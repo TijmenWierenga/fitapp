@@ -17,7 +17,20 @@ class WorkoutFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'user_id' => \App\Models\User::factory(),
+            'name' => fake()->randomElement([
+                'Morning Run',
+                'Gym Session',
+                'Yoga Class',
+                'Swimming',
+                'Cycling',
+                'CrossFit',
+                'Pilates',
+                'Boxing',
+                'Weight Training',
+                'Cardio Workout',
+            ]),
+            'scheduled_at' => fake()->dateTimeBetween('now', '+2 weeks'),
         ];
     }
 }

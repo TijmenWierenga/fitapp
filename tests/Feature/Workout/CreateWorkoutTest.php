@@ -10,7 +10,8 @@ test('a user can create a workout', function () {
 
     Livewire::test(Create::class)
         ->set('name', 'My new workout')
-        ->set('scheduled_at', '2025-01-01 10:00:00')
+        ->set('scheduled_date', '2025-01-01')
+        ->set('scheduled_time', '10:00:00')
         ->call('save')
         ->assertRedirect('/dashboard');
 
@@ -26,28 +27,42 @@ test('name is required', function () {
     $this->actingAs($user);
 
     Livewire::test(Create::class)
-        ->set('scheduled_at', '2025-01-01 10:00:00')
+        ->set('scheduled_date', '2025-01-01')
+        ->set('scheduled_time', '10:00:00')
         ->call('save')
         ->assertHasErrors(['name' => 'required']);
 });
 
-test('scheduled_at is required', function () {
+test('scheduled_date is required', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
     Livewire::test(Create::class)
         ->set('name', 'My new workout')
+        ->set('scheduled_time', '10:00:00')
         ->call('save')
-        ->assertHasErrors(['scheduled_at' => 'required']);
+        ->assertHasErrors(['scheduled_date' => 'required']);
 });
 
-test('scheduled_at must be a valid date', function () {
+test('scheduled_time is required', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
     Livewire::test(Create::class)
         ->set('name', 'My new workout')
-        ->set('scheduled_at', 'not-a-date')
+        ->set('scheduled_date', '2025-01-01')
         ->call('save')
-        ->assertHasErrors(['scheduled_at' => 'date']);
+        ->assertHasErrors(['scheduled_time' => 'required']);
+});
+
+test('scheduled_date must be a valid date', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test(Create::class)
+        ->set('name', 'My new workout')
+        ->set('scheduled_date', 'not-a-date')
+        ->set('scheduled_time', '10:00:00')
+        ->call('save')
+        ->assertHasErrors(['scheduled_date' => 'date']);
 });

@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard;
 
 use App\Models\Workout;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class NextWorkout extends Component
@@ -23,6 +24,13 @@ class NextWorkout extends Component
         $workout->markAsCompleted();
 
         $this->dispatch('workout-completed');
+    }
+
+    #[On('mark-workout-complete')]
+    public function markWorkoutComplete(int $workoutId): void
+    {
+        $this->markAsCompleted($workoutId);
+        unset($this->nextWorkout);
     }
 
     public function render(): \Illuminate\View\View

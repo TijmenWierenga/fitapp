@@ -17,5 +17,9 @@
                 <livewire:dashboard.completed-workouts />
             </div>
         </div>
+
+        <div class="relative overflow-hidden rounded-xl">
+            <livewire:dashboard.workout-calendar />
+        </div>
     </div>
 </x-layouts.app>

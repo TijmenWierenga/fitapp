@@ -3,6 +3,7 @@
 use App\Livewire\Dashboard\CompletedWorkouts;
 use App\Livewire\Dashboard\NextWorkout;
 use App\Livewire\Dashboard\UpcomingWorkouts;
+use App\Livewire\Dashboard\WorkoutCalendar;
 use App\Models\User;
 
 test('guests are redirected to the login page', function () {
@@ -22,5 +23,6 @@ test('dashboard displays all workout components', function () {
         ->get('/dashboard')
         ->assertSeeLivewire(NextWorkout::class)
         ->assertSeeLivewire(UpcomingWorkouts::class)
-        ->assertSeeLivewire(CompletedWorkouts::class);
+        ->assertSeeLivewire(CompletedWorkouts::class)
+        ->assertSeeLivewire(WorkoutCalendar::class);
 });

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class WorkoutSeeder extends Seeder
@@ -14,12 +13,13 @@ class WorkoutSeeder extends Seeder
     {
         $user = \App\Models\User::first();
 
-        if (!$user) {
+        if (! $user) {
             $this->command->warn('No users found. Please create a user first.');
+
             return;
         }
 
-        // Create some completed workouts
+        // Create some completed workouts in the past
         \App\Models\Workout::factory()
             ->for($user)
             ->count(5)
@@ -28,12 +28,27 @@ class WorkoutSeeder extends Seeder
                 'completed_at' => now()->subDays(rand(1, 14)),
             ]);
 
-        // Create some upcoming workouts
+        // Create workouts throughout the current month
+        for ($day = 1; $day <= now()->daysInMonth; $day += 3) {
+            $scheduledAt = now()->setDay($day)->setHour(rand(6, 20))->setMinute([0, 15, 30, 45][rand(0, 3)]);
+
+            // Mix of completed and upcoming
+            $completed = $scheduledAt->isPast() && rand(0, 1) === 1;
+
+            \App\Models\Workout::factory()
+                ->for($user)
+                ->create([
+                    'scheduled_at' => $scheduledAt,
+                    'completed_at' => $completed ? $scheduledAt->copy()->addMinutes(rand(30, 90)) : null,
+                ]);
+        }
+
+        // Create upcoming workouts in the next month
         \App\Models\Workout::factory()
             ->for($user)
             ->count(5)
             ->create([
-                'scheduled_at' => now()->addDays(rand(1, 14)),
+                'scheduled_at' => now()->addDays(rand(1, 30)),
                 'completed_at' => null,
             ]);
 
@@ -48,4 +63,3 @@ class WorkoutSeeder extends Seeder
         $this->command->info('Workout seeder completed successfully.');
     }
 }
-

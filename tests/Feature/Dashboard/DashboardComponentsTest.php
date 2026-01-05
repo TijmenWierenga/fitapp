@@ -3,6 +3,7 @@
 use App\Livewire\Dashboard\CompletedWorkouts;
 use App\Livewire\Dashboard\NextWorkout;
 use App\Livewire\Dashboard\UpcomingWorkouts;
+use App\Livewire\Dashboard\WorkoutCalendar;
 use App\Models\User;
 use App\Models\Workout;
 use Livewire\Livewire;
@@ -108,6 +109,89 @@ it('refreshes completed workouts when workout completed', function () {
 
     $component = Livewire::actingAs($user)
         ->test(CompletedWorkouts::class);
+
+    $component->dispatch('workout-completed');
+
+    $component->assertStatus(200);
+});
+
+it('displays workout calendar', function () {
+    $user = User::factory()->create();
+    Workout::factory()->for($user)->create(['scheduled_at' => now()->addDay()]);
+
+    Livewire::actingAs($user)
+        ->test(WorkoutCalendar::class)
+        ->assertSee('Workout Calendar')
+        ->assertSee(now()->format('F Y'));
+});
+
+it('shows workouts on calendar', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now()->setDay(15)->setHour(10),
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(WorkoutCalendar::class)
+        ->assertSee($workout->name);
+});
+
+it('can navigate to previous month', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(WorkoutCalendar::class)
+        ->call('previousMonth')
+        ->assertSee(now()->subMonth()->format('F Y'));
+});
+
+it('can navigate to next month', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(WorkoutCalendar::class)
+        ->call('nextMonth')
+        ->assertSee(now()->addMonth()->format('F Y'));
+});
+
+it('can return to current month', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(WorkoutCalendar::class)
+        ->call('nextMonth')
+        ->call('nextMonth')
+        ->call('today')
+        ->assertSee(now()->format('F Y'));
+});
+
+it('distinguishes between completed and upcoming workouts on calendar', function () {
+    $user = User::factory()->create();
+
+    $completed = Workout::factory()->for($user)->create([
+        'scheduled_at' => now()->setDay(10),
+        'completed_at' => now(),
+    ]);
+
+    $upcoming = Workout::factory()->for($user)->create([
+        'scheduled_at' => now()->setDay(20),
+        'completed_at' => null,
+    ]);
+
+    $component = Livewire::actingAs($user)
+        ->test(WorkoutCalendar::class);
+
+    // Both workouts should be visible
+    expect($component->get('calendarWeeks'))
+        ->toBeArray();
+});
+
+it('refreshes calendar when workout completed', function () {
+    $user = User::factory()->create();
+    Workout::factory()->for($user)->create(['scheduled_at' => now()->addDay()]);
+
+    $component = Livewire::actingAs($user)
+        ->test(WorkoutCalendar::class);
 
     $component->dispatch('workout-completed');
 

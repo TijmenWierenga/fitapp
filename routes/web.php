@@ -4,6 +4,7 @@ use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\TwoFactor;
+use App\Livewire\Workout\Create as CreateWorkout;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -14,6 +15,10 @@ Route::get('/', function () {
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+Route::get('workouts/create', CreateWorkout::class)
+    ->middleware(['auth', 'verified'])
+    ->name('workouts.create');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

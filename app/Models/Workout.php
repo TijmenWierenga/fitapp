@@ -85,4 +85,13 @@ class Workout extends Model
 
         return true;
     }
+
+    public function duplicate(\DateTimeInterface $scheduledAt): self
+    {
+        return self::create([
+            'user_id' => $this->user_id,
+            'name' => $this->name,
+            'scheduled_at' => $scheduledAt,
+        ]);
+    }
 }

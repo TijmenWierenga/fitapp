@@ -93,6 +93,17 @@
                                                 </div>
                                             @endif
 
+                                            <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                                                <flux:button
+                                                    wire:click="$dispatch('duplicate-workout', { workoutId: {{ $workout->id }} })"
+                                                    variant="ghost"
+                                                    size="xs"
+                                                    class="w-full pointer-events-auto"
+                                                >
+                                                    Duplicate
+                                                </flux:button>
+                                            </div>
+
                                             @if(!$day['isPast'] || $day['isToday'])
                                                 <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
                                                     <flux:button

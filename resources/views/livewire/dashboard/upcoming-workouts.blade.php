@@ -24,6 +24,12 @@
                             <flux:button variant="ghost" size="xs" icon="ellipsis-vertical" />
                             <flux:menu>
                                 <flux:menu.item
+                                    wire:click="$dispatch('duplicate-workout', { workoutId: {{ $workout->id }} })"
+                                    icon="document-duplicate"
+                                >
+                                    Duplicate
+                                </flux:menu.item>
+                                <flux:menu.item
                                     wire:click="deleteWorkout({{ $workout->id }})"
                                     wire:confirm="Are you sure you want to delete this workout?"
                                     icon="trash"

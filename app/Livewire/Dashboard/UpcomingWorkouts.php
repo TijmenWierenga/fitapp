@@ -24,6 +24,12 @@ class UpcomingWorkouts extends Component
         unset($this->upcomingWorkouts);
     }
 
+    #[On('workout-duplicated')]
+    public function refreshAfterDuplicate(): void
+    {
+        unset($this->upcomingWorkouts);
+    }
+
     public function deleteWorkout(int $workoutId): void
     {
         $workout = auth()->user()->workouts()->findOrFail($workoutId);

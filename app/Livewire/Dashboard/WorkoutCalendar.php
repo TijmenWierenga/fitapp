@@ -97,6 +97,12 @@ class WorkoutCalendar extends Component
         unset($this->calendarWeeks);
     }
 
+    #[On('workout-duplicated')]
+    public function refreshAfterDuplicate(): void
+    {
+        unset($this->calendarWeeks);
+    }
+
     public function deleteWorkout(int $workoutId): void
     {
         $workout = auth()->user()->workouts()->findOrFail($workoutId);

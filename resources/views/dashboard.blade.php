@@ -22,4 +22,6 @@
             <livewire:dashboard.workout-calendar />
         </div>
     </div>
+
+    <livewire:workout.duplicate />
 </x-layouts.app>

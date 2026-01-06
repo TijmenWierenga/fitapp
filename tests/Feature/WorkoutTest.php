@@ -65,3 +65,73 @@ it('checks if workout is completed', function () {
     expect($incomplete->isCompleted())->toBeFalse()
         ->and($complete->isCompleted())->toBeTrue();
 });
+
+it('can delete a future workout', function () {
+    $workout = Workout::factory()->create([
+        'scheduled_at' => now()->addDay(),
+        'completed_at' => null,
+    ]);
+
+    expect($workout->canBeDeleted())->toBeTrue();
+
+    $result = $workout->deleteIfAllowed();
+
+    expect($result)->toBeTrue()
+        ->and(Workout::find($workout->id))->toBeNull();
+});
+
+it('can delete a workout scheduled for today', function () {
+    $workout = Workout::factory()->create([
+        'scheduled_at' => now(),
+        'completed_at' => null,
+    ]);
+
+    expect($workout->canBeDeleted())->toBeTrue();
+
+    $result = $workout->deleteIfAllowed();
+
+    expect($result)->toBeTrue()
+        ->and(Workout::find($workout->id))->toBeNull();
+});
+
+it('cannot delete a completed workout', function () {
+    $workout = Workout::factory()->create([
+        'scheduled_at' => now()->addDay(),
+        'completed_at' => now(),
+    ]);
+
+    expect($workout->canBeDeleted())->toBeFalse();
+
+    $result = $workout->deleteIfAllowed();
+
+    expect($result)->toBeFalse()
+        ->and(Workout::find($workout->id))->not->toBeNull();
+});
+
+it('cannot delete a past workout', function () {
+    $workout = Workout::factory()->create([
+        'scheduled_at' => now()->subDay(),
+        'completed_at' => null,
+    ]);
+
+    expect($workout->canBeDeleted())->toBeFalse();
+
+    $result = $workout->deleteIfAllowed();
+
+    expect($result)->toBeFalse()
+        ->and(Workout::find($workout->id))->not->toBeNull();
+});
+
+it('cannot delete a completed past workout', function () {
+    $workout = Workout::factory()->create([
+        'scheduled_at' => now()->subDay(),
+        'completed_at' => now(),
+    ]);
+
+    expect($workout->canBeDeleted())->toBeFalse();
+
+    $result = $workout->deleteIfAllowed();
+
+    expect($result)->toBeFalse()
+        ->and(Workout::find($workout->id))->not->toBeNull();
+});

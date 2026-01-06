@@ -24,6 +24,15 @@ class UpcomingWorkouts extends Component
         unset($this->upcomingWorkouts);
     }
 
+    public function deleteWorkout(int $workoutId): void
+    {
+        $workout = auth()->user()->workouts()->findOrFail($workoutId);
+
+        $workout->deleteIfAllowed();
+
+        unset($this->upcomingWorkouts);
+    }
+
     public function render(): \Illuminate\View\View
     {
         return view('livewire.dashboard.upcoming-workouts');

@@ -197,3 +197,122 @@ it('refreshes calendar when workout completed', function () {
 
     $component->assertStatus(200);
 });
+
+it('can delete a future workout', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now()->addDay(),
+    ]);
+
+    expect(Workout::count())->toBe(1);
+
+    Livewire::actingAs($user)
+        ->test(WorkoutCalendar::class)
+        ->call('deleteWorkout', $workout->id)
+        ->assertStatus(200);
+
+    expect(Workout::count())->toBe(0);
+});
+
+it('can delete a workout scheduled for today', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now(),
+    ]);
+
+    expect(Workout::count())->toBe(1);
+
+    Livewire::actingAs($user)
+        ->test(WorkoutCalendar::class)
+        ->call('deleteWorkout', $workout->id)
+        ->assertStatus(200);
+
+    expect(Workout::count())->toBe(0);
+});
+
+it('cannot delete a past workout', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now()->subDay(),
+    ]);
+
+    expect(Workout::count())->toBe(1);
+
+    Livewire::actingAs($user)
+        ->test(WorkoutCalendar::class)
+        ->call('deleteWorkout', $workout->id)
+        ->assertStatus(200);
+
+    // Workout should still exist
+    expect(Workout::count())->toBe(1);
+    expect($workout->fresh())->not->toBeNull();
+});
+
+it('cannot delete another users workout', function () {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $workout = Workout::factory()->for($otherUser)->create([
+        'scheduled_at' => now()->addDay(),
+    ]);
+
+    expect(Workout::count())->toBe(1);
+
+    Livewire::actingAs($user)
+        ->test(WorkoutCalendar::class)
+        ->call('deleteWorkout', $workout->id);
+
+    // Workout should still exist (user doesn't have access to it)
+    expect(Workout::count())->toBe(1);
+})->throws(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+
+it('can delete a workout from upcoming workouts', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now()->addDay(),
+    ]);
+
+    expect(Workout::count())->toBe(1);
+
+    Livewire::actingAs($user)
+        ->test(UpcomingWorkouts::class)
+        ->call('deleteWorkout', $workout->id)
+        ->assertStatus(200);
+
+    expect(Workout::count())->toBe(0);
+});
+
+it('cannot delete a completed workout from upcoming workouts', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now()->addDay(),
+        'completed_at' => now(),
+    ]);
+
+    expect(Workout::count())->toBe(1);
+
+    Livewire::actingAs($user)
+        ->test(UpcomingWorkouts::class)
+        ->call('deleteWorkout', $workout->id)
+        ->assertStatus(200);
+
+    // Workout should still exist (it's completed)
+    expect(Workout::count())->toBe(1);
+    expect($workout->fresh())->not->toBeNull();
+});
+
+it('cannot delete another users workout from upcoming workouts', function () {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $workout = Workout::factory()->for($otherUser)->create([
+        'scheduled_at' => now()->addDay(),
+    ]);
+
+    expect(Workout::count())->toBe(1);
+
+    Livewire::actingAs($user)
+        ->test(UpcomingWorkouts::class)
+        ->call('deleteWorkout', $workout->id);
+
+    // Workout should still exist (user doesn't have access to it)
+    expect(Workout::count())->toBe(1);
+})->throws(\Illuminate\Database\Eloquent\ModelNotFoundException::class);

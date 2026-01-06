@@ -13,12 +13,26 @@
                             {{ $workout->scheduled_at->format('M j, g:i A') }}
                         </flux:text>
                     </div>
-                    <flux:badge
-                        :color="$workout->scheduled_at->isToday() ? 'green' : ($workout->scheduled_at->isTomorrow() ? 'blue' : 'zinc')"
-                        size="sm"
-                    >
-                        {{ $workout->scheduled_at->diffForHumans() }}
-                    </flux:badge>
+                    <div class="flex items-center gap-2">
+                        <flux:badge
+                            :color="$workout->scheduled_at->isToday() ? 'green' : ($workout->scheduled_at->isTomorrow() ? 'blue' : 'zinc')"
+                            size="sm"
+                        >
+                            {{ $workout->scheduled_at->diffForHumans() }}
+                        </flux:badge>
+                        <flux:dropdown position="bottom" align="end">
+                            <flux:button variant="ghost" size="xs" icon="ellipsis-vertical" />
+                            <flux:menu>
+                                <flux:menu.item
+                                    wire:click="deleteWorkout({{ $workout->id }})"
+                                    wire:confirm="Are you sure you want to delete this workout?"
+                                    icon="trash"
+                                >
+                                    Delete
+                                </flux:menu.item>
+                            </flux:menu>
+                        </flux:dropdown>
+                    </div>
                 </div>
             @endforeach
         </div>

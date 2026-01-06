@@ -59,4 +59,30 @@ class Workout extends Model
     {
         $this->update(['completed_at' => now()]);
     }
+
+    public function canBeDeleted(): bool
+    {
+        // Cannot delete completed workouts
+        if ($this->isCompleted()) {
+            return false;
+        }
+
+        // Cannot delete past workouts (except today)
+        if ($this->scheduled_at->isPast() && ! $this->scheduled_at->isToday()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function deleteIfAllowed(): bool
+    {
+        if (! $this->canBeDeleted()) {
+            return false;
+        }
+
+        $this->delete();
+
+        return true;
+    }
 }

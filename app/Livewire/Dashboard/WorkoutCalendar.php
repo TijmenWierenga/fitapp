@@ -97,6 +97,15 @@ class WorkoutCalendar extends Component
         unset($this->calendarWeeks);
     }
 
+    public function deleteWorkout(int $workoutId): void
+    {
+        $workout = auth()->user()->workouts()->findOrFail($workoutId);
+
+        $workout->deleteIfAllowed();
+
+        unset($this->calendarWeeks);
+    }
+
     public function render(): \Illuminate\View\View
     {
         return view('livewire.dashboard.workout-calendar');

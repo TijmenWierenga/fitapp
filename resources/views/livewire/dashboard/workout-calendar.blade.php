@@ -92,6 +92,20 @@
                                                     </flux:button>
                                                 </div>
                                             @endif
+
+                                            @if(!$day['isPast'] || $day['isToday'])
+                                                <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                                                    <flux:button
+                                                        wire:click="deleteWorkout({{ $workout->id }})"
+                                                        wire:confirm="Are you sure you want to delete this workout?"
+                                                        variant="danger"
+                                                        size="xs"
+                                                        class="w-full pointer-events-auto"
+                                                    >
+                                                        Delete Workout
+                                                    </flux:button>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

@@ -21,7 +21,7 @@ class PaceValue
 
     public static function fromSecondsPerKm(int $secondsPerKm): self
     {
-        $minutes = (int) floor($secondsPerKm / 60);
+        $minutes = floor($secondsPerKm / 60);
         $seconds = $secondsPerKm % 60;
 
         return new self($minutes, $seconds);

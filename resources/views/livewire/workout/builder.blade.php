@@ -184,7 +184,14 @@
                             />
                         </div>
                         <p class="text-sm text-gray-600">
-                            Total: {{ number_format(($duration_km * 1000 + $duration_tens_of_meters * 10) / 1000, 3) }} km
+                            @php
+                                try {
+                                    $distance = new \App\ValueObjects\DistanceValue((int)$duration_km, (int)$duration_tens_of_meters);
+                                    echo 'Total: ' . $distance->format();
+                                } catch (\Exception $e) {
+                                    echo 'Total: Invalid distance';
+                                }
+                            @endphp
                         </p>
                     @else
                         <p class="text-sm text-gray-600">Step completes when you press the lap button on your device.</p>

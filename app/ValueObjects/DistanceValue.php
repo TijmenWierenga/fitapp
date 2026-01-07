@@ -25,8 +25,8 @@ class DistanceValue
             throw new \InvalidArgumentException('Meters must be divisible by 10');
         }
 
-        $kilometers = (int) floor($meters / 1000);
-        $tensOfMeters = (int) (($meters % 1000) / 10);
+        $kilometers = floor($meters / 1000);
+        $tensOfMeters = (($meters % 1000) / 10);
 
         return new self($kilometers, $tensOfMeters);
     }

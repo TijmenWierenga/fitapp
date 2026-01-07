@@ -150,11 +150,13 @@ class Builder extends Component
             $this->duration_type = $step->duration_type ?? 'distance';
             
             if ($step->duration_type === 'time' && $step->duration_value) {
-                $this->duration_minutes = (int) floor($step->duration_value / 60);
-                $this->duration_seconds = $step->duration_value % 60;
+                $time = \App\ValueObjects\TimeValue::fromSeconds($step->duration_value);
+                $this->duration_minutes = $time->minutes;
+                $this->duration_seconds = $time->seconds;
             } elseif ($step->duration_type === 'distance' && $step->duration_value) {
-                $this->duration_km = (int) floor($step->duration_value / 1000);
-                $this->duration_tens_of_meters = (int) (($step->duration_value % 1000) / 10);
+                $distance = \App\ValueObjects\DistanceValue::fromMeters($step->duration_value);
+                $this->duration_km = $distance->kilometers;
+                $this->duration_tens_of_meters = $distance->tensOfMeters;
             }
             
             $this->target_type = $step->target_type ?? 'none';
@@ -163,12 +165,14 @@ class Builder extends Component
             
             if ($step->target_type === 'pace') {
                 if ($step->target_low) {
-                    $this->target_low_minutes = (int) floor($step->target_low / 60);
-                    $this->target_low_seconds = $step->target_low % 60;
+                    $lowPace = \App\ValueObjects\PaceValue::fromSecondsPerKm($step->target_low);
+                    $this->target_low_minutes = $lowPace->minutes;
+                    $this->target_low_seconds = $lowPace->seconds;
                 }
                 if ($step->target_high) {
-                    $this->target_high_minutes = (int) floor($step->target_high / 60);
-                    $this->target_high_seconds = $step->target_high % 60;
+                    $highPace = \App\ValueObjects\PaceValue::fromSecondsPerKm($step->target_high);
+                    $this->target_high_minutes = $highPace->minutes;
+                    $this->target_high_seconds = $highPace->seconds;
                 }
             } elseif ($step->target_type === 'heart_rate') {
                 $this->target_low_bpm = $step->target_low;

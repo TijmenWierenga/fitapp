@@ -21,7 +21,7 @@ class TimeValue
 
     public static function fromSeconds(int $totalSeconds): self
     {
-        $minutes = (int) floor($totalSeconds / 60);
+        $minutes = floor($totalSeconds / 60);
         $seconds = $totalSeconds % 60;
 
         return new self($minutes, $seconds);

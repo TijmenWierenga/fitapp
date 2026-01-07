@@ -30,6 +30,7 @@ class WorkoutFactory extends Factory
                 'Weight Training',
                 'Cardio Workout',
             ]),
+            'sport' => 'running',
             'scheduled_at' => fake()->dateTimeBetween('now', '+2 weeks'),
         ];
     }

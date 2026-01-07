@@ -27,6 +27,32 @@
                 </flux:text>
             </div>
 
+            @if($this->nextWorkout->steps->isNotEmpty())
+                <div class="mt-4 space-y-2">
+                    <flux:heading size="sm">Workout Overview</flux:heading>
+                    <ul class="space-y-1 text-sm text-zinc-600 dark:text-zinc-400">
+                        @foreach($this->nextWorkout->steps as $step)
+                            <li class="flex items-start gap-2">
+                                <span class="font-medium text-zinc-800 dark:text-zinc-200 min-w-[3rem]">
+                                    @if($step->type->value === 'repetition')
+                                        {{ $step->duration_value }}x
+                                    @else
+                                        {{ $step->summary() }}
+                                    @endif
+                                </span>
+                                @if($step->type->value === 'repetition')
+                                    <div class="flex flex-col gap-1 border-l-2 border-zinc-200 dark:border-zinc-700 pl-2">
+                                        @foreach($step->children as $child)
+                                            <span>{{ $child->summary() }}</span>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="mt-auto pt-4">
                 <flux:button
                     wire:click="markAsCompleted({{ $this->nextWorkout->id }})"

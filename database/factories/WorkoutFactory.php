@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\WorkoutType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -30,6 +31,7 @@ class WorkoutFactory extends Factory
                 'Weight Training',
                 'Cardio Workout',
             ]),
+            'type' => fake()->randomElement(WorkoutType::cases()),
             'scheduled_at' => fake()->dateTimeBetween('now', '+2 weeks'),
         ];
     }

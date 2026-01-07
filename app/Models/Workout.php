@@ -2,18 +2,22 @@
 
 namespace App\Models;
 
+use App\Enums\WorkoutType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
  * @property int $user_id
  * @property string $name
+ * @property WorkoutType $type
  * @property \Illuminate\Support\Carbon|null $scheduled_at
  * @property \Illuminate\Support\Carbon|null $completed_at
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  * @property-read User $user
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, WorkoutStep> $steps
  */
 class Workout extends Model
 {
@@ -23,6 +27,7 @@ class Workout extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'type',
         'scheduled_at',
         'completed_at',
     ];
@@ -30,6 +35,7 @@ class Workout extends Model
     protected function casts(): array
     {
         return [
+            'type' => WorkoutType::class,
             'scheduled_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
@@ -44,7 +50,15 @@ class Workout extends Model
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder<$this> $query
+     * @return HasMany<WorkoutStep, $this>
+     */
+    public function steps(): HasMany
+    {
+        return $this->hasMany(WorkoutStep::class)->whereNull('parent_id')->orderBy('order');
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
      */
     public function scopeUpcoming(\Illuminate\Database\Eloquent\Builder $query): void
     {
@@ -54,7 +68,7 @@ class Workout extends Model
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder<$this> $query
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
      */
     public function scopeCompleted(\Illuminate\Database\Eloquent\Builder $query): void
     {
@@ -63,7 +77,7 @@ class Workout extends Model
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder<$this> $query
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
      */
     public function scopeOverdue(\Illuminate\Database\Eloquent\Builder $query): void
     {
@@ -110,10 +124,38 @@ class Workout extends Model
 
     public function duplicate(\DateTimeInterface $scheduledAt): self
     {
-        return self::create([
+        $newWorkout = self::create([
             'user_id' => $this->user_id,
             'name' => $this->name,
+            'type' => $this->type,
             'scheduled_at' => $scheduledAt,
         ]);
+
+        foreach ($this->steps as $step) {
+            $this->duplicateStep($step, $newWorkout->id);
+        }
+
+        return $newWorkout;
+    }
+
+    protected function duplicateStep(WorkoutStep $step, int $workoutId, ?int $parentId = null): void
+    {
+        $newStep = WorkoutStep::create([
+            'workout_id' => $workoutId,
+            'parent_id' => $parentId,
+            'order' => $step->order,
+            'type' => $step->type,
+            'intensity' => $step->intensity,
+            'duration_type' => $step->duration_type,
+            'duration_value' => $step->duration_value,
+            'target_type' => $step->target_type,
+            'target_value_low' => $step->target_value_low,
+            'target_value_high' => $step->target_value_high,
+            'notes' => $step->notes,
+        ]);
+
+        foreach ($step->children as $childStep) {
+            $this->duplicateStep($childStep, $workoutId, $newStep->id);
+        }
     }
 }

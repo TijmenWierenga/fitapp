@@ -23,6 +23,7 @@ class Workout extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'sport',
         'scheduled_at',
         'completed_at',
     ];
@@ -36,6 +37,22 @@ class Workout extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Step, $this>
+     */
+    public function steps(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Step::class)->orderBy('sort_order');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Step, $this>
+     */
+    public function rootSteps(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->steps()->whereNull('parent_step_id');
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this>
      */
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -44,7 +61,7 @@ class Workout extends Model
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder<$this> $query
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
      */
     public function scopeUpcoming(\Illuminate\Database\Eloquent\Builder $query): void
     {
@@ -54,7 +71,7 @@ class Workout extends Model
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder<$this> $query
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
      */
     public function scopeCompleted(\Illuminate\Database\Eloquent\Builder $query): void
     {
@@ -63,7 +80,7 @@ class Workout extends Model
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder<$this> $query
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
      */
     public function scopeOverdue(\Illuminate\Database\Eloquent\Builder $query): void
     {
@@ -110,10 +127,29 @@ class Workout extends Model
 
     public function duplicate(\DateTimeInterface $scheduledAt): self
     {
-        return self::create([
+        $newWorkout = self::create([
             'user_id' => $this->user_id,
             'name' => $this->name,
+            'sport' => $this->sport,
             'scheduled_at' => $scheduledAt,
         ]);
+
+        foreach ($this->rootSteps as $step) {
+            $this->duplicateStep($step, $newWorkout);
+        }
+
+        return $newWorkout;
+    }
+
+    protected function duplicateStep(Step $step, Workout $newWorkout, ?int $parentId = null): void
+    {
+        $newStep = $step->replicate();
+        $newStep->workout_id = $newWorkout->id;
+        $newStep->parent_step_id = $parentId;
+        $newStep->save();
+
+        foreach ($step->children as $child) {
+            $this->duplicateStep($child, $newWorkout, $newStep->id);
+        }
     }
 }

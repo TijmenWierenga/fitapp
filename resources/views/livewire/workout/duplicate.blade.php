@@ -21,7 +21,6 @@
                         wire:model="scheduled_time"
                         name="scheduled_time"
                         label="Time"
-                        min="06:00"
                         required
                     />
                 </div>

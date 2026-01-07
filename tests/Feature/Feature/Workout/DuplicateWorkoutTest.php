@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Workout\StepKind;
 use App\Livewire\Workout\Duplicate;
 use App\Models\User;
 use App\Models\Workout;
@@ -121,4 +122,22 @@ it('can duplicate a completed workout as an uncompleted workout', function () {
     expect($duplicatedWorkout)
         ->name->toBe('Yoga Session')
         ->completed_at->toBeNull();
+});
+
+it('duplicates steps when duplicating a workout', function () {
+    $workout = Workout::factory()->create(['user_id' => $this->user->id]);
+    \App\Models\Step::factory()->create([
+        'workout_id' => $workout->id,
+        'step_kind' => StepKind::Run,
+    ]);
+
+    Livewire::test(Duplicate::class)
+        ->dispatch('duplicate-workout', workoutId: $workout->id)
+        ->set('scheduled_date', '2026-01-15')
+        ->set('scheduled_time', '10:00')
+        ->call('save');
+
+    $duplicatedWorkout = Workout::where('id', '!=', $workout->id)->first();
+    expect($duplicatedWorkout->steps)->toHaveCount(1);
+    expect($duplicatedWorkout->steps->first()->step_kind)->toBe(StepKind::Run);
 });

@@ -19,6 +19,70 @@ class WorkoutSeeder extends Seeder
             return;
         }
 
+        // Create a sample workout with steps for demonstration
+        $sampleWorkout = \App\Models\Workout::factory()
+            ->for($user)
+            ->create([
+                'name' => 'Sample 5K Interval Training',
+                'sport' => 'running',
+                'scheduled_at' => now()->addDays(1)->setHour(8)->setMinute(0),
+                'completed_at' => null,
+            ]);
+
+        // Add warmup
+        $sampleWorkout->allSteps()->create([
+            'sort_order' => 0,
+            'step_kind' => 'warmup',
+            'intensity' => 'warmup',
+            'duration_type' => 'time',
+            'duration_value' => 600, // 10 minutes
+            'target_type' => 'none',
+        ]);
+
+        // Add repeat block with intervals
+        $repeat = $sampleWorkout->allSteps()->create([
+            'sort_order' => 1,
+            'step_kind' => 'repeat',
+            'intensity' => 'active',
+            'repeat_count' => 5,
+            'skip_last_recovery' => false,
+        ]);
+
+        // Run interval
+        $sampleWorkout->allSteps()->create([
+            'parent_step_id' => $repeat->id,
+            'sort_order' => 0,
+            'step_kind' => 'run',
+            'intensity' => 'active',
+            'duration_type' => 'distance',
+            'duration_value' => 1000, // 1 km
+            'target_type' => 'pace',
+            'target_mode' => 'range',
+            'target_low' => 240, // 4:00 /km
+            'target_high' => 270, // 4:30 /km
+        ]);
+
+        // Recovery interval
+        $sampleWorkout->allSteps()->create([
+            'parent_step_id' => $repeat->id,
+            'sort_order' => 1,
+            'step_kind' => 'recovery',
+            'intensity' => 'rest',
+            'duration_type' => 'time',
+            'duration_value' => 120, // 2 minutes
+            'target_type' => 'none',
+        ]);
+
+        // Add cooldown
+        $sampleWorkout->allSteps()->create([
+            'sort_order' => 2,
+            'step_kind' => 'cooldown',
+            'intensity' => 'cooldown',
+            'duration_type' => 'time',
+            'duration_value' => 600, // 10 minutes
+            'target_type' => 'none',
+        ]);
+
         // Create some completed workouts in the past
         \App\Models\Workout::factory()
             ->for($user)

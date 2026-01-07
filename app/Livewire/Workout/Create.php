@@ -30,7 +30,7 @@ class Create extends Component
         $this->redirect('/dashboard');
     }
 
-    public function render()
+    public function render(): \Illuminate\Contracts\View\View
     {
         return view('livewire.workout.create');
     }

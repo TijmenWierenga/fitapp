@@ -23,7 +23,7 @@ class UserCreateCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $user = \App\Models\User::create([
             'name' => $this->argument('name'),

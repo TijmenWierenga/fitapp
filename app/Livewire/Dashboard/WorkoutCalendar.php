@@ -45,6 +45,9 @@ class WorkoutCalendar extends Component
         return Carbon::create($this->year, $this->month, 1)->format('F Y');
     }
 
+    /**
+     * @return array<int, array<int, array{date: \Carbon\Carbon, isCurrentMonth: bool, isToday: bool, isPast: bool, workouts: \Illuminate\Support\Collection<int, \App\Models\Workout>}>>
+     */
     #[Computed]
     public function calendarWeeks(): array
     {
@@ -52,12 +55,14 @@ class WorkoutCalendar extends Component
         $lastDay = $firstDay->copy()->endOfMonth();
 
         // Get workouts for this month
-        $workouts = auth()->user()
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Workout> $workoutsModels */
+        $workoutsModels = auth()->user()
             ->workouts()
             ->whereBetween('scheduled_at', [$firstDay->startOfMonth(), $lastDay->endOfMonth()])
             ->orderBy('scheduled_at')
-            ->get()
-            ->groupBy(fn ($workout) => $workout->scheduled_at->format('Y-m-d'));
+            ->get();
+
+        $workouts = $workoutsModels->groupBy(fn (\App\Models\Workout $workout) => $workout->scheduled_at->format('Y-m-d'));
 
         $weeks = [];
         $currentWeek = [];

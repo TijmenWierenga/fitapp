@@ -5,6 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string $name
+ * @property \Illuminate\Support\Carbon|null $scheduled_at
+ * @property \Illuminate\Support\Carbon|null $completed_at
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ * @property-read User $user
+ */
 class Workout extends Model
 {
     /** @use HasFactory<\Database\Factories\WorkoutFactory> */
@@ -25,11 +35,17 @@ class Workout extends Model
         ];
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this>
+     */
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<$this> $query
+     */
     public function scopeUpcoming(\Illuminate\Database\Eloquent\Builder $query): void
     {
         $query->whereNull('completed_at')
@@ -37,12 +53,18 @@ class Workout extends Model
             ->orderBy('scheduled_at');
     }
 
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<$this> $query
+     */
     public function scopeCompleted(\Illuminate\Database\Eloquent\Builder $query): void
     {
         $query->whereNotNull('completed_at')
             ->orderBy('completed_at', 'desc');
     }
 
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<$this> $query
+     */
     public function scopeOverdue(\Illuminate\Database\Eloquent\Builder $query): void
     {
         $query->whereNull('completed_at')

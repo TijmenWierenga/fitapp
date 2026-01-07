@@ -8,6 +8,9 @@ use Livewire\Component;
 
 class UpcomingWorkouts extends Component
 {
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Workout>
+     */
     #[Computed]
     public function upcomingWorkouts(): \Illuminate\Database\Eloquent\Collection
     {

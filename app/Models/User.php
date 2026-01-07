@@ -62,6 +62,9 @@ class User extends Authenticatable
             ->implode('');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Workout, $this>
+     */
     public function workouts(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Workout::class);

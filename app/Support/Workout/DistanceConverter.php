@@ -4,24 +4,22 @@ namespace App\Support\Workout;
 
 class DistanceConverter
 {
-    public static function toMeters(int $kilometers, int $tensOfMeters): int
+    public static function toMeters(float $kilometers): int
     {
-        return ($kilometers * 1000) + ($tensOfMeters * 10);
+        return (int) round($kilometers * 1000);
     }
 
-    /**
-     * @return array{kilometers: int, tens_of_meters: int}
-     */
-    public static function fromMeters(int $meters): array
+    public static function fromMeters(int $meters): float
     {
-        return [
-            'kilometers' => (int) floor($meters / 1000),
-            'tens_of_meters' => (int) (($meters % 1000) / 10),
-        ];
+        return $meters / 1000;
     }
 
     public static function format(int $meters): string
     {
-        return sprintf('%.3f km', $meters / 1000);
+        if ($meters < 1000) {
+            return $meters.' m';
+        }
+
+        return ($meters / 1000).' km';
     }
 }

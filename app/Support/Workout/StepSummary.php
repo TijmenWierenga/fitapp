@@ -50,13 +50,13 @@ class StepSummary
         return match ($type) {
             TargetType::None->value => 'No target',
             TargetType::HeartRate->value => match ($mode) {
-                TargetMode::Zone->value => "HR Zone {$zone}",
-                TargetMode::Range->value => "HR {$low}–{$high} bpm",
-                default => 'HR target',
+                TargetMode::Zone->value => "Heart Rate Zone {$zone}",
+                TargetMode::Range->value => "{$low}–{$high} BPM",
+                default => 'Heart Rate target',
             },
             TargetType::Pace->value => match ($mode) {
                 TargetMode::Zone->value => "Pace Zone {$zone}",
-                TargetMode::Range->value => 'Pace '.PaceConverter::format($low).'–'.PaceConverter::format($high),
+                TargetMode::Range->value => PaceConverter::formatRaw($low).'–'.PaceConverter::format($high),
                 default => 'Pace target',
             },
             default => 'No target',

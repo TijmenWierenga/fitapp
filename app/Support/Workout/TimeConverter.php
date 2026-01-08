@@ -10,12 +10,13 @@ class TimeConverter
     }
 
     /**
-     * @return array{minutes: int, seconds: int}
+     * @return array{hours: int, minutes: int, seconds: int}
      */
     public static function fromSeconds(int $totalSeconds): array
     {
         return [
-            'minutes' => (int) floor($totalSeconds / 60),
+            'hours' => (int) floor($totalSeconds / 3600),
+            'minutes' => (int) floor(($totalSeconds % 3600) / 60),
             'seconds' => $totalSeconds % 60,
         ];
     }
@@ -23,7 +24,20 @@ class TimeConverter
     public static function format(int $totalSeconds): string
     {
         $parts = self::fromSeconds($totalSeconds);
+        $result = [];
 
-        return sprintf('%d:%02d', $parts['minutes'], $parts['seconds']);
+        if ($parts['hours'] > 0) {
+            $result[] = $parts['hours'].'h';
+        }
+
+        if ($parts['minutes'] > 0) {
+            $result[] = $parts['minutes'].'min';
+        }
+
+        if ($parts['seconds'] > 0 || empty($result)) {
+            $result[] = $parts['seconds'].'s';
+        }
+
+        return implode(' ', $result);
     }
 }

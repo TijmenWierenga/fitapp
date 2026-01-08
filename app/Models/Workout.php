@@ -152,4 +152,52 @@ class Workout extends Model
             $this->duplicateStep($child, $newWorkout, $newStep->id);
         }
     }
+
+    public function totalDistanceInMeters(): int
+    {
+        return (int) $this->rootSteps->sum(function (Step $step) {
+            return $this->calculateStepDistance($step);
+        });
+    }
+
+    protected function calculateStepDistance(Step $step): int
+    {
+        if ($step->step_kind === \App\Enums\Workout\StepKind::Repeat) {
+            $childDistance = $step->children->sum(function (Step $child) {
+                return $this->calculateStepDistance($child);
+            });
+
+            return (int) ($childDistance * $step->repeat_count);
+        }
+
+        if ($step->duration_type === \App\Enums\Workout\DurationType::Distance) {
+            return $step->duration_value ?? 0;
+        }
+
+        return 0;
+    }
+
+    public function totalDurationInSeconds(): int
+    {
+        return (int) $this->rootSteps->sum(function (Step $step) {
+            return $this->calculateStepDuration($step);
+        });
+    }
+
+    protected function calculateStepDuration(Step $step): int
+    {
+        if ($step->step_kind === \App\Enums\Workout\StepKind::Repeat) {
+            $childDuration = $step->children->sum(function (Step $child) {
+                return $this->calculateStepDuration($child);
+            });
+
+            return (int) ($childDuration * $step->repeat_count);
+        }
+
+        if ($step->duration_type === \App\Enums\Workout\DurationType::Time) {
+            return $step->duration_value ?? 0;
+        }
+
+        return 0;
+    }
 }

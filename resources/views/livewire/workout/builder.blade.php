@@ -131,11 +131,7 @@
                                 <flux:input type="number" wire:model="editingStepData.duration_seconds" label="Seconds" min="0" max="59" />
                             </div>
                         @elseif(($editingStepData['duration_type'] ?? '') === \App\Enums\Workout\DurationType::Distance->value)
-                            <div class="flex gap-4 items-end">
-                                <flux:input type="number" wire:model="editingStepData.duration_km" label="Kilometers" min="0" />
-                                <flux:input type="number" wire:model="editingStepData.duration_tens" label="Tens of meters" min="0" max="99" />
-                                <flux:text class="pb-2">x 10m</flux:text>
-                            </div>
+                            <flux:input type="number" step="0.001" wire:model="editingStepData.duration_km" label="Distance (km)" min="0" />
                         @endif
                     </div>
 

@@ -22,8 +22,13 @@ class PaceConverter
 
     public static function format(int $secondsPerKm): string
     {
+        return self::formatRaw($secondsPerKm).' /km';
+    }
+
+    public static function formatRaw(int $secondsPerKm): string
+    {
         $parts = self::fromSecondsPerKm($secondsPerKm);
 
-        return sprintf('%d:%02d /km', $parts['minutes'], $parts['seconds']);
+        return sprintf('%d:%02d', $parts['minutes'], $parts['seconds']);
     }
 }

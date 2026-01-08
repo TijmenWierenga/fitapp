@@ -150,13 +150,11 @@ class Builder extends Component
         // Initialize human-readable fields for the form
         if ($step['step_kind'] !== StepKind::Repeat->value) {
             if ($step['duration_type'] === DurationType::Time->value) {
-                $parts = TimeConverter::fromSeconds($step['duration_value'] ?? 0);
-                $this->editingStepData['duration_minutes'] = $parts['minutes'];
-                $this->editingStepData['duration_seconds'] = $parts['seconds'];
+                $totalSeconds = $step['duration_value'] ?? 0;
+                $this->editingStepData['duration_minutes'] = (int) floor($totalSeconds / 60);
+                $this->editingStepData['duration_seconds'] = $totalSeconds % 60;
             } elseif ($step['duration_type'] === DurationType::Distance->value) {
-                $parts = DistanceConverter::fromMeters($step['duration_value'] ?? 0);
-                $this->editingStepData['duration_km'] = $parts['kilometers'];
-                $this->editingStepData['duration_tens'] = $parts['tens_of_meters'];
+                $this->editingStepData['duration_km'] = ($step['duration_value'] ?? 0) / 1000;
             }
 
             if ($step['target_type'] === TargetType::Pace->value && $step['target_mode'] === TargetMode::Range->value) {

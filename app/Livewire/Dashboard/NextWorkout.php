@@ -14,6 +14,7 @@ class NextWorkout extends Component
     {
         return auth()->user()
             ->workouts()
+            ->with(['rootSteps.children'])
             ->upcoming()
             ->first();
     }

@@ -73,6 +73,22 @@ test('it can save a workout with nested steps', function () {
     expect($workout->rootSteps)->toHaveCount(2);
 });
 
+test('it does not throw exception when rendering badge with skip last recovery', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->create(['user_id' => $user->id]);
+    $workout->steps()->create([
+        'step_kind' => StepKind::Repeat,
+        'repeat_count' => 3,
+        'skip_last_recovery' => true,
+        'sort_order' => 1,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Builder::class, ['workout' => $workout])
+        ->assertStatus(200)
+        ->assertSee('Skip last recovery');
+});
+
 test('validation rules for workout', function () {
     $user = User::factory()->create();
     $this->actingAs($user);

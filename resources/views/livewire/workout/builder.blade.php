@@ -36,7 +36,7 @@
                                         <flux:icon.arrow-path class="size-5 text-zinc-500" />
                                         <flux:heading size="sm">Repeat {{ $step['repeat_count'] }}x</flux:heading>
                                         @if($step['skip_last_recovery'])
-                                            <flux:badge size="sm" inset="none">Skip last recovery</flux:badge>
+                                            <flux:badge size="sm">Skip last recovery</flux:badge>
                                         @endif
                                     </div>
                                     <div class="flex gap-2">

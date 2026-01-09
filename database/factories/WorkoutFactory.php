@@ -20,16 +20,12 @@ class WorkoutFactory extends Factory
             'user_id' => \App\Models\User::factory(),
             'name' => fake()->randomElement([
                 'Morning Run',
-                'Gym Session',
-                'Yoga Class',
-                'Swimming',
-                'Cycling',
-                'CrossFit',
-                'Pilates',
-                'Boxing',
-                'Weight Training',
-                'Cardio Workout',
+                'Intervals',
+                'Tempo Run',
+                'Long Run',
+                'Recovery Run',
             ]),
+            'sport' => 'running',
             'scheduled_at' => fake()->dateTimeBetween('now', '+2 weeks'),
         ];
     }

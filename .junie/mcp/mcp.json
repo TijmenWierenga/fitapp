@@ -1,14 +1,14 @@
 {
     "mcpServers": {
         "laravel-boost": {
-            "command": "/Users/tijmenwierenga/Library/Application Support/Herd/bin/php84",
+            "command": "/Users/tijmenwierenga/Library/Application Support/Herd/bin/php85",
             "args": [
                 "/Users/tijmenwierenga/www/tijmenwierenga/fitapp/artisan",
                 "boost:mcp"
             ]
         },
         "herd": {
-            "command": "/Users/tijmenwierenga/Library/Application Support/Herd/bin/php84",
+            "command": "/Users/tijmenwierenga/Library/Application Support/Herd/bin/php85",
             "args": [
                 "/Applications/Herd.app/Contents/Resources/herd-mcp.phar"
             ],

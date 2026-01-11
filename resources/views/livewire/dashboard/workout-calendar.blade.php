@@ -44,12 +44,11 @@
 
                                     {{-- Tooltip on hover --}}
                                     <div class="
-                                        absolute z-50 left-0 top-full mt-1 w-64 p-3 rounded-lg shadow-lg border
-                                        bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700
+                                        absolute z-50 left-0 top-full w-64 pt-1
                                         opacity-0 invisible group-hover/workout:opacity-100 group-hover/workout:visible
-                                        transition-all duration-200 pointer-events-none
+                                        transition-all duration-200
                                     ">
-                                        <div class="space-y-2">
+                                        <div class="p-3 rounded-lg shadow-lg border bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 space-y-2">
                                             <div>
                                                 <flux:heading size="sm" class="font-semibold">
                                                     {{ $workout->name }}
@@ -86,9 +85,22 @@
                                                         wire:click="$dispatch('mark-workout-complete', { workoutId: {{ $workout->id }} })"
                                                         variant="primary"
                                                         size="xs"
-                                                        class="w-full pointer-events-auto"
+                                                        class="w-full"
                                                     >
                                                         Mark Complete
+                                                    </flux:button>
+                                                </div>
+                                            @endif
+
+                                            @if($workout->canBeEdited())
+                                                <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                                                    <flux:button
+                                                        href="{{ route('workouts.edit', $workout) }}"
+                                                        variant="ghost"
+                                                        size="xs"
+                                                        class="w-full"
+                                                    >
+                                                        Edit Workout
                                                     </flux:button>
                                                 </div>
                                             @endif
@@ -98,7 +110,7 @@
                                                     wire:click="$dispatch('duplicate-workout', { workoutId: {{ $workout->id }} })"
                                                     variant="ghost"
                                                     size="xs"
-                                                    class="w-full pointer-events-auto"
+                                                    class="w-full"
                                                 >
                                                     Duplicate
                                                 </flux:button>
@@ -111,7 +123,7 @@
                                                         wire:confirm="Are you sure you want to delete this workout?"
                                                         variant="danger"
                                                         size="xs"
-                                                        class="w-full pointer-events-auto"
+                                                        class="w-full"
                                                     >
                                                         Delete Workout
                                                     </flux:button>

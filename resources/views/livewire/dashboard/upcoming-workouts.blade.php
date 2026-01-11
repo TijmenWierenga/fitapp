@@ -23,6 +23,14 @@
                         <flux:dropdown position="bottom" align="end">
                             <flux:button variant="ghost" size="xs" icon="ellipsis-vertical" />
                             <flux:menu>
+                                @if($workout->canBeEdited())
+                                    <flux:menu.item
+                                        href="{{ route('workouts.edit', $workout) }}"
+                                        icon="pencil-square"
+                                    >
+                                        Edit
+                                    </flux:menu.item>
+                                @endif
                                 <flux:menu.item
                                     wire:click="$dispatch('duplicate-workout', { workoutId: {{ $workout->id }} })"
                                     icon="document-duplicate"

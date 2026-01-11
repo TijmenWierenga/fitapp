@@ -109,11 +109,20 @@
                 </div>
             @endif
 
-            <div class="mt-auto pt-4">
+            <div class="mt-auto pt-4 flex gap-2">
+                @if($this->nextWorkout->canBeEdited())
+                    <flux:button
+                        href="{{ route('workouts.edit', $this->nextWorkout) }}"
+                        variant="ghost"
+                        class="flex-1"
+                    >
+                        Edit Workout
+                    </flux:button>
+                @endif
                 <flux:button
                     wire:click="markAsCompleted({{ $this->nextWorkout->id }})"
                     variant="primary"
-                    class="w-full"
+                    class="flex-1"
                 >
                     Mark as Completed
                 </flux:button>

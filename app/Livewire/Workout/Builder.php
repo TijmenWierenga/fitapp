@@ -36,6 +36,10 @@ class Builder extends Component
     public function mount(?Workout $workout = null): void
     {
         if ($workout && $workout->exists) {
+            if (! $workout->canBeEdited()) {
+                abort(403, 'Completed workouts cannot be edited.');
+            }
+
             $this->workout = $workout;
             $this->name = $workout->name;
             $this->scheduled_date = $workout->scheduled_at->format('Y-m-d');
@@ -270,6 +274,10 @@ class Builder extends Component
         ]);
 
         $scheduledAt = "{$this->scheduled_date} {$this->scheduled_time}";
+
+        if ($this->workout && $this->workout->exists && ! $this->workout->fresh()->canBeEdited()) {
+            abort(403, 'Completed workouts cannot be edited.');
+        }
 
         if (! $this->workout) {
             $this->workout = new Workout;

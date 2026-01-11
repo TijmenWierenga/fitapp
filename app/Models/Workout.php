@@ -94,6 +94,11 @@ class Workout extends Model
         return $this->completed_at !== null;
     }
 
+    public function canBeEdited(): bool
+    {
+        return ! $this->isCompleted();
+    }
+
     public function markAsCompleted(): void
     {
         $this->update(['completed_at' => now()]);

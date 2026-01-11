@@ -47,6 +47,14 @@ it('shows overdue workouts', function () {
         ->and($overdueWorkouts->last()->id)->toBe($overdue2->id);
 });
 
+it('checks if workout can be edited', function () {
+    $incomplete = Workout::factory()->create(['completed_at' => null]);
+    $complete = Workout::factory()->create(['completed_at' => now()]);
+
+    expect($incomplete->canBeEdited())->toBeTrue()
+        ->and($complete->canBeEdited())->toBeFalse();
+});
+
 it('can mark workout as completed', function () {
     $workout = Workout::factory()->create(['completed_at' => null]);
 

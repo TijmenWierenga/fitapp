@@ -13,8 +13,8 @@
                         {{ $this->nextWorkout->scheduled_at->format('g:i A') }}
                     </flux:text>
                     @php
-                        $totalDistance = $this->nextWorkout->totalDistanceInMeters();
-                        $totalDuration = $this->nextWorkout->totalDurationInSeconds();
+                        $totalDistance = $this->nextWorkout->estimatedTotalDistanceInMeters();
+                        $totalDuration = $this->nextWorkout->estimatedTotalDurationInSeconds();
                     @endphp
                     @if($totalDistance > 0 || $totalDuration > 0)
                         <div class="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
@@ -22,7 +22,7 @@
                             @if($totalDuration > 0)
                                 <div class="flex items-center gap-1">
                                     <flux:icon.clock class="size-3.5" />
-                                    <span class="text-sm">{{ \App\Support\Workout\TimeConverter::format($totalDuration) }}</span>
+                                    <span class="text-sm">Est. {{ \App\Support\Workout\TimeConverter::format($totalDuration) }}</span>
                                 </div>
                             @endif
                             @if($totalDistance > 0)
@@ -31,7 +31,7 @@
                                 @endif
                                 <div class="flex items-center gap-1">
                                     <flux:icon.bolt class="size-3.5" />
-                                    <span class="text-sm">{{ \App\Support\Workout\DistanceConverter::format($totalDistance) }}</span>
+                                    <span class="text-sm">Est. {{ \App\Support\Workout\DistanceConverter::format($totalDistance) }}</span>
                                 </div>
                             @endif
                         </div>
@@ -56,56 +56,71 @@
             @if($this->nextWorkout->rootSteps->isNotEmpty())
                 <div class="space-y-2 mt-4">
                     <flux:heading size="sm" class="text-zinc-500 dark:text-zinc-400">Workout Steps</flux:heading>
-                    <div class="space-y-1">
-                        @foreach($this->nextWorkout->rootSteps->take(5) as $step)
-                            <div class="flex items-start gap-2 text-sm">
-                                <span class="text-zinc-400 mt-1">•</span>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-baseline justify-between gap-2">
-                                        <span class="font-medium text-zinc-800 dark:text-zinc-200 truncate">
-                                            @if($step->step_kind === \App\Enums\Workout\StepKind::Repeat)
+                    <flux:table>
+                        <flux:table.columns>
+                            <flux:table.column>Step</flux:table.column>
+                            <flux:table.column>Duration</flux:table.column>
+                            <flux:table.column>Target</flux:table.column>
+                        </flux:table.columns>
+
+                        <flux:table.rows>
+                            @foreach($this->nextWorkout->rootSteps->take(5) as $step)
+                                @if($step->step_kind === \App\Enums\Workout\StepKind::Repeat)
+                                    <flux:table.row class="bg-zinc-50/50 dark:bg-white/5">
+                                        <flux:table.cell colspan="3">
+                                            <div class="flex items-center gap-2 text-sm font-bold text-zinc-800 dark:text-white ps-2">
+                                                <flux:icon.arrow-path class="size-4" />
                                                 Repeat {{ $step->repeat_count }}x
-                                            @else
-                                                {{ $step->name ?: ucfirst($step->step_kind->value) }}
-                                            @endif
-                                        </span>
-                                        @if($step->step_kind !== \App\Enums\Workout\StepKind::Repeat)
-                                            <div class="flex items-center gap-2 text-xs text-zinc-500 whitespace-nowrap">
-                                                <span>{{ \App\Support\Workout\StepSummary::duration($step) }}</span>
-                                                @if(\App\Support\Workout\StepSummary::target($step) !== 'No target')
-                                                    <span class="text-zinc-300 dark:text-zinc-700">•</span>
-                                                    <span>{{ \App\Support\Workout\StepSummary::target($step) }}</span>
-                                                @endif
                                             </div>
-                                        @endif
-                                    </div>
+                                        </flux:table.cell>
+                                    </flux:table.row>
+                                    @foreach($step->children as $child)
+                                        <flux:table.row>
+                                            <flux:table.cell class="pl-8!">
+                                                <flux:text size="sm" class="truncate">{{ $child->name ?: ucfirst($child->step_kind->value) }}</flux:text>
+                                            </flux:table.cell>
+                                            <flux:table.cell>
+                                                <flux:text size="sm">{{ \App\Support\Workout\StepSummary::duration($child) }}</flux:text>
+                                            </flux:table.cell>
+                                            <flux:table.cell>
+                                                <flux:text size="sm">
+                                                    @if(\App\Support\Workout\StepSummary::target($child) !== 'No target')
+                                                        {{ \App\Support\Workout\StepSummary::target($child) }}
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </flux:text>
+                                            </flux:table.cell>
+                                        </flux:table.row>
+                                    @endforeach
+                                @else
+                                    <flux:table.row>
+                                        <flux:table.cell>
+                                            <flux:text size="sm" class="font-medium truncate">{{ $step->name ?: ucfirst($step->step_kind->value) }}</flux:text>
+                                        </flux:table.cell>
+                                        <flux:table.cell>
+                                            <flux:text size="sm">{{ \App\Support\Workout\StepSummary::duration($step) }}</flux:text>
+                                        </flux:table.cell>
+                                        <flux:table.cell>
+                                            <flux:text size="sm">
+                                                @if(\App\Support\Workout\StepSummary::target($step) !== 'No target')
+                                                    {{ \App\Support\Workout\StepSummary::target($step) }}
+                                                @else
+                                                    -
+                                                @endif
+                                            </flux:text>
+                                        </flux:table.cell>
+                                    </flux:table.row>
+                                @endif
+                            @endforeach
+                        </flux:table.rows>
+                    </flux:table>
 
-                                    @if($step->step_kind === \App\Enums\Workout\StepKind::Repeat)
-                                        <div class="pl-3 mt-1 border-l border-zinc-200 dark:border-zinc-800 space-y-0.5">
-                                            @foreach($step->children as $child)
-                                                <div class="flex items-baseline justify-between gap-2 text-xs text-zinc-500">
-                                                    <span class="truncate">{{ $child->name ?: ucfirst($child->step_kind->value) }}</span>
-                                                    <div class="flex items-center gap-1.5 whitespace-nowrap">
-                                                        <span>{{ \App\Support\Workout\StepSummary::duration($child) }}</span>
-                                                        @if(\App\Support\Workout\StepSummary::target($child) !== 'No target')
-                                                            <span class="text-zinc-300 dark:text-zinc-800">•</span>
-                                                            <span>{{ \App\Support\Workout\StepSummary::target($child) }}</span>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-
-                        @if($this->nextWorkout->rootSteps->count() > 5)
-                            <div class="text-xs text-zinc-500 pl-4 mt-1">
-                                + {{ $this->nextWorkout->rootSteps->count() - 5 }} more steps
-                            </div>
-                        @endif
-                    </div>
+                    @if($this->nextWorkout->rootSteps->count() > 5)
+                        <div class="text-xs text-zinc-500 mt-2">
+                            + {{ $this->nextWorkout->rootSteps->count() - 5 }} more steps
+                        </div>
+                    @endif
                 </div>
             @endif
 

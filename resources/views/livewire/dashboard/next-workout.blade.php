@@ -4,7 +4,9 @@
     @if($this->nextWorkout)
         <div class="flex flex-col gap-4">
             <div>
-                <flux:heading size="xl" class="font-bold">{{ $this->nextWorkout->name }}</flux:heading>
+                <a href="{{ route('workouts.show', $this->nextWorkout) }}">
+                    <flux:heading size="xl" class="font-bold hover:text-blue-600 dark:hover:text-blue-400">{{ $this->nextWorkout->name }}</flux:heading>
+                </a>
                 <flux:text class="text-zinc-500 dark:text-zinc-400 mt-1">
                     {{ $this->nextWorkout->scheduled_at->format('l, F j, Y') }}
                 </flux:text>
@@ -117,9 +119,9 @@
                     </flux:table>
 
                     @if($this->nextWorkout->rootSteps->count() > 5)
-                        <div class="text-xs text-zinc-500 mt-2">
-                            + {{ $this->nextWorkout->rootSteps->count() - 5 }} more steps
-                        </div>
+                        <a href="{{ route('workouts.show', $this->nextWorkout) }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-block">
+                            View all {{ $this->nextWorkout->rootSteps->count() }} steps
+                        </a>
                     @endif
                 </div>
             @endif

@@ -46,7 +46,7 @@ it('displays repeat blocks in the next workout overview', function () {
         ->assertSee('Fast Run');
 });
 
-it('limits the number of displayed steps and shows a count for more steps', function () {
+it('limits the number of displayed steps and shows a link to view all steps', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create(['scheduled_at' => now()->addDay()]);
 
@@ -54,7 +54,7 @@ it('limits the number of displayed steps and shows a count for more steps', func
 
     Livewire::actingAs($user)
         ->test(NextWorkout::class)
-        ->assertSee('+ 2 more steps');
+        ->assertSee('View all 7 steps');
 });
 
 it('displays total duration and targets in the next workout overview', function () {

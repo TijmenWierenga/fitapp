@@ -32,12 +32,7 @@
             </flux:text>
         @endif
     @else
-        <div class="flex flex-col items-center justify-center py-8 text-center">
-            <flux:icon.check-circle class="size-12 text-zinc-400 dark:text-zinc-600 mb-3" />
-            <flux:text class="text-zinc-500 dark:text-zinc-400">
-                No completed workouts yet
-            </flux:text>
-        </div>
+        <x-empty-state icon="check-circle" message="No completed workouts yet" />
     @endif
 </flux:card>
 

@@ -58,14 +58,7 @@
                         <flux:table.rows>
                             @foreach($this->nextWorkout->rootSteps->take(5) as $step)
                                 @if($step->step_kind === \App\Enums\Workout\StepKind::Repeat)
-                                    <flux:table.row class="bg-zinc-50/50 dark:bg-white/5">
-                                        <flux:table.cell colspan="3">
-                                            <div class="flex items-center gap-2 text-sm font-bold text-zinc-800 dark:text-white ps-2">
-                                                <flux:icon.arrow-path class="size-4" />
-                                                Repeat {{ $step->repeat_count }}x
-                                            </div>
-                                        </flux:table.cell>
-                                    </flux:table.row>
+                                    <x-workout-repeat-header :repeat-count="$step->repeat_count" />
                                     @foreach($step->children as $child)
                                         <x-workout-step-row :step="$child" indented />
                                     @endforeach

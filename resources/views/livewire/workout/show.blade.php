@@ -68,51 +68,12 @@
                         <flux:table.rows>
                             @foreach($workout->rootSteps as $step)
                                 @if($step->step_kind === \App\Enums\Workout\StepKind::Repeat)
-                                    <flux:table.row class="bg-zinc-50/50 dark:bg-white/5">
-                                        <flux:table.cell colspan="3">
-                                            <div class="flex items-center gap-2 text-sm font-bold text-zinc-800 dark:text-white ps-2">
-                                                <flux:icon.arrow-path class="size-4" />
-                                                Repeat {{ $step->repeat_count }}x
-                                            </div>
-                                        </flux:table.cell>
-                                    </flux:table.row>
+                                    <x-workout-repeat-header :repeat-count="$step->repeat_count" />
                                     @foreach($step->children as $child)
-                                        <flux:table.row>
-                                            <flux:table.cell class="pl-8!">
-                                                <flux:text size="sm" class="truncate">{{ $child->name ?: ucfirst($child->step_kind->value) }}</flux:text>
-                                            </flux:table.cell>
-                                            <flux:table.cell>
-                                                <flux:text size="sm">{{ \App\Support\Workout\StepSummary::duration($child) }}</flux:text>
-                                            </flux:table.cell>
-                                            <flux:table.cell>
-                                                <flux:text size="sm">
-                                                    @if(\App\Support\Workout\StepSummary::target($child) !== 'No target')
-                                                        {{ \App\Support\Workout\StepSummary::target($child) }}
-                                                    @else
-                                                        -
-                                                    @endif
-                                                </flux:text>
-                                            </flux:table.cell>
-                                        </flux:table.row>
+                                        <x-workout-step-row :step="$child" indented />
                                     @endforeach
                                 @else
-                                    <flux:table.row>
-                                        <flux:table.cell>
-                                            <flux:text size="sm" class="font-medium truncate">{{ $step->name ?: ucfirst($step->step_kind->value) }}</flux:text>
-                                        </flux:table.cell>
-                                        <flux:table.cell>
-                                            <flux:text size="sm">{{ \App\Support\Workout\StepSummary::duration($step) }}</flux:text>
-                                        </flux:table.cell>
-                                        <flux:table.cell>
-                                            <flux:text size="sm">
-                                                @if(\App\Support\Workout\StepSummary::target($step) !== 'No target')
-                                                    {{ \App\Support\Workout\StepSummary::target($step) }}
-                                                @else
-                                                    -
-                                                @endif
-                                            </flux:text>
-                                        </flux:table.cell>
-                                    </flux:table.row>
+                                    <x-workout-step-row :step="$step" />
                                 @endif
                             @endforeach
                         </flux:table.rows>
@@ -120,12 +81,7 @@
                 </flux:card>
             @else
                 <flux:card>
-                    <div class="flex flex-col items-center justify-center py-8 text-center">
-                        <flux:icon.document class="size-12 text-zinc-400 dark:text-zinc-600 mb-3" />
-                        <flux:text class="text-zinc-500 dark:text-zinc-400">
-                            No workout steps defined
-                        </flux:text>
-                    </div>
+                    <x-empty-state icon="document" message="No workout steps defined" />
                 </flux:card>
             @endif
         </div>

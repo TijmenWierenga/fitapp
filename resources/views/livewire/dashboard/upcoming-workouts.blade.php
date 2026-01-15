@@ -14,12 +14,7 @@
                         </flux:text>
                     </a>
                     <div class="flex items-center gap-2">
-                        <flux:badge
-                            :color="$workout->scheduled_at->isToday() ? 'green' : ($workout->scheduled_at->isTomorrow() ? 'blue' : 'zinc')"
-                            size="sm"
-                        >
-                            {{ $workout->scheduled_at->diffForHumans() }}
-                        </flux:badge>
+                        <x-workout-schedule-badge :scheduled-at="$workout->scheduled_at" />
                         <flux:dropdown position="bottom" align="end">
                             <flux:button variant="ghost" size="xs" icon="ellipsis-vertical" />
                             <flux:menu>
@@ -57,12 +52,7 @@
             @endforeach
         </div>
     @else
-        <div class="flex flex-col items-center justify-center py-8 text-center">
-            <flux:icon.calendar class="size-12 text-zinc-400 dark:text-zinc-600 mb-3" />
-            <flux:text class="text-zinc-500 dark:text-zinc-400">
-                No upcoming workouts
-            </flux:text>
-        </div>
+        <x-empty-state icon="calendar" message="No upcoming workouts" />
     @endif
 </flux:card>
 

@@ -42,17 +42,7 @@
             </div>
 
             <div class="flex flex-col gap-2">
-                <flux:text class="text-sm text-zinc-600 dark:text-zinc-300">
-                    @if($this->nextWorkout->scheduled_at->isToday())
-                        <flux:badge color="green" size="sm">Today</flux:badge>
-                    @elseif($this->nextWorkout->scheduled_at->isTomorrow())
-                        <flux:badge color="blue" size="sm">Tomorrow</flux:badge>
-                    @else
-                        <flux:badge color="zinc" size="sm">
-                            {{ $this->nextWorkout->scheduled_at->diffForHumans() }}
-                        </flux:badge>
-                    @endif
-                </flux:text>
+                <x-workout-schedule-badge :scheduled-at="$this->nextWorkout->scheduled_at" />
             </div>
 
             @if($this->nextWorkout->rootSteps->isNotEmpty())
@@ -77,42 +67,10 @@
                                         </flux:table.cell>
                                     </flux:table.row>
                                     @foreach($step->children as $child)
-                                        <flux:table.row>
-                                            <flux:table.cell class="pl-8!">
-                                                <flux:text size="sm" class="truncate">{{ $child->name ?: ucfirst($child->step_kind->value) }}</flux:text>
-                                            </flux:table.cell>
-                                            <flux:table.cell>
-                                                <flux:text size="sm">{{ \App\Support\Workout\StepSummary::duration($child) }}</flux:text>
-                                            </flux:table.cell>
-                                            <flux:table.cell>
-                                                <flux:text size="sm">
-                                                    @if(\App\Support\Workout\StepSummary::target($child) !== 'No target')
-                                                        {{ \App\Support\Workout\StepSummary::target($child) }}
-                                                    @else
-                                                        -
-                                                    @endif
-                                                </flux:text>
-                                            </flux:table.cell>
-                                        </flux:table.row>
+                                        <x-workout-step-row :step="$child" indented />
                                     @endforeach
                                 @else
-                                    <flux:table.row>
-                                        <flux:table.cell>
-                                            <flux:text size="sm" class="font-medium truncate">{{ $step->name ?: ucfirst($step->step_kind->value) }}</flux:text>
-                                        </flux:table.cell>
-                                        <flux:table.cell>
-                                            <flux:text size="sm">{{ \App\Support\Workout\StepSummary::duration($step) }}</flux:text>
-                                        </flux:table.cell>
-                                        <flux:table.cell>
-                                            <flux:text size="sm">
-                                                @if(\App\Support\Workout\StepSummary::target($step) !== 'No target')
-                                                    {{ \App\Support\Workout\StepSummary::target($step) }}
-                                                @else
-                                                    -
-                                                @endif
-                                            </flux:text>
-                                        </flux:table.cell>
-                                    </flux:table.row>
+                                    <x-workout-step-row :step="$step" />
                                 @endif
                             @endforeach
                         </flux:table.rows>
@@ -146,19 +104,11 @@
             </div>
         </div>
     @else
-        <div class="flex flex-col items-center justify-center py-8 text-center">
-            <flux:icon.calendar class="size-12 text-zinc-400 dark:text-zinc-600 mb-3" />
-            <flux:text class="text-zinc-500 dark:text-zinc-400">
-                No upcoming workouts scheduled
-            </flux:text>
-            <flux:button
-                href="{{ route('workouts.create') }}"
-                variant="primary"
-                class="mt-4"
-            >
+        <x-empty-state icon="calendar" message="No upcoming workouts scheduled">
+            <flux:button href="{{ route('workouts.create') }}" variant="primary">
                 Schedule Workout
             </flux:button>
-        </div>
+        </x-empty-state>
     @endif
 </flux:card>
 

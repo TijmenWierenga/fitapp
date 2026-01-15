@@ -34,13 +34,16 @@
                         <div class="space-y-1">
                             @foreach($day['workouts'] as $workout)
                                 <div class="relative group/workout">
-                                    <div class="
-                                        text-xs px-1.5 py-0.5 rounded truncate cursor-pointer transition-all
-                                        {{ $workout->completed_at ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ($day['isPast'] ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400') }}
-                                        hover:ring-2 {{ $workout->completed_at ? 'hover:ring-green-500' : ($day['isPast'] ? 'hover:ring-red-500' : 'hover:ring-blue-500') }}
-                                    ">
+                                    <a
+                                        href="{{ route('workouts.show', $workout) }}"
+                                        class="
+                                            block text-xs px-1.5 py-0.5 rounded truncate cursor-pointer transition-all
+                                            {{ $workout->completed_at ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ($day['isPast'] ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400') }}
+                                            hover:ring-2 {{ $workout->completed_at ? 'hover:ring-green-500' : ($day['isPast'] ? 'hover:ring-red-500' : 'hover:ring-blue-500') }}
+                                        "
+                                    >
                                         {{ $workout->name }}
-                                    </div>
+                                    </a>
 
                                     {{-- Tooltip on hover --}}
                                     <div class="
@@ -91,6 +94,17 @@
                                                     </flux:button>
                                                 </div>
                                             @endif
+
+                                            <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                                                <flux:button
+                                                    href="{{ route('workouts.show', $workout) }}"
+                                                    variant="ghost"
+                                                    size="xs"
+                                                    class="w-full"
+                                                >
+                                                    View Details
+                                                </flux:button>
+                                            </div>
 
                                             @if($workout->canBeEdited())
                                                 <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">

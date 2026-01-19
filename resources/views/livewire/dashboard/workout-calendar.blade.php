@@ -32,17 +32,32 @@
 
                     @if($day['workouts']->count() > 0)
                         <div class="space-y-1">
-                            @foreach($day['workouts'] as $workout)
+                            @foreach($day['workouts'] as $item)
+                                @php
+                                    $workout = $item['workout'];
+                                    $intensityLevel = $item['intensityLevel'];
+                                    $isCompleted = $workout->completed_at !== null;
+                                    $isOverdue = $day['isPast'] && !$isCompleted;
+                                    $isPast = $day['isPast'] || $isCompleted;
+                                @endphp
                                 <div class="relative group/workout">
                                     <a
                                         href="{{ route('workouts.show', $workout) }}"
                                         class="
                                             block text-xs px-1.5 py-0.5 rounded truncate cursor-pointer transition-all
-                                            {{ $workout->completed_at ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ($day['isPast'] ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400') }}
-                                            hover:ring-2 {{ $workout->completed_at ? 'hover:ring-green-500' : ($day['isPast'] ? 'hover:ring-red-500' : 'hover:ring-blue-500') }}
+                                            {{ $intensityLevel->colorClasses() }}
+                                            {{ $isPast ? 'opacity-60' : '' }}
+                                            hover:ring-2 {{ $intensityLevel->hoverRingClasses() }}
                                         "
                                     >
-                                        {{ $workout->name }}
+                                        <span class="flex items-center gap-1">
+                                            @if($isCompleted)
+                                                <flux:icon.check class="size-3 shrink-0" />
+                                            @elseif($isOverdue)
+                                                <flux:icon.exclamation-triangle class="size-3 shrink-0" />
+                                            @endif
+                                            <span class="truncate">{{ $workout->name }}</span>
+                                        </span>
                                     </a>
 
                                     {{-- Tooltip on hover --}}
@@ -56,6 +71,11 @@
                                                 <flux:heading size="sm" class="font-semibold">
                                                     {{ $workout->name }}
                                                 </flux:heading>
+                                                <div class="mt-1">
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs {{ $intensityLevel->colorClasses() }}">
+                                                        {{ $intensityLevel->label() }} Intensity
+                                                    </span>
+                                                </div>
                                             </div>
 
                                             <div class="space-y-1 text-sm">
@@ -64,12 +84,12 @@
                                                     <span>{{ $workout->scheduled_at->format('g:i A') }}</span>
                                                 </div>
 
-                                                @if($workout->completed_at)
+                                                @if($isCompleted)
                                                     <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
                                                         <flux:icon.check-circle class="size-4" />
                                                         <span>Completed {{ $workout->completed_at->format('g:i A') }}</span>
                                                     </div>
-                                                @elseif($day['isPast'])
+                                                @elseif($isOverdue)
                                                     <div class="flex items-center gap-2 text-red-600 dark:text-red-400">
                                                         <flux:icon.exclamation-circle class="size-4" />
                                                         <span>Overdue</span>
@@ -82,7 +102,7 @@
                                                 @endif
                                             </div>
 
-                                            @if(!$workout->completed_at && ($day['isToday'] || $day['isPast']))
+                                            @if(!$isCompleted && ($day['isToday'] || $day['isPast']))
                                                 <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
                                                     <flux:button
                                                         wire:click="$dispatch('mark-workout-complete', { workoutId: {{ $workout->id }} })"
@@ -161,19 +181,31 @@
     </div>
 
     {{-- Legend --}}
-    <div class="flex items-center justify-center gap-4 mt-4 text-xs">
-        <div class="flex items-center gap-1.5">
-            <div class="size-3 rounded bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700"></div>
-            <span class="text-zinc-600 dark:text-zinc-400">Upcoming</span>
+    <div class="mt-4 space-y-2">
+        {{-- Intensity levels --}}
+        <div class="flex items-center justify-center gap-3 text-xs flex-wrap">
+            <span class="text-zinc-500 dark:text-zinc-400 font-medium">Intensity:</span>
+            @foreach(\App\Enums\Workout\IntensityLevel::cases() as $level)
+                <div class="flex items-center gap-1.5">
+                    <div class="size-3 rounded {{ $level->colorClasses() }} border {{ $level->borderColorClasses() }}"></div>
+                    <span class="text-zinc-600 dark:text-zinc-400">{{ $level->label() }}</span>
+                </div>
+            @endforeach
         </div>
-        <div class="flex items-center gap-1.5">
-            <div class="size-3 rounded bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700"></div>
-            <span class="text-zinc-600 dark:text-zinc-400">Completed</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-            <div class="size-3 rounded bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700"></div>
-            <span class="text-zinc-600 dark:text-zinc-400">Overdue</span>
+        {{-- Status indicators --}}
+        <div class="flex items-center justify-center gap-4 text-xs">
+            <div class="flex items-center gap-1.5">
+                <flux:icon.check class="size-3 text-zinc-600 dark:text-zinc-400" />
+                <span class="text-zinc-600 dark:text-zinc-400">Completed</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <flux:icon.exclamation-triangle class="size-3 text-zinc-600 dark:text-zinc-400" />
+                <span class="text-zinc-600 dark:text-zinc-400">Overdue</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <div class="size-3 rounded bg-zinc-300 dark:bg-zinc-600 opacity-60"></div>
+                <span class="text-zinc-600 dark:text-zinc-400">Past (faded)</span>
+            </div>
         </div>
     </div>
 </flux:card>
-

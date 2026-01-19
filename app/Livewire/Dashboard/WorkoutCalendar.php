@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Services\Workout\IntensityCalculator;
 use Carbon\Carbon;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -9,6 +10,10 @@ use Livewire\Component;
 
 class WorkoutCalendar extends Component
 {
+    public function __construct(
+        private readonly IntensityCalculator $intensityCalculator = new IntensityCalculator,
+    ) {}
+
     public int $year;
 
     public int $month;
@@ -46,7 +51,7 @@ class WorkoutCalendar extends Component
     }
 
     /**
-     * @return array<int, array<int, array{date: \Carbon\Carbon, isCurrentMonth: bool, isToday: bool, isPast: bool, workouts: \Illuminate\Support\Collection<int, \App\Models\Workout>}>>
+     * @return array<int, array<int, array{date: \Carbon\Carbon, isCurrentMonth: bool, isToday: bool, isPast: bool, workouts: \Illuminate\Support\Collection<int, array{workout: \App\Models\Workout, intensityLevel: \App\Enums\Workout\IntensityLevel}>}>>
      */
     #[Computed]
     public function calendarWeeks(): array
@@ -54,15 +59,22 @@ class WorkoutCalendar extends Component
         $firstDay = Carbon::create($this->year, $this->month, 1);
         $lastDay = $firstDay->copy()->endOfMonth();
 
-        // Get workouts for this month
+        // Get workouts for this month with steps eager loaded for intensity calculation
         /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Workout> $workoutsModels */
         $workoutsModels = auth()->user()
             ->workouts()
+            ->with('rootSteps.children')
             ->whereBetween('scheduled_at', [$firstDay->startOfMonth(), $lastDay->endOfMonth()])
             ->orderBy('scheduled_at')
             ->get();
 
-        $workouts = $workoutsModels->groupBy(fn (\App\Models\Workout $workout) => $workout->scheduled_at->format('Y-m-d'));
+        // Map workouts to include intensity level
+        $workoutsWithIntensity = $workoutsModels->map(fn (\App\Models\Workout $workout) => [
+            'workout' => $workout,
+            'intensityLevel' => $this->intensityCalculator->level($workout),
+        ]);
+
+        $workouts = $workoutsWithIntensity->groupBy(fn (array $item) => $item['workout']->scheduled_at->format('Y-m-d'));
 
         $weeks = [];
         $currentWeek = [];

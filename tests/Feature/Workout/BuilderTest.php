@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Workout\Sport;
 use App\Enums\Workout\StepKind;
 use App\Livewire\Workout\Builder;
 use App\Models\User;
@@ -99,4 +100,136 @@ test('validation rules for workout', function () {
         ->set('scheduled_time', '')
         ->call('saveWorkout')
         ->assertHasErrors(['name', 'scheduled_date', 'scheduled_time']);
+});
+
+test('it defaults to running sport', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test(Builder::class)
+        ->assertSet('sport', 'running');
+});
+
+test('it loads sport when editing a workout', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->strength()->create(['user_id' => $user->id]);
+
+    $this->actingAs($user);
+
+    Livewire::test(Builder::class, ['workout' => $workout])
+        ->assertSet('sport', Sport::Strength->value);
+});
+
+test('it can select a different sport', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test(Builder::class)
+        ->call('removeStep', '0') // Remove default step first so no confirmation needed
+        ->call('selectSport', Sport::Cardio->value)
+        ->assertSet('sport', Sport::Cardio->value);
+});
+
+test('it shows confirmation modal when changing from running to other sport with existing steps', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test(Builder::class)
+        ->assertCount('steps', 1) // Default step from mount
+        ->call('selectSport', Sport::Strength->value)
+        ->assertSet('showingActivityTypeChangeModal', true)
+        ->assertSet('pendingSport', Sport::Strength->value)
+        ->assertSet('sport', 'running'); // Sport should not change yet
+});
+
+test('it clears steps when confirming sport change from running to other', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test(Builder::class)
+        ->assertCount('steps', 1) // Default step from mount
+        ->call('selectSport', Sport::Strength->value)
+        ->assertSet('showingActivityTypeChangeModal', true)
+        ->call('confirmSportChange')
+        ->assertSet('sport', Sport::Strength->value)
+        ->assertSet('showingActivityTypeChangeModal', false)
+        ->assertCount('steps', 0);
+});
+
+test('it keeps sport when canceling sport change', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test(Builder::class)
+        ->assertCount('steps', 1)
+        ->call('selectSport', Sport::Strength->value)
+        ->assertSet('showingActivityTypeChangeModal', true)
+        ->call('cancelSportChange')
+        ->assertSet('sport', 'running')
+        ->assertSet('showingActivityTypeChangeModal', false)
+        ->assertCount('steps', 1);
+});
+
+test('it adds default step when changing to running from other sport', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test(Builder::class)
+        ->call('removeStep', '0') // Remove default step
+        ->set('sport', Sport::Cardio->value)
+        ->assertCount('steps', 0)
+        ->call('selectSport', Sport::Running->value)
+        ->assertCount('steps', 1);
+});
+
+test('it can save a workout with a non-running sport', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test(Builder::class)
+        ->call('removeStep', '0') // Remove default step
+        ->call('selectSport', Sport::Strength->value)
+        ->set('name', 'Leg Day')
+        ->set('scheduled_date', '2026-01-01')
+        ->set('scheduled_time', '08:00')
+        ->call('saveWorkout')
+        ->assertRedirect(route('dashboard'));
+
+    $this->assertDatabaseHas('workouts', [
+        'name' => 'Leg Day',
+        'sport' => Sport::Strength->value,
+    ]);
+
+    $workout = Workout::where('name', 'Leg Day')->first();
+    expect($workout->sport)->toBe(Sport::Strength);
+    expect($workout->steps)->toHaveCount(0);
+});
+
+test('validation does not require steps for non-running sports', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test(Builder::class)
+        ->call('removeStep', '0')
+        ->call('selectSport', Sport::Cardio->value)
+        ->set('name', 'Cycling Session')
+        ->set('scheduled_date', '2026-01-01')
+        ->set('scheduled_time', '08:00')
+        ->assertCount('steps', 0)
+        ->call('saveWorkout')
+        ->assertHasNoErrors()
+        ->assertRedirect(route('dashboard'));
+});
+
+test('validation requires steps for running sport', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test(Builder::class)
+        ->call('removeStep', '0')
+        ->set('name', 'Morning Run')
+        ->set('scheduled_date', '2026-01-01')
+        ->set('scheduled_time', '08:00')
+        ->call('saveWorkout')
+        ->assertHasErrors(['steps']);
 });

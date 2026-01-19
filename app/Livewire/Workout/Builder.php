@@ -4,6 +4,7 @@ namespace App\Livewire\Workout;
 
 use App\Enums\Workout\DurationType;
 use App\Enums\Workout\Intensity;
+use App\Enums\Workout\Sport;
 use App\Enums\Workout\StepKind;
 use App\Enums\Workout\TargetMode;
 use App\Enums\Workout\TargetType;
@@ -20,11 +21,19 @@ class Builder extends Component
 
     public string $name = '';
 
+    public string $sport = 'running';
+
+    public string $notes = '';
+
     public string $scheduled_date = '';
 
     public string $scheduled_time = '';
 
     public array $steps = [];
+
+    public bool $showingActivityTypeChangeModal = false;
+
+    public string $pendingSport = '';
 
     // Modal state
     public bool $showingStepModal = false;
@@ -42,13 +51,14 @@ class Builder extends Component
 
             $this->workout = $workout;
             $this->name = $workout->name;
+            $this->sport = $workout->sport->value;
             $this->scheduled_date = $workout->scheduled_at->format('Y-m-d');
             $this->scheduled_time = $workout->scheduled_at->format('H:i');
             $this->loadSteps();
         } else {
             $this->scheduled_date = now()->format('Y-m-d');
             $this->scheduled_time = now()->format('H:i');
-            // Default first step
+            // Default first step for running activity
             $this->addStep();
         }
     }
@@ -264,14 +274,68 @@ class Builder extends Component
         }
     }
 
+    public function selectSport(string $type): void
+    {
+        $newSport = Sport::from($type);
+        $currentSport = Sport::from($this->sport);
+
+        // If changing FROM running to another type and there are steps, show confirmation
+        if ($currentSport->hasStepBuilder() && ! $newSport->hasStepBuilder() && count($this->steps) > 0) {
+            $this->pendingSport = $type;
+            $this->showingActivityTypeChangeModal = true;
+
+            return;
+        }
+
+        $this->applySportChange($type);
+    }
+
+    public function confirmSportChange(): void
+    {
+        $this->applySportChange($this->pendingSport);
+        $this->showingActivityTypeChangeModal = false;
+        $this->pendingSport = '';
+    }
+
+    public function cancelSportChange(): void
+    {
+        $this->showingActivityTypeChangeModal = false;
+        $this->pendingSport = '';
+    }
+
+    protected function applySportChange(string $type): void
+    {
+        $newSport = Sport::from($type);
+        $oldSport = Sport::from($this->sport);
+
+        $this->sport = $type;
+
+        // Clear steps when changing FROM running to another type
+        if ($oldSport->hasStepBuilder() && ! $newSport->hasStepBuilder()) {
+            $this->steps = [];
+        }
+
+        // Add default step when changing TO running if there are no steps
+        if ($newSport->hasStepBuilder() && count($this->steps) === 0) {
+            $this->addStep();
+        }
+    }
+
     public function saveWorkout(): void
     {
-        $this->validate([
+        $sport = Sport::from($this->sport);
+
+        $rules = [
             'name' => 'required|string|max:255',
             'scheduled_date' => 'required|date',
             'scheduled_time' => 'required',
-            'steps' => 'required|array|min:1',
-        ]);
+        ];
+
+        if ($sport->hasStepBuilder()) {
+            $rules['steps'] = 'required|array|min:1';
+        }
+
+        $this->validate($rules);
 
         $scheduledAt = "{$this->scheduled_date} {$this->scheduled_time}";
 
@@ -285,11 +349,13 @@ class Builder extends Component
         }
 
         $this->workout->name = $this->name;
-        $this->workout->sport = 'running';
+        $this->workout->sport = Sport::from($this->sport);
         $this->workout->scheduled_at = $scheduledAt;
         $this->workout->save();
 
-        $this->syncSteps();
+        if (Sport::from($this->sport)->hasStepBuilder()) {
+            $this->syncSteps();
+        }
 
         $this->redirect(route('dashboard'));
     }

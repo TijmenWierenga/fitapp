@@ -3,7 +3,10 @@
     <div class="flex items-center gap-4 mb-6">
         <flux:button href="{{ route('dashboard') }}" variant="ghost" icon="arrow-left" />
         <div class="flex-1">
-            <flux:heading size="xl">{{ $workout->name }}</flux:heading>
+            <div class="flex items-center gap-2">
+                <flux:heading size="xl">{{ $workout->name }}</flux:heading>
+                <x-activity-badge :sport="$workout->sport" />
+            </div>
         </div>
         <flux:badge color="{{ $this->statusBadge['color'] }}" size="sm">
             {{ $this->statusBadge['text'] }}

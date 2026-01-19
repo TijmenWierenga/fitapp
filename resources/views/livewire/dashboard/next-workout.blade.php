@@ -4,10 +4,13 @@
     @if($this->nextWorkout)
         <div class="flex flex-col gap-4">
             <div>
-                <a href="{{ route('workouts.show', $this->nextWorkout) }}">
-                    <flux:heading size="xl" class="font-bold hover:text-blue-600 dark:hover:text-blue-400">{{ $this->nextWorkout->name }}</flux:heading>
-                </a>
-                <flux:text class="text-zinc-500 dark:text-zinc-400 mt-1">
+                <div class="flex items-center gap-2 mb-2">
+                    <a href="{{ route('workouts.show', $this->nextWorkout) }}">
+                        <flux:heading size="xl" class="font-bold hover:text-blue-600 dark:hover:text-blue-400">{{ $this->nextWorkout->name }}</flux:heading>
+                    </a>
+                    <x-activity-badge :sport="$this->nextWorkout->sport" />
+                </div>
+                <flux:text class="text-zinc-500 dark:text-zinc-400">
                     {{ $this->nextWorkout->scheduled_at->format('l, F j, Y') }}
                 </flux:text>
                 <div class="flex items-center gap-3">

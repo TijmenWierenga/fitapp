@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Workout\Sport;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property int $user_id
  * @property string $name
+ * @property Sport $sport
  * @property \Illuminate\Support\Carbon|null $scheduled_at
  * @property \Illuminate\Support\Carbon|null $completed_at
  * @property \Illuminate\Support\Carbon $created_at
@@ -31,6 +33,7 @@ class Workout extends Model
     protected function casts(): array
     {
         return [
+            'sport' => Sport::class,
             'scheduled_at' => 'datetime',
             'completed_at' => 'datetime',
         ];

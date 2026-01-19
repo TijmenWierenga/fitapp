@@ -12,9 +12,27 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left: Steps Tree -->
         <div class="lg:col-span-2 space-y-4">
+            {{-- Activity Type Selector --}}
             <flux:card class="p-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="md:col-span-1">
+                <flux:heading size="sm" class="mb-3">Activity Type</flux:heading>
+                <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+                    @foreach(\App\Enums\Workout\Sport::cases() as $sportOption)
+                        <flux:button
+                            wire:click="selectSport('{{ $sportOption->value }}')"
+                            variant="{{ $sport === $sportOption->value ? 'primary' : 'outline' }}"
+                            icon="{{ $sportOption->icon() }}"
+                            class="justify-start"
+                            wire:loading.attr="disabled"
+                        >
+                            {{ $sportOption->label() }}
+                        </flux:button>
+                    @endforeach
+                </div>
+            </flux:card>
+
+            <flux:card class="p-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <div class="sm:col-span-2 xl:col-span-1">
                         <flux:input wire:model="name" label="Workout Name" placeholder="e.g. 5k Interval Session" />
                     </div>
                     <div>
@@ -26,69 +44,114 @@
                 </div>
             </flux:card>
 
-            <div class="space-y-4">
-                @foreach ($steps as $index => $step)
-                    <div wire:key="step-{{ $index }}">
-                        @if ($step['step_kind'] === \App\Enums\Workout\StepKind::Repeat->value)
-                            <div class="border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl p-4 bg-zinc-50/50 dark:bg-zinc-800/50">
-                                <div class="flex justify-between items-center mb-4">
-                                    <div class="flex items-center gap-2">
-                                        <flux:icon.arrow-path class="size-5 text-zinc-500" />
-                                        <flux:heading size="sm">Repeat {{ $step['repeat_count'] }}x</flux:heading>
-                                        @if($step['skip_last_recovery'])
-                                            <flux:badge size="sm">Skip last recovery</flux:badge>
-                                        @endif
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <flux:button size="xs" variant="ghost" wire:click="moveUp('{{ $index }}')" :disabled="$loop->first" icon="chevron-up" />
-                                        <flux:button size="xs" variant="ghost" wire:click="moveDown('{{ $index }}')" :disabled="$loop->last" icon="chevron-down" />
-                                        <flux:button size="xs" variant="ghost" wire:click="editStep('{{ $index }}')">Edit</flux:button>
-                                        <flux:button size="xs" variant="ghost" wire:click="removeStep('{{ $index }}')" class="text-red-500" icon="trash" />
-                                    </div>
-                                </div>
-
-                                <div class="pl-6 space-y-2 border-l-2 border-zinc-200 dark:border-zinc-700 ml-2">
-                                    @foreach ($step['children'] as $childIndex => $child)
-                                        <div wire:key="step-{{ $index }}-{{ $childIndex }}">
-                                            <x-step-card :step="$child" :path="$index.'.children.'.$childIndex" :loop="$loop" />
+            @if($sport === \App\Enums\Workout\Sport::Running->value)
+                {{-- Step Builder for Running --}}
+                <div class="space-y-4">
+                    @foreach ($steps as $index => $step)
+                        <div wire:key="step-{{ $index }}">
+                            @if ($step['step_kind'] === \App\Enums\Workout\StepKind::Repeat->value)
+                                <div class="border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl p-4 bg-zinc-50/50 dark:bg-zinc-800/50">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <div class="flex items-center gap-2">
+                                            <flux:icon.arrow-path class="size-5 text-zinc-500" />
+                                            <flux:heading size="sm">Repeat {{ $step['repeat_count'] }}x</flux:heading>
+                                            @if($step['skip_last_recovery'])
+                                                <flux:badge size="sm">Skip last recovery</flux:badge>
+                                            @endif
                                         </div>
-                                    @endforeach
-                                    <flux:button size="sm" variant="ghost" wire:click="addStep({{ $index }})" icon="plus" class="w-full justify-start">
-                                        Add Step to Repeat
-                                    </flux:button>
+                                        <div class="flex gap-2">
+                                            <flux:button size="xs" variant="ghost" wire:click="moveUp('{{ $index }}')" :disabled="$loop->first" icon="chevron-up" />
+                                            <flux:button size="xs" variant="ghost" wire:click="moveDown('{{ $index }}')" :disabled="$loop->last" icon="chevron-down" />
+                                            <flux:button size="xs" variant="ghost" wire:click="editStep('{{ $index }}')">Edit</flux:button>
+                                            <flux:button size="xs" variant="ghost" wire:click="removeStep('{{ $index }}')" class="text-red-500" icon="trash" />
+                                        </div>
+                                    </div>
+
+                                    <div class="pl-6 space-y-2 border-l-2 border-zinc-200 dark:border-zinc-700 ml-2">
+                                        @foreach ($step['children'] as $childIndex => $child)
+                                            <div wire:key="step-{{ $index }}-{{ $childIndex }}">
+                                                <x-step-card :step="$child" :path="$index.'.children.'.$childIndex" :loop="$loop" />
+                                            </div>
+                                        @endforeach
+                                        <flux:button size="sm" variant="ghost" wire:click="addStep({{ $index }})" icon="plus" class="w-full justify-start">
+                                            Add Step to Repeat
+                                        </flux:button>
+                                    </div>
                                 </div>
-                            </div>
-                        @else
-                            <x-step-card :step="$step" :path="(string)$index" :loop="$loop" />
-                        @endif
+                            @else
+                                <x-step-card :step="$step" :path="(string)$index" :loop="$loop" />
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                {{-- Coming Soon for Other Activity Types --}}
+                <flux:card class="p-6">
+                    <flux:callout variant="info" icon="information-circle">
+                        <flux:callout.text>
+                            <strong>Detailed workout builder coming soon!</strong> For now, you can create {{ strtolower(\App\Enums\Workout\Sport::from($sport)->label()) }} workouts and add notes below.
+                        </flux:callout.text>
+                    </flux:callout>
+
+                    <div class="mt-4">
+                        <flux:textarea
+                            wire:model="notes"
+                            label="Workout Notes"
+                            placeholder="Describe your workout plan..."
+                            rows="6"
+                        />
                     </div>
-                @endforeach
-            </div>
+                </flux:card>
+            @endif
         </div>
 
         <!-- Right: Toolbox -->
-        <div class="space-y-4">
-            <flux:card class="p-4 sticky top-6">
-                <flux:heading size="lg" class="mb-4">Add Content</flux:heading>
-                <div class="grid grid-cols-1 gap-2">
-                    <flux:button wire:click="addStep" variant="outline" icon="plus" class="justify-start">
-                        Add Normal Step
-                    </flux:button>
-                    <flux:button wire:click="addRepeat" variant="outline" icon="arrow-path" class="justify-start">
-                        Add Repeat Block
-                    </flux:button>
+        @if($sport === \App\Enums\Workout\Sport::Running->value)
+            <div class="space-y-4">
+                <flux:card class="p-4 sticky top-6">
+                    <flux:heading size="lg" class="mb-4">Add Content</flux:heading>
+                    <div class="grid grid-cols-1 gap-2">
+                        <flux:button wire:click="addStep" variant="outline" icon="plus" class="justify-start">
+                            Add Normal Step
+                        </flux:button>
+                        <flux:button wire:click="addRepeat" variant="outline" icon="arrow-path" class="justify-start">
+                            Add Repeat Block
+                        </flux:button>
+                    </div>
+
+                    <flux:separator class="my-6" />
+
+                    <div class="space-y-2">
+                        <flux:text size="sm">
+                            <strong>Nesting Rule:</strong> Max depth of 2. You cannot nest repeats inside repeats.
+                        </flux:text>
+                    </div>
+                </flux:card>
+            </div>
+        @endif
+    </div>
+
+    <!-- Activity Type Change Confirmation Modal -->
+    <flux:modal wire:model="showingActivityTypeChangeModal" class="md:w-[500px]">
+        <div class="space-y-6">
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0">
+                    <flux:icon.exclamation-triangle class="size-6 text-amber-500" />
                 </div>
-
-                <flux:separator class="my-6" />
-
-                <div class="space-y-2">
-                    <flux:text size="sm">
-                        <strong>Nesting Rule:</strong> Max depth of 2. You cannot nest repeats inside repeats.
+                <div>
+                    <flux:heading size="lg">Change Activity Type?</flux:heading>
+                    <flux:text class="mt-2">
+                        Changing from Running to another activity type will clear all workout steps. This action cannot be undone.
                     </flux:text>
                 </div>
-            </flux:card>
+            </div>
+
+            <div class="flex gap-2 justify-end">
+                <flux:button variant="ghost" wire:click="cancelSportChange">Cancel</flux:button>
+                <flux:button variant="danger" wire:click="confirmSportChange">Change Activity Type</flux:button>
+            </div>
         </div>
-    </div>
+    </flux:modal>
 
     <!-- Step Editor Modal -->
     <flux:modal wire:model="showingStepModal" class="md:w-[500px]">

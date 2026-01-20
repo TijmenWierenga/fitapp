@@ -4,10 +4,13 @@
     @if($this->nextWorkout)
         <div class="flex flex-col gap-4">
             <div>
-                <a href="{{ route('workouts.show', $this->nextWorkout) }}">
-                    <flux:heading size="xl" class="font-bold hover:text-blue-600 dark:hover:text-blue-400">{{ $this->nextWorkout->name }}</flux:heading>
-                </a>
-                <flux:text class="text-zinc-500 dark:text-zinc-400 mt-1">
+                <div class="flex items-center gap-2 mb-2">
+                    <a href="{{ route('workouts.show', $this->nextWorkout) }}">
+                        <flux:heading size="xl" class="font-bold hover:text-blue-600 dark:hover:text-blue-400">{{ $this->nextWorkout->name }}</flux:heading>
+                    </a>
+                    <x-activity-badge :sport="$this->nextWorkout->sport" />
+                </div>
+                <flux:text class="text-zinc-500 dark:text-zinc-400">
                     {{ $this->nextWorkout->scheduled_at->format('l, F j, Y') }}
                 </flux:text>
                 <div class="flex items-center gap-3">
@@ -44,6 +47,13 @@
             <div class="flex flex-col gap-2">
                 <x-workout-schedule-badge :scheduled-at="$this->nextWorkout->scheduled_at" />
             </div>
+
+            @if($this->nextWorkout->notes)
+                <flux:card class="bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700">
+                    <flux:heading size="sm" class="mb-2 text-zinc-700 dark:text-zinc-300">Notes</flux:heading>
+                    <flux:text class="whitespace-pre-wrap text-zinc-600 dark:text-zinc-400">{{ $this->nextWorkout->notes }}</flux:text>
+                </flux:card>
+            @endif
 
             @if($this->nextWorkout->rootSteps->isNotEmpty())
                 <div class="space-y-2 mt-4">

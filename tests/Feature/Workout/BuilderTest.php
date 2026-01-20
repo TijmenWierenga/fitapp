@@ -107,7 +107,7 @@ test('it defaults to running sport', function () {
     $this->actingAs($user);
 
     Livewire::test(Builder::class)
-        ->assertSet('sport', 'running');
+        ->assertSet('sport', Sport::Running);
 });
 
 test('it loads sport when editing a workout', function () {
@@ -117,7 +117,7 @@ test('it loads sport when editing a workout', function () {
     $this->actingAs($user);
 
     Livewire::test(Builder::class, ['workout' => $workout])
-        ->assertSet('sport', Sport::Strength->value);
+        ->assertSet('sport', Sport::Strength);
 });
 
 test('it can select a different sport', function () {
@@ -127,7 +127,7 @@ test('it can select a different sport', function () {
     Livewire::test(Builder::class)
         ->call('removeStep', '0') // Remove default step first so no confirmation needed
         ->call('selectSport', Sport::Cardio->value)
-        ->assertSet('sport', Sport::Cardio->value);
+        ->assertSet('sport', Sport::Cardio);
 });
 
 test('it shows confirmation modal when changing from running to other sport with existing steps', function () {
@@ -138,8 +138,8 @@ test('it shows confirmation modal when changing from running to other sport with
         ->assertCount('steps', 1) // Default step from mount
         ->call('selectSport', Sport::Strength->value)
         ->assertSet('showingActivityTypeChangeModal', true)
-        ->assertSet('pendingSport', Sport::Strength->value)
-        ->assertSet('sport', 'running'); // Sport should not change yet
+        ->assertSet('pendingSport', Sport::Strength)
+        ->assertSet('sport', Sport::Running); // Sport should not change yet
 });
 
 test('it clears steps when confirming sport change from running to other', function () {
@@ -151,7 +151,7 @@ test('it clears steps when confirming sport change from running to other', funct
         ->call('selectSport', Sport::Strength->value)
         ->assertSet('showingActivityTypeChangeModal', true)
         ->call('confirmSportChange')
-        ->assertSet('sport', Sport::Strength->value)
+        ->assertSet('sport', Sport::Strength)
         ->assertSet('showingActivityTypeChangeModal', false)
         ->assertCount('steps', 0);
 });
@@ -165,7 +165,7 @@ test('it keeps sport when canceling sport change', function () {
         ->call('selectSport', Sport::Strength->value)
         ->assertSet('showingActivityTypeChangeModal', true)
         ->call('cancelSportChange')
-        ->assertSet('sport', 'running')
+        ->assertSet('sport', Sport::Running)
         ->assertSet('showingActivityTypeChangeModal', false)
         ->assertCount('steps', 1);
 });
@@ -176,7 +176,7 @@ test('it adds default step when changing to running from other sport', function 
 
     Livewire::test(Builder::class)
         ->call('removeStep', '0') // Remove default step
-        ->set('sport', Sport::Cardio->value)
+        ->set('sport', Sport::Cardio)
         ->assertCount('steps', 0)
         ->call('selectSport', Sport::Running->value)
         ->assertCount('steps', 1);
@@ -232,4 +232,34 @@ test('validation requires steps for running sport', function () {
         ->set('scheduled_time', '08:00')
         ->call('saveWorkout')
         ->assertHasErrors(['steps']);
+});
+
+test('it deletes persisted steps when changing from running to non-running sport and saving', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->create(['user_id' => $user->id, 'sport' => Sport::Running]);
+    $step = \App\Models\Step::factory()->create([
+        'workout_id' => $workout->id,
+        'step_kind' => StepKind::Run,
+    ]);
+
+    $this->actingAs($user);
+
+    // Verify step exists
+    expect($workout->steps()->count())->toBe(1);
+
+    Livewire::test(Builder::class, ['workout' => $workout])
+        ->assertCount('steps', 1)
+        ->call('selectSport', Sport::Strength->value)
+        ->assertSet('showingActivityTypeChangeModal', true)
+        ->call('confirmSportChange')
+        ->assertSet('sport', Sport::Strength)
+        ->assertCount('steps', 0) // In-memory steps should be cleared
+        ->set('name', 'Strength Workout')
+        ->call('saveWorkout')
+        ->assertRedirect(route('dashboard'));
+
+    // Verify persisted steps are deleted
+    $workout->refresh();
+    expect($workout->sport)->toBe(Sport::Strength);
+    expect($workout->steps()->count())->toBe(0);
 });

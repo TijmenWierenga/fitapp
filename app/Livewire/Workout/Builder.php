@@ -21,9 +21,7 @@ class Builder extends Component
 
     public string $name = '';
 
-    public string $sport = 'running';
-
-    public string $notes = '';
+    public Sport $sport = Sport::Running;
 
     public string $scheduled_date = '';
 
@@ -33,7 +31,7 @@ class Builder extends Component
 
     public bool $showingActivityTypeChangeModal = false;
 
-    public string $pendingSport = '';
+    public ?Sport $pendingSport = null;
 
     // Modal state
     public bool $showingStepModal = false;
@@ -51,7 +49,7 @@ class Builder extends Component
 
             $this->workout = $workout;
             $this->name = $workout->name;
-            $this->sport = $workout->sport->value;
+            $this->sport = $workout->sport;
             $this->scheduled_date = $workout->scheduled_at->format('Y-m-d');
             $this->scheduled_time = $workout->scheduled_at->format('H:i');
             $this->loadSteps();
@@ -274,64 +272,57 @@ class Builder extends Component
         }
     }
 
-    public function selectSport(string $type): void
+    public function selectSport(Sport $sport): void
     {
-        $newSport = Sport::from($type);
-        $currentSport = Sport::from($this->sport);
-
         // If changing FROM running to another type and there are steps, show confirmation
-        if ($currentSport->hasStepBuilder() && ! $newSport->hasStepBuilder() && count($this->steps) > 0) {
-            $this->pendingSport = $type;
+        if ($this->sport->hasStepBuilder() && ! $sport->hasStepBuilder() && count($this->steps) > 0) {
+            $this->pendingSport = $sport;
             $this->showingActivityTypeChangeModal = true;
 
             return;
         }
 
-        $this->applySportChange($type);
+        $this->applySportChange($sport);
     }
 
     public function confirmSportChange(): void
     {
         $this->applySportChange($this->pendingSport);
         $this->showingActivityTypeChangeModal = false;
-        $this->pendingSport = '';
+        $this->pendingSport = null;
     }
 
     public function cancelSportChange(): void
     {
         $this->showingActivityTypeChangeModal = false;
-        $this->pendingSport = '';
+        $this->pendingSport = null;
     }
 
-    protected function applySportChange(string $type): void
+    protected function applySportChange(Sport $sport): void
     {
-        $newSport = Sport::from($type);
-        $oldSport = Sport::from($this->sport);
-
-        $this->sport = $type;
+        $oldSport = $this->sport;
+        $this->sport = $sport;
 
         // Clear steps when changing FROM running to another type
-        if ($oldSport->hasStepBuilder() && ! $newSport->hasStepBuilder()) {
+        if ($oldSport->hasStepBuilder() && ! $sport->hasStepBuilder()) {
             $this->steps = [];
         }
 
         // Add default step when changing TO running if there are no steps
-        if ($newSport->hasStepBuilder() && count($this->steps) === 0) {
+        if ($sport->hasStepBuilder() && count($this->steps) === 0) {
             $this->addStep();
         }
     }
 
     public function saveWorkout(): void
     {
-        $sport = Sport::from($this->sport);
-
         $rules = [
             'name' => 'required|string|max:255',
             'scheduled_date' => 'required|date',
             'scheduled_time' => 'required',
         ];
 
-        if ($sport->hasStepBuilder()) {
+        if ($this->sport->hasStepBuilder()) {
             $rules['steps'] = 'required|array|min:1';
         }
 
@@ -349,12 +340,15 @@ class Builder extends Component
         }
 
         $this->workout->name = $this->name;
-        $this->workout->sport = Sport::from($this->sport);
+        $this->workout->sport = $this->sport;
         $this->workout->scheduled_at = $scheduledAt;
         $this->workout->save();
 
-        if (Sport::from($this->sport)->hasStepBuilder()) {
+        if ($this->sport->hasStepBuilder()) {
             $this->syncSteps();
+        } else {
+            // Delete any existing steps when changing to a non-step-builder sport
+            $this->workout->steps()->delete();
         }
 
         $this->redirect(route('dashboard'));

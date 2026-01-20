@@ -19,7 +19,7 @@
                     @foreach(\App\Enums\Workout\Sport::cases() as $sportOption)
                         <flux:button
                             wire:click="selectSport('{{ $sportOption->value }}')"
-                            variant="{{ $sport === $sportOption->value ? 'primary' : 'outline' }}"
+                            variant="{{ $sport === $sportOption ? 'primary' : 'outline' }}"
                             icon="{{ $sportOption->icon() }}"
                             class="justify-start"
                             wire:loading.attr="disabled"
@@ -44,7 +44,7 @@
                 </div>
             </flux:card>
 
-            @if($sport === \App\Enums\Workout\Sport::Running->value)
+            @if($sport === \App\Enums\Workout\Sport::Running)
                 {{-- Step Builder for Running --}}
                 <div class="space-y-4">
                     @foreach ($steps as $index => $step)
@@ -89,24 +89,15 @@
                 <flux:card class="p-6">
                     <flux:callout variant="info" icon="information-circle">
                         <flux:callout.text>
-                            <strong>Detailed workout builder coming soon!</strong> For now, you can create {{ strtolower(\App\Enums\Workout\Sport::from($sport)->label()) }} workouts and add notes below.
+                            <strong>Detailed workout builder coming soon!</strong> For now, you can create {{ strtolower($sport->label()) }} workouts.
                         </flux:callout.text>
                     </flux:callout>
-
-                    <div class="mt-4">
-                        <flux:textarea
-                            wire:model="notes"
-                            label="Workout Notes"
-                            placeholder="Describe your workout plan..."
-                            rows="6"
-                        />
-                    </div>
                 </flux:card>
             @endif
         </div>
 
         <!-- Right: Toolbox -->
-        @if($sport === \App\Enums\Workout\Sport::Running->value)
+        @if($sport === \App\Enums\Workout\Sport::Running)
             <div class="space-y-4">
                 <flux:card class="p-4 sticky top-6">
                     <flux:heading size="lg" class="mb-4">Add Content</flux:heading>

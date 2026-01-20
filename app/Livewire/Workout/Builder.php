@@ -21,6 +21,8 @@ class Builder extends Component
 
     public string $name = '';
 
+    public ?string $notes = null;
+
     public Sport $sport = Sport::Running;
 
     public string $scheduled_date = '';
@@ -49,6 +51,7 @@ class Builder extends Component
 
             $this->workout = $workout;
             $this->name = $workout->name;
+            $this->notes = $workout->notes;
             $this->sport = $workout->sport;
             $this->scheduled_date = $workout->scheduled_at->format('Y-m-d');
             $this->scheduled_time = $workout->scheduled_at->format('H:i');
@@ -340,6 +343,7 @@ class Builder extends Component
         }
 
         $this->workout->name = $this->name;
+        $this->workout->notes = $this->notes;
         $this->workout->sport = $this->sport;
         $this->workout->scheduled_at = $scheduledAt;
         $this->workout->save();

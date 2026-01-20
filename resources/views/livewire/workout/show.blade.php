@@ -57,6 +57,14 @@
                 </div>
             </flux:card>
 
+            {{-- Notes Card --}}
+            @if($workout->notes)
+                <flux:card>
+                    <flux:heading size="lg" class="mb-4">Notes</flux:heading>
+                    <flux:text class="whitespace-pre-wrap text-zinc-600 dark:text-zinc-400">{{ $workout->notes }}</flux:text>
+                </flux:card>
+            @endif
+
             {{-- Steps Table Card --}}
             @if($workout->rootSteps->isNotEmpty())
                 <flux:card>

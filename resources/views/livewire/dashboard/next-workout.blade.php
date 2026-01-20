@@ -48,6 +48,13 @@
                 <x-workout-schedule-badge :scheduled-at="$this->nextWorkout->scheduled_at" />
             </div>
 
+            @if($this->nextWorkout->notes)
+                <flux:card class="bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700">
+                    <flux:heading size="sm" class="mb-2 text-zinc-700 dark:text-zinc-300">Notes</flux:heading>
+                    <flux:text class="whitespace-pre-wrap text-zinc-600 dark:text-zinc-400">{{ $this->nextWorkout->notes }}</flux:text>
+                </flux:card>
+            @endif
+
             @if($this->nextWorkout->rootSteps->isNotEmpty())
                 <div class="space-y-2 mt-4">
                     <flux:heading size="sm" class="text-zinc-500 dark:text-zinc-400">Workout Steps</flux:heading>

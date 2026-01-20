@@ -42,6 +42,17 @@
                         <flux:time-picker wire:model="scheduled_time" label="Time" required />
                     </div>
                 </div>
+
+                <flux:separator class="my-4" />
+
+                <flux:field>
+                    <flux:label>Notes (optional)</flux:label>
+                    <flux:textarea
+                        wire:model="notes"
+                        placeholder="Add notes, instructions, or reminders for this workout..."
+                        rows="4"
+                    />
+                </flux:field>
             </flux:card>
 
             @if($sport === \App\Enums\Workout\Sport::Running)

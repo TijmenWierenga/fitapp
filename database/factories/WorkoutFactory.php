@@ -27,6 +27,7 @@ class WorkoutFactory extends Factory
                 'Recovery Run',
             ]),
             'sport' => Sport::Running,
+            'notes' => fake()->boolean(50) ? fake()->sentence() : null,
             'scheduled_at' => fake()->dateTimeBetween('now', '+2 weeks'),
         ];
     }

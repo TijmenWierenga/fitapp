@@ -98,11 +98,11 @@
                     </flux:button>
                 @endif
                 <flux:button
-                    wire:click="markAsCompleted({{ $this->nextWorkout->id }})"
+                    href="{{ route('workouts.show', $this->nextWorkout) }}"
                     variant="primary"
                     class="flex-1"
                 >
-                    Mark as Completed
+                    View Workout
                 </flux:button>
             </div>
         </div>

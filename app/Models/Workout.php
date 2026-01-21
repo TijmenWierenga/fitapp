@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $notes
  * @property \Illuminate\Support\Carbon|null $scheduled_at
  * @property \Illuminate\Support\Carbon|null $completed_at
+ * @property int|null $rpe
+ * @property int|null $feeling
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  * @property-read User $user
@@ -31,6 +33,8 @@ class Workout extends Model
         'notes',
         'scheduled_at',
         'completed_at',
+        'rpe',
+        'feeling',
     ];
 
     protected function casts(): array
@@ -39,6 +43,8 @@ class Workout extends Model
             'sport' => Sport::class,
             'scheduled_at' => 'datetime',
             'completed_at' => 'datetime',
+            'rpe' => 'integer',
+            'feeling' => 'integer',
         ];
     }
 
@@ -123,9 +129,13 @@ class Workout extends Model
         return ! $this->isCompleted();
     }
 
-    public function markAsCompleted(): void
+    public function markAsCompleted(int $rpe, int $feeling): void
     {
-        $this->update(['completed_at' => now()]);
+        $this->update([
+            'completed_at' => now(),
+            'rpe' => $rpe,
+            'feeling' => $feeling,
+        ]);
     }
 
     public function canBeDeleted(): bool
@@ -222,6 +232,18 @@ class Workout extends Model
     public function estimatedTotalDurationInSeconds(): int
     {
         return app(\App\Services\Workout\WorkoutEstimator::class)->estimateDuration($this);
+    }
+
+    public static function getRpeLabel(?int $rpe): string
+    {
+        return match ($rpe) {
+            1, 2 => 'Very Easy',
+            3, 4 => 'Easy',
+            5, 6 => 'Moderate',
+            7, 8 => 'Hard',
+            9, 10 => 'Maximum Effort',
+            default => '',
+        };
     }
 
     protected function calculateStepDuration(Step $step): int

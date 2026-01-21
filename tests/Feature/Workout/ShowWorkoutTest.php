@@ -415,7 +415,7 @@ it('displays evaluation data for completed workout', function () {
     Livewire::actingAs($user)
         ->test(Show::class, ['workout' => $workout])
         ->assertSee('RPE: 8/10 (Hard)')
-        ->assertSee('Feeling: 4/5');
+        ->assertSee('Feeling: Good (4/5)');
 });
 
 it('returns correct rpe label', function () {

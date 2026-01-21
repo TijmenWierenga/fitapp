@@ -60,9 +60,25 @@
                             </div>
                         @endif
                         @if($workout->feeling)
+                            @php
+                                $feelingEmojis = [
+                                    1 => '😞',
+                                    2 => '😕',
+                                    3 => '😐',
+                                    4 => '🙂',
+                                    5 => '😊',
+                                ];
+                                $feelingLabels = [
+                                    1 => 'Very Bad',
+                                    2 => 'Bad',
+                                    3 => 'Okay',
+                                    4 => 'Good',
+                                    5 => 'Great',
+                                ];
+                            @endphp
                             <div class="flex items-center gap-2">
-                                <flux:icon.face-smile class="size-5 text-zinc-400" />
-                                <flux:text>Feeling: {{ $workout->feeling }}/5</flux:text>
+                                <span class="text-xl">{{ $feelingEmojis[$workout->feeling] }}</span>
+                                <flux:text>Feeling: {{ $feelingLabels[$workout->feeling] }} ({{ $workout->feeling }}/5)</flux:text>
                             </div>
                         @endif
                     @endif
@@ -183,7 +199,7 @@
                             <button
                                 type="button"
                                 wire:click="$set('rpe', {{ $value }})"
-                                class="flex-1 py-2 text-sm font-medium rounded-md transition-colors {{ $rpe === $value ? 'bg-accent text-white' : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600' }}"
+                                class="flex-1 py-2 text-sm font-medium rounded-md transition-colors {{ $rpe === $value ? 'bg-accent text-accent-foreground' : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600' }}"
                             >
                                 {{ $value }}
                             </button>
@@ -208,23 +224,30 @@
                 <flux:label>Overall Feeling</flux:label>
                 <flux:description>How did you feel during this workout?</flux:description>
                 <div class="mt-3">
+                    @php
+                        $feelingEmojis = [
+                            1 => ['emoji' => '😞', 'label' => 'Very Bad'],
+                            2 => ['emoji' => '😕', 'label' => 'Bad'],
+                            3 => ['emoji' => '😐', 'label' => 'Okay'],
+                            4 => ['emoji' => '🙂', 'label' => 'Good'],
+                            5 => ['emoji' => '😊', 'label' => 'Great'],
+                        ];
+                    @endphp
                     <div class="flex justify-between gap-2">
-                        @foreach(range(1, 5) as $value)
+                        @foreach($feelingEmojis as $value => $data)
                             <button
                                 type="button"
                                 wire:click="$set('feeling', {{ $value }})"
-                                class="flex-1 py-3 text-lg font-medium rounded-md transition-colors {{ $feeling === $value ? 'bg-accent text-white' : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600' }}"
+                                class="flex-1 py-3 text-3xl rounded-md transition-colors {{ $feeling === $value ? 'bg-accent' : 'bg-zinc-100 dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-600' }}"
                             >
-                                {{ $value }}
+                                {{ $data['emoji'] }}
                             </button>
                         @endforeach
                     </div>
                     <div class="flex justify-between mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                        <span>1</span>
-                        <span>2</span>
-                        <span>3</span>
-                        <span>4</span>
-                        <span>5</span>
+                        @foreach($feelingEmojis as $data)
+                            <span class="flex-1 text-center">{{ $data['label'] }}</span>
+                        @endforeach
                     </div>
                 </div>
                 <flux:error name="feeling" />

@@ -55,15 +55,19 @@ it('checks if workout can be edited', function () {
         ->and($complete->canBeEdited())->toBeFalse();
 });
 
-it('can mark workout as completed', function () {
+it('can mark workout as completed with evaluation', function () {
     $workout = Workout::factory()->create(['completed_at' => null]);
 
     expect($workout->isCompleted())->toBeFalse();
 
-    $workout->markAsCompleted();
+    $workout->markAsCompleted(rpe: 7, feeling: 4);
 
-    expect($workout->fresh()->isCompleted())->toBeTrue()
-        ->and($workout->fresh()->completed_at)->not->toBeNull();
+    $workout->refresh();
+
+    expect($workout->isCompleted())->toBeTrue()
+        ->and($workout->completed_at)->not->toBeNull()
+        ->and($workout->rpe)->toBe(7)
+        ->and($workout->feeling)->toBe(4);
 });
 
 it('checks if workout is completed', function () {

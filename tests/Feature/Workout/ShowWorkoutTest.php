@@ -125,7 +125,7 @@ it('shows tomorrow badge for workout scheduled tomorrow', function () {
 });
 
 // Action tests
-it('can mark workout as completed', function () {
+it('opens evaluation modal when clicking mark as completed', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create([
         'scheduled_at' => now(),
@@ -134,10 +134,8 @@ it('can mark workout as completed', function () {
 
     Livewire::actingAs($user)
         ->test(Show::class, ['workout' => $workout])
-        ->call('markAsCompleted')
-        ->assertDispatched('workout-completed');
-
-    expect($workout->fresh()->completed_at)->not->toBeNull();
+        ->call('openEvaluationModal')
+        ->assertSet('showEvaluationModal', true);
 });
 
 it('shows edit button for editable workout', function () {
@@ -259,4 +257,189 @@ it('hides delete button for completed workout', function () {
     Livewire::actingAs($user)
         ->test(Show::class, ['workout' => $workout])
         ->assertDontSee('Delete');
+});
+
+// Workout Evaluation tests
+it('marks workout as completed with valid evaluation and saves both values', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now(),
+        'completed_at' => null,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->set('rpe', 7)
+        ->set('feeling', 4)
+        ->call('submitEvaluation')
+        ->assertSet('showEvaluationModal', false)
+        ->assertDispatched('workout-completed');
+
+    $workout->refresh();
+
+    expect($workout->completed_at)->not->toBeNull()
+        ->and($workout->rpe)->toBe(7)
+        ->and($workout->feeling)->toBe(4);
+});
+
+it('fails validation when attempting to complete without rpe', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now(),
+        'completed_at' => null,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->set('feeling', 4)
+        ->call('submitEvaluation')
+        ->assertHasErrors(['rpe' => 'required']);
+
+    expect($workout->fresh()->completed_at)->toBeNull();
+});
+
+it('fails validation when attempting to complete without feeling', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now(),
+        'completed_at' => null,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->set('rpe', 7)
+        ->call('submitEvaluation')
+        ->assertHasErrors(['feeling' => 'required']);
+
+    expect($workout->fresh()->completed_at)->toBeNull();
+});
+
+it('fails validation when rpe value is below 1', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now(),
+        'completed_at' => null,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->set('rpe', 0)
+        ->set('feeling', 4)
+        ->call('submitEvaluation')
+        ->assertHasErrors(['rpe' => 'min']);
+
+    expect($workout->fresh()->completed_at)->toBeNull();
+});
+
+it('fails validation when rpe value is above 10', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now(),
+        'completed_at' => null,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->set('rpe', 11)
+        ->set('feeling', 4)
+        ->call('submitEvaluation')
+        ->assertHasErrors(['rpe' => 'max']);
+
+    expect($workout->fresh()->completed_at)->toBeNull();
+});
+
+it('fails validation when feeling value is below 1', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now(),
+        'completed_at' => null,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->set('rpe', 7)
+        ->set('feeling', 0)
+        ->call('submitEvaluation')
+        ->assertHasErrors(['feeling' => 'min']);
+
+    expect($workout->fresh()->completed_at)->toBeNull();
+});
+
+it('fails validation when feeling value is above 5', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now(),
+        'completed_at' => null,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->set('rpe', 7)
+        ->set('feeling', 6)
+        ->call('submitEvaluation')
+        ->assertHasErrors(['feeling' => 'max']);
+
+    expect($workout->fresh()->completed_at)->toBeNull();
+});
+
+it('canceling evaluation keeps workout uncompleted', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now(),
+        'completed_at' => null,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->call('openEvaluationModal')
+        ->assertSet('showEvaluationModal', true)
+        ->set('rpe', 7)
+        ->set('feeling', 4)
+        ->call('cancelEvaluation')
+        ->assertSet('showEvaluationModal', false)
+        ->assertSet('rpe', null)
+        ->assertSet('feeling', null);
+
+    expect($workout->fresh()->completed_at)->toBeNull();
+});
+
+it('displays evaluation data for completed workout', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now(),
+        'completed_at' => now(),
+        'rpe' => 8,
+        'feeling' => 4,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->assertSee('RPE: 8/10 (Hard)')
+        ->assertSee('Feeling: 4/5');
+});
+
+it('returns correct rpe label', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now(),
+        'completed_at' => null,
+    ]);
+
+    $component = Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout]);
+
+    $component->set('rpe', 1);
+    expect($component->get('rpeLabel'))->toBe('Very Easy');
+
+    $component->set('rpe', 4);
+    expect($component->get('rpeLabel'))->toBe('Easy');
+
+    $component->set('rpe', 6);
+    expect($component->get('rpeLabel'))->toBe('Moderate');
+
+    $component->set('rpe', 8);
+    expect($component->get('rpeLabel'))->toBe('Hard');
+
+    $component->set('rpe', 10);
+    expect($component->get('rpeLabel'))->toBe('Maximum Effort');
 });

@@ -55,4 +55,13 @@ class WorkoutFactory extends Factory
             'sport' => Sport::Hiit,
         ]);
     }
+
+    public function completed(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'completed_at' => now(),
+            'rpe' => fake()->numberBetween(1, 10),
+            'feeling' => fake()->numberBetween(1, 5),
+        ]);
+    }
 }

@@ -15,7 +15,7 @@ it('displays next workout component', function () {
     Livewire::actingAs($user)
         ->test(NextWorkout::class)
         ->assertSee($workout->name)
-        ->assertSee('Mark as Completed');
+        ->assertSee('View Workout');
 });
 
 it('displays empty state when no next workout', function () {
@@ -27,18 +27,14 @@ it('displays empty state when no next workout', function () {
         ->assertSee('Schedule Workout');
 });
 
-it('can mark next workout as completed', function () {
+it('refreshes next workout when workout completed event is dispatched', function () {
     $user = User::factory()->create();
-    $workout = Workout::factory()->for($user)->create(['scheduled_at' => now()->addDay()]);
-
-    expect($workout->completed_at)->toBeNull();
+    Workout::factory()->for($user)->create(['scheduled_at' => now()->addDay()]);
 
     Livewire::actingAs($user)
         ->test(NextWorkout::class)
-        ->call('markAsCompleted', $workout->id)
-        ->assertDispatched('workout-completed');
-
-    expect($workout->fresh()->completed_at)->not->toBeNull();
+        ->dispatch('workout-completed')
+        ->assertStatus(200);
 });
 
 it('displays upcoming workouts', function () {

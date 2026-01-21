@@ -53,6 +53,18 @@
                             <flux:icon.check-circle class="size-5" />
                             <flux:text>Completed {{ $workout->completed_at->diffForHumans() }}</flux:text>
                         </div>
+                        @if($workout->rpe)
+                            <div class="flex items-center gap-2">
+                                <flux:icon.fire class="size-5 text-zinc-400" />
+                                <flux:text>RPE: {{ $workout->rpe }}/10 ({{ \App\Models\Workout::getRpeLabel($workout->rpe) }})</flux:text>
+                            </div>
+                        @endif
+                        @if($workout->feeling)
+                            <div class="flex items-center gap-2">
+                                <flux:icon.face-smile class="size-5 text-zinc-400" />
+                                <flux:text>Feeling: {{ $workout->feeling }}/5</flux:text>
+                            </div>
+                        @endif
                     @endif
                 </div>
             </flux:card>
@@ -105,7 +117,7 @@
                 <div class="flex flex-col gap-3">
                     @if(!$workout->isCompleted() && ($workout->scheduled_at->isPast() || $workout->scheduled_at->isToday()))
                         <flux:button
-                            wire:click="markAsCompleted"
+                            wire:click="openEvaluationModal"
                             variant="primary"
                             icon="check"
                             class="w-full"
@@ -152,4 +164,81 @@
 
     {{-- Include duplicate modal component --}}
     <livewire:workout.duplicate />
+
+    {{-- Evaluation Modal --}}
+    <flux:modal name="evaluation-modal" wire:model.live="showEvaluationModal" @cancel="cancelEvaluation">
+        <form wire:submit="submitEvaluation" class="space-y-6">
+            <div>
+                <flux:heading size="lg">How was your workout?</flux:heading>
+                <flux:text class="mt-1">Rate your effort and how you felt during this session.</flux:text>
+            </div>
+
+            {{-- RPE Section --}}
+            <flux:field>
+                <flux:label>Rate of Perceived Exertion (RPE)</flux:label>
+                <flux:description>How hard did this workout feel?</flux:description>
+                <div class="mt-3">
+                    <div class="flex justify-between gap-1">
+                        @foreach(range(1, 10) as $value)
+                            <button
+                                type="button"
+                                wire:click="$set('rpe', {{ $value }})"
+                                class="flex-1 py-2 text-sm font-medium rounded-md transition-colors {{ $rpe === $value ? 'bg-accent text-white' : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600' }}"
+                            >
+                                {{ $value }}
+                            </button>
+                        @endforeach
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                        <span>Very Easy</span>
+                        <span>Easy</span>
+                        <span>Moderate</span>
+                        <span>Hard</span>
+                        <span>Maximum</span>
+                    </div>
+                    @if($rpe)
+                        <flux:text class="mt-2 text-center font-medium">{{ $this->rpeLabel }}</flux:text>
+                    @endif
+                </div>
+                <flux:error name="rpe" />
+            </flux:field>
+
+            {{-- Feeling Section --}}
+            <flux:field>
+                <flux:label>Overall Feeling</flux:label>
+                <flux:description>How did you feel during this workout?</flux:description>
+                <div class="mt-3">
+                    <div class="flex justify-between gap-2">
+                        @foreach(range(1, 5) as $value)
+                            <button
+                                type="button"
+                                wire:click="$set('feeling', {{ $value }})"
+                                class="flex-1 py-3 text-lg font-medium rounded-md transition-colors {{ $feeling === $value ? 'bg-accent text-white' : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600' }}"
+                            >
+                                {{ $value }}
+                            </button>
+                        @endforeach
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                        <span>1</span>
+                        <span>2</span>
+                        <span>3</span>
+                        <span>4</span>
+                        <span>5</span>
+                    </div>
+                </div>
+                <flux:error name="feeling" />
+            </flux:field>
+
+            <div class="flex gap-2 justify-between">
+                <flux:button type="button" wire:click="cancelEvaluation" variant="ghost">
+                    Cancel
+                </flux:button>
+                <flux:button type="submit" variant="primary" :disabled="!$rpe || !$feeling" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="submitEvaluation">Complete Workout</span>
+                    <span wire:loading wire:target="submitEvaluation">Completing...</span>
+                </flux:button>
+            </div>
+        </form>
+    </flux:modal>
 </div>

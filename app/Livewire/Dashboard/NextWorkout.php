@@ -19,18 +19,9 @@ class NextWorkout extends Component
             ->first();
     }
 
-    public function markAsCompleted(int $workoutId): void
+    #[On('workout-completed')]
+    public function refreshNextWorkout(): void
     {
-        $workout = auth()->user()->workouts()->findOrFail($workoutId);
-        $workout->markAsCompleted();
-
-        $this->dispatch('workout-completed');
-    }
-
-    #[On('mark-workout-complete')]
-    public function markWorkoutComplete(int $workoutId): void
-    {
-        $this->markAsCompleted($workoutId);
         unset($this->nextWorkout);
     }
 

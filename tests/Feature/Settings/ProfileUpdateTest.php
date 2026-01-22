@@ -18,6 +18,7 @@ test('profile information can be updated', function () {
     $response = Livewire::test(Profile::class)
         ->set('name', 'Test User')
         ->set('email', 'test@example.com')
+        ->set('timezone', 'America/New_York')
         ->call('updateProfileInformation');
 
     $response->assertHasNoErrors();
@@ -26,6 +27,7 @@ test('profile information can be updated', function () {
 
     expect($user->name)->toEqual('Test User');
     expect($user->email)->toEqual('test@example.com');
+    expect($user->timezone)->toEqual('America/New_York');
     expect($user->email_verified_at)->toBeNull();
 });
 
@@ -73,4 +75,62 @@ test('correct password must be provided to delete account', function () {
     $response->assertHasErrors(['password']);
 
     expect($user->fresh())->not->toBeNull();
+});
+
+test('timezone can be updated independently', function () {
+    $user = User::factory()->create([
+        'timezone' => 'UTC',
+    ]);
+
+    $this->actingAs($user);
+
+    $response = Livewire::test(Profile::class)
+        ->set('name', $user->name)
+        ->set('email', $user->email)
+        ->set('timezone', 'Europe/Amsterdam')
+        ->call('updateProfileInformation');
+
+    $response->assertHasNoErrors();
+
+    expect($user->refresh()->timezone)->toEqual('Europe/Amsterdam');
+});
+
+test('timezone must be valid', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user);
+
+    $response = Livewire::test(Profile::class)
+        ->set('name', $user->name)
+        ->set('email', $user->email)
+        ->set('timezone', 'Invalid/Timezone')
+        ->call('updateProfileInformation');
+
+    $response->assertHasErrors(['timezone']);
+});
+
+test('timezone is required', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user);
+
+    $response = Livewire::test(Profile::class)
+        ->set('name', $user->name)
+        ->set('email', $user->email)
+        ->set('timezone', '')
+        ->call('updateProfileInformation');
+
+    $response->assertHasErrors(['timezone']);
+});
+
+test('timezone defaults to UTC when not set', function () {
+    $user = User::factory()->create([
+        'timezone' => null,
+    ]);
+
+    $this->actingAs($user);
+
+    $component = Livewire::test(Profile::class);
+
+    expect($component->get('timezone'))->toEqual('UTC');
 });

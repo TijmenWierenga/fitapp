@@ -27,6 +27,20 @@
                 @endif
             </div>
 
+            <div>
+                <flux:select wire:model="timezone" :label="__('Timezone')" required searchable>
+                    @foreach ($this->timezones as $region => $cities)
+                        @foreach ($cities as $value => $label)
+                            <flux:select.option :value="$value">{{ $region }} - {{ $label }}</flux:select.option>
+                        @endforeach
+                    @endforeach
+                </flux:select>
+
+                <flux:text class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                    {{ __('Your timezone is used by the AI Coach to provide personalized training recommendations based on your local time.') }}
+                </flux:text>
+            </div>
+
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
                     <flux:button variant="primary" type="submit" class="w-full">{{ __('Save') }}</flux:button>

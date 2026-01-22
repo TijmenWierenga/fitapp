@@ -3,9 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use DateTimeZone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
@@ -23,6 +25,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'timezone',
     ];
 
     /**
@@ -68,5 +71,30 @@ class User extends Authenticatable
     public function workouts(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Workout::class);
+    }
+
+    /**
+     * Get the user's timezone as a DateTimeZone object.
+     * Falls back to UTC if no timezone is set.
+     */
+    public function getTimezoneObject(): DateTimeZone
+    {
+        return new DateTimeZone($this->timezone ?? 'UTC');
+    }
+
+    /**
+     * Convert a Carbon instance to the user's timezone.
+     */
+    public function toUserTimezone(Carbon $date): Carbon
+    {
+        return $date->copy()->setTimezone($this->getTimezoneObject());
+    }
+
+    /**
+     * Get the current time in the user's timezone.
+     */
+    public function currentTimeInTimezone(): Carbon
+    {
+        return Carbon::now($this->getTimezoneObject());
     }
 }

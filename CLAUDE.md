@@ -12,6 +12,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/fortify (FORTIFY) - v1
 - laravel/framework (LARAVEL) - v12
 - laravel/prompts (PROMPTS) - v0
+- laravel/sanctum (SANCTUM) - v4
 - livewire/flux (FLUXUI_FREE) - v2
 - livewire/flux-pro (FLUXUI_PRO) - v2
 - livewire/livewire (LIVEWIRE) - v4
@@ -258,6 +259,16 @@ accordion, autocomplete, avatar, badge, brand, breadcrumbs, button, calendar, ca
     $this->get('/posts/create')
     ->assertSeeLivewire(CreatePost::class);
 </code-snippet>
+
+=== mcp/core rules ===
+
+## Laravel MCP
+
+- MCP (Model Context Protocol) is very new. You must use the `search-docs` tool to get documentation for how to write and test Laravel MCP servers, tools, resources, and prompts effectively.
+- MCP servers need to be registered with a route or handle in `routes/ai.php`. Typically, they will be registered using `Mcp::web()` to register an HTTP streaming MCP server.
+- Servers are very testable; use the `search-docs` tool to find testing instructions.
+- Do not run `mcp:start`. This command hangs waiting for JSON-RPC MCP requests.
+- Some MCP clients use Node, which has its own certificate store. If a user tries to connect to their web MCP server locally using HTTPS, it could fail due to this reason. They will need to switch to HTTP during local development.
 
 === pint/core rules ===
 

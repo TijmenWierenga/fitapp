@@ -20,8 +20,8 @@
             "command": "/Users/tijmenwierenga/Library/Application Support/Herd/bin/php85",
             "args": [
                 "/Users/tijmenwierenga/www/tijmenwierenga/fitapp/artisan",
-                "mcp:serve",
-                "mcp/workout-planner"
+                "mcp:start",
+                "workout-planner"
             ],
             "env": {
                 "AUTHORIZATION": "Bearer 1|Oo4w1yK8ZUwxJifWyDouTMpO0sOZ26beVAP597wVd507bd74"

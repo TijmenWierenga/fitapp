@@ -1,7 +1,10 @@
 <?php
 
+use App\Livewire\Dashboard\NextWorkout;
+use App\Livewire\Workout\Show;
 use App\Models\User;
 use App\Models\Workout;
+use Livewire\Livewire;
 
 it('can create a workout with notes', function () {
     $user = User::factory()->create();
@@ -100,4 +103,66 @@ it('stores notes with maximum length', function () {
     ]);
 
     expect($workout->notes)->toBe($longNotes);
+});
+
+it('renders markdown bold text in workout show page', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'notes' => 'This is **bold** text',
+        'scheduled_at' => now()->addDay(),
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->assertSeeHtml('<strong>bold</strong>');
+});
+
+it('renders markdown italic text in workout show page', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'notes' => 'This is *italic* text',
+        'scheduled_at' => now()->addDay(),
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->assertSeeHtml('<em>italic</em>');
+});
+
+it('renders markdown list in workout show page', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'notes' => "- Item 1\n- Item 2",
+        'scheduled_at' => now()->addDay(),
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->assertSeeHtml('<li>Item 1</li>');
+});
+
+it('escapes raw HTML in notes to prevent XSS', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'notes' => '<script>alert("xss")</script>',
+        'scheduled_at' => now()->addDay(),
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->assertDontSeeHtml('<script>alert("xss")</script>')
+        ->assertSeeHtml('&lt;script&gt;');
+});
+
+it('renders markdown in next workout dashboard card', function () {
+    $user = User::factory()->create();
+    Workout::factory()->for($user)->create([
+        'notes' => 'Remember to **warm up** properly',
+        'scheduled_at' => now()->addDay(),
+        'completed_at' => null,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(NextWorkout::class)
+        ->assertSeeHtml('<strong>warm up</strong>');
 });

@@ -89,7 +89,9 @@
             @if($workout->notes)
                 <flux:card>
                     <flux:heading size="lg" class="mb-4">Notes</flux:heading>
-                    <flux:text class="whitespace-pre-wrap text-zinc-600 dark:text-zinc-400">{{ $workout->notes }}</flux:text>
+                    <div class="prose prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400">
+                        {!! Str::markdown($workout->notes, ['html_input' => 'escape']) !!}
+                    </div>
                 </flux:card>
             @endif
 

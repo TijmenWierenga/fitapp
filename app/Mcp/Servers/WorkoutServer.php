@@ -78,6 +78,15 @@ class WorkoutServer extends Server
         - Use descriptive names to indicate plan structure
           - Example: "Week 1: Easy Run", "Week 1: Long Run", "Week 2: Tempo Run"
 
+        ## Workout Notes
+
+        Notes support **Markdown formatting** for rich text. You can use:
+        - **Bold** text with `**text**`
+        - *Italic* text with `*text*`
+        - Lists with `- item` or `1. item`
+        - [Links](url) with `[text](url)`
+        - Headers with `# Header`
+
         ## Business Rules
 
         - Completed workouts cannot be edited or deleted

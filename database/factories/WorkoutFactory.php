@@ -56,6 +56,14 @@ class WorkoutFactory extends Factory
         ]);
     }
 
+    public function upcoming(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'scheduled_at' => fake()->dateTimeBetween('now', '+2 weeks'),
+            'completed_at' => null,
+        ]);
+    }
+
     public function completed(): static
     {
         return $this->state(fn (array $attributes): array => [

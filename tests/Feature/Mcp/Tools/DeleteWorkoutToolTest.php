@@ -1,0 +1,107 @@
+<?php
+
+use App\Mcp\Servers\WorkoutServer;
+use App\Mcp\Tools\DeleteWorkoutTool;
+use App\Models\User;
+use App\Models\Workout;
+
+use function Pest\Laravel\assertDatabaseMissing;
+
+it('deletes upcoming workout successfully', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->upcoming()->create();
+
+    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
+        'user_id' => $user->id,
+        'workout_id' => $workout->id,
+    ]);
+
+    $response->assertOk()
+        ->assertSee('Workout deleted successfully');
+
+    assertDatabaseMissing('workouts', [
+        'id' => $workout->id,
+    ]);
+});
+
+it('deletes today\'s workout successfully', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now()->setHour(8),
+    ]);
+
+    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
+        'user_id' => $user->id,
+        'workout_id' => $workout->id,
+    ]);
+
+    $response->assertOk();
+
+    assertDatabaseMissing('workouts', [
+        'id' => $workout->id,
+    ]);
+});
+
+it('fails to delete completed workout', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->completed()->create();
+
+    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
+        'user_id' => $user->id,
+        'workout_id' => $workout->id,
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('Cannot delete completed workouts');
+});
+
+it('fails to delete past workout (not today)', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now()->subDays(2),
+    ]);
+
+    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
+        'user_id' => $user->id,
+        'workout_id' => $workout->id,
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('Cannot delete past workouts');
+});
+
+it('fails to delete workout owned by different user', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+    $workout = Workout::factory()->for($user1)->create();
+
+    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
+        'user_id' => $user2->id,
+        'workout_id' => $workout->id,
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('Workout not found or access denied');
+});
+
+it('fails with invalid user_id', function () {
+    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
+        'user_id' => 99999,
+        'workout_id' => 1,
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('User not found');
+});
+
+it('fails with non-existent workout_id', function () {
+    $user = User::factory()->create();
+
+    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
+        'user_id' => $user->id,
+        'workout_id' => 99999,
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('Workout not found or access denied');
+});

@@ -75,6 +75,30 @@ class User extends Authenticatable
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<FitnessProfile, $this>
+     */
+    public function fitnessProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(FitnessProfile::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Injury, $this>
+     */
+    public function injuries(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Injury::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Injury, $this>
+     */
+    public function activeInjuries(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->injuries()->active();
+    }
+
+    /**
      * Get the user's timezone as a DateTimeZone object.
      * Falls back to UTC if no timezone is set.
      */

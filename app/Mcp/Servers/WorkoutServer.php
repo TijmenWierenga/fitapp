@@ -4,11 +4,14 @@ namespace App\Mcp\Servers;
 
 use App\Mcp\Resources\UserProfileResource;
 use App\Mcp\Resources\WorkoutScheduleResource;
+use App\Mcp\Tools\AddInjuryTool;
 use App\Mcp\Tools\CompleteWorkoutTool;
 use App\Mcp\Tools\CreateWorkoutTool;
 use App\Mcp\Tools\DeleteWorkoutTool;
 use App\Mcp\Tools\ListWorkoutsTool;
 use App\Mcp\Tools\PingTool;
+use App\Mcp\Tools\RemoveInjuryTool;
+use App\Mcp\Tools\UpdateFitnessProfileTool;
 use App\Mcp\Tools\UpdateWorkoutTool;
 use Laravel\Mcp\Server;
 
@@ -90,10 +93,13 @@ class WorkoutServer extends Server
         - **delete-workout**: Delete a workout (with business rule checks)
         - **complete-workout**: Mark workout as completed with ratings
         - **list-workouts**: Query workouts with filtering (upcoming/completed/overdue/all)
+        - **update-fitness-profile**: Set or update user's fitness goals and availability
+        - **add-injury**: Add an injury record to track limitations
+        - **remove-injury**: Remove an injury record
 
         ## Available Resources
 
-        - **user://profile/{userId}**: Read-only user profile information
+        - **user://profile/{userId}**: Read-only user profile information including fitness profile and injuries
         - **workout://schedule/{userId}**: Read-only workout schedule (upcoming & completed)
     MARKDOWN;
 
@@ -109,6 +115,9 @@ class WorkoutServer extends Server
         DeleteWorkoutTool::class,
         CompleteWorkoutTool::class,
         ListWorkoutsTool::class,
+        UpdateFitnessProfileTool::class,
+        AddInjuryTool::class,
+        RemoveInjuryTool::class,
     ];
 
     /**

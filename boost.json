@@ -8,8 +8,6 @@
     "editors": [
         "phpstorm"
     ],
-    "guidelines": [
-        "laravel/fortify"
-    ],
+    "guidelines": true,
     "herd_mcp": true
 }

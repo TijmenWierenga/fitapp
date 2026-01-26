@@ -51,7 +51,9 @@
             @if($this->nextWorkout->notes)
                 <flux:card class="bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700">
                     <flux:heading size="sm" class="mb-2 text-zinc-700 dark:text-zinc-300">Notes</flux:heading>
-                    <flux:text class="whitespace-pre-wrap text-zinc-600 dark:text-zinc-400">{{ $this->nextWorkout->notes }}</flux:text>
+                    <div class="prose prose-sm prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400">
+                        {!! Str::markdown($this->nextWorkout->notes, ['html_input' => 'escape']) !!}
+                    </div>
                 </flux:card>
             @endif
 

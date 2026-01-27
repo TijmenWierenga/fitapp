@@ -18,6 +18,10 @@ class WorkoutScheduleResource extends Resource implements HasUriTemplate
         Read-only workout schedule showing upcoming and recently completed workouts.
 
         Use URI template: workout://schedule/{userId}
+
+        Optional parameters:
+        - `upcoming_limit`: Number of upcoming workouts to return (default: 20, max: 50)
+        - `completed_limit`: Number of completed workouts to return (default: 10, max: 50)
     MARKDOWN;
 
     /**
@@ -45,8 +49,11 @@ class WorkoutScheduleResource extends Resource implements HasUriTemplate
             return Response::error('User not found');
         }
 
-        $upcomingWorkouts = $user->workouts()->upcoming()->limit(10)->get();
-        $completedWorkouts = $user->workouts()->completed()->limit(5)->get();
+        $upcomingLimit = min((int) ($request->get('upcoming_limit') ?? 20), 50);
+        $completedLimit = min((int) ($request->get('completed_limit') ?? 10), 50);
+
+        $upcomingWorkouts = $user->workouts()->upcoming()->limit($upcomingLimit)->get();
+        $completedWorkouts = $user->workouts()->completed()->limit($completedLimit)->get();
 
         $content = "# Workout Schedule for {$user->name}\n\n";
 

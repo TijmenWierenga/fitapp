@@ -85,12 +85,39 @@ class WorkoutServer extends Server
 
         ## Workout Notes
 
-        Notes support **Markdown formatting** for rich text. You can use:
-        - **Bold** text with `**text**`
-        - *Italic* text with `*text*`
-        - Lists with `- item` or `1. item`
-        - [Links](url) with `[text](url)`
-        - Headers with `# Header`
+        Notes support **Markdown formatting** for rich text. Always write detailed, actionable notes that help the user follow the workout independently. Include:
+
+        - **Equipment needed** — list any gear (e.g., dumbbells, resistance bands, barbell, treadmill, yoga mat)
+        - **Step-by-step workout plan** — break the session into phases (warm-up, main work, cool-down)
+        - **Sets, reps & intensity** — specify numbers, weight suggestions, pace, or RPE where applicable
+        - **Rest periods** — note rest between sets or intervals
+        - **Modifications or alternatives** — suggest easier/harder variations when helpful
+
+        ### Example note
+
+        ```markdown
+        ## Equipment
+        - Pair of dumbbells (moderate weight)
+        - Yoga mat
+
+        ## Warm-Up (5 min)
+        - 2 min light jog in place
+        - Arm circles — 30 sec each direction
+        - Leg swings — 10 each side
+
+        ## Main Workout
+        1. **Goblet Squats** — 3 × 12 reps (rest 60 sec between sets)
+        2. **Dumbbell Lunges** — 3 × 10 each leg (rest 60 sec)
+        3. **Dumbbell Shoulder Press** — 3 × 10 reps (rest 90 sec)
+        4. **Plank Hold** — 3 × 45 sec (rest 30 sec)
+
+        ## Cool-Down (5 min)
+        - Standing quad stretch — 30 sec each side
+        - Seated hamstring stretch — 30 sec each side
+        - Deep breathing — 1 min
+        ```
+
+        Adapt the level of detail to the workout type: a simple "Easy Run" may only need pace and distance guidance, while a strength session benefits from full set/rep breakdowns.
 
         ## Business Rules
 

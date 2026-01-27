@@ -80,7 +80,7 @@ class CreateWorkoutTool extends Tool
             'name' => $schema->string()->description('The name/title of the workout (e.g., "Morning Run", "Leg Day")'),
             'activity' => $schema->string()->description('The activity type (e.g., run, strength, cardio, hiit, bike, pool_swim, hike, yoga, etc.)'),
             'scheduled_at' => $schema->string()->description('The date and time when the workout is scheduled (in user\'s timezone)'),
-            'notes' => $schema->string()->description('Optional notes or description for the workout')->nullable(),
+            'notes' => $schema->string()->description('Optional Markdown notes for the workout. Include a detailed plan: equipment needed, step-by-step phases (warm-up, main work, cool-down), sets/reps/intensity, and rest periods where applicable.')->nullable(),
         ];
     }
 }

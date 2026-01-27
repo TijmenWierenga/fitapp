@@ -136,7 +136,7 @@ test('it shows confirmation modal when changing from running to other activity w
 
     Livewire::test(Builder::class)
         ->assertCount('steps', 1) // Default step from mount
-        ->call('selectActivity', Activity::Strength->value)
+        ->call('selectActivity', Activity::Strength)
         ->assertSet('showingActivityTypeChangeModal', true)
         ->assertSet('pendingActivity', Activity::Strength)
         ->assertSet('activity', Activity::Run); // Activity should not change yet
@@ -148,7 +148,7 @@ test('it clears steps when confirming activity change from running to other', fu
 
     Livewire::test(Builder::class)
         ->assertCount('steps', 1) // Default step from mount
-        ->call('selectActivity', Activity::Strength->value)
+        ->call('selectActivity', Activity::Strength)
         ->assertSet('showingActivityTypeChangeModal', true)
         ->call('confirmActivityChange')
         ->assertSet('activity', Activity::Strength)
@@ -162,7 +162,7 @@ test('it keeps activity when canceling activity change', function () {
 
     Livewire::test(Builder::class)
         ->assertCount('steps', 1)
-        ->call('selectActivity', Activity::Strength->value)
+        ->call('selectActivity', Activity::Strength)
         ->assertSet('showingActivityTypeChangeModal', true)
         ->call('cancelActivityChange')
         ->assertSet('activity', Activity::Run)

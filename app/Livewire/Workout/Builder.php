@@ -275,10 +275,8 @@ class Builder extends Component
         }
     }
 
-    public function selectActivity(string $activityValue): void
+    public function selectActivity(Activity $activity): void
     {
-        $activity = Activity::from($activityValue);
-
         // If changing FROM running to another type and there are steps, show confirmation
         if ($this->activity->hasSteps() && ! $activity->hasSteps() && count($this->steps) > 0) {
             $this->pendingActivity = $activity;

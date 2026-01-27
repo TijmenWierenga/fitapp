@@ -275,8 +275,10 @@ class Builder extends Component
         }
     }
 
-    public function selectActivity(Activity $activity): void
+    public function selectActivity(string $activityValue): void
     {
+        $activity = Activity::from($activityValue);
+
         // If changing FROM running to another type and there are steps, show confirmation
         if ($this->activity->hasSteps() && ! $activity->hasSteps() && count($this->steps) > 0) {
             $this->pendingActivity = $activity;
@@ -299,6 +301,8 @@ class Builder extends Component
     {
         $this->showingActivityTypeChangeModal = false;
         $this->pendingActivity = null;
+        // Force re-render to reset the select value
+        $this->dispatch('$refresh');
     }
 
     protected function applyActivityChange(Activity $activity): void

@@ -15,7 +15,7 @@
             {{-- Activity Type Selector --}}
             <flux:card class="p-4">
                 <flux:heading size="sm" class="mb-3">Activity Type</flux:heading>
-                <flux:select wire:model.live="activity" wire:change="selectActivity($event.target.value)">
+                <flux:select value="{{ $activity->value }}" wire:change="selectActivity($event.target.value)">
                     @php
                         $grouped = collect(\App\Enums\Workout\Activity::cases())->groupBy(fn ($a) => $a->category());
                         $categoryLabels = [

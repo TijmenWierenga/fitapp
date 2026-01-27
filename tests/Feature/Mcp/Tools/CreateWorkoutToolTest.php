@@ -12,20 +12,20 @@ it('creates a workout successfully', function () {
     $response = WorkoutServer::tool(CreateWorkoutTool::class, [
         'user_id' => $user->id,
         'name' => 'Morning Run',
-        'sport' => 'running',
+        'activity' => 'run',
         'scheduled_at' => '2026-01-26 07:00:00',
         'notes' => 'Easy pace',
     ]);
 
     $response->assertOk()
         ->assertSee('Morning Run')
-        ->assertSee('running')
+        ->assertSee('run')
         ->assertSee('Workout created successfully');
 
     assertDatabaseHas('workouts', [
         'user_id' => $user->id,
         'name' => 'Morning Run',
-        'sport' => 'running',
+        'activity' => 'run',
         'notes' => 'Easy pace',
     ]);
 });
@@ -36,7 +36,7 @@ it('creates a workout without notes', function () {
     $response = WorkoutServer::tool(CreateWorkoutTool::class, [
         'user_id' => $user->id,
         'name' => 'Strength Training',
-        'sport' => 'strength',
+        'activity' => 'strength',
         'scheduled_at' => '2026-01-27 18:00:00',
     ]);
 
@@ -56,7 +56,7 @@ it('converts user timezone to UTC for storage', function () {
     $response = WorkoutServer::tool(CreateWorkoutTool::class, [
         'user_id' => $user->id,
         'name' => 'Evening HIIT',
-        'sport' => 'hiit',
+        'activity' => 'hiit',
         'scheduled_at' => '2026-01-26 19:00:00',
     ]);
 
@@ -70,7 +70,7 @@ it('fails with invalid user_id', function () {
     $response = WorkoutServer::tool(CreateWorkoutTool::class, [
         'user_id' => 99999,
         'name' => 'Test Workout',
-        'sport' => 'running',
+        'activity' => 'run',
         'scheduled_at' => '2026-01-26 07:00:00',
     ]);
 
@@ -78,32 +78,32 @@ it('fails with invalid user_id', function () {
         ->assertSee('User not found');
 });
 
-it('fails with invalid sport', function (string $invalidSport) {
+it('fails with invalid activity', function (string $invalidActivity) {
     $user = User::factory()->create();
 
     $response = WorkoutServer::tool(CreateWorkoutTool::class, [
         'user_id' => $user->id,
         'name' => 'Test Workout',
-        'sport' => $invalidSport,
+        'activity' => $invalidActivity,
         'scheduled_at' => '2026-01-26 07:00:00',
     ]);
 
     $response->assertHasErrors()
-        ->assertSee('The selected sport is invalid');
+        ->assertSee('The selected activity is invalid');
 })->with(['invalid', 'swimming', 'cycling']);
 
-it('fails with empty sport', function () {
+it('fails with empty activity', function () {
     $user = User::factory()->create();
 
     $response = WorkoutServer::tool(CreateWorkoutTool::class, [
         'user_id' => $user->id,
         'name' => 'Test Workout',
-        'sport' => '',
+        'activity' => '',
         'scheduled_at' => '2026-01-26 07:00:00',
     ]);
 
     $response->assertHasErrors()
-        ->assertSee('sport');
+        ->assertSee('activity');
 });
 
 it('fails with invalid scheduled_at', function () {
@@ -112,7 +112,7 @@ it('fails with invalid scheduled_at', function () {
     $response = WorkoutServer::tool(CreateWorkoutTool::class, [
         'user_id' => $user->id,
         'name' => 'Test Workout',
-        'sport' => 'running',
+        'activity' => 'run',
         'scheduled_at' => 'not-a-date',
     ]);
 
@@ -126,7 +126,7 @@ it('trims empty notes to null', function () {
     $response = WorkoutServer::tool(CreateWorkoutTool::class, [
         'user_id' => $user->id,
         'name' => 'Test Workout',
-        'sport' => 'running',
+        'activity' => 'run',
         'scheduled_at' => '2026-01-26 07:00:00',
         'notes' => '   ',
     ]);

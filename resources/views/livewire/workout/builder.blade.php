@@ -15,19 +15,34 @@
             {{-- Activity Type Selector --}}
             <flux:card class="p-4">
                 <flux:heading size="sm" class="mb-3">Activity Type</flux:heading>
-                <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
-                    @foreach(\App\Enums\Workout\Sport::cases() as $sportOption)
-                        <flux:button
-                            wire:click="selectSport('{{ $sportOption->value }}')"
-                            variant="{{ $sport === $sportOption ? 'primary' : 'outline' }}"
-                            icon="{{ $sportOption->icon() }}"
-                            class="justify-start"
-                            wire:loading.attr="disabled"
-                        >
-                            {{ $sportOption->label() }}
-                        </flux:button>
+                <flux:select wire:model.live="activity" wire:change="selectActivity($event.target.value)">
+                    @php
+                        $grouped = collect(\App\Enums\Workout\Activity::cases())->groupBy(fn ($a) => $a->category());
+                        $categoryLabels = [
+                            'running' => 'Running',
+                            'cycling' => 'Cycling',
+                            'swimming' => 'Swimming',
+                            'walking' => 'Walking & Hiking',
+                            'gym' => 'Gym',
+                            'flexibility' => 'Flexibility',
+                            'combat' => 'Combat',
+                            'racket' => 'Racket Sports',
+                            'water' => 'Water Sports',
+                            'winter' => 'Winter Sports',
+                            'team' => 'Team Sports',
+                            'mind_body' => 'Mind & Body',
+                            'multi_sport' => 'Multi-Sport',
+                            'other' => 'Other',
+                        ];
+                    @endphp
+                    @foreach($grouped as $category => $activities)
+                        <optgroup label="{{ $categoryLabels[$category] ?? ucfirst($category) }}">
+                            @foreach($activities as $activityOption)
+                                <flux:select.option value="{{ $activityOption->value }}">{{ $activityOption->label() }}</flux:select.option>
+                            @endforeach
+                        </optgroup>
                     @endforeach
-                </div>
+                </flux:select>
             </flux:card>
 
             <flux:card class="p-4">
@@ -55,7 +70,7 @@
                 </flux:field>
             </flux:card>
 
-            @if($sport === \App\Enums\Workout\Sport::Running)
+            @if($activity->hasSteps())
                 {{-- Step Builder for Running --}}
                 <div class="space-y-4">
                     @foreach ($steps as $index => $step)
@@ -100,7 +115,7 @@
                 <flux:card class="p-6">
                     <flux:callout variant="info" icon="information-circle">
                         <flux:callout.text>
-                            <strong>Detailed workout builder coming soon!</strong> For now, you can create {{ strtolower($sport->label()) }} workouts.
+                            <strong>Detailed workout builder coming soon!</strong> For now, you can create {{ strtolower($activity->label()) }} workouts.
                         </flux:callout.text>
                     </flux:callout>
                 </flux:card>
@@ -108,7 +123,7 @@
         </div>
 
         <!-- Right: Toolbox -->
-        @if($sport === \App\Enums\Workout\Sport::Running)
+        @if($activity->hasSteps())
             <div class="space-y-4">
                 <flux:card class="p-4 sticky top-6">
                     <flux:heading size="lg" class="mb-4">Add Content</flux:heading>
@@ -149,8 +164,8 @@
             </div>
 
             <div class="flex gap-2 justify-end">
-                <flux:button variant="ghost" wire:click="cancelSportChange">Cancel</flux:button>
-                <flux:button variant="danger" wire:click="confirmSportChange">Change Activity Type</flux:button>
+                <flux:button variant="ghost" wire:click="cancelActivityChange">Cancel</flux:button>
+                <flux:button variant="danger" wire:click="confirmActivityChange">Change Activity Type</flux:button>
             </div>
         </div>
     </flux:modal>

@@ -5,7 +5,7 @@
         <div class="flex-1">
             <div class="flex items-center gap-2">
                 <flux:heading size="xl">{{ $workout->name }}</flux:heading>
-                <x-activity-badge :sport="$workout->sport" />
+                <x-activity-badge :activity="$workout->activity" />
             </div>
         </div>
         <flux:badge color="{{ $this->statusBadge['color'] }}" size="sm">

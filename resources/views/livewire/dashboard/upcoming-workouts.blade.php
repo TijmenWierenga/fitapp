@@ -10,7 +10,7 @@
                             <flux:heading size="sm" class="font-semibold truncate hover:text-blue-600 dark:hover:text-blue-400">
                                 {{ $workout->name }}
                             </flux:heading>
-                            <x-activity-badge :sport="$workout->sport" />
+                            <x-activity-badge :activity="$workout->activity" />
                         </div>
                         <flux:text class="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
                             {{ $workout->scheduled_at->format('M j, g:i A') }}

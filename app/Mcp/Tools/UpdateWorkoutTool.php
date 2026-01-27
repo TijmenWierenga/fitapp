@@ -2,7 +2,7 @@
 
 namespace App\Mcp\Tools;
 
-use App\Enums\Workout\Sport;
+use App\Enums\Workout\Activity;
 use App\Models\User;
 use App\Models\Workout;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -20,7 +20,7 @@ class UpdateWorkoutTool extends Tool
     protected string $description = <<<'MARKDOWN'
         Update an existing workout. Only workouts that have not been completed can be updated.
 
-        You can update the name, sport, scheduled time, or notes. Only provide the fields you want to change.
+        You can update the name, activity, scheduled time, or notes. Only provide the fields you want to change.
     MARKDOWN;
 
     /**
@@ -32,12 +32,12 @@ class UpdateWorkoutTool extends Tool
             'user_id' => 'required|integer|exists:users,id',
             'workout_id' => 'required|integer',
             'name' => 'sometimes|string|max:255',
-            'sport' => ['sometimes', Rule::enum(Sport::class)],
+            'activity' => ['sometimes', Rule::enum(Activity::class)],
             'scheduled_at' => 'sometimes|date',
             'notes' => 'nullable|string|max:5000',
         ], [
             'user_id.exists' => 'User not found. Please provide a valid user ID.',
-            'sport.Enum' => 'Invalid sport. Must be one of: running, strength, cardio, hiit.',
+            'activity.Enum' => 'Invalid activity type. See available activity values.',
             'scheduled_at.date' => 'Please provide a valid date and time.',
         ]);
 
@@ -59,8 +59,8 @@ class UpdateWorkoutTool extends Tool
             $updateData['name'] = $validated['name'];
         }
 
-        if (isset($validated['sport'])) {
-            $updateData['sport'] = $validated['sport'];
+        if (isset($validated['activity'])) {
+            $updateData['activity'] = $validated['activity'];
         }
 
         if (isset($validated['scheduled_at'])) {
@@ -78,7 +78,7 @@ class UpdateWorkoutTool extends Tool
             'workout' => [
                 'id' => $workout->id,
                 'name' => $workout->name,
-                'sport' => $workout->sport->value,
+                'activity' => $workout->activity->value,
                 'scheduled_at' => $user->toUserTimezone($workout->scheduled_at)->toIso8601String(),
                 'notes' => $workout->notes,
                 'completed' => $workout->isCompleted(),
@@ -98,7 +98,7 @@ class UpdateWorkoutTool extends Tool
             'user_id' => $schema->integer()->description('The ID of the user who owns the workout'),
             'workout_id' => $schema->integer()->description('The ID of the workout to update'),
             'name' => $schema->string()->description('The new name for the workout')->nullable(),
-            'sport' => $schema->string()->description('The new sport type: running, strength, cardio, or hiit')->nullable(),
+            'activity' => $schema->string()->description('The new activity type (e.g., run, strength, cardio, hiit, bike, pool_swim, hike, yoga, etc.)')->nullable(),
             'scheduled_at' => $schema->string()->description('The new scheduled date and time (in user\'s timezone)')->nullable(),
             'notes' => $schema->string()->description('The new notes for the workout')->nullable(),
         ];

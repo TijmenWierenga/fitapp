@@ -56,7 +56,7 @@ class WorkoutScheduleResource extends Resource implements HasUriTemplate
         } else {
             foreach ($upcomingWorkouts as $workout) {
                 $scheduledAt = $user->toUserTimezone($workout->scheduled_at)->format('Y-m-d H:i');
-                $content .= "- **{$workout->name}** ({$workout->sport->label()})\n";
+                $content .= "- **{$workout->name}** ({$workout->activity->label()})\n";
                 $content .= "  Scheduled: {$scheduledAt}\n";
                 if ($workout->notes) {
                     $content .= "  Notes: {$workout->notes}\n";
@@ -71,7 +71,7 @@ class WorkoutScheduleResource extends Resource implements HasUriTemplate
         } else {
             foreach ($completedWorkouts as $workout) {
                 $completedAt = $user->toUserTimezone($workout->completed_at)->format('Y-m-d H:i');
-                $content .= "- **{$workout->name}** ({$workout->sport->label()})\n";
+                $content .= "- **{$workout->name}** ({$workout->activity->label()})\n";
                 $content .= "  Completed: {$completedAt}\n";
                 $content .= "  RPE: {$workout->rpe}/10, Feeling: {$workout->feeling}/5\n\n";
             }

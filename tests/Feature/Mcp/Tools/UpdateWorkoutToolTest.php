@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\Workout\Sport;
+use App\Enums\Workout\Activity;
 use App\Mcp\Servers\WorkoutServer;
 use App\Mcp\Tools\UpdateWorkoutTool;
 use App\Models\User;
@@ -28,21 +28,21 @@ it('updates workout name successfully', function () {
     ]);
 });
 
-it('updates workout sport successfully', function () {
+it('updates workout activity successfully', function () {
     $user = User::factory()->create();
-    $workout = Workout::factory()->for($user)->create(['sport' => Sport::Running]);
+    $workout = Workout::factory()->for($user)->create(['activity' => Activity::Run]);
 
     $response = WorkoutServer::tool(UpdateWorkoutTool::class, [
         'user_id' => $user->id,
         'workout_id' => $workout->id,
-        'sport' => 'strength',
+        'activity' => 'strength',
     ]);
 
     $response->assertOk();
 
     assertDatabaseHas('workouts', [
         'id' => $workout->id,
-        'sport' => 'strength',
+        'activity' => 'strength',
     ]);
 });
 

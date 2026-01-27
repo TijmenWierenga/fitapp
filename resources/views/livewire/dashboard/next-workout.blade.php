@@ -8,7 +8,7 @@
                     <a href="{{ route('workouts.show', $this->nextWorkout) }}" class="flex-1 min-w-0">
                         <flux:heading size="xl" class="font-bold hover:text-blue-600 dark:hover:text-blue-400 truncate">{{ $this->nextWorkout->name }}</flux:heading>
                     </a>
-                    <x-activity-badge :sport="$this->nextWorkout->sport" />
+                    <x-activity-badge :activity="$this->nextWorkout->activity" />
                 </div>
                 <flux:text class="text-zinc-500 dark:text-zinc-400 text-sm sm:text-base">
                     {{ $this->nextWorkout->scheduled_at->format('l, F j, Y') }}

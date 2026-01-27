@@ -58,7 +58,7 @@ class ListWorkoutsTool extends Tool
             return [
                 'id' => $workout->id,
                 'name' => $workout->name,
-                'sport' => $workout->sport->value,
+                'activity' => $workout->activity->value,
                 'scheduled_at' => $user->toUserTimezone($workout->scheduled_at)->toIso8601String(),
                 'completed' => $workout->isCompleted(),
                 'completed_at' => $workout->completed_at ? $user->toUserTimezone($workout->completed_at)->toIso8601String() : null,

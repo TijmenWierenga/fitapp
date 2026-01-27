@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\Workout\Sport;
+use App\Enums\Workout\Activity;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property int $user_id
  * @property string $name
- * @property Sport $sport
+ * @property Activity $activity
  * @property string|null $notes
  * @property \Illuminate\Support\Carbon|null $scheduled_at
  * @property \Illuminate\Support\Carbon|null $completed_at
@@ -29,7 +29,7 @@ class Workout extends Model
     protected $fillable = [
         'user_id',
         'name',
-        'sport',
+        'activity',
         'notes',
         'scheduled_at',
         'completed_at',
@@ -40,7 +40,7 @@ class Workout extends Model
     protected function casts(): array
     {
         return [
-            'sport' => Sport::class,
+            'activity' => Activity::class,
             'scheduled_at' => 'datetime',
             'completed_at' => 'datetime',
             'rpe' => 'integer',
@@ -169,7 +169,7 @@ class Workout extends Model
         $newWorkout = self::create([
             'user_id' => $this->user_id,
             'name' => $this->name,
-            'sport' => $this->sport,
+            'activity' => $this->activity,
             'notes' => $this->notes,
             'scheduled_at' => $scheduledAt,
         ]);

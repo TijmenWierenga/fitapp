@@ -39,13 +39,18 @@ class WorkoutServer extends Server
         - For local MCP: Users specify their ID when calling tools
         - Dates and times are in the user's timezone (server handles UTC conversion automatically)
 
-        ## Workout Sports
+        ## Activity Types
 
-        Available sport types:
-        - `running` - Running workouts (outdoor/treadmill)
-        - `strength` - Strength training sessions
-        - `cardio` - Cardiovascular exercise
-        - `hiit` - High-Intensity Interval Training
+        Activities are Garmin-compatible. Common types include:
+        - **Running:** `run`, `trail_run`, `treadmill`, `track_run`, `ultra_run`
+        - **Cycling:** `bike`, `bike_indoor`, `mountain_bike`, `road_bike`, `gravel_bike`
+        - **Swimming:** `pool_swim`, `open_water`
+        - **Gym:** `strength`, `cardio`, `hiit`, `elliptical`, `row_indoor`
+        - **Walking:** `walk`, `hike`, `rucking`, `mountaineering`
+        - **Flexibility:** `yoga`, `pilates`, `mobility`
+        - **Racket:** `tennis`, `padel`, `badminton`, `squash`, `pickleball`
+        - **Team:** `soccer`, `basketball`, `volleyball`, `rugby`
+        - **Other:** `golf`, `meditation`, `triathlon`, `other`, and many more
 
         ## Rating Scales
 
@@ -65,8 +70,8 @@ class WorkoutServer extends Server
 
         ## Workout Lifecycle
 
-        1. **Create** workout with sport, name, and schedule
-        2. **Update** (optional) before completion - modify name, sport, schedule, or notes
+        1. **Create** workout with activity, name, and schedule
+        2. **Update** (optional) before completion - modify name, activity, schedule, or notes
         3. **Complete** with RPE and feeling ratings
         4. **Delete** only if not completed and not past (except today's workouts)
 

@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Enums\Workout\Sport;
+use App\Enums\Workout\Activity;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -26,7 +26,7 @@ class WorkoutFactory extends Factory
                 'Long Run',
                 'Recovery Run',
             ]),
-            'sport' => Sport::Running,
+            'activity' => Activity::Run,
             'notes' => fake()->boolean(50) ? fake()->sentence() : null,
             'scheduled_at' => fake()->dateTimeBetween('now', '+2 weeks'),
         ];
@@ -36,7 +36,7 @@ class WorkoutFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'name' => fake()->randomElement(['Leg Day', 'Upper Body', 'Full Body', 'Core Workout']),
-            'sport' => Sport::Strength,
+            'activity' => Activity::Strength,
         ]);
     }
 
@@ -44,7 +44,7 @@ class WorkoutFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'name' => fake()->randomElement(['Cycling', 'Swimming', 'Rowing', 'Elliptical']),
-            'sport' => Sport::Cardio,
+            'activity' => Activity::Cardio,
         ]);
     }
 
@@ -52,7 +52,7 @@ class WorkoutFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'name' => fake()->randomElement(['HIIT Circuit', 'Tabata', 'EMOM', 'AMRAP']),
-            'sport' => Sport::Hiit,
+            'activity' => Activity::HIIT,
         ]);
     }
 

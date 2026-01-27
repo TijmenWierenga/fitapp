@@ -1,13 +1,13 @@
-@props(['sport'])
+@props(['activity'])
 
 @php
-    $sportEnum = is_string($sport) ? \App\Enums\Workout\Sport::from($sport) : $sport;
+    $activityEnum = is_string($activity) ? \App\Enums\Workout\Activity::from($activity) : $activity;
 @endphp
 
 <flux:badge
-    color="{{ $sportEnum->color() }}"
-    icon="{{ $sportEnum->icon() }}"
+    color="{{ $activityEnum->color() }}"
+    icon="{{ $activityEnum->icon() }}"
     size="sm"
 >
-    {{ $sportEnum->label() }}
+    {{ $activityEnum->label() }}
 </flux:badge>

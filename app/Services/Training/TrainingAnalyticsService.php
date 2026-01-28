@@ -53,7 +53,7 @@ class TrainingAnalyticsService
         ];
     }
 
-    protected function calculateWorkoutsPerWeek(mixed $completed, int $weeks): array
+    protected function calculateWorkoutsPerWeek(\Illuminate\Database\Eloquent\Collection $completed, int $weeks): array
     {
         $workoutsPerWeek = [];
         for ($i = 0; $i < $weeks; $i++) {

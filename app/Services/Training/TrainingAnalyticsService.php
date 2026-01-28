@@ -4,6 +4,7 @@ namespace App\Services\Training;
 
 use App\Models\User;
 use App\Models\Workout;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
 class TrainingAnalyticsService
@@ -53,7 +54,7 @@ class TrainingAnalyticsService
         ];
     }
 
-    protected function calculateWorkoutsPerWeek(\Illuminate\Database\Eloquent\Collection $completed, int $weeks): array
+    protected function calculateWorkoutsPerWeek(Collection $completed, int $weeks): array
     {
         $workoutsPerWeek = [];
         for ($i = 0; $i < $weeks; $i++) {

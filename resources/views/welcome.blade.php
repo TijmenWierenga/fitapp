@@ -83,6 +83,83 @@
         </div>
     </section>
 
+    {{-- Use Cases / Stories --}}
+    <section class="max-w-6xl mx-auto px-6 pb-32">
+        <div class="text-center mb-12">
+            <span class="text-xs font-medium uppercase tracking-widest text-brand-amber">
+                Succesverhalen
+            </span>
+            <h2 class="mt-4 text-3xl font-bold text-white">
+                Voor elke fitnessdoelstelling
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {{-- Story 1: Injury Recovery --}}
+            <div class="bg-zinc-900 rounded-2xl p-8 border border-zinc-800">
+                <span class="text-xs font-medium uppercase tracking-wider text-brand-red">
+                    Herstel
+                </span>
+                <h3 class="mt-3 text-lg font-semibold text-white">
+                    Terug naar hardlopen na een blessure
+                </h3>
+                <p class="mt-2 text-sm text-zinc-500">
+                    Marco, 34 — Recreatieve hardloper
+                </p>
+                <p class="mt-4 text-sm text-zinc-400 leading-relaxed">
+                    Na een knieoperatie wilde Marco veilig terugkeren naar het hardlopen. Met FitApp's blessuretracking en slimme aanpassingen op basis van zijn RPE en herstelgevoel bouwde hij stap voor stap zijn conditie weer op.
+                </p>
+                <div class="mt-6 pt-6 border-t border-zinc-800">
+                    <p class="text-sm text-zinc-300 italic">
+                        "De AI hield rekening met mijn blessure en paste mijn schema automatisch aan wanneer ik aangaf dat mijn knie opspeelde."
+                    </p>
+                </div>
+            </div>
+
+            {{-- Story 2: First 5K --}}
+            <div class="bg-zinc-900 rounded-2xl p-8 border border-zinc-800">
+                <span class="text-xs font-medium uppercase tracking-wider text-brand-amber">
+                    Beginners
+                </span>
+                <h3 class="mt-3 text-lg font-semibold text-white">
+                    Van de bank naar de eerste 5K
+                </h3>
+                <p class="mt-2 text-sm text-zinc-500">
+                    Lisa, 28 — Kantoormedewerker
+                </p>
+                <p class="mt-4 text-sm text-zinc-400 leading-relaxed">
+                    Lisa had nog nooit hardgelopen maar droomde ervan om een 5K te finishen. FitApp creëerde een beginnersvriendelijk schema dat haar geleidelijk opbouwde, met duidelijke doelen en voortgangsinzichten.
+                </p>
+                <div class="mt-6 pt-6 border-t border-zinc-800">
+                    <p class="text-sm text-zinc-300 italic">
+                        "Ik vond het geweldig om mijn voortgang te zien. Na 8 weken liep ik mijn eerste 5K — iets wat ik nooit voor mogelijk had gehouden!"
+                    </p>
+                </div>
+            </div>
+
+            {{-- Story 3: Busy Professional --}}
+            <div class="bg-zinc-900 rounded-2xl p-8 border border-zinc-800">
+                <span class="text-xs font-medium uppercase tracking-wider text-brand-red">
+                    Druk schema
+                </span>
+                <h3 class="mt-3 text-lg font-semibold text-white">
+                    Fit blijven met een volle agenda
+                </h3>
+                <p class="mt-2 text-sm text-zinc-500">
+                    Thomas, 42 — Manager
+                </p>
+                <p class="mt-4 text-sm text-zinc-400 leading-relaxed">
+                    Als drukke manager heeft Thomas weinig tijd voor fitness. FitApp plant efficiënte workouts die passen binnen zijn beschikbare dagen en gewenste sessieduur, zodat hij fit blijft zonder zijn agenda te overbelasten.
+                </p>
+                <div class="mt-6 pt-6 border-t border-zinc-800">
+                    <p class="text-sm text-zinc-300 italic">
+                        "Met slechts 3 dagen per week en korte sessies van 30 minuten heb ik eindelijk een routine die ik kan volhouden."
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     {{-- Footer CTA --}}
     <section class="border-t border-zinc-800 py-20">
         <div class="max-w-2xl mx-auto px-6 text-center">

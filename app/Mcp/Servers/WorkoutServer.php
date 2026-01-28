@@ -8,6 +8,8 @@ use App\Mcp\Tools\AddInjuryTool;
 use App\Mcp\Tools\CompleteWorkoutTool;
 use App\Mcp\Tools\CreateWorkoutTool;
 use App\Mcp\Tools\DeleteWorkoutTool;
+use App\Mcp\Tools\GetTrainingAnalyticsTool;
+use App\Mcp\Tools\GetWorkoutTool;
 use App\Mcp\Tools\ListWorkoutsTool;
 use App\Mcp\Tools\PingTool;
 use App\Mcp\Tools\RemoveInjuryTool;
@@ -134,6 +136,8 @@ class WorkoutServer extends Server
         - **delete-workout**: Delete a workout (with business rule checks)
         - **complete-workout**: Mark workout as completed with ratings
         - **list-workouts**: Query workouts with filtering (upcoming/completed/overdue/all)
+        - **get-workout**: Fetch a single workout by ID with full details
+        - **get-training-analytics**: Aggregated training stats (completion rate, RPE, streaks, etc.)
         - **update-fitness-profile**: Set or update user's fitness goals and availability
         - **add-injury**: Add an injury record to track limitations
         - **remove-injury**: Remove an injury record
@@ -141,7 +145,7 @@ class WorkoutServer extends Server
         ## Available Resources
 
         - **user://profile/{userId}**: Read-only user profile information including fitness profile and injuries
-        - **workout://schedule/{userId}**: Read-only workout schedule (upcoming & completed)
+        - **workout://schedule/{userId}**: Read-only workout schedule (upcoming & completed). Supports optional `upcoming_limit` (default 20, max 50) and `completed_limit` (default 10, max 50) parameters.
     MARKDOWN;
 
     /**
@@ -156,6 +160,8 @@ class WorkoutServer extends Server
         DeleteWorkoutTool::class,
         CompleteWorkoutTool::class,
         ListWorkoutsTool::class,
+        GetWorkoutTool::class,
+        GetTrainingAnalyticsTool::class,
         UpdateFitnessProfileTool::class,
         AddInjuryTool::class,
         RemoveInjuryTool::class,

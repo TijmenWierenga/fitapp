@@ -50,9 +50,11 @@
     </nav>
 
     {{-- Hero --}}
-    <section class="relative max-w-4xl mx-auto px-6 pt-24 pb-32 text-center">
+    <section class="relative max-w-4xl mx-auto px-6 pt-24 pb-32 text-center min-h-[90vh] flex flex-col justify-center">
         {{-- Hero gradient orb --}}
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-to-br from-brand-red/20 to-brand-amber/10 rounded-full blur-3xl traiq-gradient-orb pointer-events-none" aria-hidden="true"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-to-br from-brand-red/30 to-brand-amber/20 rounded-full blur-3xl traiq-gradient-orb pointer-events-none" aria-hidden="true"></div>
+        {{-- Second layered glow --}}
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[250px] bg-gradient-to-b from-brand-red/20 to-transparent rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
 
         <div class="relative z-10">
             <span class="inline-block text-xs font-medium uppercase tracking-widest text-brand-amber mb-6 traiq-fade-in">
@@ -65,11 +67,19 @@
             <p class="mt-6 text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed traiq-fade-in-delay-2">
                 {{ config('app.name') }} uses AI to create adaptive training plans that evolve with your progress, recovery, and lifestyle.
             </p>
-            <div class="mt-10 traiq-fade-in-delay-3">
+            <div class="mt-12 traiq-fade-in-delay-3">
                 <a href="{{ route('register') }}" class="inline-block traiq-cta-gradient text-white font-semibold px-8 py-4 rounded-xl text-lg transition-all">
                     Start free trial
                 </a>
             </div>
+        </div>
+
+        {{-- Scroll indicator --}}
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 traiq-fade-in-delay-4">
+            <span class="text-xs text-zinc-400 tracking-wide font-medium">Discover more</span>
+            <svg class="w-5 h-5 text-zinc-400 animate-bounce" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7" />
+            </svg>
         </div>
     </section>
 
@@ -205,8 +215,8 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             {{-- Injury Recovery --}}
-            <div class="border-l-2 border-l-brand-red border border-zinc-800/30 rounded-lg bg-zinc-950 pl-6 pr-8 py-8">
-                <span class="text-xs font-semibold uppercase tracking-wide text-brand-red opacity-80">
+            <div class="traiq-use-case-card px-8 py-8">
+                <span class="text-xs font-semibold uppercase tracking-wide text-brand-red">
                     Recovery
                 </span>
                 <h3 class="mt-3 text-2xl font-bold text-white leading-tight">
@@ -241,8 +251,8 @@
             </div>
 
             {{-- Goal Achievement --}}
-            <div class="border-l-2 border-l-brand-amber border border-zinc-800/30 rounded-lg bg-zinc-950 pl-6 pr-8 py-8">
-                <span class="text-xs font-semibold uppercase tracking-wide text-brand-amber opacity-80">
+            <div class="traiq-use-case-card px-8 py-8">
+                <span class="text-xs font-semibold uppercase tracking-wide text-brand-amber">
                     Beginners
                 </span>
                 <h3 class="mt-3 text-2xl font-bold text-white leading-tight">
@@ -277,8 +287,8 @@
             </div>
 
             {{-- Busy Lifestyle --}}
-            <div class="border-l-2 border-l-zinc-600 border border-zinc-800/30 rounded-lg bg-zinc-950 pl-6 pr-8 py-8">
-                <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500 opacity-80">
+            <div class="traiq-use-case-card px-8 py-8">
+                <span class="text-xs font-semibold uppercase tracking-wide text-zinc-400">
                     Busy schedule
                 </span>
                 <h3 class="mt-3 text-2xl font-bold text-white leading-tight">

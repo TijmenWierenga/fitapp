@@ -1,4 +1,4 @@
-<flux:card class="h-full">
+<flux:card>
     <flux:heading size="lg" class="mb-4">Next Workout</flux:heading>
 
     @if($this->nextWorkout)
@@ -51,9 +51,12 @@
             @if($this->nextWorkout->notes)
                 <flux:card class="bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700">
                     <flux:heading size="sm" class="mb-2 text-zinc-700 dark:text-zinc-300">Notes</flux:heading>
-                    <div class="prose prose-sm prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400">
+                    <div class="prose prose-sm prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400 line-clamp-3">
                         {!! Str::markdown($this->nextWorkout->notes, ['html_input' => 'escape']) !!}
                     </div>
+                    <a href="{{ route('workouts.show', $this->nextWorkout) }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-1 inline-block">
+                        Read more
+                    </a>
                 </flux:card>
             @endif
 
@@ -70,7 +73,7 @@
                                 </flux:table.columns>
 
                                 <flux:table.rows>
-                                    @foreach($this->nextWorkout->rootSteps->take(5) as $step)
+                                    @foreach($this->nextWorkout->rootSteps->take(3) as $step)
                                         @if($step->step_kind === \App\Enums\Workout\StepKind::Repeat)
                                             <x-workout-repeat-header :repeat-count="$step->repeat_count" />
                                             @foreach($step->children as $child)
@@ -85,7 +88,7 @@
                         </div>
                     </div>
 
-                    @if($this->nextWorkout->rootSteps->count() > 5)
+                    @if($this->nextWorkout->rootSteps->count() > 3)
                         <a href="{{ route('workouts.show', $this->nextWorkout) }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-block">
                             View all {{ $this->nextWorkout->rootSteps->count() }} steps
                         </a>

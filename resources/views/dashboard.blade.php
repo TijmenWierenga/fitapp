@@ -7,15 +7,12 @@
     </div>
 
     <div class="flex h-full w-full flex-1 flex-col gap-4 mt-4">
-        <div class="grid gap-4 lg:grid-cols-3">
-            <div class="relative overflow-hidden rounded-xl lg:col-span-3 xl:col-span-1">
+        <div class="grid gap-4 lg:grid-cols-2">
+            <div class="relative overflow-hidden rounded-xl lg:col-span-2 xl:col-span-1">
                 <livewire:dashboard.next-workout />
             </div>
-            <div class="relative overflow-hidden rounded-xl lg:col-span-3 xl:col-span-1">
-                <livewire:dashboard.upcoming-workouts />
-            </div>
-            <div class="relative overflow-hidden rounded-xl lg:col-span-3 xl:col-span-1">
-                <livewire:dashboard.completed-workouts />
+            <div class="relative overflow-hidden rounded-xl lg:col-span-2 xl:col-span-1">
+                <livewire:dashboard.training-insights />
             </div>
         </div>
 

@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import '../../vendor/livewire/flux/dist/flux.css';
+/* @import '../../vendor/livewire/flux/dist/flux.css'; */
 @plugin '@tailwindcss/typography';
 
 @source '../views';
@@ -23,6 +23,9 @@
     --color-zinc-800: #262626;
     --color-zinc-900: #171717;
     --color-zinc-950: #0a0a0a;
+
+    --color-brand-red: #dc2626;
+    --color-brand-amber: #f59e0b;
 
     --color-accent: var(--color-neutral-800);
     --color-accent-content: var(--color-neutral-800);

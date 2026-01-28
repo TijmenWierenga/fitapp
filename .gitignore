@@ -23,3 +23,4 @@ yarn-error.log
 /.zed
 .claude/settings.local.json
 /.playwright-mcp
+vendor/composer/platform_check.php

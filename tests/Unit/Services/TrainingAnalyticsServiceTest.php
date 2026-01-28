@@ -20,7 +20,7 @@ class TrainingAnalyticsServiceTest extends TestCase
         $this->service = new TrainingAnalyticsService;
     }
 
-    public function test_get_analytics_accepts_eloquent_collection_internally(): void
+    public function test_get_analytics_calculates_correctly_with_completed_workouts(): void
     {
         $user = User::factory()->withTimezone('UTC')->create();
 
@@ -41,7 +41,7 @@ class TrainingAnalyticsServiceTest extends TestCase
 
     public function test_get_analytics_handles_empty_collection(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->withTimezone('UTC')->create();
 
         $analytics = $this->service->getAnalytics($user, 4);
 

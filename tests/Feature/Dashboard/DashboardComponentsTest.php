@@ -94,6 +94,8 @@ it('shows workouts on calendar', function () {
 });
 
 it('can navigate to previous month', function () {
+    $this->travelTo(now()->startOfMonth()->addDays(14));
+
     $user = User::factory()->create();
 
     Livewire::actingAs($user)
@@ -103,6 +105,8 @@ it('can navigate to previous month', function () {
 });
 
 it('can navigate to next month', function () {
+    $this->travelTo(now()->startOfMonth()->addDays(14));
+
     $user = User::factory()->create();
 
     Livewire::actingAs($user)

@@ -122,8 +122,12 @@ select:focus[data-flux-control] {
 
 /* Homepage specific styles */
 .traiq-bg-grid {
-    background-image: radial-gradient(circle at 1px 1px, rgba(113, 113, 122, 0.3) 1px, transparent 0);
+    background-image: radial-gradient(circle at 1px 1px, rgba(113, 113, 122, 0.25) 1px, transparent 0);
     background-size: 40px 40px;
+}
+
+.dark .traiq-bg-grid {
+    background-image: radial-gradient(circle at 1px 1px, rgba(113, 113, 122, 0.3) 1px, transparent 0);
 }
 
 .traiq-gradient-orb {
@@ -142,25 +146,42 @@ select:focus[data-flux-control] {
     background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%);
     background-size: 200% 200%;
     animation: gradient-shift 3s ease infinite;
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35), 0 3px 8px rgba(245, 158, 11, 0.2);
+}
+
+.dark .traiq-cta-gradient {
     box-shadow: 0 0 20px rgba(220, 38, 38, 0.3), 0 0 40px rgba(245, 158, 11, 0.15);
 }
 
 .traiq-cta-gradient:hover {
+    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.45), 0 4px 14px rgba(245, 158, 11, 0.3);
+    transform: translateY(-1px) scale(1.02);
+}
+
+.dark .traiq-cta-gradient:hover {
     box-shadow: 0 0 40px rgba(220, 38, 38, 0.5), 0 0 80px rgba(245, 158, 11, 0.25);
-    transform: translateY(-1px);
 }
 
 /* Use Case Card - Gradient Border Glass Morphism */
 .traiq-use-case-card {
     position: relative;
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(245, 158, 11, 0.03) 100%),
-                rgba(10, 10, 10, 0.6);
-    backdrop-filter: blur(8px);
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.08) 0%, rgba(245, 158, 11, 0.04) 100%),
+                rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
     border: 1px solid transparent;
     border-radius: 0.5rem;
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 1),
+                0 4px 6px rgba(0, 0, 0, 0.07),
+                0 8px 16px rgba(0, 0, 0, 0.05),
+                0 2px 4px rgba(220, 38, 38, 0.03);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dark .traiq-use-case-card {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(245, 158, 11, 0.03) 100%),
+                rgba(10, 10, 10, 0.6);
     box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
                 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .traiq-use-case-card::before {
@@ -173,12 +194,23 @@ select:focus[data-flux-control] {
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
-    opacity: 0.4;
+    opacity: 0.5;
     transition: opacity 0.3s ease;
+}
+
+.dark .traiq-use-case-card::before {
+    opacity: 0.4;
 }
 
 .traiq-use-case-card:hover {
     transform: translateY(-4px) scale(1.01);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 1),
+                0 0 35px rgba(220, 38, 38, 0.15),
+                0 0 55px rgba(245, 158, 11, 0.1),
+                0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.dark .traiq-use-case-card:hover {
     box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
                 0 0 40px rgba(220, 38, 38, 0.15),
                 0 0 60px rgba(245, 158, 11, 0.1),
@@ -186,6 +218,10 @@ select:focus[data-flux-control] {
 }
 
 .traiq-use-case-card:hover::before {
+    opacity: 0.8;
+}
+
+.dark .traiq-use-case-card:hover::before {
     opacity: 0.7;
 }
 
@@ -212,6 +248,10 @@ select:focus[data-flux-control] {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(220, 38, 38, 0.25)) drop-shadow(0 0 40px rgba(245, 158, 11, 0.15));
+}
+
+.dark .traiq-text-gradient {
     filter: drop-shadow(0 0 30px rgba(220, 38, 38, 0.4)) drop-shadow(0 0 60px rgba(245, 158, 11, 0.2));
 }
 

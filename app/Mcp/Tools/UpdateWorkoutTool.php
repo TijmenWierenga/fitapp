@@ -2,9 +2,11 @@
 
 namespace App\Mcp\Tools;
 
+use App\Data\UpdateWorkoutData;
 use App\Enums\Workout\Activity;
-use App\Models\User;
-use App\Models\Workout;
+use App\Mcp\Concerns\ResolvesUser;
+use App\Services\Workout\WorkoutService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
@@ -14,6 +16,8 @@ use Laravel\Mcp\Server\Tool;
 
 class UpdateWorkoutTool extends Tool
 {
+    use ResolvesUser;
+
     /**
      * The tool's description.
      */
@@ -23,13 +27,17 @@ class UpdateWorkoutTool extends Tool
         You can update the name, activity, scheduled time, or notes. Only provide the fields you want to change.
     MARKDOWN;
 
+    public function __construct(
+        protected WorkoutService $workoutService
+    ) {}
+
     /**
      * Handle the tool request.
      */
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
+            'user_id' => 'nullable|integer|exists:users,id',
             'workout_id' => 'required|integer',
             'name' => 'sometimes|string|max:255',
             'activity' => ['sometimes', Rule::enum(Activity::class)],
@@ -41,37 +49,32 @@ class UpdateWorkoutTool extends Tool
             'scheduled_at.date' => 'Please provide a valid date and time.',
         ]);
 
-        $user = User::findOrFail($validated['user_id']);
+        $user = $this->resolveUser($request);
 
-        $workout = Workout::where('user_id', $user->id)->find($validated['workout_id']);
+        $workout = $this->workoutService->find($user, $validated['workout_id']);
 
         if (! $workout) {
             return Response::error('Workout not found or access denied');
         }
 
-        if (! $workout->canBeEdited()) {
+        $scheduledAt = null;
+        if (isset($validated['scheduled_at'])) {
+            $scheduledAt = Carbon::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
+        }
+
+        $data = new UpdateWorkoutData(
+            name: $validated['name'] ?? null,
+            activity: isset($validated['activity']) ? Activity::from($validated['activity']) : null,
+            scheduledAt: $scheduledAt,
+            notes: $validated['notes'] ?? null,
+            updateNotes: array_key_exists('notes', $validated),
+        );
+
+        try {
+            $workout = $this->workoutService->update($user, $workout, $data);
+        } catch (AuthorizationException) {
             return Response::error('Cannot update completed workouts');
         }
-
-        $updateData = [];
-
-        if (isset($validated['name'])) {
-            $updateData['name'] = $validated['name'];
-        }
-
-        if (isset($validated['activity'])) {
-            $updateData['activity'] = $validated['activity'];
-        }
-
-        if (isset($validated['scheduled_at'])) {
-            $updateData['scheduled_at'] = Carbon::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
-        }
-
-        if (array_key_exists('notes', $validated)) {
-            $updateData['notes'] = $validated['notes'];
-        }
-
-        $workout->update($updateData);
 
         return Response::text(json_encode([
             'success' => true,
@@ -95,7 +98,7 @@ class UpdateWorkoutTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('The ID of the user who owns the workout'),
+            'user_id' => $schema->integer()->description('User ID (required for local MCP, ignored for authenticated web requests)')->nullable(),
             'workout_id' => $schema->integer()->description('The ID of the workout to update'),
             'name' => $schema->string()->description('The new name for the workout')->nullable(),
             'activity' => $schema->string()->description('The new activity type (e.g., run, strength, cardio, hiit, bike, pool_swim, hike, yoga, etc.)')->nullable(),

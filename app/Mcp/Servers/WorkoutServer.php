@@ -35,10 +35,25 @@ class WorkoutServer extends Server
     protected string $instructions = <<<'MARKDOWN'
         The Workout Server enables AI-assisted workout planning and management. Users can create personalized workout plans for fitness goals like race preparation, injury recovery, and general fitness.
 
+        ## Authentication
+
+        This server supports two authentication methods:
+
+        ### Web API (Sanctum Token Authentication)
+        - **Endpoint:** `https://fitapp.test/mcp/workout`
+        - **Authentication:** Include a Bearer token in the Authorization header
+        - **Header:** `Authorization: Bearer <api_token>`
+        - **User ID:** Automatically determined from the authenticated token (do NOT provide `user_id` parameter)
+
+        ### Local MCP (User ID Parameter)
+        - **Endpoint:** Local stdio connection via `workout` server name
+        - **Authentication:** Provide `user_id` parameter with each tool call
+        - **User ID:** Required as a parameter for all tools
+
         ## User Identification
 
-        All tools require a `user_id` parameter (integer). This is the ID of the user in the system.
-        - For local MCP: Users specify their ID when calling tools
+        - For **web API requests**: User is automatically authenticated via Sanctum token. The `user_id` parameter is optional and ignored.
+        - For **local MCP requests**: The `user_id` parameter is required and specifies which user's data to access.
         - Dates and times are in the user's timezone (server handles UTC conversion automatically)
 
         ## Activity Types

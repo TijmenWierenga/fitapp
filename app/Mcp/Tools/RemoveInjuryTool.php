@@ -2,7 +2,9 @@
 
 namespace App\Mcp\Tools;
 
-use App\Models\User;
+use App\Mcp\Concerns\ResolvesUser;
+use App\Services\Injury\InjuryService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -10,6 +12,8 @@ use Laravel\Mcp\Server\Tool;
 
 class RemoveInjuryTool extends Tool
 {
+    use ResolvesUser;
+
     /**
      * The tool's description.
      */
@@ -18,21 +22,26 @@ class RemoveInjuryTool extends Tool
         record is no longer needed or was added in error.
     MARKDOWN;
 
+    public function __construct(
+        protected InjuryService $injuryService
+    ) {}
+
     /**
      * Handle the tool request.
      */
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
+            'user_id' => 'nullable|integer|exists:users,id',
             'injury_id' => 'required|integer|exists:injuries,id',
         ], [
             'user_id.exists' => 'User not found. Please provide a valid user ID.',
             'injury_id.exists' => 'Injury not found. Please provide a valid injury ID.',
         ]);
 
-        $user = User::findOrFail($validated['user_id']);
-        $injury = $user->injuries()->where('id', $validated['injury_id'])->first();
+        $user = $this->resolveUser($request);
+
+        $injury = $this->injuryService->find($user, $validated['injury_id']);
 
         if (! $injury) {
             return Response::text(json_encode([
@@ -47,7 +56,14 @@ class RemoveInjuryTool extends Tool
             'injury_type' => $injury->injury_type->label(),
         ];
 
-        $injury->delete();
+        try {
+            $this->injuryService->remove($user, $injury);
+        } catch (AuthorizationException) {
+            return Response::text(json_encode([
+                'success' => false,
+                'error' => 'You are not authorized to remove this injury.',
+            ]));
+        }
 
         return Response::text(json_encode([
             'success' => true,
@@ -64,7 +80,7 @@ class RemoveInjuryTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('The ID of the user who owns the injury'),
+            'user_id' => $schema->integer()->description('User ID (required for local MCP, ignored for authenticated web requests)')->nullable(),
             'injury_id' => $schema->integer()->description('The ID of the injury to remove'),
         ];
     }

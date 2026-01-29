@@ -2,8 +2,10 @@
 
 namespace App\Mcp\Tools;
 
+use App\Data\FitnessProfileData;
 use App\Enums\FitnessGoal;
-use App\Models\User;
+use App\Mcp\Concerns\ResolvesUser;
+use App\Services\FitnessProfile\FitnessProfileService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
@@ -12,6 +14,8 @@ use Laravel\Mcp\Server\Tool;
 
 class UpdateFitnessProfileTool extends Tool
 {
+    use ResolvesUser;
+
     /**
      * The tool's description.
      */
@@ -26,13 +30,17 @@ class UpdateFitnessProfileTool extends Tool
         - `general_fitness` - Maintain overall health and well-being
     MARKDOWN;
 
+    public function __construct(
+        protected FitnessProfileService $fitnessProfileService
+    ) {}
+
     /**
      * Handle the tool request.
      */
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
+            'user_id' => 'nullable|integer|exists:users,id',
             'primary_goal' => ['required', Rule::enum(FitnessGoal::class)],
             'goal_details' => 'nullable|string|max:5000',
             'available_days_per_week' => 'required|integer|min:1|max:7',
@@ -46,17 +54,16 @@ class UpdateFitnessProfileTool extends Tool
             'minutes_per_session.max' => 'Session duration cannot exceed 180 minutes.',
         ]);
 
-        $user = User::findOrFail($validated['user_id']);
+        $user = $this->resolveUser($request);
 
-        $profile = $user->fitnessProfile()->updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'primary_goal' => $validated['primary_goal'],
-                'goal_details' => $validated['goal_details'] ?? null,
-                'available_days_per_week' => $validated['available_days_per_week'],
-                'minutes_per_session' => $validated['minutes_per_session'],
-            ]
+        $data = new FitnessProfileData(
+            primaryGoal: FitnessGoal::from($validated['primary_goal']),
+            availableDaysPerWeek: $validated['available_days_per_week'],
+            minutesPerSession: $validated['minutes_per_session'],
+            goalDetails: $validated['goal_details'] ?? null,
         );
+
+        $profile = $this->fitnessProfileService->updateOrCreate($user, $data);
 
         return Response::text(json_encode([
             'success' => true,
@@ -80,7 +87,7 @@ class UpdateFitnessProfileTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('The ID of the user'),
+            'user_id' => $schema->integer()->description('User ID (required for local MCP, ignored for authenticated web requests)')->nullable(),
             'primary_goal' => $schema->string()->description('Primary fitness goal: weight_loss, muscle_gain, endurance, or general_fitness'),
             'goal_details' => $schema->string()->description('Optional detailed description of specific goals (e.g., "Run a sub-4hr marathon by October")')->nullable(),
             'available_days_per_week' => $schema->integer()->description('Number of days available for training per week (1-7)'),

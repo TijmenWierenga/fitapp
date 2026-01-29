@@ -2,7 +2,8 @@
 
 namespace App\Mcp\Tools;
 
-use App\Models\User;
+use App\Mcp\Concerns\ResolvesUser;
+use App\Services\Workout\WorkoutService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -10,6 +11,8 @@ use Laravel\Mcp\Server\Tool;
 
 class ListWorkoutsTool extends Tool
 {
+    use ResolvesUser;
+
     /**
      * The tool's description.
      */
@@ -25,34 +28,29 @@ class ListWorkoutsTool extends Tool
         Results are limited to 20 by default, max 100.
     MARKDOWN;
 
+    public function __construct(
+        protected WorkoutService $workoutService
+    ) {}
+
     /**
      * Handle the tool request.
      */
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
+            'user_id' => 'nullable|integer|exists:users,id',
             'filter' => 'nullable|in:upcoming,completed,overdue,all',
             'limit' => 'nullable|integer|min:1|max:100',
         ], [
             'user_id.exists' => 'User not found. Please provide a valid user ID.',
         ]);
 
-        $user = User::findOrFail($validated['user_id']);
+        $user = $this->resolveUser($request);
 
         $filter = $validated['filter'] ?? 'all';
         $limit = $validated['limit'] ?? 20;
 
-        $query = $user->workouts();
-
-        match ($filter) {
-            'upcoming' => $query->upcoming(),
-            'completed' => $query->completed(),
-            'overdue' => $query->overdue(),
-            default => $query->orderBy('scheduled_at', 'desc'),
-        };
-
-        $workouts = $query->limit($limit)->get();
+        $workouts = $this->workoutService->list($user, $filter, $limit);
 
         $workoutData = $workouts->map(function ($workout) use ($user) {
             return [
@@ -82,7 +80,7 @@ class ListWorkoutsTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('The ID of the user whose workouts to list'),
+            'user_id' => $schema->integer()->description('User ID (required for local MCP, ignored for authenticated web requests)')->nullable(),
             'filter' => $schema->string()->description('Filter workouts: upcoming, completed, overdue, or all (default)')->nullable(),
             'limit' => $schema->integer()->description('Maximum number of workouts to return (default: 20, max: 100)')->nullable(),
         ];

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "traiq": {
+      "type": "http",
+      "url": "http://fitapp.test/mcp/workout",
+      "headers": {
+        "Authorization": "Bearer 8|kntT3j7CcPP4S5xHPz0k0pqJAOee8qd08MCJRQc51f36fc43"
+      }
+    }
+  }
+}

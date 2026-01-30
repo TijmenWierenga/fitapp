@@ -40,7 +40,7 @@ class WorkoutServer extends Server
         This server supports two authentication methods:
 
         ### Web API (Sanctum Token Authentication)
-        - **Endpoint:** `https://fitapp.test/mcp/workout`
+        - **Endpoint:** `'.config('app.url').'/mcp/workout`
         - **Authentication:** Include a Bearer token in the Authorization header
         - **Header:** `Authorization: Bearer <api_token>`
         - **User ID:** Automatically determined from the authenticated token (do NOT provide `user_id` parameter)

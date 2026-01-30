@@ -40,8 +40,8 @@
     {{-- Step Content --}}
     <div class="space-y-6">
         {{-- Step 1: Account & API Key --}}
-        <flux:accordion wire:model="currentStep">
-            <flux:accordion.item value="1" :expanded="$currentStep === 1">
+        <flux:accordion exclusive wire:key="accordion-{{ $currentStep }}">
+            <flux:accordion.item :expanded="$currentStep === 1">
                 <flux:accordion.heading>
                     <div class="flex items-center gap-3">
                         <span class="flex items-center justify-center w-8 h-8 rounded-full {{ $currentStep > 1 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-brand-red text-white' }} text-sm font-bold">
@@ -81,39 +81,13 @@
                                     </flux:callout.text>
                                 </flux:callout>
 
-                                <div
-                                    class="flex items-center gap-2"
-                                    x-data="{
-                                        copied: false,
-                                        copy() {
-                                            const input = this.$refs.tokenInput;
-                                            input.select();
-                                            input.setSelectionRange(0, 99999);
-                                            navigator.clipboard.writeText(input.value).then(() => {
-                                                this.copied = true;
-                                                setTimeout(() => this.copied = false, 2000);
-                                            });
-                                        }
-                                    }"
-                                >
-                                    <div class="flex-1">
-                                        <input
-                                            type="text"
-                                            readonly
-                                            value="{{ $newToken }}"
-                                            x-ref="tokenInput"
-                                            class="w-full px-3 py-2 border rounded-lg font-mono text-sm bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-700"
-                                        />
-                                    </div>
-                                    <button
-                                        type="button"
-                                        @click="copy()"
-                                        class="px-4 py-2 border rounded-lg transition-colors dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                    >
-                                        <flux:icon.document-duplicate x-show="!copied" variant="outline" class="w-5 h-5" />
-                                        <flux:icon.check x-show="copied" class="w-5 h-5 text-green-500" />
-                                    </button>
-                                </div>
+                                <flux:input
+                                    type="text"
+                                    readonly
+                                    copyable
+                                    :value="$newToken"
+                                    class:input="font-mono"
+                                />
 
                                 <flux:button wire:click="goToStep(2)" variant="primary">
                                     Continue to Step 2
@@ -158,7 +132,7 @@
             </flux:accordion.item>
 
             {{-- Step 2: Configure Claude --}}
-            <flux:accordion.item value="2" :expanded="$currentStep === 2">
+            <flux:accordion.item :expanded="$currentStep === 2">
                 <flux:accordion.heading>
                     <div class="flex items-center gap-3">
                         <span class="flex items-center justify-center w-8 h-8 rounded-full {{ $currentStep > 2 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ($currentStep === 2 ? 'bg-brand-red text-white' : 'bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400') }} text-sm font-bold">
@@ -190,9 +164,8 @@
                             <div
                                 x-data="{
                                     copied: false,
-                                    config: @js($this->getConfigJson()),
                                     copy() {
-                                        navigator.clipboard.writeText(this.config).then(() => {
+                                        navigator.clipboard.writeText($wire.getConfigJson()).then(() => {
                                             this.copied = true;
                                             setTimeout(() => this.copied = false, 2000);
                                         });
@@ -200,7 +173,7 @@
                                 }"
                             >
                                 <div class="relative">
-                                    <pre class="p-4 bg-zinc-900 text-zinc-100 rounded-lg overflow-x-auto text-sm font-mono"><code x-text="config"></code></pre>
+                                    <pre class="p-4 bg-zinc-900 text-zinc-100 rounded-lg overflow-x-auto text-sm font-mono"><code>{{ $this->getConfigJson() }}</code></pre>
                                     <button
                                         type="button"
                                         @click="copy()"
@@ -244,7 +217,7 @@
             </flux:accordion.item>
 
             {{-- Step 3: Start Training --}}
-            <flux:accordion.item value="3" :expanded="$currentStep === 3">
+            <flux:accordion.item :expanded="$currentStep === 3">
                 <flux:accordion.heading>
                     <div class="flex items-center gap-3">
                         <span class="flex items-center justify-center w-8 h-8 rounded-full {{ $currentStep === 3 ? 'bg-brand-red text-white' : 'bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400' }} text-sm font-bold">

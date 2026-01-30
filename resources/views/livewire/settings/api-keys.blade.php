@@ -112,48 +112,14 @@
                 {{ __("This is the only time you'll see this key. Copy it and store it securely.") }}
             </flux:callout>
 
-            <div
-                class="flex items-center gap-2"
-                x-data="{
-                    copied: false,
-                    copy() {
-                        const input = this.$refs.tokenInput;
-                        input.select();
-                        input.setSelectionRange(0, 99999);
-
-                        navigator.clipboard.writeText(input.value).then(() => {
-                            this.copied = true;
-                            setTimeout(() => this.copied = false, 1500);
-                        }).catch(() => {
-                            document.execCommand('copy');
-                            this.copied = true;
-                            setTimeout(() => this.copied = false, 1500);
-                        });
-                    }
-                }"
-            >
-                <div class="flex-1">
-                    <flux:field>
-                        <flux:label>{{ __('Your API Key') }}</flux:label>
-                        <input
-                            type="text"
-                            readonly
-                            value="{{ $newToken }}"
-                            x-ref="tokenInput"
-                            class="w-full px-3 py-2 border rounded-lg font-mono text-sm bg-stone-50 dark:bg-stone-900 dark:border-stone-600"
-                        />
-                    </flux:field>
-                </div>
-
-                <button
-                    type="button"
-                    @click="copy()"
-                    class="mt-6 px-4 py-2 border rounded-lg transition-colors dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800"
-                >
-                    <flux:icon.document-duplicate x-show="!copied" variant="outline"/>
-                    <flux:icon.check x-show="copied" class="text-green-500"/>
-                </button>
-            </div>
+            <flux:input
+                type="text"
+                label="{{ __('Your API Key') }}"
+                readonly
+                copyable
+                :value="$newToken"
+                class="font-mono"
+            />
 
             <flux:button variant="primary" class="w-full" wire:click="closeModals">
                 {{ __("I've Saved My Key") }}

@@ -60,6 +60,8 @@ class GetStarted extends Component
         $this->tokenName = '';
 
         $this->loadTokens();
+
+        $this->goToStep(2);
     }
 
     public function goToStep(int $step): void

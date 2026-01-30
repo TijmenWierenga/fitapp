@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -93,7 +94,7 @@ class GetStarted extends Component
         return json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.get-started');
     }

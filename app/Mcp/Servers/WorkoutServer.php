@@ -150,6 +150,61 @@ class WorkoutServer extends Server
         - **add-injury**: Add an injury record to track limitations
         - **remove-injury**: Remove an injury record
 
+        ## Injury Assessment Protocol
+
+        Before adding an injury using the `add-injury` tool, you MUST gather comprehensive information through a structured assessment. Follow these steps:
+
+        ### Step 1: Location
+        Ask: "Where are you experiencing the issue?"
+        - Map the response to one of the supported body parts
+        - If unclear, ask follow-up questions to pinpoint the exact location
+
+        ### Step 2: Duration
+        Ask: "How long have you been experiencing this issue?"
+        - Use this to determine the `started_at` date
+        - For acute injuries, get the specific date if possible
+
+        ### Step 3: Progression
+        Ask: "Are your symptoms getting better, worse, or staying the same?"
+        - This helps determine injury type (acute vs chronic vs recurring)
+        - Worsening symptoms may indicate a red flag
+
+        ### Step 4: Pain Characteristics
+        Ask: "What type of pain or discomfort do you feel?"
+        - Sharp: Often indicates acute injury or nerve involvement
+        - Dull: May suggest chronic condition or muscle fatigue
+        - Aching: Common with overuse or inflammation
+        - Burning: Could indicate nerve irritation or inflammation
+
+        ### Step 5: Professional Consultation
+        Ask: "Have you consulted a healthcare professional about this issue?"
+        - Document their diagnosis or recommendations in the notes field
+        - If they haven't and symptoms are concerning, recommend seeking professional advice
+
+        ### Red Flags - Urgent Referral Required
+
+        If ANY of the following are present, DO NOT proceed with adding the injury. Instead, strongly advise the user to seek immediate medical attention:
+
+        - Severe pain that is unbearable or prevents sleep
+        - Numbness, tingling, or loss of sensation
+        - Visible deformity or significant swelling
+        - Inability to bear weight or move the affected area
+        - Pain following a traumatic incident (fall, collision, accident)
+        - Symptoms accompanied by fever, chills, or feeling unwell
+        - Rapidly worsening symptoms despite rest
+        - Pain that radiates down arms or legs
+        - Chest pain or difficulty breathing
+
+        **Response template for red flags:**
+        "Based on what you've described, I strongly recommend consulting a healthcare professional before continuing. [Specific symptom] can indicate a condition that requires proper medical evaluation. Please see a doctor or physiotherapist before we proceed with your training plan."
+
+        ### After Assessment
+
+        Once you have gathered all information and confirmed no red flags are present:
+        1. Summarize the injury details back to the user for confirmation
+        2. Use the `add-injury` tool with appropriate values
+        3. Include relevant assessment notes in the `notes` field
+
         ## Available Resources
 
         - **user://profile**: Read-only user profile information including fitness profile and injuries

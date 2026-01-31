@@ -2,7 +2,6 @@
 
 namespace App\Mcp\Tools;
 
-use App\Mcp\Concerns\ResolvesUser;
 use App\Services\Workout\WorkoutService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
@@ -11,8 +10,6 @@ use Laravel\Mcp\Server\Tool;
 
 class ListWorkoutsTool extends Tool
 {
-    use ResolvesUser;
-
     /**
      * The tool's description.
      */
@@ -38,14 +35,11 @@ class ListWorkoutsTool extends Tool
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'nullable|integer|exists:users,id',
             'filter' => 'nullable|in:upcoming,completed,overdue,all',
             'limit' => 'nullable|integer|min:1|max:100',
-        ], [
-            'user_id.exists' => 'User not found. Please provide a valid user ID.',
         ]);
 
-        $user = $this->resolveUser($request);
+        $user = $request->user();
 
         $filter = $validated['filter'] ?? 'all';
         $limit = $validated['limit'] ?? 20;
@@ -80,7 +74,6 @@ class ListWorkoutsTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('User ID (required for local MCP, ignored for authenticated web requests)')->nullable(),
             'filter' => $schema->string()->description('Filter workouts: upcoming, completed, overdue, or all (default)')->nullable(),
             'limit' => $schema->integer()->description('Maximum number of workouts to return (default: 20, max: 100)')->nullable(),
         ];

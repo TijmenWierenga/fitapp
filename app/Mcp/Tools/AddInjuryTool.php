@@ -5,7 +5,6 @@ namespace App\Mcp\Tools;
 use App\Data\InjuryData;
 use App\Enums\BodyPart;
 use App\Enums\InjuryType;
-use App\Mcp\Concerns\ResolvesUser;
 use App\Services\Injury\InjuryService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Carbon;
@@ -16,8 +15,6 @@ use Laravel\Mcp\Server\Tool;
 
 class AddInjuryTool extends Tool
 {
-    use ResolvesUser;
-
     /**
      * The tool's description.
      */
@@ -48,20 +45,18 @@ class AddInjuryTool extends Tool
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'nullable|integer|exists:users,id',
             'injury_type' => ['required', Rule::enum(InjuryType::class)],
             'body_part' => ['required', Rule::enum(BodyPart::class)],
             'started_at' => 'required|date',
             'ended_at' => 'nullable|date|after_or_equal:started_at',
             'notes' => 'nullable|string|max:5000',
         ], [
-            'user_id.exists' => 'User not found. Please provide a valid user ID.',
             'injury_type.Enum' => 'Invalid injury type. Must be one of: acute, chronic, recurring, post_surgery.',
             'body_part.Enum' => 'Invalid body part.',
             'ended_at.after_or_equal' => 'End date must be on or after the start date.',
         ]);
 
-        $user = $this->resolveUser($request);
+        $user = $request->user();
 
         $data = new InjuryData(
             injuryType: InjuryType::from($validated['injury_type']),
@@ -99,7 +94,6 @@ class AddInjuryTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('User ID (required for local MCP, ignored for authenticated web requests)')->nullable(),
             'injury_type' => $schema->string()->description('Type of injury: acute, chronic, recurring, or post_surgery'),
             'body_part' => $schema->string()->description('Affected body part (e.g., knee, shoulder, lower_back)'),
             'started_at' => $schema->string()->description('Date when the injury started (YYYY-MM-DD)'),

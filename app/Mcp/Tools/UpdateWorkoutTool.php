@@ -4,7 +4,6 @@ namespace App\Mcp\Tools;
 
 use App\Data\UpdateWorkoutData;
 use App\Enums\Workout\Activity;
-use App\Mcp\Concerns\ResolvesUser;
 use App\Services\Workout\WorkoutService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -16,8 +15,6 @@ use Laravel\Mcp\Server\Tool;
 
 class UpdateWorkoutTool extends Tool
 {
-    use ResolvesUser;
-
     /**
      * The tool's description.
      */
@@ -37,19 +34,17 @@ class UpdateWorkoutTool extends Tool
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'nullable|integer|exists:users,id',
             'workout_id' => 'required|integer',
             'name' => 'sometimes|string|max:255',
             'activity' => ['sometimes', Rule::enum(Activity::class)],
             'scheduled_at' => 'sometimes|date',
             'notes' => 'nullable|string|max:5000',
         ], [
-            'user_id.exists' => 'User not found. Please provide a valid user ID.',
             'activity.Enum' => 'Invalid activity type. See available activity values.',
             'scheduled_at.date' => 'Please provide a valid date and time.',
         ]);
 
-        $user = $this->resolveUser($request);
+        $user = $request->user();
 
         $workout = $this->workoutService->find($user, $validated['workout_id']);
 
@@ -98,7 +93,6 @@ class UpdateWorkoutTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('User ID (required for local MCP, ignored for authenticated web requests)')->nullable(),
             'workout_id' => $schema->integer()->description('The ID of the workout to update'),
             'name' => $schema->string()->description('The new name for the workout')->nullable(),
             'activity' => $schema->string()->description('The new activity type (e.g., run, strength, cardio, hiit, bike, pool_swim, hike, yoga, etc.)')->nullable(),

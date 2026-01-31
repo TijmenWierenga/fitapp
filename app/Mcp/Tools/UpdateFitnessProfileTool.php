@@ -4,7 +4,6 @@ namespace App\Mcp\Tools;
 
 use App\Data\FitnessProfileData;
 use App\Enums\FitnessGoal;
-use App\Mcp\Concerns\ResolvesUser;
 use App\Services\FitnessProfile\FitnessProfileService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
@@ -14,8 +13,6 @@ use Laravel\Mcp\Server\Tool;
 
 class UpdateFitnessProfileTool extends Tool
 {
-    use ResolvesUser;
-
     /**
      * The tool's description.
      */
@@ -40,13 +37,11 @@ class UpdateFitnessProfileTool extends Tool
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'nullable|integer|exists:users,id',
             'primary_goal' => ['required', Rule::enum(FitnessGoal::class)],
             'goal_details' => 'nullable|string|max:5000',
             'available_days_per_week' => 'required|integer|min:1|max:7',
             'minutes_per_session' => 'required|integer|min:15|max:180',
         ], [
-            'user_id.exists' => 'User not found. Please provide a valid user ID.',
             'primary_goal.Enum' => 'Invalid goal. Must be one of: weight_loss, muscle_gain, endurance, general_fitness.',
             'available_days_per_week.min' => 'Available days must be at least 1.',
             'available_days_per_week.max' => 'Available days cannot exceed 7.',
@@ -54,7 +49,7 @@ class UpdateFitnessProfileTool extends Tool
             'minutes_per_session.max' => 'Session duration cannot exceed 180 minutes.',
         ]);
 
-        $user = $this->resolveUser($request);
+        $user = $request->user();
 
         $data = new FitnessProfileData(
             primaryGoal: FitnessGoal::from($validated['primary_goal']),
@@ -87,7 +82,6 @@ class UpdateFitnessProfileTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('User ID (required for local MCP, ignored for authenticated web requests)')->nullable(),
             'primary_goal' => $schema->string()->description('Primary fitness goal: weight_loss, muscle_gain, endurance, or general_fitness'),
             'goal_details' => $schema->string()->description('Optional detailed description of specific goals (e.g., "Run a sub-4hr marathon by October")')->nullable(),
             'available_days_per_week' => $schema->integer()->description('Number of days available for training per week (1-7)'),

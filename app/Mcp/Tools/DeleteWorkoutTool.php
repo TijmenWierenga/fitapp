@@ -2,7 +2,6 @@
 
 namespace App\Mcp\Tools;
 
-use App\Mcp\Concerns\ResolvesUser;
 use App\Services\Workout\WorkoutService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -12,8 +11,6 @@ use Laravel\Mcp\Server\Tool;
 
 class DeleteWorkoutTool extends Tool
 {
-    use ResolvesUser;
-
     /**
      * The tool's description.
      */
@@ -33,13 +30,10 @@ class DeleteWorkoutTool extends Tool
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'nullable|integer|exists:users,id',
             'workout_id' => 'required|integer',
-        ], [
-            'user_id.exists' => 'User not found. Please provide a valid user ID.',
         ]);
 
-        $user = $this->resolveUser($request);
+        $user = $request->user();
 
         $workout = $this->workoutService->find($user, $validated['workout_id']);
 
@@ -71,7 +65,6 @@ class DeleteWorkoutTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('User ID (required for local MCP, ignored for authenticated web requests)')->nullable(),
             'workout_id' => $schema->integer()->description('The ID of the workout to delete'),
         ];
     }

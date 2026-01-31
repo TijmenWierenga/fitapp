@@ -4,7 +4,6 @@ namespace App\Mcp\Tools;
 
 use App\Data\CreateWorkoutData;
 use App\Enums\Workout\Activity;
-use App\Mcp\Concerns\ResolvesUser;
 use App\Services\Workout\WorkoutService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Carbon;
@@ -15,8 +14,6 @@ use Laravel\Mcp\Server\Tool;
 
 class CreateWorkoutTool extends Tool
 {
-    use ResolvesUser;
-
     /**
      * The tool's description.
      */
@@ -38,18 +35,16 @@ class CreateWorkoutTool extends Tool
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'nullable|integer|exists:users,id',
             'name' => 'required|string|max:255',
             'activity' => ['required', Rule::enum(Activity::class)],
             'scheduled_at' => 'required|date',
             'notes' => 'nullable|string|max:5000',
         ], [
-            'user_id.exists' => 'User not found. Please provide a valid user ID.',
             'activity.Enum' => 'Invalid activity type. See available activity values.',
             'scheduled_at.date' => 'Please provide a valid date and time.',
         ]);
 
-        $user = $this->resolveUser($request);
+        $user = $request->user();
 
         $scheduledAt = Carbon::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
 
@@ -84,7 +79,6 @@ class CreateWorkoutTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('User ID (required for local MCP, ignored for authenticated web requests)')->nullable(),
             'name' => $schema->string()->description('The name/title of the workout (e.g., "Morning Run", "Leg Day")'),
             'activity' => $schema->string()->description('The activity type (e.g., run, strength, cardio, hiit, bike, pool_swim, hike, yoga, etc.)'),
             'scheduled_at' => $schema->string()->description('The date and time when the workout is scheduled (in user\'s timezone)'),

@@ -2,7 +2,6 @@
 
 namespace App\Mcp\Tools;
 
-use App\Mcp\Concerns\ResolvesUser;
 use App\Services\Injury\InjuryService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -12,8 +11,6 @@ use Laravel\Mcp\Server\Tool;
 
 class RemoveInjuryTool extends Tool
 {
-    use ResolvesUser;
-
     /**
      * The tool's description.
      */
@@ -32,14 +29,12 @@ class RemoveInjuryTool extends Tool
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'nullable|integer|exists:users,id',
             'injury_id' => 'required|integer|exists:injuries,id',
         ], [
-            'user_id.exists' => 'User not found. Please provide a valid user ID.',
             'injury_id.exists' => 'Injury not found. Please provide a valid injury ID.',
         ]);
 
-        $user = $this->resolveUser($request);
+        $user = $request->user();
 
         $injury = $this->injuryService->find($user, $validated['injury_id']);
 
@@ -80,7 +75,6 @@ class RemoveInjuryTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('User ID (required for local MCP, ignored for authenticated web requests)')->nullable(),
             'injury_id' => $schema->integer()->description('The ID of the injury to remove'),
         ];
     }

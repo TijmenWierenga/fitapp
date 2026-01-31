@@ -2,22 +2,24 @@
 
 namespace App\Mcp\Resources;
 
-use App\Models\User;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Contracts\HasUriTemplate;
 use Laravel\Mcp\Server\Resource;
-use Laravel\Mcp\Support\UriTemplate;
 
-class WorkoutScheduleResource extends Resource implements HasUriTemplate
+class WorkoutScheduleResource extends Resource
 {
+    /**
+     * The resource URI.
+     */
+    protected string $uri = 'workout://schedule';
+
     /**
      * The resource's description.
      */
     protected string $description = <<<'MARKDOWN'
         Read-only workout schedule showing upcoming and recently completed workouts.
 
-        Use URI template: workout://schedule/{userId}
+        Use URI: workout://schedule
 
         Optional parameters:
         - `upcoming_limit`: Number of upcoming workouts to return (default: 20, max: 50)
@@ -25,29 +27,11 @@ class WorkoutScheduleResource extends Resource implements HasUriTemplate
     MARKDOWN;
 
     /**
-     * Get the URI template for this resource.
-     */
-    public function uriTemplate(): UriTemplate
-    {
-        return new UriTemplate('workout://schedule/{userId}');
-    }
-
-    /**
      * Handle the resource request.
      */
     public function handle(Request $request): Response
     {
-        $userId = $request->get('userId');
-
-        if (! $userId) {
-            return Response::error('User ID is required');
-        }
-
-        $user = User::find($userId);
-
-        if (! $user) {
-            return Response::error('User not found');
-        }
+        $user = $request->user();
 
         $upcomingLimit = min((int) ($request->get('upcoming_limit') ?? 20), 50);
         $completedLimit = min((int) ($request->get('completed_limit') ?? 10), 50);

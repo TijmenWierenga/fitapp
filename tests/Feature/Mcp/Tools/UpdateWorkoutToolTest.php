@@ -12,8 +12,7 @@ it('updates workout name successfully', function () {
     $user = User::factory()->withTimezone('UTC')->create();
     $workout = Workout::factory()->for($user)->create(['name' => 'Old Name']);
 
-    $response = WorkoutServer::tool(UpdateWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(UpdateWorkoutTool::class, [
         'workout_id' => $workout->id,
         'name' => 'New Name',
     ]);
@@ -32,8 +31,7 @@ it('updates workout activity successfully', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create(['activity' => Activity::Run]);
 
-    $response = WorkoutServer::tool(UpdateWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(UpdateWorkoutTool::class, [
         'workout_id' => $workout->id,
         'activity' => 'strength',
     ]);
@@ -50,8 +48,7 @@ it('updates workout scheduled_at successfully', function () {
     $user = User::factory()->withTimezone('Europe/Amsterdam')->create();
     $workout = Workout::factory()->for($user)->create();
 
-    $response = WorkoutServer::tool(UpdateWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(UpdateWorkoutTool::class, [
         'workout_id' => $workout->id,
         'scheduled_at' => '2026-02-01 08:00:00',
     ]);
@@ -66,8 +63,7 @@ it('updates workout notes successfully', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create(['notes' => 'Old notes']);
 
-    $response = WorkoutServer::tool(UpdateWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(UpdateWorkoutTool::class, [
         'workout_id' => $workout->id,
         'notes' => 'Updated notes',
     ]);
@@ -85,8 +81,7 @@ it('fails to update workout owned by different user', function () {
     $user2 = User::factory()->create();
     $workout = Workout::factory()->for($user1)->create();
 
-    $response = WorkoutServer::tool(UpdateWorkoutTool::class, [
-        'user_id' => $user2->id,
+    $response = WorkoutServer::actingAs($user2)->tool(UpdateWorkoutTool::class, [
         'workout_id' => $workout->id,
         'name' => 'Hacked Name',
     ]);
@@ -99,8 +94,7 @@ it('fails to update completed workout', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->completed()->create();
 
-    $response = WorkoutServer::tool(UpdateWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(UpdateWorkoutTool::class, [
         'workout_id' => $workout->id,
         'name' => 'New Name',
     ]);
@@ -109,22 +103,10 @@ it('fails to update completed workout', function () {
         ->assertSee('Cannot update completed workouts');
 });
 
-it('fails with invalid user_id', function () {
-    $response = WorkoutServer::tool(UpdateWorkoutTool::class, [
-        'user_id' => 99999,
-        'workout_id' => 1,
-        'name' => 'Test',
-    ]);
-
-    $response->assertHasErrors()
-        ->assertSee('User not found');
-});
-
 it('fails with non-existent workout_id', function () {
     $user = User::factory()->create();
 
-    $response = WorkoutServer::tool(UpdateWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(UpdateWorkoutTool::class, [
         'workout_id' => 99999,
         'name' => 'Test',
     ]);

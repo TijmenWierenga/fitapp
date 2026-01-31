@@ -37,23 +37,16 @@ class WorkoutServer extends Server
 
         ## Authentication
 
-        This server supports two authentication methods:
+        All requests require authentication via Sanctum token.
 
-        ### Web API (Sanctum Token Authentication)
         - **Endpoint:** `'.config('app.url').'/mcp/workout`
         - **Authentication:** Include a Bearer token in the Authorization header
         - **Header:** `Authorization: Bearer <api_token>`
-        - **User ID:** Automatically determined from the authenticated token (do NOT provide `user_id` parameter)
-
-        ### Local MCP (User ID Parameter)
-        - **Endpoint:** Local stdio connection via `workout` server name
-        - **Authentication:** Provide `user_id` parameter with each tool call
-        - **User ID:** Required as a parameter for all tools
+        - **User:** Automatically determined from the authenticated token
 
         ## User Identification
 
-        - For **web API requests**: User is automatically authenticated via Sanctum token. The `user_id` parameter is optional and ignored.
-        - For **local MCP requests**: The `user_id` parameter is required and specifies which user's data to access.
+        - User is automatically authenticated via Sanctum token
         - Dates and times are in the user's timezone (server handles UTC conversion automatically)
 
         ## Activity Types
@@ -159,8 +152,8 @@ class WorkoutServer extends Server
 
         ## Available Resources
 
-        - **user://profile/{userId}**: Read-only user profile information including fitness profile and injuries
-        - **workout://schedule/{userId}**: Read-only workout schedule (upcoming & completed). Supports optional `upcoming_limit` (default 20, max 50) and `completed_limit` (default 10, max 50) parameters.
+        - **user://profile**: Read-only user profile information including fitness profile and injuries
+        - **workout://schedule**: Read-only workout schedule (upcoming & completed). Supports optional `upcoming_limit` (default 20, max 50) and `completed_limit` (default 10, max 50) parameters.
     MARKDOWN;
 
     /**

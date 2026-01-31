@@ -17,8 +17,7 @@ describe('UpdateFitnessProfileTool', function () {
     it('creates a fitness profile successfully', function () {
         $user = User::factory()->create();
 
-        $response = WorkoutServer::tool(UpdateFitnessProfileTool::class, [
-            'user_id' => $user->id,
+        $response = WorkoutServer::actingAs($user)->tool(UpdateFitnessProfileTool::class, [
             'primary_goal' => 'weight_loss',
             'goal_details' => 'Lose 15kg by summer',
             'available_days_per_week' => 4,
@@ -45,8 +44,7 @@ describe('UpdateFitnessProfileTool', function () {
             'primary_goal' => FitnessGoal::WeightLoss,
         ]);
 
-        $response = WorkoutServer::tool(UpdateFitnessProfileTool::class, [
-            'user_id' => $user->id,
+        $response = WorkoutServer::actingAs($user)->tool(UpdateFitnessProfileTool::class, [
             'primary_goal' => 'muscle_gain',
             'available_days_per_week' => 6,
             'minutes_per_session' => 90,
@@ -62,23 +60,10 @@ describe('UpdateFitnessProfileTool', function () {
         ]);
     });
 
-    it('fails with invalid user_id', function () {
-        $response = WorkoutServer::tool(UpdateFitnessProfileTool::class, [
-            'user_id' => 99999,
-            'primary_goal' => 'weight_loss',
-            'available_days_per_week' => 4,
-            'minutes_per_session' => 60,
-        ]);
-
-        $response->assertHasErrors()
-            ->assertSee('User not found');
-    });
-
     it('fails with invalid primary_goal', function () {
         $user = User::factory()->create();
 
-        $response = WorkoutServer::tool(UpdateFitnessProfileTool::class, [
-            'user_id' => $user->id,
+        $response = WorkoutServer::actingAs($user)->tool(UpdateFitnessProfileTool::class, [
             'primary_goal' => 'invalid_goal',
             'available_days_per_week' => 4,
             'minutes_per_session' => 60,
@@ -90,8 +75,7 @@ describe('UpdateFitnessProfileTool', function () {
     it('fails with days out of range', function (int $days) {
         $user = User::factory()->create();
 
-        $response = WorkoutServer::tool(UpdateFitnessProfileTool::class, [
-            'user_id' => $user->id,
+        $response = WorkoutServer::actingAs($user)->tool(UpdateFitnessProfileTool::class, [
             'primary_goal' => 'weight_loss',
             'available_days_per_week' => $days,
             'minutes_per_session' => 60,
@@ -103,8 +87,7 @@ describe('UpdateFitnessProfileTool', function () {
     it('fails with minutes out of range', function (int $minutes) {
         $user = User::factory()->create();
 
-        $response = WorkoutServer::tool(UpdateFitnessProfileTool::class, [
-            'user_id' => $user->id,
+        $response = WorkoutServer::actingAs($user)->tool(UpdateFitnessProfileTool::class, [
             'primary_goal' => 'weight_loss',
             'available_days_per_week' => 4,
             'minutes_per_session' => $minutes,
@@ -118,8 +101,7 @@ describe('AddInjuryTool', function () {
     it('adds an injury successfully', function () {
         $user = User::factory()->create();
 
-        $response = WorkoutServer::tool(AddInjuryTool::class, [
-            'user_id' => $user->id,
+        $response = WorkoutServer::actingAs($user)->tool(AddInjuryTool::class, [
             'injury_type' => 'acute',
             'body_part' => 'knee',
             'started_at' => '2024-01-15',
@@ -142,8 +124,7 @@ describe('AddInjuryTool', function () {
     it('adds a resolved injury with end date', function () {
         $user = User::factory()->create();
 
-        $response = WorkoutServer::tool(AddInjuryTool::class, [
-            'user_id' => $user->id,
+        $response = WorkoutServer::actingAs($user)->tool(AddInjuryTool::class, [
             'injury_type' => 'chronic',
             'body_part' => 'lower_back',
             'started_at' => '2023-06-01',
@@ -157,23 +138,10 @@ describe('AddInjuryTool', function () {
         expect($injury->ended_at->toDateString())->toBe('2024-01-01');
     });
 
-    it('fails with invalid user_id', function () {
-        $response = WorkoutServer::tool(AddInjuryTool::class, [
-            'user_id' => 99999,
-            'injury_type' => 'acute',
-            'body_part' => 'knee',
-            'started_at' => '2024-01-15',
-        ]);
-
-        $response->assertHasErrors()
-            ->assertSee('User not found');
-    });
-
     it('fails with invalid injury_type', function () {
         $user = User::factory()->create();
 
-        $response = WorkoutServer::tool(AddInjuryTool::class, [
-            'user_id' => $user->id,
+        $response = WorkoutServer::actingAs($user)->tool(AddInjuryTool::class, [
             'injury_type' => 'invalid_type',
             'body_part' => 'knee',
             'started_at' => '2024-01-15',
@@ -185,8 +153,7 @@ describe('AddInjuryTool', function () {
     it('fails with invalid body_part', function () {
         $user = User::factory()->create();
 
-        $response = WorkoutServer::tool(AddInjuryTool::class, [
-            'user_id' => $user->id,
+        $response = WorkoutServer::actingAs($user)->tool(AddInjuryTool::class, [
             'injury_type' => 'acute',
             'body_part' => 'invalid_part',
             'started_at' => '2024-01-15',
@@ -198,8 +165,7 @@ describe('AddInjuryTool', function () {
     it('fails when end date is before start date', function () {
         $user = User::factory()->create();
 
-        $response = WorkoutServer::tool(AddInjuryTool::class, [
-            'user_id' => $user->id,
+        $response = WorkoutServer::actingAs($user)->tool(AddInjuryTool::class, [
             'injury_type' => 'acute',
             'body_part' => 'knee',
             'started_at' => '2024-06-01',
@@ -218,8 +184,7 @@ describe('RemoveInjuryTool', function () {
             'body_part' => BodyPart::Shoulder,
         ]);
 
-        $response = WorkoutServer::tool(RemoveInjuryTool::class, [
-            'user_id' => $user->id,
+        $response = WorkoutServer::actingAs($user)->tool(RemoveInjuryTool::class, [
             'injury_id' => $injury->id,
         ]);
 
@@ -230,24 +195,10 @@ describe('RemoveInjuryTool', function () {
         assertDatabaseMissing('injuries', ['id' => $injury->id]);
     });
 
-    it('fails with invalid user_id', function () {
-        $user = User::factory()->create();
-        $injury = Injury::factory()->create(['user_id' => $user->id]);
-
-        $response = WorkoutServer::tool(RemoveInjuryTool::class, [
-            'user_id' => 99999,
-            'injury_id' => $injury->id,
-        ]);
-
-        $response->assertHasErrors()
-            ->assertSee('User not found');
-    });
-
     it('fails with invalid injury_id', function () {
         $user = User::factory()->create();
 
-        $response = WorkoutServer::tool(RemoveInjuryTool::class, [
-            'user_id' => $user->id,
+        $response = WorkoutServer::actingAs($user)->tool(RemoveInjuryTool::class, [
             'injury_id' => 99999,
         ]);
 
@@ -260,8 +211,7 @@ describe('RemoveInjuryTool', function () {
         $otherUser = User::factory()->create();
         $injury = Injury::factory()->create(['user_id' => $otherUser->id]);
 
-        $response = WorkoutServer::tool(RemoveInjuryTool::class, [
-            'user_id' => $user->id,
+        $response = WorkoutServer::actingAs($user)->tool(RemoveInjuryTool::class, [
             'injury_id' => $injury->id,
         ]);
 

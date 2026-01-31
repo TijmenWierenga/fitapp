@@ -148,43 +148,30 @@
                 <flux:accordion.content>
                     <div class="pl-11 space-y-6">
                         <p class="text-zinc-600 dark:text-zinc-400">
-                            Add the following MCP server configuration to your Claude Code settings. This connects Claude to your {{ config('app.name') }} account.
+                            Run this command in your terminal to connect Claude Code to your {{ config('app.name') }} account:
                         </p>
 
-                        <div class="space-y-4">
-                            <h4 class="font-medium text-zinc-900 dark:text-white">1. Open Claude Code settings</h4>
-                            <p class="text-sm text-zinc-600 dark:text-zinc-400">
-                                In Claude Code, open Settings (press <code class="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">Cmd/Ctrl + ,</code>) and navigate to the MCP Servers section.
-                            </p>
-                        </div>
-
-                        <div class="space-y-4">
-                            <h4 class="font-medium text-zinc-900 dark:text-white">2. Add this MCP server configuration</h4>
-
-                            <div
-                                x-data="{
-                                    copied: false,
-                                    copy() {
-                                        navigator.clipboard.writeText($wire.getConfigJson()).then(() => {
-                                            this.copied = true;
-                                            setTimeout(() => this.copied = false, 2000);
-                                        });
-                                    }
-                                }"
-                            >
-                                <div class="relative">
-                                    <pre class="p-4 bg-zinc-900 text-zinc-100 rounded-lg overflow-x-auto text-sm font-mono"><code>{{ $this->getConfigJson() }}</code></pre>
-                                    <button
-                                        type="button"
-                                        @click="copy()"
-                                        class="absolute top-3 right-3 px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-white text-sm rounded-md transition-colors flex items-center gap-2"
-                                    >
-                                        <flux:icon.document-duplicate x-show="!copied" variant="outline" class="w-4 h-4" />
-                                        <flux:icon.check x-show="copied" class="w-4 h-4" />
-                                        <span x-text="copied ? 'Copied!' : 'Copy'"></span>
-                                    </button>
-                                </div>
+                        <div
+                            x-data="{
+                                copied: false,
+                                copy() {
+                                    navigator.clipboard.writeText($wire.getCliCommand()).then(() => {
+                                        this.copied = true;
+                                        setTimeout(() => this.copied = false, 2000);
+                                    });
+                                }
+                            }"
+                            class="space-y-3"
+                        >
+                            <div class="p-4 bg-zinc-900 rounded-lg overflow-x-auto">
+                                <code class="font-mono text-sm text-zinc-100 break-all whitespace-pre-wrap">{{ $this->getCliCommand() }}</code>
                             </div>
+
+                            <flux:button @click="copy()" class="w-full">
+                                <flux:icon.document-duplicate x-show="!copied" variant="outline" class="w-4 h-4" />
+                                <flux:icon.check x-show="copied" class="w-4 h-4" />
+                                <span x-text="copied ? 'Copied!' : 'Copy Command'"></span>
+                            </flux:button>
 
                             @guest
                                 <flux:callout variant="warning" icon="exclamation-triangle">
@@ -196,7 +183,7 @@
                                 @if ($tokenCreated && $newToken)
                                     <flux:callout variant="success" icon="check-circle">
                                         <flux:callout.text>
-                                            The configuration above already includes your new API key!
+                                            The command above already includes your new API key!
                                         </flux:callout.text>
                                     </flux:callout>
                                 @else

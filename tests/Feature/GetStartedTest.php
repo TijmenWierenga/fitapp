@@ -74,7 +74,7 @@ it('shows Claude configuration instructions on step 2', function () {
     Livewire::test(GetStarted::class)
         ->call('goToStep', 2)
         ->assertSee('Configure Claude Code')
-        ->assertSee('MCP server configuration');
+        ->assertSee('Run this command in your terminal');
 });
 
 it('shows starter prompts on step 3', function () {
@@ -90,14 +90,15 @@ it('generates correct MCP endpoint URL', function () {
     expect($component->getMcpEndpoint())->toContain('/mcp/workout');
 });
 
-it('generates config JSON with placeholder for guests', function () {
+it('generates CLI command with placeholder for guests', function () {
     $component = new GetStarted;
-    $json = $component->getConfigJson();
+    $command = $component->getCliCommand();
 
-    expect($json)
+    expect($command)
         ->toContain('YOUR_API_KEY_HERE')
-        ->toContain('mcp-remote')
-        ->toContain('mcpServers');
+        ->toContain('claude mcp add')
+        ->toContain('--transport http')
+        ->toContain('traiq');
 });
 
 it('prevents creating more than 5 tokens', function () {

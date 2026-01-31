@@ -11,8 +11,7 @@ it('fetches a single workout', function () {
         'name' => 'Morning Run',
     ]);
 
-    $response = WorkoutServer::tool(GetWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(GetWorkoutTool::class, [
         'workout_id' => $workout->id,
     ]);
 
@@ -29,8 +28,7 @@ it('includes rpe and feeling for completed workouts', function () {
         'feeling' => 4,
     ]);
 
-    $response = WorkoutServer::tool(GetWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(GetWorkoutTool::class, [
         'workout_id' => $workout->id,
     ]);
 
@@ -44,8 +42,7 @@ it('includes rpe and feeling for completed workouts', function () {
 it('returns error for non-existent workout', function () {
     $user = User::factory()->create();
 
-    $response = WorkoutServer::tool(GetWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(GetWorkoutTool::class, [
         'workout_id' => 99999,
     ]);
 
@@ -58,23 +55,12 @@ it('returns error when workout belongs to another user', function () {
     $otherUser = User::factory()->create();
     $workout = Workout::factory()->for($otherUser)->create();
 
-    $response = WorkoutServer::tool(GetWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(GetWorkoutTool::class, [
         'workout_id' => $workout->id,
     ]);
 
     $response->assertHasErrors()
         ->assertSee('Workout not found');
-});
-
-it('fails with invalid user_id', function () {
-    $response = WorkoutServer::tool(GetWorkoutTool::class, [
-        'user_id' => 99999,
-        'workout_id' => 1,
-    ]);
-
-    $response->assertHasErrors()
-        ->assertSee('User not found');
 });
 
 it('converts dates to user timezone', function () {
@@ -83,8 +69,7 @@ it('converts dates to user timezone', function () {
         'scheduled_at' => '2026-01-26 06:00:00',
     ]);
 
-    $response = WorkoutServer::tool(GetWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(GetWorkoutTool::class, [
         'workout_id' => $workout->id,
     ]);
 

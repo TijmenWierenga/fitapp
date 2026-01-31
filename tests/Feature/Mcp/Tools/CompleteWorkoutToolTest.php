@@ -11,8 +11,7 @@ it('completes workout successfully', function () {
     $user = User::factory()->withTimezone('Europe/Amsterdam')->create();
     $workout = Workout::factory()->for($user)->upcoming()->create();
 
-    $response = WorkoutServer::tool(CompleteWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
         'workout_id' => $workout->id,
         'rpe' => 7,
         'feeling' => 4,
@@ -36,8 +35,7 @@ it('includes rpe label in response', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create();
 
-    $response = WorkoutServer::tool(CompleteWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
         'workout_id' => $workout->id,
         'rpe' => 2,
         'feeling' => 5,
@@ -51,8 +49,7 @@ it('fails to complete already completed workout', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->completed()->create();
 
-    $response = WorkoutServer::tool(CompleteWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
         'workout_id' => $workout->id,
         'rpe' => 5,
         'feeling' => 3,
@@ -66,8 +63,7 @@ it('fails with RPE out of range', function (int $invalidRpe) {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create();
 
-    $response = WorkoutServer::tool(CompleteWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
         'workout_id' => $workout->id,
         'rpe' => $invalidRpe,
         'feeling' => 3,
@@ -81,8 +77,7 @@ it('fails with feeling out of range', function (int $invalidFeeling) {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create();
 
-    $response = WorkoutServer::tool(CompleteWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
         'workout_id' => $workout->id,
         'rpe' => 5,
         'feeling' => $invalidFeeling,
@@ -97,8 +92,7 @@ it('fails to complete workout owned by different user', function () {
     $user2 = User::factory()->create();
     $workout = Workout::factory()->for($user1)->create();
 
-    $response = WorkoutServer::tool(CompleteWorkoutTool::class, [
-        'user_id' => $user2->id,
+    $response = WorkoutServer::actingAs($user2)->tool(CompleteWorkoutTool::class, [
         'workout_id' => $workout->id,
         'rpe' => 5,
         'feeling' => 3,
@@ -106,16 +100,4 @@ it('fails to complete workout owned by different user', function () {
 
     $response->assertHasErrors()
         ->assertSee('Workout not found or access denied');
-});
-
-it('fails with invalid user_id', function () {
-    $response = WorkoutServer::tool(CompleteWorkoutTool::class, [
-        'user_id' => 99999,
-        'workout_id' => 1,
-        'rpe' => 5,
-        'feeling' => 3,
-    ]);
-
-    $response->assertHasErrors()
-        ->assertSee('User not found');
 });

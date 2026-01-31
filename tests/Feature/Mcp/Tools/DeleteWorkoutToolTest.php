@@ -11,8 +11,7 @@ it('deletes upcoming workout successfully', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->upcoming()->create();
 
-    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(DeleteWorkoutTool::class, [
         'workout_id' => $workout->id,
     ]);
 
@@ -30,8 +29,7 @@ it('deletes today\'s workout successfully', function () {
         'scheduled_at' => now()->setHour(8),
     ]);
 
-    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(DeleteWorkoutTool::class, [
         'workout_id' => $workout->id,
     ]);
 
@@ -46,8 +44,7 @@ it('fails to delete completed workout', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->completed()->create();
 
-    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(DeleteWorkoutTool::class, [
         'workout_id' => $workout->id,
     ]);
 
@@ -61,8 +58,7 @@ it('fails to delete past workout (not today)', function () {
         'scheduled_at' => now()->subDays(2),
     ]);
 
-    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(DeleteWorkoutTool::class, [
         'workout_id' => $workout->id,
     ]);
 
@@ -75,8 +71,7 @@ it('fails to delete workout owned by different user', function () {
     $user2 = User::factory()->create();
     $workout = Workout::factory()->for($user1)->create();
 
-    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
-        'user_id' => $user2->id,
+    $response = WorkoutServer::actingAs($user2)->tool(DeleteWorkoutTool::class, [
         'workout_id' => $workout->id,
     ]);
 
@@ -84,21 +79,10 @@ it('fails to delete workout owned by different user', function () {
         ->assertSee('Workout not found or access denied');
 });
 
-it('fails with invalid user_id', function () {
-    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
-        'user_id' => 99999,
-        'workout_id' => 1,
-    ]);
-
-    $response->assertHasErrors()
-        ->assertSee('User not found');
-});
-
 it('fails with non-existent workout_id', function () {
     $user = User::factory()->create();
 
-    $response = WorkoutServer::tool(DeleteWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(DeleteWorkoutTool::class, [
         'workout_id' => 99999,
     ]);
 

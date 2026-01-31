@@ -74,25 +74,15 @@ class GetStarted extends Component
         return rtrim(config('app.url'), '/').'/mcp/workout';
     }
 
-    public function getConfigJson(): string
+    public function getCliCommand(): string
     {
         $token = $this->newToken ?? 'YOUR_API_KEY_HERE';
 
-        $config = [
-            'mcpServers' => [
-                'traiq' => [
-                    'command' => 'npx',
-                    'args' => [
-                        'mcp-remote',
-                        $this->getMcpEndpoint(),
-                        '--header',
-                        'Authorization: Bearer '.$token,
-                    ],
-                ],
-            ],
-        ];
-
-        return json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        return sprintf(
+            'claude mcp add --transport http traiq %s --header "Authorization: Bearer %s"',
+            $this->getMcpEndpoint(),
+            $token
+        );
     }
 
     public function render()

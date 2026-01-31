@@ -2,8 +2,8 @@
 
 namespace App\Mcp\Tools;
 
-use App\Models\User;
 use App\Models\Workout;
+use App\Services\Workout\WorkoutService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -18,21 +18,22 @@ class GetWorkoutTool extends Tool
         Fetch a single workout by ID. Returns full workout details including RPE and feeling if completed.
     MARKDOWN;
 
+    public function __construct(
+        protected WorkoutService $workoutService
+    ) {}
+
     /**
      * Handle the tool request.
      */
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
             'workout_id' => 'required|integer',
-        ], [
-            'user_id.exists' => 'User not found. Please provide a valid user ID.',
         ]);
 
-        $user = User::findOrFail($validated['user_id']);
+        $user = $request->user();
 
-        $workout = Workout::where('user_id', $user->id)->find($validated['workout_id']);
+        $workout = $this->workoutService->find($user, $validated['workout_id']);
 
         if (! $workout) {
             return Response::error('Workout not found or access denied');
@@ -65,7 +66,6 @@ class GetWorkoutTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('The ID of the user who owns the workout'),
             'workout_id' => $schema->integer()->description('The ID of the workout to fetch'),
         ];
     }

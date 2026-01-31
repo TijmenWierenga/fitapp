@@ -2,9 +2,9 @@
 
 namespace App\Mcp\Tools;
 
+use App\Data\CreateWorkoutData;
 use App\Enums\Workout\Activity;
-use App\Models\User;
-use App\Models\Workout;
+use App\Services\Workout\WorkoutService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
@@ -25,34 +25,37 @@ class CreateWorkoutTool extends Tool
         Dates/times should be in the user's local timezone and will be converted to UTC for storage.
     MARKDOWN;
 
+    public function __construct(
+        protected WorkoutService $workoutService
+    ) {}
+
     /**
      * Handle the tool request.
      */
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
             'name' => 'required|string|max:255',
             'activity' => ['required', Rule::enum(Activity::class)],
             'scheduled_at' => 'required|date',
             'notes' => 'nullable|string|max:5000',
         ], [
-            'user_id.exists' => 'User not found. Please provide a valid user ID.',
             'activity.Enum' => 'Invalid activity type. See available activity values.',
             'scheduled_at.date' => 'Please provide a valid date and time.',
         ]);
 
-        $user = User::findOrFail($validated['user_id']);
+        $user = $request->user();
 
         $scheduledAt = Carbon::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
 
-        $workout = Workout::create([
-            'user_id' => $user->id,
-            'name' => $validated['name'],
-            'activity' => $validated['activity'],
-            'scheduled_at' => $scheduledAt,
-            'notes' => $validated['notes'] ?? null,
-        ]);
+        $data = new CreateWorkoutData(
+            name: $validated['name'],
+            activity: Activity::from($validated['activity']),
+            scheduledAt: $scheduledAt,
+            notes: $validated['notes'] ?? null,
+        );
+
+        $workout = $this->workoutService->create($user, $data);
 
         return Response::text(json_encode([
             'success' => true,
@@ -76,7 +79,6 @@ class CreateWorkoutTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('The ID of the user creating the workout'),
             'name' => $schema->string()->description('The name/title of the workout (e.g., "Morning Run", "Leg Day")'),
             'activity' => $schema->string()->description('The activity type (e.g., run, strength, cardio, hiit, bike, pool_swim, hike, yoga, etc.)'),
             'scheduled_at' => $schema->string()->description('The date and time when the workout is scheduled (in user\'s timezone)'),

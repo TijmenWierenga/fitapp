@@ -6,45 +6,31 @@ use App\Models\Injury;
 use App\Models\User;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Contracts\HasUriTemplate;
 use Laravel\Mcp\Server\Resource;
-use Laravel\Mcp\Support\UriTemplate;
 
-class UserProfileResource extends Resource implements HasUriTemplate
+class UserProfileResource extends Resource
 {
+    /**
+     * The resource URI.
+     */
+    protected string $uri = 'user://profile';
+
     /**
      * The resource's description.
      */
     protected string $description = <<<'MARKDOWN'
         Read-only user profile information including name, email, timezone, fitness profile, and injuries.
 
-        Use URI template: user://profile/{userId}
+        Use URI: user://profile
     MARKDOWN;
-
-    /**
-     * Get the URI template for this resource.
-     */
-    public function uriTemplate(): UriTemplate
-    {
-        return new UriTemplate('user://profile/{userId}');
-    }
 
     /**
      * Handle the resource request.
      */
     public function handle(Request $request): Response
     {
-        $userId = $request->get('userId');
-
-        if (! $userId) {
-            return Response::error('User ID is required');
-        }
-
-        $user = User::with(['fitnessProfile', 'injuries'])->find($userId);
-
-        if (! $user) {
-            return Response::error('User not found');
-        }
+        $user = $request->user();
+        $user->load(['fitnessProfile', 'injuries']);
 
         $content = $this->buildProfileContent($user);
 

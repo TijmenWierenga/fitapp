@@ -9,8 +9,7 @@ use function Pest\Laravel\assertDatabaseHas;
 it('creates a workout successfully', function () {
     $user = User::factory()->withTimezone('Europe/Amsterdam')->create();
 
-    $response = WorkoutServer::tool(CreateWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
         'name' => 'Morning Run',
         'activity' => 'run',
         'scheduled_at' => '2026-01-26 07:00:00',
@@ -33,8 +32,7 @@ it('creates a workout successfully', function () {
 it('creates a workout without notes', function () {
     $user = User::factory()->withTimezone('UTC')->create();
 
-    $response = WorkoutServer::tool(CreateWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
         'name' => 'Strength Training',
         'activity' => 'strength',
         'scheduled_at' => '2026-01-27 18:00:00',
@@ -53,8 +51,7 @@ it('creates a workout without notes', function () {
 it('converts user timezone to UTC for storage', function () {
     $user = User::factory()->withTimezone('America/New_York')->create();
 
-    $response = WorkoutServer::tool(CreateWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
         'name' => 'Evening HIIT',
         'activity' => 'hiit',
         'scheduled_at' => '2026-01-26 19:00:00',
@@ -66,23 +63,10 @@ it('converts user timezone to UTC for storage', function () {
     expect($workout->scheduled_at->timezone->getName())->toBe('UTC');
 });
 
-it('fails with invalid user_id', function () {
-    $response = WorkoutServer::tool(CreateWorkoutTool::class, [
-        'user_id' => 99999,
-        'name' => 'Test Workout',
-        'activity' => 'run',
-        'scheduled_at' => '2026-01-26 07:00:00',
-    ]);
-
-    $response->assertHasErrors()
-        ->assertSee('User not found');
-});
-
 it('fails with invalid activity', function (string $invalidActivity) {
     $user = User::factory()->create();
 
-    $response = WorkoutServer::tool(CreateWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
         'name' => 'Test Workout',
         'activity' => $invalidActivity,
         'scheduled_at' => '2026-01-26 07:00:00',
@@ -95,8 +79,7 @@ it('fails with invalid activity', function (string $invalidActivity) {
 it('fails with empty activity', function () {
     $user = User::factory()->create();
 
-    $response = WorkoutServer::tool(CreateWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
         'name' => 'Test Workout',
         'activity' => '',
         'scheduled_at' => '2026-01-26 07:00:00',
@@ -109,8 +92,7 @@ it('fails with empty activity', function () {
 it('fails with invalid scheduled_at', function () {
     $user = User::factory()->create();
 
-    $response = WorkoutServer::tool(CreateWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
         'name' => 'Test Workout',
         'activity' => 'run',
         'scheduled_at' => 'not-a-date',
@@ -123,8 +105,7 @@ it('fails with invalid scheduled_at', function () {
 it('trims empty notes to null', function () {
     $user = User::factory()->create();
 
-    $response = WorkoutServer::tool(CreateWorkoutTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
         'name' => 'Test Workout',
         'activity' => 'run',
         'scheduled_at' => '2026-01-26 07:00:00',

@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\GetStarted;
 use App\Livewire\Settings\ApiKeys;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\FitnessProfile;
@@ -18,6 +19,8 @@ Route::get('/', function () {
 
     return view('welcome');
 })->name('home');
+
+Route::get('/get-started', GetStarted::class)->name('get-started');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])

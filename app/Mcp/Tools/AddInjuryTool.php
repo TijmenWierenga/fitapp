@@ -2,10 +2,12 @@
 
 namespace App\Mcp\Tools;
 
+use App\Data\InjuryData;
 use App\Enums\BodyPart;
 use App\Enums\InjuryType;
-use App\Models\User;
+use App\Services\Injury\InjuryService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -33,34 +35,38 @@ class AddInjuryTool extends Tool
         - Other: other
     MARKDOWN;
 
+    public function __construct(
+        protected InjuryService $injuryService
+    ) {}
+
     /**
      * Handle the tool request.
      */
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
             'injury_type' => ['required', Rule::enum(InjuryType::class)],
             'body_part' => ['required', Rule::enum(BodyPart::class)],
             'started_at' => 'required|date',
             'ended_at' => 'nullable|date|after_or_equal:started_at',
             'notes' => 'nullable|string|max:5000',
         ], [
-            'user_id.exists' => 'User not found. Please provide a valid user ID.',
             'injury_type.Enum' => 'Invalid injury type. Must be one of: acute, chronic, recurring, post_surgery.',
             'body_part.Enum' => 'Invalid body part.',
             'ended_at.after_or_equal' => 'End date must be on or after the start date.',
         ]);
 
-        $user = User::findOrFail($validated['user_id']);
+        $user = $request->user();
 
-        $injury = $user->injuries()->create([
-            'injury_type' => $validated['injury_type'],
-            'body_part' => $validated['body_part'],
-            'started_at' => $validated['started_at'],
-            'ended_at' => $validated['ended_at'] ?? null,
-            'notes' => $validated['notes'] ?? null,
-        ]);
+        $data = new InjuryData(
+            injuryType: InjuryType::from($validated['injury_type']),
+            bodyPart: BodyPart::from($validated['body_part']),
+            startedAt: Carbon::parse($validated['started_at']),
+            endedAt: isset($validated['ended_at']) ? Carbon::parse($validated['ended_at']) : null,
+            notes: $validated['notes'] ?? null,
+        );
+
+        $injury = $this->injuryService->add($user, $data);
 
         return Response::text(json_encode([
             'success' => true,
@@ -88,7 +94,6 @@ class AddInjuryTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('The ID of the user'),
             'injury_type' => $schema->string()->description('Type of injury: acute, chronic, recurring, or post_surgery'),
             'body_part' => $schema->string()->description('Affected body part (e.g., knee, shoulder, lower_back)'),
             'started_at' => $schema->string()->description('Date when the injury started (YYYY-MM-DD)'),

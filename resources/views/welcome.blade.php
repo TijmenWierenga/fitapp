@@ -12,6 +12,18 @@
     <div class="fixed top-20 -left-40 w-96 h-96 bg-gradient-to-br from-brand-red/25 to-brand-amber/15 dark:from-brand-red/10 dark:to-brand-amber/5 rounded-full blur-3xl traiq-gradient-orb pointer-events-none" aria-hidden="true"></div>
     <div class="fixed top-1/2 -right-40 w-80 h-80 bg-gradient-to-br from-brand-amber/25 to-brand-red/15 dark:from-brand-amber/10 dark:to-brand-red/5 rounded-full blur-3xl traiq-gradient-orb-delayed pointer-events-none" aria-hidden="true"></div>
 
+    {{-- Early Access Banner --}}
+    <div class="bg-gradient-to-r from-brand-red/10 via-brand-amber/10 to-brand-red/10 dark:from-brand-red/5 dark:via-brand-amber/5 dark:to-brand-red/5 border-b border-brand-red/20 dark:border-brand-red/10">
+        <div class="max-w-6xl mx-auto px-6 py-2.5 text-center">
+            <p class="text-sm text-zinc-700 dark:text-zinc-300">
+                <span class="font-semibold text-brand-red">Early Access:</span>
+                Get started FREE while we're in beta
+                <span class="mx-2 text-zinc-400">•</span>
+                Bring your own Claude subscription
+            </p>
+        </div>
+    </div>
+
     {{-- Navigation --}}
     <nav class="sticky top-0 z-50 backdrop-blur-lg bg-zinc-50/90 dark:bg-zinc-950/80 border-b border-zinc-200/80 dark:border-zinc-800/50 shadow-sm dark:shadow-none">
         <div class="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
@@ -23,7 +35,7 @@
                     Log in
                 </a>
                 <a href="{{ route('register') }}" class="text-sm traiq-cta-gradient text-white px-4 py-2 rounded-lg font-medium transition-all">
-                    Get started
+                    Get started free
                 </a>
             </div>
         </div>
@@ -45,12 +57,13 @@
                 <span class="traiq-text-gradient">workout intelligence</span>
             </h1>
             <p class="mt-6 text-lg md:text-xl text-zinc-700 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed traiq-fade-in-delay-2">
-                {{ config('app.name') }} uses AI to create adaptive training plans that evolve with your progress, recovery, and lifestyle.
+                {{ config('app.name') }} connects Claude to your fitness journey. Get personalized, adaptive training plans through natural conversation.
             </p>
-            <div class="mt-12 traiq-fade-in-delay-3">
+            <div class="mt-12 traiq-fade-in-delay-3 flex flex-col items-center gap-3">
                 <a href="{{ route('register') }}" class="inline-block traiq-cta-gradient text-white font-semibold px-8 py-4 rounded-xl text-lg transition-all">
-                    Start free trial
+                    Get started free
                 </a>
+                <span class="text-sm text-zinc-500 dark:text-zinc-500">Free during early access. Just bring your Claude subscription.</span>
             </div>
         </div>
 
@@ -60,6 +73,65 @@
             <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400 animate-bounce" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7" />
             </svg>
+        </div>
+    </section>
+
+    {{-- How It Works --}}
+    <section class="relative max-w-6xl mx-auto px-6 pb-32">
+        <div class="text-center mb-16">
+            <span class="text-xs font-medium uppercase tracking-widest text-brand-amber">
+                Powered by Claude
+            </span>
+            <h2 class="mt-4 text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white">
+                How it works
+            </h2>
+            <p class="mt-3 text-zinc-600 dark:text-zinc-500 max-w-2xl mx-auto">
+                {{ config('app.name') }} connects Claude AI directly to your workout data. Just talk naturally about your fitness goals, and Claude handles the rest.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {{-- Step 1 --}}
+            <div class="text-center">
+                <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-brand-red/10 dark:bg-brand-red/20 flex items-center justify-center">
+                    <span class="text-xl font-bold text-brand-red">1</span>
+                </div>
+                <h3 class="text-lg font-semibold text-zinc-900 dark:text-white mb-2">Connect Claude</h3>
+                <p class="text-sm text-zinc-600 dark:text-zinc-400">
+                    Add {{ config('app.name') }} as an MCP server in Claude Code. It takes less than 5 minutes.
+                </p>
+            </div>
+
+            {{-- Step 2 --}}
+            <div class="text-center">
+                <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-brand-amber/10 dark:bg-brand-amber/20 flex items-center justify-center">
+                    <span class="text-xl font-bold text-brand-amber">2</span>
+                </div>
+                <h3 class="text-lg font-semibold text-zinc-900 dark:text-white mb-2">Tell Claude your goals</h3>
+                <p class="text-sm text-zinc-600 dark:text-zinc-400">
+                    Describe your fitness goals, schedule, and any limitations. Claude creates your personalized plan.
+                </p>
+            </div>
+
+            {{-- Step 3 --}}
+            <div class="text-center">
+                <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-zinc-200/50 dark:bg-zinc-700/50 flex items-center justify-center">
+                    <span class="text-xl font-bold text-zinc-600 dark:text-zinc-400">3</span>
+                </div>
+                <h3 class="text-lg font-semibold text-zinc-900 dark:text-white mb-2">Train & adapt</h3>
+                <p class="text-sm text-zinc-600 dark:text-zinc-400">
+                    Track your progress through Claude. Your plan evolves based on your feedback and performance.
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-12 text-center">
+            <a href="{{ route('get-started') }}" class="inline-flex items-center gap-2 text-brand-red hover:text-brand-red/80 font-medium transition-colors">
+                See full setup guide
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+            </a>
         </div>
     </section>
 
@@ -78,101 +150,101 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {{-- Smart Planning --}}
+            {{-- AI That Understands You --}}
             <div class="border-l-2 border-l-brand-red border border-zinc-200/80 dark:border-zinc-800/30 rounded-lg bg-white/80 dark:bg-zinc-950 shadow-md dark:shadow-none pl-6 pr-8 py-8">
                 <span class="text-xs font-semibold uppercase tracking-wide text-brand-red opacity-80">
-                    Save time
+                    Claude-powered
                 </span>
                 <h3 class="mt-3 text-2xl font-bold text-zinc-900 dark:text-white leading-tight">
-                    Your schedule, optimized
+                    AI that understands you
                 </h3>
                 <p class="mt-4 text-[0.9375rem] text-zinc-700 dark:text-zinc-400/90 leading-relaxed">
-                    No more wondering what to do next. Get a personalized workout plan that fits your available days and adapts when life gets in the way.
+                    Unlike rigid apps, Claude understands context. Say "I'm exhausted today" and your workout adapts. Mention an injury, and Claude considers it for every future plan.
                 </p>
                 <ul class="mt-7 pt-6 space-y-3 border-t border-zinc-200/80 dark:border-zinc-800/30">
                     <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
                         <svg class="w-4 h-4 text-brand-red flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                         </svg>
-                        Workouts planned around your life
+                        Natural language interactions
                     </li>
                     <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
                         <svg class="w-4 h-4 text-brand-red flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                         </svg>
-                        Automatically reschedules missed sessions
+                        Remembers your full context
                     </li>
                     <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
                         <svg class="w-4 h-4 text-brand-red flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                         </svg>
-                        Never skip a beat
+                        Explains every recommendation
                     </li>
                 </ul>
             </div>
 
-            {{-- Progress Insights --}}
+            {{-- Adapts in Real-Time --}}
             <div class="border-l-2 border-l-brand-amber border border-zinc-200/80 dark:border-zinc-800/30 rounded-lg bg-white/80 dark:bg-zinc-950 shadow-md dark:shadow-none pl-6 pr-8 py-8">
                 <span class="text-xs font-semibold uppercase tracking-wide text-brand-amber opacity-80">
-                    Stay motivated
+                    Dynamic
                 </span>
                 <h3 class="mt-3 text-2xl font-bold text-zinc-900 dark:text-white leading-tight">
-                    See your progress clearly
+                    Adapts in real-time
                 </h3>
                 <p class="mt-4 text-[0.9375rem] text-zinc-700 dark:text-zinc-400/90 leading-relaxed">
-                    Know exactly how far you've come. Track your workouts, monitor trends, and celebrate milestones that keep you moving forward.
+                    Life happens. Miss a workout? Schedule change? Just tell Claude. Your plan adjusts instantly while keeping you on track toward your goals.
                 </p>
                 <ul class="mt-7 pt-6 space-y-3 border-t border-zinc-200/80 dark:border-zinc-800/30">
                     <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
                         <svg class="w-4 h-4 text-brand-amber flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                         </svg>
-                        Visual progress tracking
+                        Instant plan adjustments
                     </li>
                     <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
                         <svg class="w-4 h-4 text-brand-amber flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                         </svg>
-                        Workout streaks and completion rates
+                        RPE-based intensity tuning
                     </li>
                     <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
                         <svg class="w-4 h-4 text-brand-amber flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                        </svg>
-                        RPE and recovery trends
-                    </li>
-                </ul>
-            </div>
-
-            {{-- Adaptive Coaching --}}
-            <div class="border-l-2 border-l-zinc-300 dark:border-l-zinc-600 border border-zinc-200/80 dark:border-zinc-800/30 rounded-lg bg-white/80 dark:bg-zinc-950 shadow-md dark:shadow-none pl-6 pr-8 py-8">
-                <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-500 opacity-80">
-                    Train smarter
-                </span>
-                <h3 class="mt-3 text-2xl font-bold text-zinc-900 dark:text-white leading-tight">
-                    A coach that listens
-                </h3>
-                <p class="mt-4 text-[0.9375rem] text-zinc-700 dark:text-zinc-400/90 leading-relaxed">
-                    Feeling tired? Had a tough week? Your plan adjusts based on how you actually feel, not just what's on the calendar.
-                </p>
-                <ul class="mt-7 pt-6 space-y-3 border-t border-zinc-200/80 dark:border-zinc-800/30">
-                    <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
-                        <svg class="w-4 h-4 text-zinc-600 dark:text-zinc-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                        </svg>
-                        Adjusts to your energy levels
-                    </li>
-                    <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
-                        <svg class="w-4 h-4 text-zinc-600 dark:text-zinc-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                        </svg>
-                        Prevents overtraining
-                    </li>
-                    <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
-                        <svg class="w-4 h-4 text-zinc-600 dark:text-zinc-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                         </svg>
                         Learns from your feedback
+                    </li>
+                </ul>
+            </div>
+
+            {{-- Free During Early Access --}}
+            <div class="border-l-2 border-l-green-500 dark:border-l-green-600 border border-zinc-200/80 dark:border-zinc-800/30 rounded-lg bg-white/80 dark:bg-zinc-950 shadow-md dark:shadow-none pl-6 pr-8 py-8">
+                <span class="text-xs font-semibold uppercase tracking-wide text-green-600 dark:text-green-500 opacity-80">
+                    Early access
+                </span>
+                <h3 class="mt-3 text-2xl font-bold text-zinc-900 dark:text-white leading-tight">
+                    Free during beta
+                </h3>
+                <p class="mt-4 text-[0.9375rem] text-zinc-700 dark:text-zinc-400/90 leading-relaxed">
+                    We're building {{ config('app.name') }} in public. Join early, get full access for free, and help shape the future of AI-powered fitness.
+                </p>
+                <ul class="mt-7 pt-6 space-y-3 border-t border-zinc-200/80 dark:border-zinc-800/30">
+                    <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
+                        <svg class="w-4 h-4 text-green-600 dark:text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                        </svg>
+                        All features included
+                    </li>
+                    <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
+                        <svg class="w-4 h-4 text-green-600 dark:text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                        </svg>
+                        Bring your own Claude subscription
+                    </li>
+                    <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
+                        <svg class="w-4 h-4 text-green-600 dark:text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                        </svg>
+                        Help shape the product
                     </li>
                 </ul>
             </div>
@@ -206,7 +278,7 @@
                     Perfect for: athletes in recovery
                 </p>
                 <p class="mt-4 text-[0.9375rem] text-zinc-700 dark:text-zinc-400/90 leading-relaxed">
-                    Want to safely return to sport after an injury? {{ config('app.name') }} takes your injury history into account and automatically adjusts your schedule based on your RPE and recovery feeling.
+                    Tell Claude about your injury and it automatically adjusts every workout. Say "my knee hurts today" and watch your plan adapt instantly.
                 </p>
                 <ul class="mt-7 pt-6 space-y-3 border-t border-zinc-200/80 dark:border-zinc-800/30">
                     <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
@@ -242,7 +314,7 @@
                     Perfect for: new athletes
                 </p>
                 <p class="mt-4 text-[0.9375rem] text-zinc-700 dark:text-zinc-400/90 leading-relaxed">
-                    Never exercised but want to start? {{ config('app.name') }} creates a beginner-friendly schedule that builds you up gradually, with clear goals and progress insights.
+                    Just say "I want to run a 5K in 3 months but I've never run before." Claude builds a complete, beginner-friendly training plan.
                 </p>
                 <ul class="mt-7 pt-6 space-y-3 border-t border-zinc-200/80 dark:border-zinc-800/30">
                     <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
@@ -278,7 +350,7 @@
                     Perfect for: busy professionals
                 </p>
                 <p class="mt-4 text-[0.9375rem] text-zinc-700 dark:text-zinc-400/90 leading-relaxed">
-                    Limited time for fitness? {{ config('app.name') }} plans efficient workouts that fit around your available days and preferred session duration, so you stay fit without overloading your schedule.
+                    Tell Claude "I only have 30 minutes on Tuesday and Thursday" and get optimized workouts that fit your real schedule.
                 </p>
                 <ul class="mt-7 pt-6 space-y-3 border-t border-zinc-200/80 dark:border-zinc-800/30">
                     <li class="flex items-center gap-2 text-[0.8125rem] text-zinc-700 dark:text-zinc-400/80">
@@ -314,11 +386,19 @@
                 Ready to train smarter?
             </h2>
             <p class="text-zinc-700 dark:text-zinc-400 text-lg mb-8">
-                Start your free trial today and discover how {{ config('app.name') }} can transform your training.
+                Join during early access and get started for free. Just bring your Claude subscription.
             </p>
-            <a href="{{ route('register') }}" class="inline-block traiq-cta-gradient text-white font-semibold px-8 py-4 rounded-xl text-lg transition-all">
-                Start free trial
-            </a>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="{{ route('register') }}" class="inline-block traiq-cta-gradient text-white font-semibold px-8 py-4 rounded-xl text-lg transition-all">
+                    Get started free
+                </a>
+                <a href="{{ route('get-started') }}" class="inline-flex items-center gap-2 text-zinc-700 dark:text-zinc-300 hover:text-brand-red dark:hover:text-brand-red font-medium transition-colors">
+                    View setup guide
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                    </svg>
+                </a>
+            </div>
         </div>
     </section>
 

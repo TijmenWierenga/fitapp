@@ -35,10 +35,18 @@ class WorkoutServer extends Server
     protected string $instructions = <<<'MARKDOWN'
         The Workout Server enables AI-assisted workout planning and management. Users can create personalized workout plans for fitness goals like race preparation, injury recovery, and general fitness.
 
+        ## Authentication
+
+        All requests require authentication via Sanctum token.
+
+        - **Endpoint:** `'.config('app.url').'/mcp/workout`
+        - **Authentication:** Include a Bearer token in the Authorization header
+        - **Header:** `Authorization: Bearer <api_token>`
+        - **User:** Automatically determined from the authenticated token
+
         ## User Identification
 
-        All tools require a `user_id` parameter (integer). This is the ID of the user in the system.
-        - For local MCP: Users specify their ID when calling tools
+        - User is automatically authenticated via Sanctum token
         - Dates and times are in the user's timezone (server handles UTC conversion automatically)
 
         ## Activity Types
@@ -144,8 +152,8 @@ class WorkoutServer extends Server
 
         ## Available Resources
 
-        - **user://profile/{userId}**: Read-only user profile information including fitness profile and injuries
-        - **workout://schedule/{userId}**: Read-only workout schedule (upcoming & completed). Supports optional `upcoming_limit` (default 20, max 50) and `completed_limit` (default 10, max 50) parameters.
+        - **user://profile**: Read-only user profile information including fitness profile and injuries
+        - **workout://schedule**: Read-only workout schedule (upcoming & completed). Supports optional `upcoming_limit` (default 20, max 50) and `completed_limit` (default 10, max 50) parameters.
     MARKDOWN;
 
     /**

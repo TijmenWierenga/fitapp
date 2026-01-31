@@ -14,8 +14,7 @@ it('returns analytics for completed workouts', function () {
         'feeling' => 4,
     ]);
 
-    $response = WorkoutServer::tool(GetTrainingAnalyticsTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(GetTrainingAnalyticsTool::class, [
         'weeks' => 4,
     ]);
 
@@ -29,9 +28,7 @@ it('returns analytics for completed workouts', function () {
 it('defaults to 4 weeks when no weeks parameter provided', function () {
     $user = User::factory()->create();
 
-    $response = WorkoutServer::tool(GetTrainingAnalyticsTool::class, [
-        'user_id' => $user->id,
-    ]);
+    $response = WorkoutServer::actingAs($user)->tool(GetTrainingAnalyticsTool::class, []);
 
     $response->assertOk()
         ->assertSee('"period_weeks":4');
@@ -48,9 +45,7 @@ it('calculates completion rate correctly', function () {
         'completed_at' => null,
     ]);
 
-    $response = WorkoutServer::tool(GetTrainingAnalyticsTool::class, [
-        'user_id' => $user->id,
-    ]);
+    $response = WorkoutServer::actingAs($user)->tool(GetTrainingAnalyticsTool::class, []);
 
     $response->assertOk()
         ->assertSee('"completion_rate":75');
@@ -59,9 +54,7 @@ it('calculates completion rate correctly', function () {
 it('returns zero completion rate when no workouts exist', function () {
     $user = User::factory()->create();
 
-    $response = WorkoutServer::tool(GetTrainingAnalyticsTool::class, [
-        'user_id' => $user->id,
-    ]);
+    $response = WorkoutServer::actingAs($user)->tool(GetTrainingAnalyticsTool::class, []);
 
     $response->assertOk()
         ->assertSee('"total_completed":0')
@@ -82,9 +75,7 @@ it('calculates current streak', function () {
         'feeling' => 3,
     ]);
 
-    $response = WorkoutServer::tool(GetTrainingAnalyticsTool::class, [
-        'user_id' => $user->id,
-    ]);
+    $response = WorkoutServer::actingAs($user)->tool(GetTrainingAnalyticsTool::class, []);
 
     $response->assertOk()
         ->assertSee('"current_streak_days":2');
@@ -102,29 +93,17 @@ it('returns activity distribution', function () {
         'completed_at' => now()->subDay(),
     ]);
 
-    $response = WorkoutServer::tool(GetTrainingAnalyticsTool::class, [
-        'user_id' => $user->id,
-    ]);
+    $response = WorkoutServer::actingAs($user)->tool(GetTrainingAnalyticsTool::class, []);
 
     $response->assertOk()
         ->assertSee('"run":2')
         ->assertSee('"strength":1');
 });
 
-it('fails with invalid user_id', function () {
-    $response = WorkoutServer::tool(GetTrainingAnalyticsTool::class, [
-        'user_id' => 99999,
-    ]);
-
-    $response->assertHasErrors()
-        ->assertSee('User not found');
-});
-
 it('fails when weeks exceeds max', function () {
     $user = User::factory()->create();
 
-    $response = WorkoutServer::tool(GetTrainingAnalyticsTool::class, [
-        'user_id' => $user->id,
+    $response = WorkoutServer::actingAs($user)->tool(GetTrainingAnalyticsTool::class, [
         'weeks' => 13,
     ]);
 

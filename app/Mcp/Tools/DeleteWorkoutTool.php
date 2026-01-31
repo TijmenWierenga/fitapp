@@ -21,7 +21,7 @@ class DeleteWorkoutTool extends Tool
     MARKDOWN;
 
     public function __construct(
-        protected WorkoutService $workoutService
+        private WorkoutService $workoutService
     ) {}
 
     /**

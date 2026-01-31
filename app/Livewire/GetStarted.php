@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -85,7 +86,7 @@ class GetStarted extends Component
         );
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.get-started');
     }

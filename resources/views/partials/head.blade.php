@@ -3,6 +3,28 @@
 
 <title>{{ $title ?? config('app.name') }}</title>
 
+<!-- Primary Meta Tags -->
+<meta name="description" content="{{ $description ?? 'Track your fitness journey with Traiq - Your personal workout tracker and fitness companion.' }}">
+<meta name="theme-color" content="#18181b">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ url()->current() }}">
+<meta property="og:title" content="{{ $title ?? config('app.name') }}">
+<meta property="og:description" content="{{ $description ?? 'Track your fitness journey with Traiq - Your personal workout tracker and fitness companion.' }}">
+<meta property="og:image" content="{{ asset('og-image.png') }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="{{ config('app.name') }}">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="{{ url()->current() }}">
+<meta name="twitter:title" content="{{ $title ?? config('app.name') }}">
+<meta name="twitter:description" content="{{ $description ?? 'Track your fitness journey with Traiq - Your personal workout tracker and fitness companion.' }}">
+<meta name="twitter:image" content="{{ asset('og-image.png') }}">
+
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">

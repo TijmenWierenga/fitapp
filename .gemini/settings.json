@@ -1,12 +1,5 @@
 {
     "mcpServers": {
-        "traiq": {
-            "type": "http",
-            "url": "http://fitapp.test/mcp/workout",
-            "headers": {
-                "Authorization": "Bearer ${TRAIQ_API_TOKEN}"
-            }
-        },
         "laravel-boost": {
             "command": "php",
             "args": [

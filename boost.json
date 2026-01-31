@@ -3,11 +3,20 @@
         "claude_code",
         "copilot",
         "gemini",
-        "phpstorm"
-    ],
-    "editors": [
-        "phpstorm"
+        "junie"
     ],
     "guidelines": true,
-    "herd_mcp": true
+    "herd_mcp": true,
+    "mcp": true,
+    "packages": [
+        "laravel/fortify"
+    ],
+    "sail": false,
+    "skills": [
+        "mcp-development",
+        "fluxui-development",
+        "livewire-development",
+        "pest-testing",
+        "tailwindcss-development"
+    ]
 }

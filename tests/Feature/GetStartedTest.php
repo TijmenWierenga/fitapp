@@ -39,6 +39,7 @@ it('shows token creation form for authenticated users', function () {
 });
 
 it('can create an API token', function () {
+    createPersonalAccessClient();
     $user = User::factory()->create();
 
     Livewire::actingAs($user)
@@ -102,6 +103,7 @@ it('generates CLI command with placeholder for guests', function () {
 });
 
 it('prevents creating more than 5 tokens', function () {
+    createPersonalAccessClient();
     $user = User::factory()->create();
 
     // Create 5 tokens

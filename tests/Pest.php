@@ -1,5 +1,7 @@
 <?php
 
+use Laravel\Passport\ClientRepository;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -44,4 +46,17 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * Create a personal access client for testing.
+ *
+ * This is required for Passport's createToken() method to work.
+ */
+function createPersonalAccessClient(): void
+{
+    app(ClientRepository::class)->createPersonalAccessGrantClient(
+        'Personal Access Client',
+        'users'
+    );
 }

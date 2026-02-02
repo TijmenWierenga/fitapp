@@ -15,6 +15,10 @@
       "env": {
         "SITE_PATH": "/Users/tijmenwierenga/www/tijmenwierenga/fitapp"
       }
+    },
+    "traiq-local": {
+      "type": "http",
+      "url": "http://fitapp.test/mcp/workout"
     }
   }
 }

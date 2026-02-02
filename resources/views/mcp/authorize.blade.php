@@ -104,10 +104,7 @@
                     <input type="hidden" name="state" value="{{ $request->state }}">
                     <input type="hidden" name="client_id" value="{{ $client->id }}">
                     <input type="hidden" name="auth_token" value="{{ $authToken }}">
-                    <flux:button type="submit" variant="ghost" class="w-full">
-                        <svg class="mr-2 h-4 w-4" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
+                    <flux:button type="submit" variant="ghost" icon="x-mark" class="w-full">
                         Cancel
                     </flux:button>
                 </form>

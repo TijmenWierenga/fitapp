@@ -23,43 +23,11 @@ it('can access get started page as authenticated user', function () {
         ->assertSeeLivewire(GetStarted::class);
 });
 
-it('shows create account CTA for guests on step 1', function () {
+it('shows setup method selection on step 1', function () {
     Livewire::test(GetStarted::class)
-        ->assertSee('Create an account first')
-        ->assertSee('Create Account');
-});
-
-it('shows token creation form for authenticated users', function () {
-    $user = User::factory()->create();
-
-    Livewire::actingAs($user)
-        ->test(GetStarted::class)
-        ->assertSee('API Key Name')
-        ->assertSee('Create API Key');
-});
-
-it('can create an API token', function () {
-    createPersonalAccessClient();
-    $user = User::factory()->create();
-
-    Livewire::actingAs($user)
-        ->test(GetStarted::class)
-        ->set('tokenName', 'Test Token')
-        ->call('createToken')
-        ->assertSet('tokenCreated', true)
-        ->assertNotSet('newToken', null);
-
-    expect($user->tokens()->where('name', 'Test Token')->exists())->toBeTrue();
-});
-
-it('validates token name is required', function () {
-    $user = User::factory()->create();
-
-    Livewire::actingAs($user)
-        ->test(GetStarted::class)
-        ->set('tokenName', '')
-        ->call('createToken')
-        ->assertHasErrors(['tokenName' => 'required']);
+        ->assertSee('Choose Your Setup Method')
+        ->assertSee('Claude Desktop')
+        ->assertSee('Claude Code CLI');
 });
 
 it('can navigate between steps', function () {
@@ -71,11 +39,35 @@ it('can navigate between steps', function () {
         ->assertSet('currentStep', 3);
 });
 
-it('shows Claude configuration instructions on step 2', function () {
+it('can select desktop setup method', function () {
     Livewire::test(GetStarted::class)
-        ->call('goToStep', 2)
-        ->assertSee('Configure Claude Code')
-        ->assertSee('Run this command in your terminal');
+        ->assertSet('setupMethod', 'desktop')
+        ->call('selectMethod', 'cli')
+        ->assertSet('setupMethod', 'cli')
+        ->assertSet('currentStep', 2);
+});
+
+it('can select cli setup method', function () {
+    Livewire::test(GetStarted::class)
+        ->call('selectMethod', 'cli')
+        ->assertSet('setupMethod', 'cli')
+        ->assertSet('currentStep', 2);
+});
+
+it('shows desktop instructions when desktop selected', function () {
+    Livewire::test(GetStarted::class)
+        ->call('selectMethod', 'desktop')
+        ->assertSee('Open Claude Desktop Settings')
+        ->assertSee('Navigate to Connectors')
+        ->assertSee('Add a Custom Connector')
+        ->assertSee('MCP Server URL');
+});
+
+it('shows cli instructions when cli selected', function () {
+    Livewire::test(GetStarted::class)
+        ->call('selectMethod', 'cli')
+        ->assertSee('Run this command in your terminal')
+        ->assertSee('claude mcp add');
 });
 
 it('shows starter prompts on step 3', function () {
@@ -91,31 +83,29 @@ it('generates correct MCP endpoint URL', function () {
     expect($component->getMcpEndpoint())->toContain('/mcp/workout');
 });
 
-it('generates CLI command with placeholder for guests', function () {
+it('generates CLI command without auth header', function () {
     $component = new GetStarted;
     $command = $component->getCliCommand();
 
     expect($command)
-        ->toContain('YOUR_API_KEY_HERE')
         ->toContain('claude mcp add')
         ->toContain('--transport http')
-        ->toContain('traiq');
+        ->toContain('Traiq')
+        ->not->toContain('Authorization')
+        ->not->toContain('Bearer');
 });
 
-it('prevents creating more than 5 tokens', function () {
-    createPersonalAccessClient();
+it('shows dashboard link for authenticated users on step 3', function () {
     $user = User::factory()->create();
-
-    // Create 5 tokens
-    for ($i = 1; $i <= 5; $i++) {
-        $user->createToken("Token {$i}");
-    }
 
     Livewire::actingAs($user)
         ->test(GetStarted::class)
-        ->set('tokenName', 'Sixth Token')
-        ->call('createToken')
-        ->assertHasErrors(['tokenLimit']);
+        ->call('goToStep', 3)
+        ->assertSee('Go to Dashboard');
+});
 
-    expect($user->tokens()->count())->toBe(5);
+it('does not show dashboard link for guests on step 3', function () {
+    Livewire::test(GetStarted::class)
+        ->call('goToStep', 3)
+        ->assertDontSee('Go to Dashboard');
 });

@@ -27,7 +27,7 @@
                     @endif
                     <span>
                         @switch($i)
-                            @case(1) Account & API Key @break
+                            @case(1) Choose Method @break
                             @case(2) Configure Claude @break
                             @case(3) Start Training @break
                         @endswitch
@@ -39,7 +39,7 @@
 
     {{-- Step Content --}}
     <div class="space-y-6">
-        {{-- Step 1: Account & API Key --}}
+        {{-- Step 1: Choose Setup Method --}}
         <flux:accordion exclusive wire:key="accordion-{{ $currentStep }}">
             <flux:accordion.item :expanded="$currentStep === 1">
                 <flux:accordion.heading>
@@ -51,82 +51,61 @@
                                 1
                             @endif
                         </span>
-                        <span class="font-semibold text-zinc-900 dark:text-white">Create an Account & API Key</span>
+                        <span class="font-semibold text-zinc-900 dark:text-white">Choose Your Setup Method</span>
                     </div>
                 </flux:accordion.heading>
                 <flux:accordion.content>
                     <div class="pl-11 space-y-6">
-                        @guest
-                            <flux:callout variant="info" icon="information-circle">
-                                <flux:callout.heading>Create an account first</flux:callout.heading>
-                                <flux:callout.text>
-                                    You'll need a {{ config('app.name') }} account to generate an API key for Claude.
-                                </flux:callout.text>
-                            </flux:callout>
+                        <p class="text-zinc-600 dark:text-zinc-400">
+                            Select how you'd like to connect Claude to {{ config('app.name') }}. Both options use secure OAuth authentication.
+                        </p>
 
-                            <div class="flex gap-4">
-                                <a href="{{ route('register') }}" class="traiq-cta-gradient text-white font-semibold px-6 py-3 rounded-lg transition-all">
-                                    Create Account
-                                </a>
-                                <a href="{{ route('login') }}" class="border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold px-6 py-3 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all">
-                                    Log In
-                                </a>
-                            </div>
-                        @else
-                            @if ($tokenCreated && $newToken)
-                                <flux:callout variant="success" icon="check-circle">
-                                    <flux:callout.heading>API Key Created!</flux:callout.heading>
-                                    <flux:callout.text>
-                                        Your API key has been created. Copy it now - you won't be able to see it again.
-                                    </flux:callout.text>
-                                </flux:callout>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            {{-- Claude Desktop Option --}}
+                            <button
+                                wire:click="selectMethod('desktop')"
+                                class="relative p-6 rounded-xl border-2 text-left transition-all hover:border-brand-red hover:bg-zinc-50 dark:hover:bg-zinc-900
+                                    {{ $setupMethod === 'desktop' ? 'border-brand-red bg-zinc-50 dark:bg-zinc-900' : 'border-zinc-200 dark:border-zinc-700' }}"
+                            >
+                                <span class="absolute top-3 right-3 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">
+                                    Recommended
+                                </span>
+                                <div class="flex items-start gap-4">
+                                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+                                        <flux:icon.computer-desktop class="w-6 h-6 text-zinc-600 dark:text-zinc-400" />
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-zinc-900 dark:text-white mb-1">Claude Desktop</h3>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                                            Add as MCP server in Claude Desktop settings
+                                        </p>
+                                    </div>
+                                </div>
+                            </button>
 
-                                <flux:input
-                                    type="text"
-                                    readonly
-                                    copyable
-                                    :value="$newToken"
-                                    class:input="font-mono"
-                                />
+                            {{-- Claude CLI Option --}}
+                            <button
+                                wire:click="selectMethod('cli')"
+                                class="p-6 rounded-xl border-2 text-left transition-all hover:border-brand-red hover:bg-zinc-50 dark:hover:bg-zinc-900
+                                    {{ $setupMethod === 'cli' ? 'border-brand-red bg-zinc-50 dark:bg-zinc-900' : 'border-zinc-200 dark:border-zinc-700' }}"
+                            >
+                                <div class="flex items-start gap-4">
+                                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+                                        <flux:icon.command-line class="w-6 h-6 text-zinc-600 dark:text-zinc-400" />
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-zinc-900 dark:text-white mb-1">Claude Code CLI</h3>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                                            Run a single command in your terminal
+                                        </p>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
 
-                                <flux:button wire:click="goToStep(2)" variant="primary">
-                                    Continue to Step 2
-                                </flux:button>
-                            @else
-                                <p class="text-zinc-600 dark:text-zinc-400">
-                                    Create an API key that Claude will use to manage your workouts. This key authenticates Claude's requests to {{ config('app.name') }}.
-                                </p>
-
-                                <flux:callout variant="warning" icon="exclamation-triangle">
-                                    <flux:callout.heading>Save your key securely</flux:callout.heading>
-                                    <flux:callout.text>
-                                        Your API key will only be shown once. Make sure to copy it to a secure location.
-                                    </flux:callout.text>
-                                </flux:callout>
-
-                                @error('tokenLimit')
-                                    <flux:callout variant="danger" icon="x-circle">
-                                        <flux:callout.text>{{ $message }} <a href="{{ route('api-keys.index') }}" class="underline">Manage API Keys</a></flux:callout.text>
-                                    </flux:callout>
-                                @enderror
-
-                                <form wire:submit="createToken" class="space-y-4">
-                                    <flux:field>
-                                        <flux:label>API Key Name</flux:label>
-                                        <flux:input
-                                            wire:model="tokenName"
-                                            placeholder="e.g., Claude Code"
-                                        />
-                                        <flux:description>A name to help you identify this key later.</flux:description>
-                                        <flux:error name="tokenName" />
-                                    </flux:field>
-
-                                    <flux:button type="submit" variant="primary" icon="key">
-                                        Create API Key
-                                    </flux:button>
-                                </form>
-                            @endif
-                        @endguest
+                        <flux:button wire:click="goToStep(2)" variant="primary">
+                            Continue with {{ $setupMethod === 'desktop' ? 'Claude Desktop' : 'Claude CLI' }}
+                        </flux:button>
                     </div>
                 </flux:accordion.content>
             </flux:accordion.item>
@@ -142,59 +121,136 @@
                                 2
                             @endif
                         </span>
-                        <span class="font-semibold text-zinc-900 dark:text-white">Configure Claude Code</span>
+                        <span class="font-semibold text-zinc-900 dark:text-white">Configure Claude</span>
                     </div>
                 </flux:accordion.heading>
                 <flux:accordion.content>
                     <div class="pl-11 space-y-6">
-                        <p class="text-zinc-600 dark:text-zinc-400">
-                            Run this command in your terminal to connect Claude Code to your {{ config('app.name') }} account:
-                        </p>
+                        @if ($setupMethod === 'desktop')
+                            {{-- Claude Desktop Instructions --}}
+                            <p class="text-zinc-600 dark:text-zinc-400">
+                                Follow these steps to add {{ config('app.name') }} as an MCP server in Claude Desktop:
+                            </p>
 
-                        <div
-                            x-data="{
-                                copied: false,
-                                copy() {
-                                    navigator.clipboard.writeText($wire.getCliCommand()).then(() => {
-                                        this.copied = true;
-                                        setTimeout(() => this.copied = false, 2000);
-                                    });
-                                }
-                            }"
-                            class="space-y-3"
-                        >
-                            <div class="p-4 bg-zinc-900 rounded-lg overflow-x-auto">
-                                <code class="font-mono text-sm text-zinc-100 break-all whitespace-pre-wrap">{{ $this->getCliCommand() }}</code>
+                            <div class="space-y-4">
+                                <div class="flex gap-4">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">1</span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">Open Claude Desktop Settings</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Click on your profile icon and select "Settings"</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-4">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">2</span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">Navigate to Connectors</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Find "Connectors" in the left sidebar</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-4">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">3</span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">Add a Custom Connector</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Click "Add Custom Connector" and enter the URL below:</p>
+                                    </div>
+                                </div>
                             </div>
 
-                            <flux:button @click="copy()" class="w-full">
-                                <flux:icon.document-duplicate x-show="!copied" variant="outline" class="w-4 h-4" />
-                                <flux:icon.check x-show="copied" class="w-4 h-4" />
-                                <span x-text="copied ? 'Copied!' : 'Copy Command'"></span>
-                            </flux:button>
+                            <div
+                                x-data="{
+                                    copied: false,
+                                    copy() {
+                                        navigator.clipboard.writeText('{{ $this->getMcpEndpoint() }}').then(() => {
+                                            this.copied = true;
+                                            setTimeout(() => this.copied = false, 2000);
+                                        });
+                                    }
+                                }"
+                                class="space-y-3"
+                            >
+                                <flux:field>
+                                    <flux:label>MCP Server URL</flux:label>
+                                    <flux:input
+                                        type="text"
+                                        readonly
+                                        copyable
+                                        :value="$this->getMcpEndpoint()"
+                                        class:input="font-mono"
+                                    />
+                                </flux:field>
+                            </div>
 
-                            @guest
-                                <flux:callout variant="warning" icon="exclamation-triangle">
-                                    <flux:callout.text>
-                                        Replace <code class="px-1 bg-zinc-100 dark:bg-zinc-800 rounded">YOUR_API_KEY_HERE</code> with the API key you create in Step 1.
-                                    </flux:callout.text>
-                                </flux:callout>
-                            @else
-                                @if ($tokenCreated && $newToken)
-                                    <flux:callout variant="success" icon="check-circle">
-                                        <flux:callout.text>
-                                            The command above already includes your new API key!
-                                        </flux:callout.text>
-                                    </flux:callout>
-                                @else
-                                    <flux:callout variant="info" icon="information-circle">
-                                        <flux:callout.text>
-                                            Complete Step 1 first to get your API key, then come back here.
-                                        </flux:callout.text>
-                                    </flux:callout>
-                                @endif
-                            @endguest
-                        </div>
+                            <div class="flex gap-4">
+                                <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">4</span>
+                                <div>
+                                    <p class="font-medium text-zinc-900 dark:text-white">Authorize when prompted</p>
+                                    <p class="text-sm text-zinc-500 dark:text-zinc-400">A browser window will open for you to log in and authorize the connection</p>
+                                </div>
+                            </div>
+                        @else
+                            {{-- Claude CLI Instructions --}}
+                            <p class="text-zinc-600 dark:text-zinc-400">
+                                Run this command in your terminal to connect Claude Code to {{ config('app.name') }}:
+                            </p>
+
+                            <div
+                                x-data="{
+                                    copied: false,
+                                    copy() {
+                                        navigator.clipboard.writeText($wire.getCliCommand()).then(() => {
+                                            this.copied = true;
+                                            setTimeout(() => this.copied = false, 2000);
+                                        });
+                                    }
+                                }"
+                                class="space-y-3"
+                            >
+                                <div class="p-4 bg-zinc-900 rounded-lg overflow-x-auto">
+                                    <code class="font-mono text-sm text-zinc-100 break-all whitespace-pre-wrap">{{ $this->getCliCommand() }}</code>
+                                </div>
+
+                                <flux:button @click="copy()" class="w-full">
+                                    <flux:icon.document-duplicate x-show="!copied" variant="outline" class="w-4 h-4" />
+                                    <flux:icon.check x-show="copied" class="w-4 h-4" />
+                                    <span x-text="copied ? 'Copied!' : 'Copy Command'"></span>
+                                </flux:button>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex gap-4">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">1</span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">Open your terminal</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Any terminal application will work</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-4">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">2</span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">Run the command above</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Paste and execute the command to register the MCP server</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-4">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">3</span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">Authorize in your browser</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">A browser window will open for you to log in and authorize the connection</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <flux:callout variant="info" icon="information-circle">
+                            <flux:callout.heading>Secure OAuth Authentication</flux:callout.heading>
+                            <flux:callout.text>
+                                {{ config('app.name') }} uses OAuth for secure authentication. You'll be redirected to log in and authorize Claude to access your workouts.
+                            </flux:callout.text>
+                        </flux:callout>
 
                         <flux:button wire:click="goToStep(3)" variant="primary">
                             Continue to Step 3
@@ -288,8 +344,8 @@
                 <flux:accordion.content>
                     <div class="space-y-4 text-sm text-zinc-600 dark:text-zinc-400">
                         <div>
-                            <h4 class="font-medium text-zinc-900 dark:text-white mb-2">"Authentication failed" or "401 Unauthorized"</h4>
-                            <p>Make sure your API key is correct and hasn't been revoked. You can check your active keys in <a href="{{ route('api-keys.index') }}" class="text-brand-red hover:underline">Settings > API Keys</a>.</p>
+                            <h4 class="font-medium text-zinc-900 dark:text-white mb-2">"Authorization failed" or "OAuth error"</h4>
+                            <p>Make sure you're logged into {{ config('app.name') }} in your browser and try the authorization again. Clear your browser cookies if the issue persists.</p>
                         </div>
 
                         <div>
@@ -299,7 +355,7 @@
 
                         <div>
                             <h4 class="font-medium text-zinc-900 dark:text-white mb-2">Claude doesn't recognize the {{ config('app.name') }} commands</h4>
-                            <p>Restart Claude Code after adding the MCP configuration. The server needs to be loaded fresh.</p>
+                            <p>Restart Claude after adding the MCP configuration. The server needs to be loaded fresh.</p>
                         </div>
 
                         <div>

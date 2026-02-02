@@ -1,7 +1,6 @@
 <?php
 
 use App\Livewire\GetStarted;
-use App\Livewire\Settings\ApiKeys;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\FitnessProfile;
 use App\Livewire\Settings\Password;
@@ -56,6 +55,5 @@ Route::middleware(['auth'])->group(function () {
         )
         ->name('two-factor.show');
 
-    Route::get('settings/api-keys', ApiKeys::class)->name('api-keys.index');
     Route::get('settings/fitness-profile', FitnessProfile::class)->name('fitness-profile.edit');
 });

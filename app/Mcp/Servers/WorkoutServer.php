@@ -37,16 +37,15 @@ class WorkoutServer extends Server
 
         ## Authentication
 
-        All requests require authentication via Sanctum token.
+        All requests require OAuth 2.1 authentication via Laravel Passport.
 
-        - **Endpoint:** `'.config('app.url').'/mcp/workout`
-        - **Authentication:** Include a Bearer token in the Authorization header
-        - **Header:** `Authorization: Bearer <api_token>`
-        - **User:** Automatically determined from the authenticated token
+        - **OAuth Discovery:** `/.well-known/oauth-authorization-server`
+        - **Endpoint:** `{app_url}/mcp/workout`
+        - **User:** Automatically determined from the authenticated OAuth token
 
         ## User Identification
 
-        - User is automatically authenticated via Sanctum token
+        - User is automatically authenticated via OAuth token
         - Dates and times are in the user's timezone (server handles UTC conversion automatically)
 
         ## Activity Types

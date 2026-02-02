@@ -1,7 +1,5 @@
 <?php
 
-use Laravel\Passport\ClientRepository;
-
 /*
 |--------------------------------------------------------------------------
 | Test Case

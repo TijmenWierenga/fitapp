@@ -95,6 +95,40 @@
                 </flux:card>
             @endif
 
+            {{-- Completion Notes Card --}}
+            @if($workout->isCompleted() && $workout->completion_notes)
+                <flux:card>
+                    <flux:heading size="lg" class="mb-4">Completion Notes</flux:heading>
+                    <div class="prose prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400">
+                        {!! Str::markdown($workout->completion_notes, ['html_input' => 'escape']) !!}
+                    </div>
+                </flux:card>
+            @endif
+
+            {{-- Injury Evaluations Card --}}
+            @if($workout->isCompleted() && $workout->injuryEvaluations->isNotEmpty())
+                <flux:card>
+                    <flux:heading size="lg" class="mb-4">Injury Feedback</flux:heading>
+                    <div class="space-y-4">
+                        @foreach($workout->injuryEvaluations as $evaluation)
+                            <div class="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <flux:badge color="amber" size="sm">{{ $evaluation->injury->body_part->label() }}</flux:badge>
+                                    @if($evaluation->discomfort_score)
+                                        <span class="text-sm font-medium {{ $evaluation->discomfort_score >= 7 ? 'text-red-600 dark:text-red-400' : ($evaluation->discomfort_score >= 4 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400') }}">
+                                            Discomfort: {{ $evaluation->discomfort_score }}/10
+                                        </span>
+                                    @endif
+                                </div>
+                                @if($evaluation->notes)
+                                    <flux:text class="text-sm text-zinc-600 dark:text-zinc-400">{{ $evaluation->notes }}</flux:text>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </flux:card>
+            @endif
+
             {{-- Steps Table Card --}}
             @if($workout->rootSteps->isNotEmpty())
                 <flux:card>
@@ -254,6 +288,64 @@
                 </div>
                 <flux:error name="feeling" />
             </flux:field>
+
+            {{-- Completion Notes Section --}}
+            <flux:field>
+                <flux:label>Workout Notes (Optional)</flux:label>
+                <flux:description>Any thoughts about this workout? What went well, challenges, etc.</flux:description>
+                <flux:textarea
+                    wire:model="completionNotes"
+                    rows="3"
+                    placeholder="e.g., Felt strong on the first half, struggled with pacing..."
+                />
+                <flux:error name="completionNotes" />
+            </flux:field>
+
+            {{-- Injury Feedback Section --}}
+            @if($this->activeInjuries->isNotEmpty())
+                <div class="space-y-4">
+                    <div>
+                        <flux:label>Injury Feedback (Optional)</flux:label>
+                        <flux:description>How did your injuries feel during this workout?</flux:description>
+                    </div>
+
+                    @foreach($this->activeInjuries as $injury)
+                        <div class="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg space-y-3">
+                            <div class="flex items-center gap-2">
+                                <flux:badge color="amber" size="sm">{{ $injury->body_part->label() }}</flux:badge>
+                                <flux:text class="text-sm text-zinc-500">{{ $injury->injury_type->label() }}</flux:text>
+                            </div>
+
+                            {{-- Discomfort Score --}}
+                            <div>
+                                <flux:text class="text-sm font-medium mb-2">Discomfort Level</flux:text>
+                                <div class="flex gap-1">
+                                    @foreach(range(1, 10) as $score)
+                                        <button
+                                            type="button"
+                                            wire:click="setInjuryDiscomfort({{ $injury->id }}, {{ $score }})"
+                                            class="flex-1 py-1.5 text-xs font-medium rounded transition-colors {{ ($injuryEvaluations[$injury->id]['discomfort_score'] ?? null) === $score ? ($score >= 7 ? 'bg-red-500 text-white' : ($score >= 4 ? 'bg-amber-500 text-white' : 'bg-green-500 text-white')) : 'bg-zinc-200 dark:bg-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-500' }}"
+                                        >
+                                            {{ $score }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                                <div class="flex justify-between mt-1 text-xs text-zinc-400">
+                                    <span>Minimal</span>
+                                    <span>Severe</span>
+                                </div>
+                            </div>
+
+                            {{-- Notes --}}
+                            <flux:textarea
+                                wire:model="injuryEvaluations.{{ $injury->id }}.notes"
+                                rows="2"
+                                placeholder="Any notes about how this injury felt..."
+                            />
+                        </div>
+                    @endforeach
+                </div>
+            @endif
 
             <div class="flex gap-2 justify-between">
                 <flux:button type="button" wire:click="cancelEvaluation" variant="ghost">

@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon $updated_at
  * @property-read User $user
  * @property-read bool $is_active
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, WorkoutInjuryEvaluation> $workoutEvaluations
  */
 class Injury extends Model
 {
@@ -79,6 +80,14 @@ class Injury extends Model
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<WorkoutInjuryEvaluation, $this>
+     */
+    public function workoutEvaluations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(WorkoutInjuryEvaluation::class);
     }
 
     /**

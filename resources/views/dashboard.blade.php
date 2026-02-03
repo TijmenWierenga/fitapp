@@ -22,4 +22,5 @@
     </div>
 
     <livewire:workout.duplicate />
+    <livewire:workout.complete />
 </x-layouts.app>

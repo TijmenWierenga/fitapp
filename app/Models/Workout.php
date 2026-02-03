@@ -17,9 +17,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $completed_at
  * @property int|null $rpe
  * @property int|null $feeling
+ * @property string|null $completion_notes
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  * @property-read User $user
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, WorkoutInjuryEvaluation> $injuryEvaluations
  */
 class Workout extends Model
 {
@@ -35,6 +37,7 @@ class Workout extends Model
         'completed_at',
         'rpe',
         'feeling',
+        'completion_notes',
     ];
 
     protected function casts(): array
@@ -91,6 +94,14 @@ class Workout extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<WorkoutInjuryEvaluation, $this>
+     */
+    public function injuryEvaluations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(WorkoutInjuryEvaluation::class);
+    }
+
+    /**
      * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
      */
     public function scopeUpcoming(\Illuminate\Database\Eloquent\Builder $query): void
@@ -129,12 +140,13 @@ class Workout extends Model
         return ! $this->isCompleted();
     }
 
-    public function markAsCompleted(int $rpe, int $feeling): void
+    public function markAsCompleted(int $rpe, int $feeling, ?string $completionNotes = null): void
     {
         $this->update([
             'completed_at' => now(),
             'rpe' => $rpe,
             'feeling' => $feeling,
+            'completion_notes' => $completionNotes,
         ]);
     }
 

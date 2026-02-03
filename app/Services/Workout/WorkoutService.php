@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\Workout;
 
+use App\Data\CompleteWorkoutData;
 use App\Data\CreateWorkoutData;
 use App\Data\UpdateWorkoutData;
 use App\Models\User;
 use App\Models\Workout;
+use App\Models\WorkoutInjuryEvaluation;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class WorkoutService
@@ -58,14 +61,33 @@ class WorkoutService
         return (bool) $workout->delete();
     }
 
-    public function complete(User $user, Workout $workout, int $rpe, int $feeling): Workout
+    public function complete(User $user, Workout $workout, CompleteWorkoutData $data): Workout
     {
         Gate::forUser($user)->authorize('complete', $workout);
 
-        $workout->markAsCompleted($rpe, $feeling);
-        $workout->refresh();
+        return DB::transaction(function () use ($user, $workout, $data): Workout {
+            $workout->markAsCompleted($data->rpe, $data->feeling, $data->completionNotes);
 
-        return $workout;
+            foreach ($data->injuryEvaluations as $evaluation) {
+                $injury = $user->injuries()->find($evaluation->injuryId);
+
+                if ($injury === null) {
+                    continue;
+                }
+
+                WorkoutInjuryEvaluation::create([
+                    'workout_id' => $workout->id,
+                    'injury_id' => $evaluation->injuryId,
+                    'discomfort_score' => $evaluation->discomfortScore,
+                    'notes' => $evaluation->notes,
+                ]);
+            }
+
+            $workout->refresh();
+            $workout->load('injuryEvaluations.injury');
+
+            return $workout;
+        });
     }
 
     public function find(User $user, int $workoutId): ?Workout

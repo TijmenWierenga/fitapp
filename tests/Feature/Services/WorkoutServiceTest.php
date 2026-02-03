@@ -1,8 +1,11 @@
 <?php
 
+use App\Data\CompleteWorkoutData;
 use App\Data\CreateWorkoutData;
+use App\Data\InjuryEvaluationData;
 use App\Data\UpdateWorkoutData;
 use App\Enums\Workout\Activity;
+use App\Models\Injury;
 use App\Models\User;
 use App\Models\Workout;
 use App\Services\Workout\WorkoutService;
@@ -109,7 +112,8 @@ describe('complete', function () {
         $user = User::factory()->create();
         $workout = Workout::factory()->for($user)->upcoming()->create();
 
-        $completed = $this->service->complete($user, $workout, 7, 4);
+        $data = new CompleteWorkoutData(rpe: 7, feeling: 4);
+        $completed = $this->service->complete($user, $workout, $data);
 
         expect($completed)
             ->rpe->toBe(7)
@@ -117,11 +121,75 @@ describe('complete', function () {
             ->completed_at->not->toBeNull();
     });
 
+    it('saves completion notes when provided', function () {
+        $user = User::factory()->create();
+        $workout = Workout::factory()->for($user)->upcoming()->create();
+
+        $data = new CompleteWorkoutData(
+            rpe: 7,
+            feeling: 4,
+            completionNotes: 'Great workout, felt strong!'
+        );
+        $completed = $this->service->complete($user, $workout, $data);
+
+        expect($completed->completion_notes)->toBe('Great workout, felt strong!');
+    });
+
+    it('saves injury evaluations when provided', function () {
+        $user = User::factory()->create();
+        $injury = Injury::factory()->for($user)->active()->create();
+        $workout = Workout::factory()->for($user)->upcoming()->create();
+
+        $data = new CompleteWorkoutData(
+            rpe: 6,
+            feeling: 3,
+            completionNotes: null,
+            injuryEvaluations: [
+                new InjuryEvaluationData(
+                    injuryId: $injury->id,
+                    discomfortScore: 4,
+                    notes: 'Mild discomfort during squats',
+                ),
+            ],
+        );
+
+        $completed = $this->service->complete($user, $workout, $data);
+
+        expect($completed->injuryEvaluations)->toHaveCount(1);
+        expect($completed->injuryEvaluations->first())
+            ->discomfort_score->toBe(4)
+            ->notes->toBe('Mild discomfort during squats')
+            ->injury_id->toBe($injury->id);
+    });
+
+    it('ignores injury evaluations for injuries not belonging to the user', function () {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $otherInjury = Injury::factory()->for($otherUser)->active()->create();
+        $workout = Workout::factory()->for($user)->upcoming()->create();
+
+        $data = new CompleteWorkoutData(
+            rpe: 6,
+            feeling: 3,
+            injuryEvaluations: [
+                new InjuryEvaluationData(
+                    injuryId: $otherInjury->id,
+                    discomfortScore: 5,
+                ),
+            ],
+        );
+
+        $completed = $this->service->complete($user, $workout, $data);
+
+        expect($completed->injuryEvaluations)->toHaveCount(0);
+    });
+
     it('throws authorization exception for already completed workout', function () {
         $user = User::factory()->create();
         $workout = Workout::factory()->for($user)->completed()->create();
 
-        $this->service->complete($user, $workout, 7, 4);
+        $data = new CompleteWorkoutData(rpe: 7, feeling: 4);
+        $this->service->complete($user, $workout, $data);
     })->throws(AuthorizationException::class);
 });
 

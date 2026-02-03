@@ -2,6 +2,7 @@
 
 use App\Mcp\Servers\WorkoutServer;
 use App\Mcp\Tools\CompleteWorkoutTool;
+use App\Models\Injury;
 use App\Models\User;
 use App\Models\Workout;
 
@@ -43,6 +44,101 @@ it('includes rpe label in response', function () {
 
     $response->assertOk()
         ->assertSee('Very Easy');
+});
+
+it('saves completion notes', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
+        'workout_id' => $workout->id,
+        'rpe' => 5,
+        'feeling' => 4,
+        'completion_notes' => 'Felt great today!',
+    ]);
+
+    $response->assertOk()
+        ->assertSee('Felt great today!');
+
+    assertDatabaseHas('workouts', [
+        'id' => $workout->id,
+        'completion_notes' => 'Felt great today!',
+    ]);
+});
+
+it('saves injury evaluations', function () {
+    $user = User::factory()->create();
+    $injury = Injury::factory()->for($user)->active()->create();
+    $workout = Workout::factory()->for($user)->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
+        'workout_id' => $workout->id,
+        'rpe' => 6,
+        'feeling' => 3,
+        'injury_evaluations' => [
+            [
+                'injury_id' => $injury->id,
+                'discomfort_score' => 4,
+                'notes' => 'Minor pain during lunges',
+            ],
+        ],
+    ]);
+
+    $response->assertOk();
+
+    assertDatabaseHas('workout_injury_evaluations', [
+        'workout_id' => $workout->id,
+        'injury_id' => $injury->id,
+        'discomfort_score' => 4,
+        'notes' => 'Minor pain during lunges',
+    ]);
+});
+
+it('includes injury evaluations in response', function () {
+    $user = User::factory()->create();
+    $injury = Injury::factory()->for($user)->active()->create([
+        'body_part' => \App\Enums\BodyPart::Knee,
+    ]);
+    $workout = Workout::factory()->for($user)->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
+        'workout_id' => $workout->id,
+        'rpe' => 6,
+        'feeling' => 3,
+        'injury_evaluations' => [
+            [
+                'injury_id' => $injury->id,
+                'discomfort_score' => 5,
+            ],
+        ],
+    ]);
+
+    $response->assertOk()
+        ->assertSee('injury_evaluations')
+        ->assertSee('Knee');
+});
+
+it('ignores injury evaluations for other users injuries', function () {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $otherInjury = Injury::factory()->for($otherUser)->active()->create();
+    $workout = Workout::factory()->for($user)->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
+        'workout_id' => $workout->id,
+        'rpe' => 6,
+        'feeling' => 3,
+        'injury_evaluations' => [
+            [
+                'injury_id' => $otherInjury->id,
+                'discomfort_score' => 5,
+            ],
+        ],
+    ]);
+
+    $response->assertOk();
+
+    expect(\App\Models\WorkoutInjuryEvaluation::count())->toBe(0);
 });
 
 it('fails to complete already completed workout', function () {

@@ -67,9 +67,9 @@ class WorkoutCalendar extends Component
         $weeks = [];
         $currentWeek = [];
 
-        // Start from the beginning of the week
-        $startDate = $firstDay->copy()->startOfWeek();
-        $endDate = $lastDay->copy()->endOfWeek();
+        // Start from the beginning of the week (Sunday)
+        $startDate = $firstDay->copy()->startOfWeek(Carbon::SUNDAY);
+        $endDate = $lastDay->copy()->endOfWeek(Carbon::SATURDAY);
 
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
             $dateKey = $date->format('Y-m-d');

@@ -2,6 +2,9 @@
 
 namespace App\Mcp\Servers;
 
+use App\Mcp\Prompts\CreateWorkoutPrompt;
+use App\Mcp\Resources\UserFitnessProfileResource;
+use App\Mcp\Resources\UserInjuriesResource;
 use App\Mcp\Resources\UserProfileResource;
 use App\Mcp\Resources\WorkoutScheduleResource;
 use App\Mcp\Tools\AddInjuryTool;
@@ -149,6 +152,10 @@ class WorkoutServer extends Server
         - **add-injury**: Add an injury record to track limitations
         - **remove-injury**: Remove an injury record
 
+        ## Available Prompts
+
+        - **create-workout**: Interactive guide for creating a new workout with smart defaults based on your fitness profile, schedule, and active injuries. All arguments are optional - the prompt will guide you through any missing information step-by-step.
+
         ## Injury Assessment Protocol
 
         Before adding an injury using the `add-injury` tool, you MUST gather comprehensive information through a structured assessment. Follow these steps:
@@ -206,7 +213,9 @@ class WorkoutServer extends Server
 
         ## Available Resources
 
-        - **user://profile**: Read-only user profile information including fitness profile and injuries
+        - **user://profile**: Read-only user identity (name, email, timezone, initials)
+        - **user://fitness-profile**: Read-only fitness goals and training preferences
+        - **user://injuries**: Read-only injury information (active and past injuries)
         - **workout://schedule**: Read-only workout schedule (upcoming & completed). Supports optional `upcoming_limit` (default 20, max 50) and `completed_limit` (default 10, max 50) parameters.
     MARKDOWN;
 
@@ -236,6 +245,8 @@ class WorkoutServer extends Server
      */
     protected array $resources = [
         UserProfileResource::class,
+        UserFitnessProfileResource::class,
+        UserInjuriesResource::class,
         WorkoutScheduleResource::class,
     ];
 
@@ -245,6 +256,6 @@ class WorkoutServer extends Server
      * @var array<int, class-string<\Laravel\Mcp\Server\Prompt>>
      */
     protected array $prompts = [
-        //
+        CreateWorkoutPrompt::class,
     ];
 }

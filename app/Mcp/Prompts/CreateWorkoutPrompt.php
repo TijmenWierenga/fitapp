@@ -8,7 +8,7 @@ use App\Enums\Workout\Activity;
 use App\Models\Injury;
 use App\Models\User;
 use App\Models\Workout;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
@@ -52,7 +52,7 @@ class CreateWorkoutPrompt extends Prompt
             $responses[] = Response::text($this->buildActivityPrompt($context));
         }
 
-            // Step 3: Workout name suggestion
+        // Step 3: Workout name suggestion
         if (! isset($validated['name'])) {
             $responses[] = Response::text($this->buildNamePrompt($validated['activity'] ?? null));
         }
@@ -365,16 +365,16 @@ class CreateWorkoutPrompt extends Prompt
 
         // Look ahead 7 days, find 4 non-conflicting slots
         for ($day = 1; $day <= 7 && count($suggestions) < 4; $day++) {
-            $candidate = $now->copy()->addDays($day);
+            $candidate = $now->addDays($day);
 
             // Try morning slot (7 AM)
-            $morning = $candidate->copy()->setTime(7, 0);
+            $morning = $candidate->setTime(7, 0);
             if (! $this->hasConflict($morning, $upcomingWorkouts, $user) && count($suggestions) < 4) {
                 $suggestions[] = $morning;
             }
 
             // Try evening slot (6 PM)
-            $evening = $candidate->copy()->setTime(18, 0);
+            $evening = $candidate->setTime(18, 0);
             if (! $this->hasConflict($evening, $upcomingWorkouts, $user) && count($suggestions) < 4) {
                 $suggestions[] = $evening;
             }
@@ -386,9 +386,9 @@ class CreateWorkoutPrompt extends Prompt
     /**
      * @param  Collection<int, Workout>  $upcomingWorkouts
      */
-    protected function hasConflict(Carbon $candidate, Collection $upcomingWorkouts, User $user): bool
+    protected function hasConflict(CarbonImmutable $candidate, Collection $upcomingWorkouts, User $user): bool
     {
-        $candidateUtc = $candidate->copy()->setTimezone('UTC');
+        $candidateUtc = $candidate->setTimezone('UTC');
 
         foreach ($upcomingWorkouts as $workout) {
             $workoutTime = $workout->scheduled_at;

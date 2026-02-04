@@ -6,8 +6,8 @@ use App\Enums\Workout\Activity;
 use App\Models\User;
 use App\Models\Workout;
 use App\Services\Workout\WorkoutService;
+use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Carbon;
 
 beforeEach(function () {
     $this->service = new WorkoutService;
@@ -20,7 +20,7 @@ describe('create', function () {
         $data = new CreateWorkoutData(
             name: 'Morning Run',
             activity: Activity::Run,
-            scheduledAt: Carbon::parse('2026-02-01 08:00:00'),
+            scheduledAt: CarbonImmutable::parse('2026-02-01 08:00:00'),
             notes: 'Easy pace',
         );
 
@@ -40,7 +40,7 @@ describe('create', function () {
         $data = new CreateWorkoutData(
             name: 'Strength Training',
             activity: Activity::Strength,
-            scheduledAt: Carbon::parse('2026-02-01 18:00:00'),
+            scheduledAt: CarbonImmutable::parse('2026-02-01 18:00:00'),
         );
 
         $workout = $this->service->create($user, $data);

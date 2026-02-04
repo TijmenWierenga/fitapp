@@ -10,7 +10,7 @@ use App\Models\FitnessProfile;
 use App\Models\Injury;
 use App\Models\User;
 use App\Models\Workout;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonImmutable;
 
 it('returns interactive prompts when no arguments provided', function () {
     $user = User::factory()->withTimezone('Europe/Amsterdam')->create();
@@ -49,7 +49,7 @@ it('shows active injuries in greeting', function () {
         'user_id' => $user->id,
         'body_part' => BodyPart::Knee,
         'injury_type' => InjuryType::Acute,
-        'started_at' => Carbon::now()->subDays(7),
+        'started_at' => CarbonImmutable::now()->subDays(7),
         'ended_at' => null,
         'notes' => 'Runner\'s knee',
     ]);
@@ -91,7 +91,7 @@ it('filters activities based on active injuries', function () {
         'user_id' => $user->id,
         'body_part' => BodyPart::Ankle,
         'injury_type' => InjuryType::Acute,
-        'started_at' => Carbon::now()->subDays(3),
+        'started_at' => CarbonImmutable::now()->subDays(3),
         'ended_at' => null,
     ]);
 
@@ -195,7 +195,7 @@ it('provides injury modifications in activity suggestions', function () {
         'user_id' => $user->id,
         'body_part' => BodyPart::Shoulder,
         'injury_type' => InjuryType::Chronic,
-        'started_at' => Carbon::now()->subMonths(2),
+        'started_at' => CarbonImmutable::now()->subMonths(2),
         'ended_at' => null,
     ]);
 
@@ -215,7 +215,7 @@ it('shows upcoming workouts in greeting', function () {
         'user_id' => $user->id,
         'name' => 'Leg Day',
         'activity' => Activity::Strength,
-        'scheduled_at' => Carbon::now('UTC')->addDay()->setTime(7, 0),
+        'scheduled_at' => CarbonImmutable::now('UTC')->addDay()->setTime(7, 0),
         'completed_at' => null,
     ]);
 
@@ -243,7 +243,7 @@ it('includes explicit injury constraints section when user has active injuries',
         'user_id' => $user->id,
         'body_part' => BodyPart::Knee,
         'injury_type' => InjuryType::Acute,
-        'started_at' => Carbon::now()->subDays(5),
+        'started_at' => CarbonImmutable::now()->subDays(5),
         'ended_at' => null,
         'notes' => 'Patellar tendonitis',
     ]);
@@ -252,7 +252,7 @@ it('includes explicit injury constraints section when user has active injuries',
         'user_id' => $user->id,
         'body_part' => BodyPart::Shoulder,
         'injury_type' => InjuryType::Chronic,
-        'started_at' => Carbon::now()->subMonths(3),
+        'started_at' => CarbonImmutable::now()->subMonths(3),
         'ended_at' => null,
     ]);
 
@@ -276,8 +276,8 @@ it('does not include injury constraints section when user has no active injuries
         'user_id' => $user->id,
         'body_part' => BodyPart::Ankle,
         'injury_type' => InjuryType::Acute,
-        'started_at' => Carbon::now()->subMonths(2),
-        'ended_at' => Carbon::now()->subMonth(),
+        'started_at' => CarbonImmutable::now()->subMonths(2),
+        'ended_at' => CarbonImmutable::now()->subMonth(),
     ]);
 
     $response = WorkoutServer::actingAs($user)->prompt(CreateWorkoutPrompt::class);

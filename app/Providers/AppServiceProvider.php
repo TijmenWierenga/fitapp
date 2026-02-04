@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 
@@ -21,5 +23,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Passport::authorizationView(fn ($parameters) => view('mcp.authorize', $parameters));
+        Date::use(CarbonImmutable::class);
     }
 }

@@ -4,8 +4,8 @@ namespace App\Services\Training;
 
 use App\Models\User;
 use App\Models\Workout;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Carbon;
 
 class TrainingAnalyticsService
 {
@@ -59,7 +59,7 @@ class TrainingAnalyticsService
         $workoutsPerWeek = [];
         for ($i = 0; $i < $weeks; $i++) {
             $weekStart = now()->subWeeks($weeks - 1 - $i)->startOfWeek();
-            $weekEnd = $weekStart->copy()->endOfWeek();
+            $weekEnd = $weekStart->endOfWeek();
             $count = $completed->filter(fn (Workout $w) => $w->completed_at->between($weekStart, $weekEnd))->count();
             $workoutsPerWeek[] = [
                 'week_start' => $weekStart->toDateString(),
@@ -73,7 +73,7 @@ class TrainingAnalyticsService
     protected function calculateStreak(User $user): int
     {
         $streak = 0;
-        $date = Carbon::today();
+        $date = CarbonImmutable::today();
 
         while (true) {
             $hasWorkout = $user->workouts()

@@ -5,9 +5,9 @@ namespace App\Mcp\Tools;
 use App\Data\UpdateWorkoutData;
 use App\Enums\Workout\Activity;
 use App\Services\Workout\WorkoutService;
+use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -54,7 +54,7 @@ class UpdateWorkoutTool extends Tool
 
         $scheduledAt = null;
         if (isset($validated['scheduled_at'])) {
-            $scheduledAt = Carbon::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
+            $scheduledAt = CarbonImmutable::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
         }
 
         $data = new UpdateWorkoutData(

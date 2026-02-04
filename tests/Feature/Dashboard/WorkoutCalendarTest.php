@@ -2,7 +2,7 @@
 
 use App\Livewire\Dashboard\WorkoutCalendar;
 use App\Models\User;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Livewire\Livewire;
 
 test('calendar weeks start on Sunday', function () {
@@ -19,7 +19,7 @@ test('calendar weeks start on Sunday', function () {
     $firstDay = $weeks[0][0]['date'];
 
     // Verify it's a Sunday (dayOfWeek 0)
-    expect($firstDay->dayOfWeek)->toBe(Carbon::SUNDAY)
+    expect($firstDay->dayOfWeek)->toBe(CarbonImmutable::SUNDAY)
         ->and($firstDay->format('l'))->toBe('Sunday');
 });
 
@@ -90,7 +90,7 @@ test('calendar weeks end on Saturday', function () {
     foreach ($weeks as $week) {
         // Last day of each week should be Saturday
         $lastDay = end($week)['date'];
-        expect($lastDay->dayOfWeek)->toBe(Carbon::SATURDAY)
+        expect($lastDay->dayOfWeek)->toBe(CarbonImmutable::SATURDAY)
             ->and($lastDay->format('l'))->toBe('Saturday');
     }
 });

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Dashboard;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -21,14 +21,14 @@ class WorkoutCalendar extends Component
 
     public function previousMonth(): void
     {
-        $date = Carbon::create($this->year, $this->month, 1)->subMonth();
+        $date = CarbonImmutable::create($this->year, $this->month, 1)->subMonth();
         $this->year = $date->year;
         $this->month = $date->month;
     }
 
     public function nextMonth(): void
     {
-        $date = Carbon::create($this->year, $this->month, 1)->addMonth();
+        $date = CarbonImmutable::create($this->year, $this->month, 1)->addMonth();
         $this->year = $date->year;
         $this->month = $date->month;
     }
@@ -42,17 +42,17 @@ class WorkoutCalendar extends Component
     #[Computed]
     public function monthName(): string
     {
-        return Carbon::create($this->year, $this->month, 1)->format('F Y');
+        return CarbonImmutable::create($this->year, $this->month, 1)->format('F Y');
     }
 
     /**
-     * @return array<int, array<int, array{date: \Carbon\Carbon, isCurrentMonth: bool, isToday: bool, isPast: bool, workouts: \Illuminate\Support\Collection<int, \App\Models\Workout>}>>
+     * @return array<int, array<int, array{date: \Carbon\CarbonImmutable, isCurrentMonth: bool, isToday: bool, isPast: bool, workouts: \Illuminate\Support\Collection<int, \App\Models\Workout>}>>
      */
     #[Computed]
     public function calendarWeeks(): array
     {
-        $firstDay = Carbon::create($this->year, $this->month, 1);
-        $lastDay = $firstDay->copy()->endOfMonth();
+        $firstDay = CarbonImmutable::create($this->year, $this->month, 1);
+        $lastDay = $firstDay->endOfMonth();
 
         // Get workouts for this month
         /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Workout> $workoutsModels */
@@ -68,22 +68,22 @@ class WorkoutCalendar extends Component
         $currentWeek = [];
 
         // Start from the beginning of the week (Sunday)
-        $startDate = $firstDay->copy()->startOfWeek(Carbon::SUNDAY);
-        $endDate = $lastDay->copy()->endOfWeek(Carbon::SATURDAY);
+        $startDate = $firstDay->startOfWeek(CarbonImmutable::SUNDAY);
+        $endDate = $lastDay->endOfWeek(CarbonImmutable::SATURDAY);
 
-        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+        for ($date = $startDate; $date->lte($endDate); $date = $date->addDay()) {
             $dateKey = $date->format('Y-m-d');
             $dayWorkouts = $workouts->get($dateKey, collect());
 
             $currentWeek[] = [
-                'date' => $date->copy(),
+                'date' => $date,
                 'isCurrentMonth' => $date->month === $this->month,
                 'isToday' => $date->isToday(),
                 'isPast' => $date->isPast() && ! $date->isToday(),
                 'workouts' => $dayWorkouts,
             ];
 
-            if ($date->dayOfWeek === Carbon::SATURDAY) {
+            if ($date->dayOfWeek === CarbonImmutable::SATURDAY) {
                 $weeks[] = $currentWeek;
                 $currentWeek = [];
             }

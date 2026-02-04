@@ -6,8 +6,8 @@ use App\Data\InjuryData;
 use App\Enums\BodyPart;
 use App\Enums\InjuryType;
 use App\Services\Injury\InjuryService;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -61,8 +61,8 @@ class AddInjuryTool extends Tool
         $data = new InjuryData(
             injuryType: InjuryType::from($validated['injury_type']),
             bodyPart: BodyPart::from($validated['body_part']),
-            startedAt: Carbon::parse($validated['started_at']),
-            endedAt: isset($validated['ended_at']) ? Carbon::parse($validated['ended_at']) : null,
+            startedAt: CarbonImmutable::parse($validated['started_at']),
+            endedAt: isset($validated['ended_at']) ? CarbonImmutable::parse($validated['ended_at']) : null,
             notes: $validated['notes'] ?? null,
         );
 

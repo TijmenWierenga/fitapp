@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonImmutable;
 
 it('returns UTC timezone object when no timezone is set', function () {
     $user = User::factory()->create(['timezone' => null]);
@@ -27,7 +27,7 @@ it('converts a date to the user timezone', function () {
     $user = User::factory()->withTimezone('America/New_York')->create();
 
     // Create a UTC date
-    $utcDate = Carbon::create(2026, 1, 15, 12, 0, 0, 'UTC');
+    $utcDate = CarbonImmutable::create(2026, 1, 15, 12, 0, 0, 'UTC');
 
     $userDate = $user->toUserTimezone($utcDate);
 
@@ -39,7 +39,7 @@ it('converts a date to the user timezone', function () {
 it('does not mutate the original date when converting to user timezone', function () {
     $user = User::factory()->withTimezone('Europe/Amsterdam')->create();
 
-    $originalDate = Carbon::create(2026, 1, 15, 12, 0, 0, 'UTC');
+    $originalDate = CarbonImmutable::create(2026, 1, 15, 12, 0, 0, 'UTC');
     $originalHour = $originalDate->hour;
 
     $user->toUserTimezone($originalDate);

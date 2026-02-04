@@ -3,11 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Carbon\CarbonImmutable;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Passport\Contracts\OAuthenticatable;
@@ -109,18 +109,18 @@ class User extends Authenticatable implements OAuthenticatable
     }
 
     /**
-     * Convert a Carbon instance to the user's timezone.
+     * Convert a CarbonImmutable instance to the user's timezone.
      */
-    public function toUserTimezone(Carbon $date): Carbon
+    public function toUserTimezone(CarbonImmutable $date): CarbonImmutable
     {
-        return $date->copy()->setTimezone($this->getTimezoneObject());
+        return $date->setTimezone($this->getTimezoneObject());
     }
 
     /**
      * Get the current time in the user's timezone.
      */
-    public function currentTimeInTimezone(): Carbon
+    public function currentTimeInTimezone(): CarbonImmutable
     {
-        return Carbon::now($this->getTimezoneObject());
+        return CarbonImmutable::now($this->getTimezoneObject());
     }
 }

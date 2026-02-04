@@ -39,7 +39,7 @@ class WorkoutSeeder extends Seeder
                 ->for($user)
                 ->create([
                     'scheduled_at' => $scheduledAt,
-                    'completed_at' => $completed ? $scheduledAt->copy()->addMinutes(rand(30, 90)) : null,
+                    'completed_at' => $completed ? $scheduledAt->addMinutes(rand(30, 90)) : null,
                 ]);
         }
 

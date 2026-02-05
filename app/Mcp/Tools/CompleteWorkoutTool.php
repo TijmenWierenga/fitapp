@@ -3,9 +3,9 @@
 namespace App\Mcp\Tools;
 
 use App\Models\Workout;
-use App\Services\Workout\WorkoutService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Gate;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
@@ -33,10 +33,6 @@ class CompleteWorkoutTool extends Tool
         - 5: Great
     MARKDOWN;
 
-    public function __construct(
-        protected WorkoutService $workoutService
-    ) {}
-
     /**
      * Handle the tool request.
      */
@@ -55,17 +51,20 @@ class CompleteWorkoutTool extends Tool
 
         $user = $request->user();
 
-        $workout = $this->workoutService->find($user, $validated['workout_id']);
+        $workout = $user->workouts()->find($validated['workout_id']);
 
         if (! $workout) {
             return Response::error('Workout not found or access denied');
         }
 
         try {
-            $workout = $this->workoutService->complete($user, $workout, $validated['rpe'], $validated['feeling']);
+            Gate::forUser($user)->authorize('complete', $workout);
         } catch (AuthorizationException) {
             return Response::error('Workout is already completed');
         }
+
+        $workout->markAsCompleted($validated['rpe'], $validated['feeling']);
+        $workout->refresh();
 
         return Response::text(json_encode([
             'success' => true,

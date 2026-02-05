@@ -2,9 +2,9 @@
 
 namespace App\Mcp\Tools;
 
-use App\Services\Injury\InjuryService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Gate;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
@@ -19,10 +19,6 @@ class RemoveInjuryTool extends Tool
         record is no longer needed or was added in error.
     MARKDOWN;
 
-    public function __construct(
-        protected InjuryService $injuryService
-    ) {}
-
     /**
      * Handle the tool request.
      */
@@ -36,12 +32,21 @@ class RemoveInjuryTool extends Tool
 
         $user = $request->user();
 
-        $injury = $this->injuryService->find($user, $validated['injury_id']);
+        $injury = $user->injuries()->find($validated['injury_id']);
 
         if (! $injury) {
             return Response::text(json_encode([
                 'success' => false,
                 'error' => 'Injury not found or does not belong to this user.',
+            ]));
+        }
+
+        try {
+            Gate::forUser($user)->authorize('delete', $injury);
+        } catch (AuthorizationException) {
+            return Response::text(json_encode([
+                'success' => false,
+                'error' => 'You are not authorized to remove this injury.',
             ]));
         }
 
@@ -51,14 +56,7 @@ class RemoveInjuryTool extends Tool
             'injury_type' => $injury->injury_type->label(),
         ];
 
-        try {
-            $this->injuryService->remove($user, $injury);
-        } catch (AuthorizationException) {
-            return Response::text(json_encode([
-                'success' => false,
-                'error' => 'You are not authorized to remove this injury.',
-            ]));
-        }
+        $injury->delete();
 
         return Response::text(json_encode([
             'success' => true,

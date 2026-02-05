@@ -30,8 +30,8 @@
                     </div>
 
                     @php
-                        $totalDistance = $workout->estimatedTotalDistanceInMeters();
-                        $totalDuration = $workout->estimatedTotalDurationInSeconds();
+                        $totalDistance = $this->estimatedTotalDistance;
+                        $totalDuration = $this->estimatedTotalDuration;
                     @endphp
 
                     @if($totalDuration > 0)

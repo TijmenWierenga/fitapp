@@ -2,12 +2,11 @@
 
 namespace App\Mcp\Tools;
 
-use App\Data\UpdateWorkoutData;
 use App\Enums\Workout\Activity;
-use App\Services\Workout\WorkoutService;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -23,10 +22,6 @@ class UpdateWorkoutTool extends Tool
 
         You can update the name, activity, scheduled time, or notes. Only provide the fields you want to change.
     MARKDOWN;
-
-    public function __construct(
-        protected WorkoutService $workoutService
-    ) {}
 
     /**
      * Handle the tool request.
@@ -46,30 +41,37 @@ class UpdateWorkoutTool extends Tool
 
         $user = $request->user();
 
-        $workout = $this->workoutService->find($user, $validated['workout_id']);
+        $workout = $user->workouts()->find($validated['workout_id']);
 
         if (! $workout) {
             return Response::error('Workout not found or access denied');
         }
 
-        $scheduledAt = null;
-        if (isset($validated['scheduled_at'])) {
-            $scheduledAt = CarbonImmutable::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
-        }
-
-        $data = new UpdateWorkoutData(
-            name: $validated['name'] ?? null,
-            activity: isset($validated['activity']) ? Activity::from($validated['activity']) : null,
-            scheduledAt: $scheduledAt,
-            notes: $validated['notes'] ?? null,
-            updateNotes: array_key_exists('notes', $validated),
-        );
-
         try {
-            $workout = $this->workoutService->update($user, $workout, $data);
+            Gate::forUser($user)->authorize('update', $workout);
         } catch (AuthorizationException) {
             return Response::error('Cannot update completed workouts');
         }
+
+        $updateData = [];
+
+        if (isset($validated['name'])) {
+            $updateData['name'] = $validated['name'];
+        }
+
+        if (isset($validated['activity'])) {
+            $updateData['activity'] = Activity::from($validated['activity']);
+        }
+
+        if (isset($validated['scheduled_at'])) {
+            $updateData['scheduled_at'] = CarbonImmutable::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
+        }
+
+        if (array_key_exists('notes', $validated)) {
+            $updateData['notes'] = $validated['notes'];
+        }
+
+        $workout->update($updateData);
 
         return Response::text(json_encode([
             'success' => true,

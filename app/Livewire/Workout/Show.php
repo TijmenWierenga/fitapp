@@ -3,6 +3,7 @@
 namespace App\Livewire\Workout;
 
 use App\Models\Workout;
+use App\Services\Workout\WorkoutEstimator;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -100,6 +101,18 @@ class Show extends Component
             9, 10 => 'Maximum Effort',
             default => '',
         };
+    }
+
+    #[Computed]
+    public function estimatedTotalDistance(): int
+    {
+        return app(WorkoutEstimator::class)->estimateDistance($this->workout);
+    }
+
+    #[Computed]
+    public function estimatedTotalDuration(): int
+    {
+        return app(WorkoutEstimator::class)->estimateDuration($this->workout);
     }
 
     public function deleteWorkout(): void

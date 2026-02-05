@@ -3,8 +3,9 @@
 namespace App\Mcp\Tools;
 
 use App\Models\Workout;
-use App\Services\Workout\WorkoutService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Gate;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
@@ -18,10 +19,6 @@ class GetWorkoutTool extends Tool
         Fetch a single workout by ID. Returns full workout details including RPE and feeling if completed.
     MARKDOWN;
 
-    public function __construct(
-        protected WorkoutService $workoutService
-    ) {}
-
     /**
      * Handle the tool request.
      */
@@ -33,9 +30,15 @@ class GetWorkoutTool extends Tool
 
         $user = $request->user();
 
-        $workout = $this->workoutService->find($user, $validated['workout_id']);
+        $workout = $user->workouts()->find($validated['workout_id']);
 
         if (! $workout) {
+            return Response::error('Workout not found or access denied');
+        }
+
+        try {
+            Gate::forUser($user)->authorize('view', $workout);
+        } catch (AuthorizationException) {
             return Response::error('Workout not found or access denied');
         }
 

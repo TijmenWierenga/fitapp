@@ -2,10 +2,8 @@
 
 namespace App\Mcp\Tools;
 
-use App\Data\InjuryData;
 use App\Enums\BodyPart;
 use App\Enums\InjuryType;
-use App\Services\Injury\InjuryService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
@@ -35,10 +33,6 @@ class AddInjuryTool extends Tool
         - Other: other
     MARKDOWN;
 
-    public function __construct(
-        protected InjuryService $injuryService
-    ) {}
-
     /**
      * Handle the tool request.
      */
@@ -58,15 +52,13 @@ class AddInjuryTool extends Tool
 
         $user = $request->user();
 
-        $data = new InjuryData(
-            injuryType: InjuryType::from($validated['injury_type']),
-            bodyPart: BodyPart::from($validated['body_part']),
-            startedAt: CarbonImmutable::parse($validated['started_at']),
-            endedAt: isset($validated['ended_at']) ? CarbonImmutable::parse($validated['ended_at']) : null,
-            notes: $validated['notes'] ?? null,
-        );
-
-        $injury = $this->injuryService->add($user, $data);
+        $injury = $user->injuries()->create([
+            'injury_type' => InjuryType::from($validated['injury_type']),
+            'body_part' => BodyPart::from($validated['body_part']),
+            'started_at' => CarbonImmutable::parse($validated['started_at']),
+            'ended_at' => isset($validated['ended_at']) ? CarbonImmutable::parse($validated['ended_at']) : null,
+            'notes' => $validated['notes'] ?? null,
+        ]);
 
         return Response::text(json_encode([
             'success' => true,

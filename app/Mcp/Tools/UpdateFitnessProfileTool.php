@@ -2,9 +2,7 @@
 
 namespace App\Mcp\Tools;
 
-use App\Data\FitnessProfileData;
 use App\Enums\FitnessGoal;
-use App\Services\FitnessProfile\FitnessProfileService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
@@ -27,10 +25,6 @@ class UpdateFitnessProfileTool extends Tool
         - `general_fitness` - Maintain overall health and well-being
     MARKDOWN;
 
-    public function __construct(
-        protected FitnessProfileService $fitnessProfileService
-    ) {}
-
     /**
      * Handle the tool request.
      */
@@ -51,14 +45,15 @@ class UpdateFitnessProfileTool extends Tool
 
         $user = $request->user();
 
-        $data = new FitnessProfileData(
-            primaryGoal: FitnessGoal::from($validated['primary_goal']),
-            availableDaysPerWeek: $validated['available_days_per_week'],
-            minutesPerSession: $validated['minutes_per_session'],
-            goalDetails: $validated['goal_details'] ?? null,
+        $profile = $user->fitnessProfile()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'primary_goal' => FitnessGoal::from($validated['primary_goal']),
+                'goal_details' => $validated['goal_details'] ?? null,
+                'available_days_per_week' => $validated['available_days_per_week'],
+                'minutes_per_session' => $validated['minutes_per_session'],
+            ]
         );
-
-        $profile = $this->fitnessProfileService->updateOrCreate($user, $data);
 
         return Response::text(json_encode([
             'success' => true,

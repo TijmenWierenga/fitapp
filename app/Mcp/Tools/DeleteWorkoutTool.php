@@ -2,9 +2,9 @@
 
 namespace App\Mcp\Tools;
 
-use App\Services\Workout\WorkoutService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Gate;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
@@ -20,10 +20,6 @@ class DeleteWorkoutTool extends Tool
         - Cannot delete past workouts (except today's workouts)
     MARKDOWN;
 
-    public function __construct(
-        private WorkoutService $workoutService
-    ) {}
-
     /**
      * Handle the tool request.
      */
@@ -35,14 +31,14 @@ class DeleteWorkoutTool extends Tool
 
         $user = $request->user();
 
-        $workout = $this->workoutService->find($user, $validated['workout_id']);
+        $workout = $user->workouts()->find($validated['workout_id']);
 
         if (! $workout) {
             return Response::error('Workout not found or access denied');
         }
 
         try {
-            $this->workoutService->delete($user, $workout);
+            Gate::forUser($user)->authorize('delete', $workout);
         } catch (AuthorizationException) {
             if ($workout->isCompleted()) {
                 return Response::error('Cannot delete completed workouts');
@@ -50,6 +46,8 @@ class DeleteWorkoutTool extends Tool
 
             return Response::error('Cannot delete past workouts (except today)');
         }
+
+        $workout->delete();
 
         return Response::text(json_encode([
             'success' => true,

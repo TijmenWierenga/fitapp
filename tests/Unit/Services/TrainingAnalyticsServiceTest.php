@@ -51,4 +51,75 @@ class TrainingAnalyticsServiceTest extends TestCase
         $this->assertNull($analytics['average_rpe']);
         $this->assertNull($analytics['average_feeling']);
     }
+
+    public function test_calculate_streak_counts_consecutive_days(): void
+    {
+        $user = User::factory()->withTimezone('UTC')->create();
+
+        // Create workouts for the last 5 consecutive days
+        for ($i = 0; $i < 5; $i++) {
+            Workout::factory()->for($user)->completed()->create([
+                'completed_at' => now()->subDays($i),
+            ]);
+        }
+
+        $analytics = $this->service->getAnalytics($user, 4);
+
+        $this->assertEquals(5, $analytics['current_streak_days']);
+    }
+
+    public function test_calculate_streak_stops_at_missing_day(): void
+    {
+        $user = User::factory()->withTimezone('UTC')->create();
+
+        // Today and yesterday
+        Workout::factory()->for($user)->completed()->create(['completed_at' => now()]);
+        Workout::factory()->for($user)->completed()->create(['completed_at' => now()->subDay()]);
+
+        // Skip day -2, create workout on day -3
+        Workout::factory()->for($user)->completed()->create(['completed_at' => now()->subDays(3)]);
+
+        $analytics = $this->service->getAnalytics($user, 4);
+
+        // Streak should be 2 (today + yesterday), stopping before the gap
+        $this->assertEquals(2, $analytics['current_streak_days']);
+    }
+
+    public function test_calculate_streak_handles_multiple_workouts_same_day(): void
+    {
+        $user = User::factory()->withTimezone('UTC')->create();
+
+        // Create 3 workouts on the same day
+        Workout::factory()->for($user)->completed()->count(3)->create([
+            'completed_at' => now(),
+        ]);
+
+        $analytics = $this->service->getAnalytics($user, 4);
+
+        // Should count as 1 day in the streak
+        $this->assertEquals(1, $analytics['current_streak_days']);
+    }
+
+    public function test_calculate_streak_returns_zero_for_no_workouts(): void
+    {
+        $user = User::factory()->withTimezone('UTC')->create();
+
+        $analytics = $this->service->getAnalytics($user, 4);
+
+        $this->assertEquals(0, $analytics['current_streak_days']);
+    }
+
+    public function test_calculate_streak_returns_zero_when_no_recent_workouts(): void
+    {
+        $user = User::factory()->withTimezone('UTC')->create();
+
+        // Create workout 10 days ago (streak is broken)
+        Workout::factory()->for($user)->completed()->create([
+            'completed_at' => now()->subDays(10),
+        ]);
+
+        $analytics = $this->service->getAnalytics($user, 4);
+
+        $this->assertEquals(0, $analytics['current_streak_days']);
+    }
 }

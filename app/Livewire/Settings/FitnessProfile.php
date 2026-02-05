@@ -7,6 +7,7 @@ use App\Enums\FitnessGoal;
 use App\Enums\InjuryType;
 use App\Models\Injury;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class FitnessProfile extends Component
@@ -48,7 +49,7 @@ class FitnessProfile extends Component
     public function saveProfile(): void
     {
         $validated = $this->validate([
-            'primaryGoal' => ['required', 'string', 'in:'.implode(',', array_column(FitnessGoal::cases(), 'value'))],
+            'primaryGoal' => ['required', Rule::enum(FitnessGoal::class)],
             'goalDetails' => ['nullable', 'string', 'max:5000'],
             'availableDaysPerWeek' => ['required', 'integer', 'min:1', 'max:7'],
             'minutesPerSession' => ['required', 'integer', 'min:15', 'max:180'],
@@ -93,8 +94,8 @@ class FitnessProfile extends Component
     public function saveInjury(): void
     {
         $validated = $this->validate([
-            'injuryType' => ['required', 'string', 'in:'.implode(',', array_column(InjuryType::cases(), 'value'))],
-            'bodyPart' => ['required', 'string', 'in:'.implode(',', array_column(BodyPart::cases(), 'value'))],
+            'injuryType' => ['required', Rule::enum(InjuryType::class)],
+            'bodyPart' => ['required', Rule::enum(BodyPart::class)],
             'startedAt' => ['required', 'date'],
             'endedAt' => ['nullable', 'date', 'after_or_equal:startedAt'],
             'injuryNotes' => ['nullable', 'string', 'max:5000'],

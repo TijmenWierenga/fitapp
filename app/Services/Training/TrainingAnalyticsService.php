@@ -70,23 +70,40 @@ class TrainingAnalyticsService
         return $workoutsPerWeek;
     }
 
+    /**
+     * Calculate the user's current workout streak (consecutive days with completed workouts).
+     *
+     * Fetches all completed workouts once and processes them in memory to avoid N+1 queries.
+     * For a 365-day streak, this reduces queries from 365 to 1.
+     */
     protected function calculateStreak(User $user): int
     {
+        // Fetch all completed workout dates in a single query
+        $completedDates = $user->workouts()
+            ->whereNotNull('completed_at')
+            ->orderBy('completed_at', 'desc')
+            ->pluck('completed_at')
+            ->map(fn ($date) => $date->toDateString())
+            ->unique()
+            ->values();
+
+        if ($completedDates->isEmpty()) {
+            return 0;
+        }
+
         $streak = 0;
-        $date = CarbonImmutable::today();
+        $expectedDate = CarbonImmutable::today();
 
-        while (true) {
-            $hasWorkout = $user->workouts()
-                ->whereNotNull('completed_at')
-                ->whereDate('completed_at', $date)
-                ->exists();
+        foreach ($completedDates as $completedDateString) {
+            $completedDate = CarbonImmutable::parse($completedDateString);
 
-            if (! $hasWorkout) {
+            if ($completedDate->equalTo($expectedDate)) {
+                $streak++;
+                $expectedDate = $expectedDate->subDay();
+            } else {
+                // Streak is broken
                 break;
             }
-
-            $streak++;
-            $date = $date->subDay();
         }
 
         return $streak;

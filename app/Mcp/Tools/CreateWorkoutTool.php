@@ -2,9 +2,8 @@
 
 namespace App\Mcp\Tools;
 
-use App\Data\CreateWorkoutData;
 use App\Enums\Workout\Activity;
-use App\Services\Workout\WorkoutService;
+use App\Models\Workout;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
@@ -25,10 +24,6 @@ class CreateWorkoutTool extends Tool
         Dates/times should be in the user's local timezone and will be converted to UTC for storage.
     MARKDOWN;
 
-    public function __construct(
-        protected WorkoutService $workoutService
-    ) {}
-
     /**
      * Handle the tool request.
      */
@@ -48,14 +43,13 @@ class CreateWorkoutTool extends Tool
 
         $scheduledAt = CarbonImmutable::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
 
-        $data = new CreateWorkoutData(
-            name: $validated['name'],
-            activity: Activity::from($validated['activity']),
-            scheduledAt: $scheduledAt,
-            notes: $validated['notes'] ?? null,
-        );
-
-        $workout = $this->workoutService->create($user, $data);
+        $workout = Workout::create([
+            'user_id' => $user->id,
+            'name' => $validated['name'],
+            'activity' => Activity::from($validated['activity']),
+            'scheduled_at' => $scheduledAt,
+            'notes' => $validated['notes'] ?? null,
+        ]);
 
         return Response::text(json_encode([
             'success' => true,

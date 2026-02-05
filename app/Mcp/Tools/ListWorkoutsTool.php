@@ -2,7 +2,7 @@
 
 namespace App\Mcp\Tools;
 
-use App\Services\Workout\WorkoutService;
+use App\Models\Workout;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -25,10 +25,6 @@ class ListWorkoutsTool extends Tool
         Results are limited to 20 by default, max 100.
     MARKDOWN;
 
-    public function __construct(
-        protected WorkoutService $workoutService
-    ) {}
-
     /**
      * Handle the tool request.
      */
@@ -44,19 +40,26 @@ class ListWorkoutsTool extends Tool
         $filter = $validated['filter'] ?? 'all';
         $limit = $validated['limit'] ?? 20;
 
-        $workouts = $this->workoutService->list($user, $filter, $limit);
+        $query = $user->workouts();
 
-        $workoutData = $workouts->map(function ($workout) use ($user) {
-            return [
-                'id' => $workout->id,
-                'name' => $workout->name,
-                'activity' => $workout->activity->value,
-                'scheduled_at' => $user->toUserTimezone($workout->scheduled_at)->toIso8601String(),
-                'completed' => $workout->isCompleted(),
-                'completed_at' => $workout->completed_at ? $user->toUserTimezone($workout->completed_at)->toIso8601String() : null,
-                'notes' => $workout->notes,
-            ];
-        });
+        match ($filter) {
+            'upcoming' => $query->upcoming(),
+            'completed' => $query->completed(),
+            'overdue' => $query->overdue(),
+            default => $query->orderBy('scheduled_at', 'desc'),
+        };
+
+        $workouts = $query->limit($limit)->get();
+
+        $workoutData = $workouts->map(fn (Workout $workout): array => [
+            'id' => $workout->id,
+            'name' => $workout->name,
+            'activity' => $workout->activity->value,
+            'scheduled_at' => $user->toUserTimezone($workout->scheduled_at)->toIso8601String(),
+            'completed' => $workout->isCompleted(),
+            'completed_at' => $workout->completed_at ? $user->toUserTimezone($workout->completed_at)->toIso8601String() : null,
+            'notes' => $workout->notes,
+        ]);
 
         return Response::text(json_encode([
             'success' => true,

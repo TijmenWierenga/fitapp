@@ -200,11 +200,6 @@ class Workout extends Model
         });
     }
 
-    public function estimatedTotalDistanceInMeters(): int
-    {
-        return app(\App\Services\Workout\WorkoutEstimator::class)->estimateDistance($this);
-    }
-
     protected function calculateStepDistance(Step $step): int
     {
         if ($step->step_kind === \App\Enums\Workout\StepKind::Repeat) {
@@ -227,11 +222,6 @@ class Workout extends Model
         return (int) $this->rootSteps->sum(function (Step $step) {
             return $this->calculateStepDuration($step);
         });
-    }
-
-    public function estimatedTotalDurationInSeconds(): int
-    {
-        return app(\App\Services\Workout\WorkoutEstimator::class)->estimateDuration($this);
     }
 
     public static function getRpeLabel(?int $rpe): string

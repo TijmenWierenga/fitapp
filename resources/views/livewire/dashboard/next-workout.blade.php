@@ -18,8 +18,8 @@
                         {{ $this->nextWorkout->scheduled_at->format('g:i A') }}
                     </flux:text>
                     @php
-                        $totalDistance = $this->nextWorkout->estimatedTotalDistanceInMeters();
-                        $totalDuration = $this->nextWorkout->estimatedTotalDurationInSeconds();
+                        $totalDistance = $this->estimatedTotalDistance;
+                        $totalDuration = $this->estimatedTotalDuration;
                     @endphp
                     @if($totalDistance > 0 || $totalDuration > 0)
                         <div class="flex flex-wrap items-center gap-2 text-zinc-500 dark:text-zinc-400">

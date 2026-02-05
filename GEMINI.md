@@ -156,6 +156,53 @@ class User extends Model
 }
 ```
 
+### Action Classes
+
+Use action classes to encapsulate business logic that's reusable across transport layers.
+
+```php
+// Good - pure business logic, transport-agnostic
+class CreateWorkoutPlan
+{
+    public function execute(User $user, WorkoutType $type, CarbonImmutable $startDate): WorkoutPlan
+    {
+        $plan = WorkoutPlan::create([
+            'user_id' => $user->id,
+            'type' => $type,
+            'start_date' => $startDate,
+        ]);
+
+        $user->notify(new WorkoutPlanCreated($plan));
+
+        return $plan;
+    }
+}
+
+// Bad - coupled to transport layer
+class CreateWorkoutPlan
+{
+    public function execute(): WorkoutPlan
+    {
+        // Don't access request/session/auth directly
+        $user = auth()->user();
+
+        // Don't perform authorization
+        if (! $user->can('create', WorkoutPlan::class)) {
+            abort(403);
+        }
+
+        $type = request()->input('type');
+
+        return WorkoutPlan::create([...]);
+    }
+}
+```
+
+**Rules:**
+- Accept all context as explicit parameters to `execute()` - no hidden dependencies on request, session, or auth
+- Never perform authorization - that belongs in the transport layer (controller, Livewire component, command)
+- Should be executable from any context: Livewire views, controllers, CLI commands, Tinker, or queued jobs
+
 === foundation rules ===
 
 # Laravel Boost Guidelines

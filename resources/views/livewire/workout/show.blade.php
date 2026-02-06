@@ -95,34 +95,27 @@
                 </flux:card>
             @endif
 
-            {{-- Steps Table Card --}}
-            @if($workout->rootSteps->isNotEmpty())
+            {{-- Workout Structure --}}
+            @if($workout->blockTree->isNotEmpty())
                 <flux:card>
-                    <flux:heading size="lg" class="mb-4">Workout Steps</flux:heading>
-                    <flux:table>
-                        <flux:table.columns>
-                            <flux:table.column>Step</flux:table.column>
-                            <flux:table.column>Duration</flux:table.column>
-                            <flux:table.column>Target</flux:table.column>
-                        </flux:table.columns>
-
-                        <flux:table.rows>
-                            @foreach($workout->rootSteps as $step)
-                                @if($step->step_kind === \App\Enums\Workout\StepKind::Repeat)
-                                    <x-workout-repeat-header :repeat-count="$step->repeat_count" />
-                                    @foreach($step->children as $child)
-                                        <x-workout-step-row :step="$child" indented />
-                                    @endforeach
-                                @else
-                                    <x-workout-step-row :step="$step" />
+                    <flux:heading size="lg" class="mb-4">Workout Structure</flux:heading>
+                    <div class="space-y-2">
+                        @foreach($workout->blockTree as $block)
+                            <div class="flex items-center gap-2 py-1.5 px-2 rounded bg-zinc-50 dark:bg-zinc-800/50">
+                                <flux:badge size="sm" color="zinc">{{ ucfirst(str_replace('_', ' ', $block->type->value)) }}</flux:badge>
+                                @if($block->label)
+                                    <flux:text class="font-medium">{{ $block->label }}</flux:text>
                                 @endif
-                            @endforeach
-                        </flux:table.rows>
-                    </flux:table>
+                                @if($block->repeat_count > 1)
+                                    <flux:badge size="sm">{{ $block->repeat_count }}x</flux:badge>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
                 </flux:card>
             @else
                 <flux:card>
-                    <x-empty-state icon="document" message="No workout steps defined" />
+                    <x-empty-state icon="document" message="No workout structure defined" />
                 </flux:card>
             @endif
         </div>

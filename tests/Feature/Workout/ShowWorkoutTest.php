@@ -1,8 +1,6 @@
 <?php
 
-use App\Enums\Workout\StepKind;
 use App\Livewire\Workout\Show;
-use App\Models\Step;
 use App\Models\User;
 use App\Models\Workout;
 use Livewire\Livewire;
@@ -46,34 +44,6 @@ it('displays workout details', function () {
         ->test(Show::class, ['workout' => $workout])
         ->assertSee('Morning Run')
         ->assertSee($workout->scheduled_at->format('l, F j, Y'));
-});
-
-it('displays all workout steps', function () {
-    $user = User::factory()->create();
-    $workout = Workout::factory()->for($user)->create();
-    Step::factory()->count(10)->for($workout)->create();
-
-    Livewire::actingAs($user)
-        ->test(Show::class, ['workout' => $workout])
-        ->assertStatus(200);
-
-    expect($workout->rootSteps)->toHaveCount(10);
-});
-
-it('displays nested steps in repeat blocks', function () {
-    $user = User::factory()->create();
-    $workout = Workout::factory()->for($user)->create();
-    $repeatStep = Step::factory()->for($workout)->create([
-        'step_kind' => StepKind::Repeat,
-        'repeat_count' => 3,
-    ]);
-    Step::factory()->for($workout)->create([
-        'parent_step_id' => $repeatStep->id,
-    ]);
-
-    Livewire::actingAs($user)
-        ->test(Show::class, ['workout' => $workout])
-        ->assertSee('Repeat 3x');
 });
 
 // Status badge tests

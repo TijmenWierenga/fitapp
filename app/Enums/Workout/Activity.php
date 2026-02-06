@@ -185,8 +185,8 @@ enum Activity: string
         };
     }
 
-    public function hasSteps(): bool
+    public function hasBlocks(): bool
     {
-        return $this->category() === 'running';
+        return true;
     }
 }

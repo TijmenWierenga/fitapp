@@ -60,37 +60,26 @@
                 </flux:card>
             @endif
 
-            @if($this->nextWorkout->rootSteps->isNotEmpty())
+            @if($this->nextWorkout->blockTree->isNotEmpty())
                 <div class="space-y-2 mt-4">
-                    <flux:heading size="sm" class="text-zinc-500 dark:text-zinc-400">Workout Steps</flux:heading>
-                    <div class="overflow-x-auto -mx-4 sm:mx-0">
-                        <div class="inline-block min-w-full align-middle px-4 sm:px-0">
-                            <flux:table>
-                                <flux:table.columns>
-                                    <flux:table.column>Step</flux:table.column>
-                                    <flux:table.column>Duration</flux:table.column>
-                                    <flux:table.column>Target</flux:table.column>
-                                </flux:table.columns>
-
-                                <flux:table.rows>
-                                    @foreach($this->nextWorkout->rootSteps->take(3) as $step)
-                                        @if($step->step_kind === \App\Enums\Workout\StepKind::Repeat)
-                                            <x-workout-repeat-header :repeat-count="$step->repeat_count" />
-                                            @foreach($step->children as $child)
-                                                <x-workout-step-row :step="$child" indented />
-                                            @endforeach
-                                        @else
-                                            <x-workout-step-row :step="$step" />
-                                        @endif
-                                    @endforeach
-                                </flux:table.rows>
-                            </flux:table>
-                        </div>
+                    <flux:heading size="sm" class="text-zinc-500 dark:text-zinc-400">Workout Structure</flux:heading>
+                    <div class="space-y-1">
+                        @foreach($this->nextWorkout->blockTree->take(3) as $block)
+                            <div class="flex items-center gap-2 py-1 px-2 rounded bg-zinc-50 dark:bg-zinc-800/50 text-sm">
+                                <flux:badge size="sm" color="zinc">{{ ucfirst(str_replace('_', ' ', $block->type->value)) }}</flux:badge>
+                                @if($block->label)
+                                    <span class="text-zinc-700 dark:text-zinc-300">{{ $block->label }}</span>
+                                @endif
+                                @if($block->repeat_count > 1)
+                                    <flux:badge size="sm">{{ $block->repeat_count }}x</flux:badge>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
 
-                    @if($this->nextWorkout->rootSteps->count() > 3)
+                    @if($this->nextWorkout->blockTree->count() > 3)
                         <a href="{{ route('workouts.show', $this->nextWorkout) }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-block">
-                            View all {{ $this->nextWorkout->rootSteps->count() }} steps
+                            View all {{ $this->nextWorkout->blockTree->count() }} blocks
                         </a>
                     @endif
                 </div>

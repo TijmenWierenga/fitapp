@@ -50,19 +50,43 @@ class Workout extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Step, $this>
+     * Root-level blocks ordered by position.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<WorkoutBlock, $this>
      */
-    public function steps(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function blocks(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(Step::class)->orderBy('sort_order');
+        return $this->hasMany(WorkoutBlock::class)
+            ->whereNull('parent_id')
+            ->orderBy('position');
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Step, $this>
+     * All blocks for this workout (flat).
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<WorkoutBlock, $this>
      */
-    public function rootSteps(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function allBlocks(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->steps()->whereNull('parent_step_id');
+        return $this->hasMany(WorkoutBlock::class);
+    }
+
+    /**
+     * Root blocks eager-loaded with nested children and blockable content.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<WorkoutBlock, $this>
+     */
+    public function blockTree(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->blocks()->with('nestedChildren', 'blockable');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<WorkoutMuscleLoadSnapshot, $this>
+     */
+    public function muscleLoadSnapshots(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(WorkoutMuscleLoadSnapshot::class);
     }
 
     /**
@@ -157,54 +181,43 @@ class Workout extends Model
             'scheduled_at' => $scheduledAt,
         ]);
 
-        foreach ($this->rootSteps as $step) {
-            $this->duplicateStep($step, $newWorkout);
+        foreach ($this->blocks as $block) {
+            $this->duplicateBlock($block, $newWorkout);
         }
 
         return $newWorkout;
     }
 
-    protected function duplicateStep(Step $step, Workout $newWorkout, ?int $parentId = null): void
+    protected function duplicateBlock(WorkoutBlock $block, self $newWorkout, ?int $parentId = null): void
     {
-        $newStep = $step->replicate();
-        $newStep->workout_id = $newWorkout->id;
-        $newStep->parent_step_id = $parentId;
-        $newStep->save();
+        $blockable = $block->blockable;
+        $newBlockableId = null;
+        $newBlockableType = $block->blockable_type;
 
-        foreach ($step->children as $child) {
-            $this->duplicateStep($child, $newWorkout, $newStep->id);
-        }
-    }
+        if ($blockable) {
+            $newBlockable = $blockable->replicate();
+            $newBlockable->save();
+            $newBlockableId = $newBlockable->id;
 
-    public function totalDistanceInMeters(): int
-    {
-        return (int) $this->rootSteps->sum(function (Step $step) {
-            return $this->calculateStepDistance($step);
-        });
-    }
-
-    protected function calculateStepDistance(Step $step): int
-    {
-        if ($step->step_kind === \App\Enums\Workout\StepKind::Repeat) {
-            $childDistance = $step->children->sum(function (Step $child) {
-                return $this->calculateStepDistance($child);
-            });
-
-            return (int) ($childDistance * $step->repeat_count);
+            if ($blockable instanceof ExerciseGroup) {
+                foreach ($blockable->entries as $entry) {
+                    $newEntry = $entry->replicate();
+                    $newEntry->exercise_group_id = $newBlockable->id;
+                    $newEntry->save();
+                }
+            }
         }
 
-        if ($step->duration_type === \App\Enums\Workout\DurationType::Distance) {
-            return $step->duration_value ?? 0;
+        $newBlock = $block->replicate();
+        $newBlock->workout_id = $newWorkout->id;
+        $newBlock->parent_id = $parentId;
+        $newBlock->blockable_id = $newBlockableId;
+        $newBlock->blockable_type = $newBlockableType;
+        $newBlock->save();
+
+        foreach ($block->children as $child) {
+            $this->duplicateBlock($child, $newWorkout, $newBlock->id);
         }
-
-        return 0;
-    }
-
-    public function totalDurationInSeconds(): int
-    {
-        return (int) $this->rootSteps->sum(function (Step $step) {
-            return $this->calculateStepDuration($step);
-        });
     }
 
     public static function getRpeLabel(?int $rpe): string
@@ -217,22 +230,5 @@ class Workout extends Model
             9, 10 => 'Maximum Effort',
             default => '',
         };
-    }
-
-    protected function calculateStepDuration(Step $step): int
-    {
-        if ($step->step_kind === \App\Enums\Workout\StepKind::Repeat) {
-            $childDuration = $step->children->sum(function (Step $child) {
-                return $this->calculateStepDuration($child);
-            });
-
-            return (int) ($childDuration * $step->repeat_count);
-        }
-
-        if ($step->duration_type === \App\Enums\Workout\DurationType::Time) {
-            return $step->duration_value ?? 0;
-        }
-
-        return 0;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Workout;
 
+use App\Actions\Workout\CompleteWorkout;
 use App\Models\Workout;
 use App\Services\Workout\WorkoutEstimator;
 use Livewire\Attributes\Computed;
@@ -23,7 +24,7 @@ class Show extends Component
             abort(403);
         }
 
-        $this->workout = $workout->load(['rootSteps.children']);
+        $this->workout = $workout->load(['blockTree']);
     }
 
     #[Computed]
@@ -78,7 +79,7 @@ class Show extends Component
             'feeling.max' => 'Feeling must be between 1 and 5.',
         ]);
 
-        $this->workout->markAsCompleted($this->rpe, $this->feeling);
+        app(CompleteWorkout::class)->execute($this->workout, $this->rpe, $this->feeling);
         $this->showEvaluationModal = false;
         $this->dispatch('workout-completed');
     }

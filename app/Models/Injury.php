@@ -8,19 +8,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * @property int $id
- * @property int $user_id
- * @property InjuryType $injury_type
- * @property BodyPart $body_part
- * @property \Illuminate\Support\Carbon $started_at
- * @property \Illuminate\Support\Carbon|null $ended_at
- * @property string|null $notes
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
- * @property-read User $user
- * @property-read bool $is_active
- */
 class Injury extends Model
 {
     /** @use HasFactory<\Database\Factories\InjuryFactory> */
@@ -35,15 +22,12 @@ class Injury extends Model
         'notes',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'injury_type' => InjuryType::class,
-            'body_part' => BodyPart::class,
-            'started_at' => 'date',
-            'ended_at' => 'date',
-        ];
-    }
+    protected $casts = [
+        'injury_type' => InjuryType::class,
+        'body_part' => BodyPart::class,
+        'started_at' => 'date',
+        'ended_at' => 'date',
+    ];
 
     /**
      * @return Attribute<string|null, string|null>

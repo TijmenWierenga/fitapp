@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Passport::authorizationView(fn ($parameters) => view('mcp.authorize', $parameters));
+        Passport::authorizationView(fn ($parameters) => view('mcp.authorize', $parameters)); // @phpstan-ignore-line
         Date::use(CarbonImmutable::class);
     }
 }

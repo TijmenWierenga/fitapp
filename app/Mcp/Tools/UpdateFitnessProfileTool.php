@@ -46,7 +46,9 @@ class UpdateFitnessProfileTool extends Tool
         $user = $request->user();
 
         $profile = $user->fitnessProfile()->updateOrCreate(
-            ['user_id' => $user->id],
+            [
+                'user_id' => $user->getKey()
+            ],
             [
                 'primary_goal' => FitnessGoal::from($validated['primary_goal']),
                 'goal_details' => $validated['goal_details'] ?? null,
@@ -71,8 +73,6 @@ class UpdateFitnessProfileTool extends Tool
 
     /**
      * Get the tool's input schema.
-     *
-     * @return array<string, \Illuminate\Contracts\JsonSchema\JsonSchema>
      */
     public function schema(JsonSchema $schema): array
     {

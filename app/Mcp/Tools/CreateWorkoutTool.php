@@ -44,7 +44,7 @@ class CreateWorkoutTool extends Tool
         $scheduledAt = CarbonImmutable::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
 
         $workout = Workout::create([
-            'user_id' => $user->id,
+            'user_id' => $user->getKey(),
             'name' => $validated['name'],
             'activity' => Activity::from($validated['activity']),
             'scheduled_at' => $scheduledAt,
@@ -67,8 +67,6 @@ class CreateWorkoutTool extends Tool
 
     /**
      * Get the tool's input schema.
-     *
-     * @return array<string, \Illuminate\Contracts\JsonSchema\JsonSchema>
      */
     public function schema(JsonSchema $schema): array
     {

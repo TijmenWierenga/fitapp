@@ -36,19 +36,16 @@ class Step extends Model
         'skip_last_recovery',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'step_kind' => StepKind::class,
-            'intensity' => Intensity::class,
-            'duration_type' => DurationType::class,
-            'target_type' => TargetType::class,
-            'target_mode' => TargetMode::class,
-            'skip_last_recovery' => 'boolean',
-            'repeat_count' => 'integer',
-            'sort_order' => 'integer',
-        ];
-    }
+    protected $casts = [
+        'step_kind' => StepKind::class,
+        'intensity' => Intensity::class,
+        'duration_type' => DurationType::class,
+        'target_type' => TargetType::class,
+        'target_mode' => TargetMode::class,
+        'skip_last_recovery' => 'boolean',
+        'repeat_count' => 'integer',
+        'sort_order' => 'integer',
+    ];
 
     /**
      * @return BelongsTo<Workout, $this>

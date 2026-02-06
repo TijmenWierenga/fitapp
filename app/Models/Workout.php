@@ -7,20 +7,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * @property int $id
- * @property int $user_id
- * @property string $name
- * @property Activity $activity
- * @property string|null $notes
- * @property \Illuminate\Support\Carbon|null $scheduled_at
- * @property \Illuminate\Support\Carbon|null $completed_at
- * @property int|null $rpe
- * @property int|null $feeling
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
- * @property-read User $user
- */
 class Workout extends Model
 {
     /** @use HasFactory<\Database\Factories\WorkoutFactory> */
@@ -37,16 +23,13 @@ class Workout extends Model
         'feeling',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'activity' => Activity::class,
-            'scheduled_at' => 'datetime',
-            'completed_at' => 'datetime',
-            'rpe' => 'integer',
-            'feeling' => 'integer',
-        ];
-    }
+    protected $casts = [
+        'activity' => Activity::class,
+        'scheduled_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'rpe' => 'integer',
+        'feeling' => 'integer',
+    ];
 
     /**
      * @return Attribute<string|null, string|null>

@@ -7,12 +7,23 @@ use App\Enums\Workout\TargetMode;
 use App\Enums\Workout\TargetType;
 use App\Models\Step;
 
+/**
+ * @phpstan-type StepArray array{
+ *     duration_type: string|DurationType,
+ *     duration_value: int|null,
+ *     target_type: string|TargetType,
+ *     target_mode: string|TargetMode|null,
+ *     target_zone: int|null,
+ *     target_low: int|null,
+ *     target_high: int|null,
+ * }
+ */
 class StepSummary
 {
     /**
-     * @param  Step|array  $step
+     * @param  Step|StepArray  $step
      */
-    public static function duration($step): string
+    public static function duration(Step|array $step): string
     {
         $type = is_array($step) ? $step['duration_type'] : $step->duration_type;
         $value = is_array($step) ? $step['duration_value'] : $step->duration_value;
@@ -30,9 +41,9 @@ class StepSummary
     }
 
     /**
-     * @param  Step|array  $step
+     * @param  Step|StepArray  $step
      */
-    public static function target($step): string
+    public static function target(Step|array $step): string
     {
         $type = is_array($step) ? $step['target_type'] : $step->target_type;
         $mode = is_array($step) ? $step['target_mode'] : $step->target_mode;

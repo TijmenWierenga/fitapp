@@ -16,6 +16,7 @@ use App\Mcp\Tools\ListWorkoutsTool;
 use App\Mcp\Tools\PingTool;
 use App\Mcp\Tools\RemoveInjuryTool;
 use App\Mcp\Tools\UpdateFitnessProfileTool;
+use App\Mcp\Tools\UpdateInjuryTool;
 use App\Mcp\Tools\UpdateWorkoutTool;
 use Laravel\Mcp\Server;
 
@@ -146,6 +147,7 @@ class WorkoutServer extends Server
         GetWorkoutTool::class,
         UpdateFitnessProfileTool::class,
         AddInjuryTool::class,
+        UpdateInjuryTool::class,
         RemoveInjuryTool::class,
     ];
 

@@ -50,39 +50,10 @@ class WorkoutServer extends Server
         - User is automatically authenticated via OAuth token
         - Dates and times are in the user's timezone (server handles UTC conversion automatically)
 
-        ## Activity Types
-
-        Activities are Garmin-compatible. Common types include:
-        - **Running:** `run`, `trail_run`, `treadmill`, `track_run`, `ultra_run`
-        - **Cycling:** `bike`, `bike_indoor`, `mountain_bike`, `road_bike`, `gravel_bike`
-        - **Swimming:** `pool_swim`, `open_water`
-        - **Gym:** `strength`, `cardio`, `hiit`, `elliptical`, `row_indoor`
-        - **Walking:** `walk`, `hike`, `rucking`, `mountaineering`
-        - **Flexibility:** `yoga`, `pilates`, `mobility`
-        - **Racket:** `tennis`, `padel`, `badminton`, `squash`, `pickleball`
-        - **Team:** `soccer`, `basketball`, `volleyball`, `rugby`
-        - **Other:** `golf`, `meditation`, `triathlon`, `other`, and many more
-
-        ## Rating Scales
-
-        ### RPE (Rate of Perceived Exertion, 1-10)
-        - 1-2: Very Easy
-        - 3-4: Easy
-        - 5-6: Moderate
-        - 7-8: Hard
-        - 9-10: Maximum Effort
-
-        ### Feeling (Post-workout, 1-5)
-        - 1: Terrible
-        - 2: Poor
-        - 3: Average
-        - 4: Good
-        - 5: Great
-
         ## Workout Lifecycle
 
         1. **Create** workout with activity, name, and schedule
-        2. **Update** (optional) before completion - modify name, activity, schedule, or notes
+        2. **Update** (optional) before completion — modify name, activity, schedule, notes, or structure
         3. **Complete** with RPE and feeling ratings
         4. **Delete** only if not completed and not past (except today's workouts)
 
@@ -91,44 +62,11 @@ class WorkoutServer extends Server
         For multi-workout plans (e.g., marathon training, weekly routines):
         - Create multiple workouts with appropriate scheduled dates
         - Each workout is independent but can follow a progression
-        - Use descriptive names to indicate plan structure
-          - Example: "Week 1: Easy Run", "Week 1: Long Run", "Week 2: Tempo Run"
+        - Use descriptive names to indicate plan structure (e.g., "Week 1: Easy Run", "Week 2: Tempo Run")
 
         ## Workout Notes
 
-        Notes support **Markdown formatting** for rich text. Always write detailed, actionable notes that help the user follow the workout independently. Include:
-
-        - **Equipment needed** — list any gear (e.g., dumbbells, resistance bands, barbell, treadmill, yoga mat)
-        - **Step-by-step workout plan** — break the session into phases (warm-up, main work, cool-down)
-        - **Sets, reps & intensity** — specify numbers, weight suggestions, pace, or RPE where applicable
-        - **Rest periods** — note rest between sets or intervals
-        - **Modifications or alternatives** — suggest easier/harder variations when helpful
-
-        ### Example note
-
-        ```markdown
-        ## Equipment
-        - Pair of dumbbells (moderate weight)
-        - Yoga mat
-
-        ## Warm-Up (5 min)
-        - 2 min light jog in place
-        - Arm circles — 30 sec each direction
-        - Leg swings — 10 each side
-
-        ## Main Workout
-        1. **Goblet Squats** — 3 × 12 reps (rest 60 sec between sets)
-        2. **Dumbbell Lunges** — 3 × 10 each leg (rest 60 sec)
-        3. **Dumbbell Shoulder Press** — 3 × 10 reps (rest 90 sec)
-        4. **Plank Hold** — 3 × 45 sec (rest 30 sec)
-
-        ## Cool-Down (5 min)
-        - Standing quad stretch — 30 sec each side
-        - Seated hamstring stretch — 30 sec each side
-        - Deep breathing — 1 min
-        ```
-
-        Adapt the level of detail to the workout type: a simple "Easy Run" may only need pace and distance guidance, while a strength session benefits from full set/rep breakdowns.
+        Notes support Markdown. Write detailed, actionable notes including: equipment needed, step-by-step phases (warm-up, main work, cool-down), sets/reps/intensity, rest periods, and modifications. Adapt detail level to workout type.
 
         ## Business Rules
 
@@ -136,23 +74,6 @@ class WorkoutServer extends Server
         - Past workouts cannot be deleted (except today's workouts)
         - Workouts can only be completed once
         - All dates/times are handled in the user's timezone
-
-        ## Available Tools
-
-        - **ping**: Test server connection
-        - **create-workout**: Create a new workout
-        - **update-workout**: Update an existing workout (if not completed)
-        - **delete-workout**: Delete a workout (with business rule checks)
-        - **complete-workout**: Mark workout as completed with ratings
-        - **list-workouts**: Query workouts with filtering (upcoming/completed/overdue/all)
-        - **get-workout**: Fetch a single workout by ID with full details
-        - **update-fitness-profile**: Set or update user's fitness goals and availability
-        - **add-injury**: Add an injury record to track limitations
-        - **remove-injury**: Remove an injury record
-
-        ## Available Prompts
-
-        - **create-workout**: Interactive guide for creating a new workout with smart defaults based on your fitness profile, schedule, and active injuries. All arguments are optional - the prompt will guide you through any missing information step-by-step.
 
         ## Injury Assessment Protocol
 
@@ -185,7 +106,7 @@ class WorkoutServer extends Server
         - Document their diagnosis or recommendations in the notes field
         - If they haven't and symptoms are concerning, recommend seeking professional advice
 
-        ### Red Flags - Urgent Referral Required
+        ### Red Flags — Urgent Referral Required
 
         If ANY of the following are present, DO NOT proceed with adding the injury. Instead, strongly advise the user to seek immediate medical attention:
 
@@ -208,13 +129,6 @@ class WorkoutServer extends Server
         1. Summarize the injury details back to the user for confirmation
         2. Use the `add-injury` tool with appropriate values
         3. Include relevant assessment notes in the `notes` field
-
-        ## Available Resources
-
-        - **user://profile**: Read-only user identity (name, email, timezone, initials)
-        - **user://fitness-profile**: Read-only fitness goals and training preferences
-        - **user://injuries**: Read-only injury information (active and past injuries)
-        - **workout://schedule**: Read-only workout schedule (upcoming & completed). Supports optional `upcoming_limit` (default 20, max 50) and `completed_limit` (default 10, max 50) parameters.
     MARKDOWN;
 
     /**

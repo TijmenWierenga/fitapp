@@ -38,6 +38,73 @@ class WorkoutSchemaBuilder
         ]);
     }
 
+    /**
+     * Output schema for a full workout response (used by Create, Update, Get tools).
+     *
+     * @return array<string, \Illuminate\JsonSchema\Types\Type>
+     */
+    public function workoutOutputSchema(): array
+    {
+        $exerciseOutput = $this->schema->object([
+            'id' => $this->schema->integer()->required(),
+            'name' => $this->schema->string()->required(),
+            'order' => $this->schema->integer()->required(),
+            'type' => $this->schema->string()->required(),
+            'notes' => $this->schema->string()->nullable(),
+            'target_sets' => $this->schema->integer()->nullable(),
+            'target_reps_min' => $this->schema->integer()->nullable(),
+            'target_reps_max' => $this->schema->integer()->nullable(),
+            'target_weight' => $this->schema->number()->nullable(),
+            'target_rpe' => $this->schema->number()->nullable(),
+            'target_tempo' => $this->schema->string()->nullable(),
+            'rest_after' => $this->schema->integer()->nullable(),
+            'target_duration' => $this->schema->integer()->nullable(),
+            'target_distance' => $this->schema->number()->nullable(),
+            'target_pace_min' => $this->schema->integer()->nullable(),
+            'target_pace_max' => $this->schema->integer()->nullable(),
+            'target_heart_rate_zone' => $this->schema->integer()->nullable(),
+            'target_heart_rate_min' => $this->schema->integer()->nullable(),
+            'target_heart_rate_max' => $this->schema->integer()->nullable(),
+            'target_power' => $this->schema->integer()->nullable(),
+        ]);
+
+        $blockOutput = $this->schema->object([
+            'id' => $this->schema->integer()->required(),
+            'block_type' => $this->schema->string()->required(),
+            'order' => $this->schema->integer()->required(),
+            'rounds' => $this->schema->integer()->nullable(),
+            'rest_between_exercises' => $this->schema->integer()->nullable(),
+            'rest_between_rounds' => $this->schema->integer()->nullable(),
+            'time_cap' => $this->schema->integer()->nullable(),
+            'work_interval' => $this->schema->integer()->nullable(),
+            'rest_interval' => $this->schema->integer()->nullable(),
+            'notes' => $this->schema->string()->nullable(),
+            'exercises' => $this->schema->array()->items($exerciseOutput)->required(),
+        ]);
+
+        $sectionOutput = $this->schema->object([
+            'id' => $this->schema->integer()->required(),
+            'name' => $this->schema->string()->required(),
+            'order' => $this->schema->integer()->required(),
+            'notes' => $this->schema->string()->nullable(),
+            'blocks' => $this->schema->array()->items($blockOutput)->required(),
+        ]);
+
+        return [
+            'id' => $this->schema->integer()->required(),
+            'name' => $this->schema->string()->required(),
+            'activity' => $this->schema->string()->required(),
+            'scheduled_at' => $this->schema->string()->description('ISO 8601 datetime in user timezone')->required(),
+            'completed' => $this->schema->boolean()->required(),
+            'completed_at' => $this->schema->string()->nullable(),
+            'rpe' => $this->schema->integer()->nullable(),
+            'rpe_label' => $this->schema->string()->nullable(),
+            'feeling' => $this->schema->integer()->nullable(),
+            'notes' => $this->schema->string()->nullable(),
+            'sections' => $this->schema->array()->items($sectionOutput)->required(),
+        ];
+    }
+
     public function exercise(): ObjectType
     {
         return $this->schema->object([

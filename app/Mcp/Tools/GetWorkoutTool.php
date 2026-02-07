@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Gate;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
+#[IsReadOnly]
 class GetWorkoutTool extends Tool
 {
     /**
@@ -47,6 +49,10 @@ class GetWorkoutTool extends Tool
         ]));
     }
 
+    public function __construct(
+        private WorkoutSchemaBuilder $schemaBuilder,
+    ) {}
+
     /**
      * Get the tool's input schema.
      */
@@ -54,6 +60,17 @@ class GetWorkoutTool extends Tool
     {
         return [
             'workout_id' => $schema->integer()->description('The ID of the workout to fetch'),
+        ];
+    }
+
+    /**
+     * Get the tool's output schema.
+     */
+    public function outputSchema(JsonSchema $schema): array
+    {
+        return [
+            'success' => $schema->boolean()->required(),
+            'workout' => $schema->object($this->schemaBuilder->workoutOutputSchema())->required(),
         ];
     }
 }

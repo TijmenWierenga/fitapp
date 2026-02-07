@@ -8,7 +8,9 @@ use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
 
+#[IsIdempotent]
 class UpdateFitnessProfileTool extends Tool
 {
     /**
@@ -47,7 +49,7 @@ class UpdateFitnessProfileTool extends Tool
 
         $profile = $user->fitnessProfile()->updateOrCreate(
             [
-                'user_id' => $user->getKey()
+                'user_id' => $user->getKey(),
             ],
             [
                 'primary_goal' => FitnessGoal::from($validated['primary_goal']),
@@ -81,6 +83,25 @@ class UpdateFitnessProfileTool extends Tool
             'goal_details' => $schema->string()->description('Optional detailed description of specific goals (e.g., "Run a sub-4hr marathon by October")')->nullable(),
             'available_days_per_week' => $schema->integer()->description('Number of days available for training per week (1-7)'),
             'minutes_per_session' => $schema->integer()->description('Typical workout session duration in minutes (15-180)'),
+        ];
+    }
+
+    /**
+     * Get the tool's output schema.
+     */
+    public function outputSchema(JsonSchema $schema): array
+    {
+        return [
+            'success' => $schema->boolean()->required(),
+            'profile' => $schema->object([
+                'id' => $schema->integer()->required(),
+                'primary_goal' => $schema->string()->required(),
+                'primary_goal_label' => $schema->string()->required(),
+                'goal_details' => $schema->string()->nullable(),
+                'available_days_per_week' => $schema->integer()->required(),
+                'minutes_per_session' => $schema->integer()->required(),
+            ])->required(),
+            'message' => $schema->string()->required(),
         ];
     }
 }

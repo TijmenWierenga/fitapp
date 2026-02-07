@@ -2,10 +2,15 @@
 
 namespace App\Mcp\Resources;
 
+use Laravel\Mcp\Enums\Role;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\Server\Annotations\Audience;
+use Laravel\Mcp\Server\Annotations\Priority;
 use Laravel\Mcp\Server\Resource;
 
+#[Audience(Role::Assistant)]
+#[Priority(0.9)]
 class WorkoutScheduleResource extends Resource
 {
     /**

@@ -14,7 +14,9 @@ use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
 
+#[IsIdempotent]
 class UpdateWorkoutTool extends Tool
 {
     public function __construct(
@@ -164,6 +166,18 @@ class UpdateWorkoutTool extends Tool
             'scheduled_at' => $schema->string()->description('The new scheduled date and time (in user\'s timezone)')->nullable(),
             'notes' => $schema->string()->description('The new notes for the workout')->nullable(),
             'sections' => $schema->array()->items($this->schemaBuilder->section())->description('Replace entire workout structure with new sections/blocks/exercises. If provided, existing structure is deleted and replaced.')->nullable(),
+        ];
+    }
+
+    /**
+     * Get the tool's output schema.
+     */
+    public function outputSchema(JsonSchema $schema): array
+    {
+        return [
+            'success' => $schema->boolean()->required(),
+            'workout' => $schema->object($this->schemaBuilder->workoutOutputSchema())->required(),
+            'message' => $schema->string()->required(),
         ];
     }
 }

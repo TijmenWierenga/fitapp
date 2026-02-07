@@ -91,4 +91,27 @@ class AddInjuryTool extends Tool
             'notes' => $schema->string()->description('Optional notes about the injury')->nullable(),
         ];
     }
+
+    /**
+     * Get the tool's output schema.
+     */
+    public function outputSchema(JsonSchema $schema): array
+    {
+        return [
+            'success' => $schema->boolean()->required(),
+            'injury' => $schema->object([
+                'id' => $schema->integer()->required(),
+                'injury_type' => $schema->string()->required(),
+                'injury_type_label' => $schema->string()->required(),
+                'body_part' => $schema->string()->required(),
+                'body_part_label' => $schema->string()->required(),
+                'body_part_region' => $schema->string()->required(),
+                'started_at' => $schema->string()->required(),
+                'ended_at' => $schema->string()->nullable(),
+                'is_active' => $schema->boolean()->required(),
+                'notes' => $schema->string()->nullable(),
+            ])->required(),
+            'message' => $schema->string()->required(),
+        ];
+    }
 }

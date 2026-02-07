@@ -6,6 +6,8 @@ use App\Enums\Workout\Activity;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Workout extends Model
 {
@@ -50,25 +52,17 @@ class Workout extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Step, $this>
+     * @return HasMany<Section, $this>
      */
-    public function steps(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function sections(): HasMany
     {
-        return $this->hasMany(Step::class)->orderBy('sort_order');
+        return $this->hasMany(Section::class)->orderBy('order');
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Step, $this>
+     * @return BelongsTo<User, $this>
      */
-    public function rootSteps(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->steps()->whereNull('parent_step_id');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this>
-     */
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -123,12 +117,10 @@ class Workout extends Model
 
     public function canBeDeleted(): bool
     {
-        // Cannot delete completed workouts
         if ($this->isCompleted()) {
             return false;
         }
 
-        // Cannot delete past workouts (except today)
         if ($this->scheduled_at->isPast() && ! $this->scheduled_at->isToday()) {
             return false;
         }
@@ -157,54 +149,44 @@ class Workout extends Model
             'scheduled_at' => $scheduledAt,
         ]);
 
-        foreach ($this->rootSteps as $step) {
-            $this->duplicateStep($step, $newWorkout);
+        $this->load('sections.blocks.exercises.exerciseable');
+
+        foreach ($this->sections as $section) {
+            $newSection = $newWorkout->sections()->create([
+                'name' => $section->name,
+                'order' => $section->order,
+                'notes' => $section->notes,
+            ]);
+
+            foreach ($section->blocks as $block) {
+                $newBlock = $newSection->blocks()->create([
+                    'block_type' => $block->block_type,
+                    'order' => $block->order,
+                    'rounds' => $block->rounds,
+                    'rest_between_exercises' => $block->rest_between_exercises,
+                    'rest_between_rounds' => $block->rest_between_rounds,
+                    'time_cap' => $block->time_cap,
+                    'work_interval' => $block->work_interval,
+                    'rest_interval' => $block->rest_interval,
+                    'notes' => $block->notes,
+                ]);
+
+                foreach ($block->exercises as $exercise) {
+                    $newExerciseable = $exercise->exerciseable->replicate();
+                    $newExerciseable->save();
+
+                    $newBlock->exercises()->create([
+                        'name' => $exercise->name,
+                        'order' => $exercise->order,
+                        'exerciseable_type' => $exercise->exerciseable_type,
+                        'exerciseable_id' => $newExerciseable->id,
+                        'notes' => $exercise->notes,
+                    ]);
+                }
+            }
         }
 
         return $newWorkout;
-    }
-
-    protected function duplicateStep(Step $step, Workout $newWorkout, ?int $parentId = null): void
-    {
-        $newStep = $step->replicate();
-        $newStep->workout_id = $newWorkout->id;
-        $newStep->parent_step_id = $parentId;
-        $newStep->save();
-
-        foreach ($step->children as $child) {
-            $this->duplicateStep($child, $newWorkout, $newStep->id);
-        }
-    }
-
-    public function totalDistanceInMeters(): int
-    {
-        return (int) $this->rootSteps->sum(function (Step $step) {
-            return $this->calculateStepDistance($step);
-        });
-    }
-
-    protected function calculateStepDistance(Step $step): int
-    {
-        if ($step->step_kind === \App\Enums\Workout\StepKind::Repeat) {
-            $childDistance = $step->children->sum(function (Step $child) {
-                return $this->calculateStepDistance($child);
-            });
-
-            return (int) ($childDistance * $step->repeat_count);
-        }
-
-        if ($step->duration_type === \App\Enums\Workout\DurationType::Distance) {
-            return $step->duration_value ?? 0;
-        }
-
-        return 0;
-    }
-
-    public function totalDurationInSeconds(): int
-    {
-        return (int) $this->rootSteps->sum(function (Step $step) {
-            return $this->calculateStepDuration($step);
-        });
     }
 
     public static function getRpeLabel(?int $rpe): string
@@ -217,22 +199,5 @@ class Workout extends Model
             9, 10 => 'Maximum Effort',
             default => '',
         };
-    }
-
-    protected function calculateStepDuration(Step $step): int
-    {
-        if ($step->step_kind === \App\Enums\Workout\StepKind::Repeat) {
-            $childDuration = $step->children->sum(function (Step $child) {
-                return $this->calculateStepDuration($child);
-            });
-
-            return (int) ($childDuration * $step->repeat_count);
-        }
-
-        if ($step->duration_type === \App\Enums\Workout\DurationType::Time) {
-            return $step->duration_value ?? 0;
-        }
-
-        return 0;
     }
 }

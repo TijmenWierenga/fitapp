@@ -2,7 +2,6 @@
 
 namespace App\Mcp\Tools;
 
-use App\Models\Workout;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Gate;
@@ -16,7 +15,7 @@ class GetWorkoutTool extends Tool
      * The tool's description.
      */
     protected string $description = <<<'MARKDOWN'
-        Fetch a single workout by ID. Returns full workout details including RPE and feeling if completed.
+        Fetch a single workout by ID. Returns full workout details including sections, blocks, exercises, RPE and feeling if completed.
     MARKDOWN;
 
     /**
@@ -42,22 +41,9 @@ class GetWorkoutTool extends Tool
             return Response::error('Workout not found or access denied');
         }
 
-        $data = [
-            'id' => $workout->id,
-            'name' => $workout->name,
-            'activity' => $workout->activity->value,
-            'scheduled_at' => $user->toUserTimezone($workout->scheduled_at)->toIso8601String(),
-            'completed' => $workout->isCompleted(),
-            'completed_at' => $workout->completed_at ? $user->toUserTimezone($workout->completed_at)->toIso8601String() : null,
-            'rpe' => $workout->rpe,
-            'rpe_label' => Workout::getRpeLabel($workout->rpe),
-            'feeling' => $workout->feeling,
-            'notes' => $workout->notes,
-        ];
-
         return Response::text(json_encode([
             'success' => true,
-            'workout' => $data,
+            'workout' => WorkoutResponseFormatter::format($workout, $user),
         ]));
     }
 

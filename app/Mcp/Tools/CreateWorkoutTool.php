@@ -2,7 +2,9 @@
 
 namespace App\Mcp\Tools;
 
+use App\Actions\CreateStructuredWorkout;
 use App\Enums\Workout\Activity;
+use App\Enums\Workout\BlockType;
 use App\Models\Workout;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -17,11 +19,19 @@ class CreateWorkoutTool extends Tool
      * The tool's description.
      */
     protected string $description = <<<'MARKDOWN'
-        Create a new workout with a scheduled date and time. The workout will be created for the specified user.
+        Create a new workout with a scheduled date and time. Optionally include structured sections with blocks and exercises.
 
-        Activity types include: run, strength, cardio, hiit, bike, pool_swim, hike, yoga, and many more Garmin-compatible activities
+        Activity types include: run, strength, cardio, hiit, bike, pool_swim, hike, yoga, and many more Garmin-compatible activities.
 
         Dates/times should be in the user's local timezone and will be converted to UTC for storage.
+
+        ## Structured Workout
+
+        You can optionally provide a `sections` array to create a fully structured workout with sections, blocks, and exercises.
+
+        Each section contains blocks (e.g., straight_sets, circuit, superset, interval, amrap, for_time, emom, distance_duration, rest).
+
+        Each block contains exercises with a `type` field (strength, cardio, or duration) plus type-specific fields.
     MARKDOWN;
 
     /**
@@ -34,33 +44,73 @@ class CreateWorkoutTool extends Tool
             'activity' => ['required', Rule::enum(Activity::class)],
             'scheduled_at' => 'required|date',
             'notes' => 'nullable|string|max:5000',
+            'sections' => 'sometimes|array',
+            'sections.*.name' => 'required|string|max:255',
+            'sections.*.order' => 'required|integer|min:0',
+            'sections.*.notes' => 'nullable|string|max:5000',
+            'sections.*.blocks' => 'sometimes|array',
+            'sections.*.blocks.*.block_type' => ['required', Rule::enum(BlockType::class)],
+            'sections.*.blocks.*.order' => 'required|integer|min:0',
+            'sections.*.blocks.*.rounds' => 'nullable|integer|min:1',
+            'sections.*.blocks.*.rest_between_exercises' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.rest_between_rounds' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.time_cap' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.work_interval' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.rest_interval' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.notes' => 'nullable|string|max:5000',
+            'sections.*.blocks.*.exercises' => 'sometimes|array',
+            'sections.*.blocks.*.exercises.*.name' => 'required|string|max:255',
+            'sections.*.blocks.*.exercises.*.order' => 'required|integer|min:0',
+            'sections.*.blocks.*.exercises.*.type' => 'required|in:strength,cardio,duration',
+            'sections.*.blocks.*.exercises.*.notes' => 'nullable|string|max:5000',
+            // Strength exercise fields
+            'sections.*.blocks.*.exercises.*.target_sets' => 'nullable|integer|min:1',
+            'sections.*.blocks.*.exercises.*.target_reps_min' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_reps_max' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_weight' => 'nullable|numeric|min:0',
+            'sections.*.blocks.*.exercises.*.target_tempo' => 'nullable|string|max:20',
+            'sections.*.blocks.*.exercises.*.rest_after' => 'nullable|integer|min:0',
+            // Cardio exercise fields
+            'sections.*.blocks.*.exercises.*.target_duration' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_distance' => 'nullable|numeric|min:0',
+            'sections.*.blocks.*.exercises.*.target_pace_min' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_pace_max' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_heart_rate_zone' => 'nullable|integer|min:1|max:5',
+            'sections.*.blocks.*.exercises.*.target_heart_rate_min' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_heart_rate_max' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_power' => 'nullable|integer|min:0',
+            // Shared field
+            'sections.*.blocks.*.exercises.*.target_rpe' => 'nullable|numeric|min:1|max:10',
         ], [
             'activity.Enum' => 'Invalid activity type. See available activity values.',
             'scheduled_at.date' => 'Please provide a valid date and time.',
         ]);
 
         $user = $request->user();
-
         $scheduledAt = CarbonImmutable::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
 
-        $workout = Workout::create([
-            'user_id' => $user->getKey(),
-            'name' => $validated['name'],
-            'activity' => Activity::from($validated['activity']),
-            'scheduled_at' => $scheduledAt,
-            'notes' => $validated['notes'] ?? null,
-        ]);
+        if (! empty($validated['sections'])) {
+            $workout = app(CreateStructuredWorkout::class)->execute(
+                user: $user,
+                name: $validated['name'],
+                activity: Activity::from($validated['activity']),
+                scheduledAt: $scheduledAt,
+                notes: $validated['notes'] ?? null,
+                sections: $validated['sections'],
+            );
+        } else {
+            $workout = Workout::create([
+                'user_id' => $user->getKey(),
+                'name' => $validated['name'],
+                'activity' => Activity::from($validated['activity']),
+                'scheduled_at' => $scheduledAt,
+                'notes' => $validated['notes'] ?? null,
+            ]);
+        }
 
         return Response::text(json_encode([
             'success' => true,
-            'workout' => [
-                'id' => $workout->id,
-                'name' => $workout->name,
-                'activity' => $workout->activity->value,
-                'scheduled_at' => $user->toUserTimezone($workout->scheduled_at)->toIso8601String(),
-                'notes' => $workout->notes,
-                'completed' => false,
-            ],
+            'workout' => WorkoutResponseFormatter::format($workout, $user),
             'message' => 'Workout created successfully',
         ]));
     }
@@ -74,7 +124,8 @@ class CreateWorkoutTool extends Tool
             'name' => $schema->string()->description('The name/title of the workout (e.g., "Morning Run", "Leg Day")'),
             'activity' => $schema->string()->description('The activity type (e.g., run, strength, cardio, hiit, bike, pool_swim, hike, yoga, etc.)'),
             'scheduled_at' => $schema->string()->description('The date and time when the workout is scheduled (in user\'s timezone)'),
-            'notes' => $schema->string()->description('Optional Markdown notes for the workout. Include a detailed plan: equipment needed, step-by-step phases (warm-up, main work, cool-down), sets/reps/intensity, and rest periods where applicable.')->nullable(),
+            'notes' => $schema->string()->description('Optional Markdown notes for the workout.')->nullable(),
+            'sections' => $schema->array()->description('Optional structured workout sections with blocks and exercises.')->nullable(),
         ];
     }
 }

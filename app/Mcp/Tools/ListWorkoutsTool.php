@@ -40,7 +40,7 @@ class ListWorkoutsTool extends Tool
         $filter = $validated['filter'] ?? 'all';
         $limit = $validated['limit'] ?? 20;
 
-        $query = $user->workouts();
+        $query = $user->workouts()->withCount('sections');
 
         match ($filter) {
             'upcoming' => $query->upcoming(),
@@ -59,6 +59,7 @@ class ListWorkoutsTool extends Tool
             'completed' => $workout->isCompleted(),
             'completed_at' => $workout->completed_at ? $user->toUserTimezone($workout->completed_at)->toIso8601String() : null,
             'notes' => $workout->notes,
+            'sections_count' => $workout->sections_count,
         ]);
 
         return Response::text(json_encode([

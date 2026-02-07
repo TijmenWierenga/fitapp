@@ -29,25 +29,6 @@
                         <flux:text>{{ $workout->scheduled_at->format('g:i A') }}</flux:text>
                     </div>
 
-                    @php
-                        $totalDistance = $this->estimatedTotalDistance;
-                        $totalDuration = $this->estimatedTotalDuration;
-                    @endphp
-
-                    @if($totalDuration > 0)
-                        <div class="flex items-center gap-2">
-                            <flux:icon.clock class="size-5 text-zinc-400" />
-                            <flux:text>Est. {{ \App\Support\Workout\TimeConverter::format($totalDuration) }}</flux:text>
-                        </div>
-                    @endif
-
-                    @if($totalDistance > 0)
-                        <div class="flex items-center gap-2">
-                            <flux:icon.bolt class="size-5 text-zinc-400" />
-                            <flux:text>Est. {{ \App\Support\Workout\DistanceConverter::format($totalDistance) }}</flux:text>
-                        </div>
-                    @endif
-
                     @if($workout->isCompleted())
                         <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
                             <flux:icon.check-circle class="size-5" />
@@ -92,37 +73,6 @@
                     <div class="prose prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400">
                         {!! Str::markdown($workout->notes, ['html_input' => 'escape']) !!}
                     </div>
-                </flux:card>
-            @endif
-
-            {{-- Steps Table Card --}}
-            @if($workout->rootSteps->isNotEmpty())
-                <flux:card>
-                    <flux:heading size="lg" class="mb-4">Workout Steps</flux:heading>
-                    <flux:table>
-                        <flux:table.columns>
-                            <flux:table.column>Step</flux:table.column>
-                            <flux:table.column>Duration</flux:table.column>
-                            <flux:table.column>Target</flux:table.column>
-                        </flux:table.columns>
-
-                        <flux:table.rows>
-                            @foreach($workout->rootSteps as $step)
-                                @if($step->step_kind === \App\Enums\Workout\StepKind::Repeat)
-                                    <x-workout-repeat-header :repeat-count="$step->repeat_count" />
-                                    @foreach($step->children as $child)
-                                        <x-workout-step-row :step="$child" indented />
-                                    @endforeach
-                                @else
-                                    <x-workout-step-row :step="$step" />
-                                @endif
-                            @endforeach
-                        </flux:table.rows>
-                    </flux:table>
-                </flux:card>
-            @else
-                <flux:card>
-                    <x-empty-state icon="document" message="No workout steps defined" />
                 </flux:card>
             @endif
         </div>

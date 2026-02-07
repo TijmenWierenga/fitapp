@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Contracts\PresentableExercise;
+use App\DataTransferObjects\Workout\ExercisePresentation;
+use App\Support\Workout\WorkoutDisplayFormatter as Format;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
-class CardioExercise extends Model
+class CardioExercise extends Model implements PresentableExercise
 {
     /** @use HasFactory<\Database\Factories\CardioExerciseFactory> */
     use HasFactory;
@@ -39,5 +42,48 @@ class CardioExercise extends Model
     public function blockExercise(): MorphOne
     {
         return $this->morphOne(BlockExercise::class, 'exerciseable');
+    }
+
+    public function present(): ExercisePresentation
+    {
+        $whatLines = [];
+        $effortLines = [];
+
+        $duration = Format::duration($this->target_duration);
+        if ($duration) {
+            $whatLines[] = $duration;
+        }
+
+        $distance = Format::distance($this->target_distance);
+        if ($distance) {
+            $whatLines[] = $distance;
+        }
+
+        $pace = Format::paceRange($this->target_pace_min, $this->target_pace_max);
+        if ($pace) {
+            $effortLines[] = "Pace: {$pace}";
+        }
+
+        $hrZone = Format::hrZone($this->target_heart_rate_zone);
+        if ($hrZone) {
+            $effortLines[] = $hrZone;
+        }
+
+        $hrRange = Format::hrRange($this->target_heart_rate_min, $this->target_heart_rate_max);
+        if ($hrRange) {
+            $effortLines[] = $hrRange;
+        }
+
+        $power = Format::power($this->target_power);
+        if ($power) {
+            $effortLines[] = $power;
+        }
+
+        return new ExercisePresentation(
+            dotColor: 'bg-blue-400',
+            typeLabel: 'Cardio',
+            whatLines: $whatLines,
+            effortLines: $effortLines,
+        );
     }
 }

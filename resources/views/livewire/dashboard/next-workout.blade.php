@@ -60,37 +60,14 @@
                 </flux:card>
             @endif
 
-            @if($this->nextWorkout->rootSteps->isNotEmpty())
-                <div class="space-y-2 mt-4">
-                    <flux:heading size="sm" class="text-zinc-500 dark:text-zinc-400">Workout Steps</flux:heading>
-                    <div class="overflow-x-auto -mx-4 sm:mx-0">
-                        <div class="inline-block min-w-full align-middle px-4 sm:px-0">
-                            <flux:table>
-                                <flux:table.columns>
-                                    <flux:table.column>Step</flux:table.column>
-                                    <flux:table.column>Duration</flux:table.column>
-                                    <flux:table.column>Target</flux:table.column>
-                                </flux:table.columns>
+            @if($this->nextWorkout->blockTree->isNotEmpty())
+                <div class="mt-4">
+                    <flux:heading size="sm" class="text-zinc-500 dark:text-zinc-400 mb-2">Workout Structure</flux:heading>
+                    <x-workout-block-tree :blocks="$this->nextWorkout->blockTree->take(3)" :compact="true" />
 
-                                <flux:table.rows>
-                                    @foreach($this->nextWorkout->rootSteps->take(3) as $step)
-                                        @if($step->step_kind === \App\Enums\Workout\StepKind::Repeat)
-                                            <x-workout-repeat-header :repeat-count="$step->repeat_count" />
-                                            @foreach($step->children as $child)
-                                                <x-workout-step-row :step="$child" indented />
-                                            @endforeach
-                                        @else
-                                            <x-workout-step-row :step="$step" />
-                                        @endif
-                                    @endforeach
-                                </flux:table.rows>
-                            </flux:table>
-                        </div>
-                    </div>
-
-                    @if($this->nextWorkout->rootSteps->count() > 3)
+                    @if($this->nextWorkout->blockTree->count() > 3)
                         <a href="{{ route('workouts.show', $this->nextWorkout) }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-block">
-                            View all {{ $this->nextWorkout->rootSteps->count() }} steps
+                            View all {{ $this->nextWorkout->blockTree->count() }} blocks
                         </a>
                     @endif
                 </div>

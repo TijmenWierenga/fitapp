@@ -69,20 +69,7 @@ it('prevents saving a completed workout', function () {
 
     $component = Livewire::actingAs($user)
         ->test(Builder::class, ['workout' => $workout])
-        ->set('name', 'My Workout')
-        ->set('steps', [[
-            'step_kind' => \App\Enums\Workout\StepKind::Run->value,
-            'duration_type' => \App\Enums\Workout\DurationType::Distance->value,
-            'duration_value' => 5000,
-            'intensity' => \App\Enums\Workout\Intensity::Active->value,
-            'target_type' => 'none',
-            'target_mode' => null,
-            'target_zone' => null,
-            'target_low' => null,
-            'target_high' => null,
-            'notes' => null,
-            'name' => null,
-        ]]);
+        ->set('name', 'My Workout');
 
     // Manually mark it as completed in the background
     $workout->update(['completed_at' => now()]);

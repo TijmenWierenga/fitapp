@@ -46,13 +46,13 @@ test('activity enum returns color by category', function () {
     expect(Activity::Bike->color())->toBe('green');
 });
 
-test('only running activities have steps', function () {
-    expect(Activity::Run->hasSteps())->toBeTrue();
-    expect(Activity::TrailRun->hasSteps())->toBeTrue();
-    expect(Activity::Treadmill->hasSteps())->toBeTrue();
-    expect(Activity::Strength->hasSteps())->toBeFalse();
-    expect(Activity::Cardio->hasSteps())->toBeFalse();
-    expect(Activity::HIIT->hasSteps())->toBeFalse();
-    expect(Activity::Bike->hasSteps())->toBeFalse();
-    expect(Activity::Yoga->hasSteps())->toBeFalse();
+test('all activities support blocks', function () {
+    expect(Activity::Run->hasBlocks())->toBeTrue();
+    expect(Activity::TrailRun->hasBlocks())->toBeTrue();
+    expect(Activity::Treadmill->hasBlocks())->toBeTrue();
+    expect(Activity::Strength->hasBlocks())->toBeTrue();
+    expect(Activity::Cardio->hasBlocks())->toBeTrue();
+    expect(Activity::HIIT->hasBlocks())->toBeTrue();
+    expect(Activity::Bike->hasBlocks())->toBeTrue();
+    expect(Activity::Yoga->hasBlocks())->toBeTrue();
 });

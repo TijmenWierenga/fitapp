@@ -95,36 +95,11 @@
                 </flux:card>
             @endif
 
-            {{-- Steps Table Card --}}
-            @if($workout->rootSteps->isNotEmpty())
-                <flux:card>
-                    <flux:heading size="lg" class="mb-4">Workout Steps</flux:heading>
-                    <flux:table>
-                        <flux:table.columns>
-                            <flux:table.column>Step</flux:table.column>
-                            <flux:table.column>Duration</flux:table.column>
-                            <flux:table.column>Target</flux:table.column>
-                        </flux:table.columns>
-
-                        <flux:table.rows>
-                            @foreach($workout->rootSteps as $step)
-                                @if($step->step_kind === \App\Enums\Workout\StepKind::Repeat)
-                                    <x-workout-repeat-header :repeat-count="$step->repeat_count" />
-                                    @foreach($step->children as $child)
-                                        <x-workout-step-row :step="$child" indented />
-                                    @endforeach
-                                @else
-                                    <x-workout-step-row :step="$step" />
-                                @endif
-                            @endforeach
-                        </flux:table.rows>
-                    </flux:table>
-                </flux:card>
-            @else
-                <flux:card>
-                    <x-empty-state icon="document" message="No workout steps defined" />
-                </flux:card>
-            @endif
+            {{-- Workout Structure --}}
+            <flux:card>
+                <flux:heading size="lg" class="mb-4">Workout Structure</flux:heading>
+                <x-workout-block-tree :blocks="$workout->blockTree" />
+            </flux:card>
         </div>
 
         {{-- Sidebar: 1/3 width --}}

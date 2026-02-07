@@ -2,13 +2,13 @@
 
 namespace Tests\Unit\Services;
 
-use App\Enums\Workout\DurationType;
-use App\Enums\Workout\Intensity;
-use App\Enums\Workout\StepKind;
-use App\Enums\Workout\TargetMode;
-use App\Enums\Workout\TargetType;
-use App\Models\Step;
+use App\Enums\Workout\IntervalIntensity;
+use App\Models\ExerciseEntry;
+use App\Models\ExerciseGroup;
+use App\Models\IntervalBlock;
+use App\Models\RestBlock;
 use App\Models\Workout;
+use App\Models\WorkoutBlock;
 use App\Services\Workout\WorkoutEstimator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -25,117 +25,290 @@ class WorkoutEstimatorTest extends TestCase
         $this->estimator = new WorkoutEstimator;
     }
 
-    public function test_it_estimates_duration_for_distance_steps_based_on_intensity(): void
+    public function test_it_estimates_duration_from_time_based_interval(): void
     {
         $workout = Workout::factory()->create();
 
-        // 1km Active = 300s (5:00 min/km)
-        Step::factory()->for($workout)->create([
-            'duration_type' => DurationType::Distance,
-            'duration_value' => 1000,
-            'intensity' => Intensity::Active,
+        $intervalBlock = IntervalBlock::factory()->create([
+            'duration_seconds' => 300,
+            'intensity' => IntervalIntensity::Moderate,
         ]);
 
-        // 1km Warmup = 420s (7:00 min/km)
-        Step::factory()->for($workout)->create([
-            'duration_type' => DurationType::Distance,
-            'duration_value' => 1000,
-            'intensity' => Intensity::Warmup,
+        WorkoutBlock::factory()->interval()->create([
+            'workout_id' => $workout->id,
+            'position' => 0,
+            'blockable_type' => 'interval_block',
+            'blockable_id' => $intervalBlock->id,
         ]);
 
-        // 1km Rest = 540s (9:00 min/km)
-        Step::factory()->for($workout)->create([
-            'duration_type' => DurationType::Distance,
-            'duration_value' => 1000,
-            'intensity' => Intensity::Rest,
-        ]);
-
-        $this->assertEquals(300 + 420 + 540, $this->estimator->estimateDuration($workout));
+        $this->assertEquals(300, $this->estimator->estimateDuration($workout));
     }
 
-    public function test_it_estimates_distance_for_time_steps_based_on_intensity(): void
+    public function test_it_estimates_duration_from_distance_based_interval(): void
     {
         $workout = Workout::factory()->create();
 
-        // 300s Active = 1000m
-        Step::factory()->for($workout)->create([
-            'duration_type' => DurationType::Time,
-            'duration_value' => 300,
-            'intensity' => Intensity::Active,
+        // 1km at moderate intensity (330s/km default pace)
+        $intervalBlock = IntervalBlock::factory()->distanceBased(1000)->create([
+            'intensity' => IntervalIntensity::Moderate,
         ]);
 
-        // 420s Warmup = 1000m
-        Step::factory()->for($workout)->create([
-            'duration_type' => DurationType::Time,
-            'duration_value' => 420,
-            'intensity' => Intensity::Warmup,
+        WorkoutBlock::factory()->interval()->create([
+            'workout_id' => $workout->id,
+            'position' => 0,
+            'blockable_type' => 'interval_block',
+            'blockable_id' => $intervalBlock->id,
         ]);
 
-        $this->assertEquals(2000, $this->estimator->estimateDistance($workout));
+        $this->assertEquals(330, $this->estimator->estimateDuration($workout));
     }
 
-    public function test_it_uses_pace_target_for_estimation_if_present(): void
+    public function test_it_estimates_distance_from_distance_based_interval(): void
     {
         $workout = Workout::factory()->create();
 
-        // 1km at 4:00-4:30 min/km (240s-270s)
-        // Average = 255s/km
-        Step::factory()->for($workout)->create([
-            'duration_type' => DurationType::Distance,
-            'duration_value' => 1000,
-            'target_type' => TargetType::Pace,
-            'target_mode' => TargetMode::Range,
-            'target_low' => 240,
-            'target_high' => 270,
+        $intervalBlock = IntervalBlock::factory()->distanceBased(1000)->create([
+            'intensity' => IntervalIntensity::Moderate,
         ]);
 
-        $this->assertEquals(255, $this->estimator->estimateDuration($workout));
+        WorkoutBlock::factory()->interval()->create([
+            'workout_id' => $workout->id,
+            'position' => 0,
+            'blockable_type' => 'interval_block',
+            'blockable_id' => $intervalBlock->id,
+        ]);
+
+        $this->assertEquals(1000, $this->estimator->estimateDistance($workout));
     }
 
-    public function test_it_handles_repeat_blocks_recursively(): void
+    public function test_it_estimates_exercise_group_duration(): void
     {
         $workout = Workout::factory()->create();
 
-        $repeat = Step::factory()->for($workout)->create([
-            'step_kind' => StepKind::Repeat,
+        $exerciseGroup = ExerciseGroup::factory()->create([
+            'rounds' => 1,
+            'rest_between_rounds_seconds' => null,
+        ]);
+
+        // 3 sets * 10 reps * 3s = 90s + rest: 90s * (3-1) = 180s = 270s total
+        ExerciseEntry::factory()->create([
+            'exercise_group_id' => $exerciseGroup->id,
+            'sets' => 3,
+            'reps' => 10,
+            'rest_between_sets_seconds' => 90,
+        ]);
+
+        WorkoutBlock::factory()->exerciseGroup()->create([
+            'workout_id' => $workout->id,
+            'position' => 0,
+            'blockable_type' => 'exercise_group',
+            'blockable_id' => $exerciseGroup->id,
+        ]);
+
+        $this->assertEquals(270, $this->estimator->estimateDuration($workout));
+    }
+
+    public function test_it_estimates_rest_block_duration(): void
+    {
+        $workout = Workout::factory()->create();
+
+        $restBlock = RestBlock::factory()->create(['duration_seconds' => 60]);
+
+        WorkoutBlock::factory()->rest()->create([
+            'workout_id' => $workout->id,
+            'position' => 0,
+            'blockable_type' => 'rest_block',
+            'blockable_id' => $restBlock->id,
+        ]);
+
+        $this->assertEquals(60, $this->estimator->estimateDuration($workout));
+    }
+
+    public function test_it_applies_repeat_count_and_rest_between_repeats(): void
+    {
+        $workout = Workout::factory()->create();
+
+        $intervalBlock = IntervalBlock::factory()->create([
+            'duration_seconds' => 300,
+            'intensity' => IntervalIntensity::Threshold,
+        ]);
+
+        // Group with repeat_count=3 and 60s rest between repeats
+        $groupBlock = WorkoutBlock::factory()->group()->create([
+            'workout_id' => $workout->id,
+            'position' => 0,
             'repeat_count' => 3,
+            'rest_between_repeats_seconds' => 60,
         ]);
 
-        // 1km Active inside repeat (300s)
-        Step::factory()->for($workout)->create([
-            'parent_step_id' => $repeat->id,
-            'duration_type' => DurationType::Distance,
-            'duration_value' => 1000,
-            'intensity' => Intensity::Active,
+        WorkoutBlock::factory()->interval()->create([
+            'workout_id' => $workout->id,
+            'parent_id' => $groupBlock->id,
+            'position' => 0,
+            'blockable_type' => 'interval_block',
+            'blockable_id' => $intervalBlock->id,
         ]);
 
-        // 3 repeats * 300s = 900s
-        $this->assertEquals(900, $this->estimator->estimateDuration($workout));
-        // 3 repeats * 1000m = 3000m
-        $this->assertEquals(3000, $this->estimator->estimateDistance($workout));
+        // Group duration: children sum = 300s
+        // Total: 300 * 3 (repeats) + 60 * 2 (rest between) = 900 + 120 = 1020
+        $this->assertEquals(1020, $this->estimator->estimateDuration($workout));
     }
 
-    public function test_it_combines_explicit_and_estimated_values(): void
+    public function test_it_returns_zero_for_empty_workout(): void
     {
         $workout = Workout::factory()->create();
 
-        // Explicit 15 min Warmup (900s)
-        // Estimated distance at 7:00 min/km (420s/km) = 900 / 420 * 1000 = 2143m (rounded)
-        Step::factory()->for($workout)->create([
-            'duration_type' => DurationType::Time,
-            'duration_value' => 900,
-            'intensity' => Intensity::Warmup,
+        $this->assertEquals(0, $this->estimator->estimateDuration($workout));
+        $this->assertEquals(0, $this->estimator->estimateDistance($workout));
+    }
+
+    public function test_it_combines_mixed_block_types(): void
+    {
+        $workout = Workout::factory()->create();
+
+        // Interval: 300s
+        $intervalBlock = IntervalBlock::factory()->create([
+            'duration_seconds' => 300,
+            'intensity' => IntervalIntensity::Moderate,
         ]);
 
-        // Explicit 7 km Run (7000m)
-        // Estimated duration at 5:00 min/km (300s/km) = 7 * 300 = 2100s
-        Step::factory()->for($workout)->create([
-            'duration_type' => DurationType::Distance,
-            'duration_value' => 7000,
-            'intensity' => Intensity::Active,
+        WorkoutBlock::factory()->interval()->create([
+            'workout_id' => $workout->id,
+            'position' => 0,
+            'blockable_type' => 'interval_block',
+            'blockable_id' => $intervalBlock->id,
         ]);
 
-        $this->assertEquals(900 + 2100, $this->estimator->estimateDuration($workout));
-        $this->assertEquals(2143 + 7000, $this->estimator->estimateDistance($workout));
+        // Exercise group: 3 sets * 10 reps * 3s = 90s + 90 * 2 rest = 270s
+        $exerciseGroup = ExerciseGroup::factory()->create([
+            'rounds' => 1,
+        ]);
+
+        ExerciseEntry::factory()->create([
+            'exercise_group_id' => $exerciseGroup->id,
+            'sets' => 3,
+            'reps' => 10,
+            'rest_between_sets_seconds' => 90,
+        ]);
+
+        WorkoutBlock::factory()->exerciseGroup()->create([
+            'workout_id' => $workout->id,
+            'position' => 1,
+            'blockable_type' => 'exercise_group',
+            'blockable_id' => $exerciseGroup->id,
+        ]);
+
+        // Rest: 60s
+        $restBlock = RestBlock::factory()->create(['duration_seconds' => 60]);
+
+        WorkoutBlock::factory()->rest()->create([
+            'workout_id' => $workout->id,
+            'position' => 2,
+            'blockable_type' => 'rest_block',
+            'blockable_id' => $restBlock->id,
+        ]);
+
+        // Total: 300 + 270 + 60 = 630s
+        $this->assertEquals(630, $this->estimator->estimateDuration($workout));
+    }
+
+    public function test_it_uses_target_pace_when_set(): void
+    {
+        $workout = Workout::factory()->create();
+
+        // 1km with explicit target pace of 300s/km
+        $intervalBlock = IntervalBlock::factory()->distanceBased(1000)->create([
+            'intensity' => IntervalIntensity::Moderate,
+            'target_pace_seconds_per_km' => 300,
+        ]);
+
+        WorkoutBlock::factory()->interval()->create([
+            'workout_id' => $workout->id,
+            'position' => 0,
+            'blockable_type' => 'interval_block',
+            'blockable_id' => $intervalBlock->id,
+        ]);
+
+        // Should use 300s/km target pace, not 330s/km default moderate pace
+        $this->assertEquals(300, $this->estimator->estimateDuration($workout));
+    }
+
+    public function test_it_estimates_timed_exercise_entries(): void
+    {
+        $workout = Workout::factory()->create();
+
+        $exerciseGroup = ExerciseGroup::factory()->create([
+            'rounds' => 1,
+        ]);
+
+        // Timed entry: 3 sets * 30s = 90s + 60 * 2 rest = 210s
+        ExerciseEntry::factory()->timed(30)->create([
+            'exercise_group_id' => $exerciseGroup->id,
+            'sets' => 3,
+            'rest_between_sets_seconds' => 60,
+        ]);
+
+        WorkoutBlock::factory()->exerciseGroup()->create([
+            'workout_id' => $workout->id,
+            'position' => 0,
+            'blockable_type' => 'exercise_group',
+            'blockable_id' => $exerciseGroup->id,
+        ]);
+
+        $this->assertEquals(210, $this->estimator->estimateDuration($workout));
+    }
+
+    public function test_it_applies_exercise_group_rounds(): void
+    {
+        $workout = Workout::factory()->create();
+
+        $exerciseGroup = ExerciseGroup::factory()->create([
+            'rounds' => 3,
+            'rest_between_rounds_seconds' => 120,
+        ]);
+
+        // 2 sets * 8 reps * 3s = 48s + 60 * 1 rest = 108s per round
+        ExerciseEntry::factory()->create([
+            'exercise_group_id' => $exerciseGroup->id,
+            'sets' => 2,
+            'reps' => 8,
+            'rest_between_sets_seconds' => 60,
+        ]);
+
+        WorkoutBlock::factory()->exerciseGroup()->create([
+            'workout_id' => $workout->id,
+            'position' => 0,
+            'blockable_type' => 'exercise_group',
+            'blockable_id' => $exerciseGroup->id,
+        ]);
+
+        // 108 * 3 rounds + 120 * 2 rest_between_rounds = 324 + 240 = 564s
+        $this->assertEquals(564, $this->estimator->estimateDuration($workout));
+    }
+
+    public function test_it_accumulates_distance_through_repeat_groups(): void
+    {
+        $workout = Workout::factory()->create();
+
+        $intervalBlock = IntervalBlock::factory()->distanceBased(400)->create([
+            'intensity' => IntervalIntensity::Threshold,
+        ]);
+
+        $groupBlock = WorkoutBlock::factory()->group()->create([
+            'workout_id' => $workout->id,
+            'position' => 0,
+            'repeat_count' => 5,
+        ]);
+
+        WorkoutBlock::factory()->interval()->create([
+            'workout_id' => $workout->id,
+            'parent_id' => $groupBlock->id,
+            'position' => 0,
+            'blockable_type' => 'interval_block',
+            'blockable_id' => $intervalBlock->id,
+        ]);
+
+        // 400m * 5 repeats = 2000m
+        $this->assertEquals(2000, $this->estimator->estimateDistance($workout));
     }
 }

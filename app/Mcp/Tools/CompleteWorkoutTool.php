@@ -2,6 +2,7 @@
 
 namespace App\Mcp\Tools;
 
+use App\Actions\Workout\CompleteWorkout;
 use App\Models\Workout;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -36,7 +37,7 @@ class CompleteWorkoutTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request, CompleteWorkout $completeWorkout): Response
     {
         $validated = $request->validate([
             'workout_id' => 'required|integer',
@@ -63,7 +64,7 @@ class CompleteWorkoutTool extends Tool
             return Response::error('Workout is already completed');
         }
 
-        $workout->markAsCompleted($validated['rpe'], $validated['feeling']);
+        $completeWorkout->execute($workout, $validated['rpe'], $validated['feeling']);
         $workout->refresh();
 
         return Response::text(json_encode([

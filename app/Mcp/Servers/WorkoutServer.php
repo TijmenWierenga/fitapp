@@ -7,14 +7,23 @@ use App\Mcp\Resources\UserFitnessProfileResource;
 use App\Mcp\Resources\UserInjuriesResource;
 use App\Mcp\Resources\UserProfileResource;
 use App\Mcp\Resources\WorkoutScheduleResource;
+use App\Mcp\Tools\AddBlockToWorkoutTool;
+use App\Mcp\Tools\AddExerciseToGroupTool;
 use App\Mcp\Tools\AddInjuryTool;
 use App\Mcp\Tools\CompleteWorkoutTool;
 use App\Mcp\Tools\CreateWorkoutTool;
 use App\Mcp\Tools\DeleteWorkoutTool;
+use App\Mcp\Tools\GetExerciseCatalogTool;
+use App\Mcp\Tools\GetMuscleLoadPreviewTool;
+use App\Mcp\Tools\GetRecoveryStatusTool;
+use App\Mcp\Tools\GetWorkoutStructureTool;
 use App\Mcp\Tools\GetWorkoutTool;
 use App\Mcp\Tools\ListWorkoutsTool;
 use App\Mcp\Tools\PingTool;
+use App\Mcp\Tools\RemoveBlockTool;
 use App\Mcp\Tools\RemoveInjuryTool;
+use App\Mcp\Tools\ReorderBlocksTool;
+use App\Mcp\Tools\SuggestTargetMusclesTool;
 use App\Mcp\Tools\UpdateFitnessProfileTool;
 use App\Mcp\Tools\UpdateWorkoutTool;
 use Laravel\Mcp\Server;
@@ -82,9 +91,33 @@ class WorkoutServer extends Server
         ## Workout Lifecycle
 
         1. **Create** workout with activity, name, and schedule
-        2. **Update** (optional) before completion - modify name, activity, schedule, or notes
-        3. **Complete** with RPE and feeling ratings
-        4. **Delete** only if not completed and not past (except today's workouts)
+        2. **Add blocks** to structure the workout (intervals, exercises, rest, notes)
+        3. **Update** (optional) before completion - modify name, activity, schedule, or notes
+        4. **Complete** with RPE and feeling ratings
+        5. **Delete** only if not completed and not past (except today's workouts)
+
+        ## Workout Structure (Blocks)
+
+        Workouts use a block-based architecture. Blocks are nested and can contain:
+        - **Group** — Container for organizing blocks. Can have `repeat_count` for repeating sections.
+        - **Interval** — A running/cardio interval with duration or distance, intensity, and optional pace target.
+        - **Exercise Group** — A group of exercises (straight sets, superset, circuit, EMOM, AMRAP). Contains exercise entries.
+        - **Rest** — An explicit rest period with duration.
+        - **Note** — A text note within the workout structure.
+
+        ### Building a Workout
+        1. Create the workout with `create-workout`
+        2. Add blocks with `add-block-to-workout`
+        3. For exercise group blocks, add exercises with `add-exercise-to-group`
+        4. Preview muscle load with `get-muscle-load-preview`
+        5. Check recovery status with `get-recovery-status` before planning
+        6. View structure with `get-workout-structure`
+
+        ### Nesting
+        Blocks can be nested up to 3 levels deep. Use `parent_id` to nest blocks inside group blocks.
+
+        ### Repeats
+        Set `repeat_count` on any block to repeat it. Use `rest_between_repeats_seconds` for rest between repetitions.
 
         ## Creating Workout Plans
 
@@ -149,6 +182,15 @@ class WorkoutServer extends Server
         - **update-fitness-profile**: Set or update user's fitness goals and availability
         - **add-injury**: Add an injury record to track limitations
         - **remove-injury**: Remove an injury record
+        - **get-exercise-catalog**: Browse exercises by category, equipment, movement pattern, or muscle group
+        - **add-block-to-workout**: Add a block (interval, exercise group, rest, note, or group) to a workout
+        - **add-exercise-to-group**: Add an exercise entry to an exercise group block
+        - **remove-block**: Remove a block and its children from a workout
+        - **reorder-blocks**: Reorder blocks within a workout
+        - **get-workout-structure**: View the full nested block tree of a workout
+        - **get-muscle-load-preview**: Preview per-muscle load breakdown for a workout
+        - **get-recovery-status**: Check muscle recovery status
+        - **suggest-target-muscles**: Get suggested target muscles based on recovery
 
         ## Available Prompts
 
@@ -233,6 +275,15 @@ class WorkoutServer extends Server
         UpdateFitnessProfileTool::class,
         AddInjuryTool::class,
         RemoveInjuryTool::class,
+        GetExerciseCatalogTool::class,
+        AddBlockToWorkoutTool::class,
+        AddExerciseToGroupTool::class,
+        RemoveBlockTool::class,
+        ReorderBlocksTool::class,
+        GetWorkoutStructureTool::class,
+        GetMuscleLoadPreviewTool::class,
+        GetRecoveryStatusTool::class,
+        SuggestTargetMusclesTool::class,
     ];
 
     /**

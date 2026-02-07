@@ -1,7 +1,6 @@
 <?php
 
 use App\Livewire\Dashboard\NextWorkout;
-use App\Livewire\Dashboard\TrainingInsights;
 use App\Livewire\Dashboard\WorkoutCalendar;
 use App\Models\User;
 use App\Models\Workout;
@@ -32,42 +31,6 @@ it('refreshes next workout when workout completed event is dispatched', function
 
     Livewire::actingAs($user)
         ->test(NextWorkout::class)
-        ->dispatch('workout-completed')
-        ->assertStatus(200);
-});
-
-it('displays training insights with completed workouts', function () {
-    $user = User::factory()->create();
-    Workout::factory()->for($user)->count(3)->create([
-        'scheduled_at' => now()->subDays(2),
-        'completed_at' => now()->subDays(2),
-        'rpe' => 5,
-        'feeling' => 4,
-    ]);
-
-    Livewire::actingAs($user)
-        ->test(TrainingInsights::class)
-        ->assertSee('Training Insights')
-        ->assertSee('Last 4 weeks')
-        ->assertSee('3')
-        ->assertSee('Completed')
-        ->assertSee('Completion Rate')
-        ->assertSee('Streak (days)');
-});
-
-it('displays training insights empty state when no completed workouts', function () {
-    $user = User::factory()->create();
-
-    Livewire::actingAs($user)
-        ->test(TrainingInsights::class)
-        ->assertSee('No completed workouts yet');
-});
-
-it('refreshes training insights when workout completed', function () {
-    $user = User::factory()->create();
-
-    Livewire::actingAs($user)
-        ->test(TrainingInsights::class)
         ->dispatch('workout-completed')
         ->assertStatus(200);
 });

@@ -75,6 +75,7 @@
                     </div>
                 </flux:card>
             @endif
+
         </div>
 
         {{-- Sidebar: 1/3 width --}}
@@ -129,6 +130,13 @@
             </flux:card>
         </div>
     </div>
+
+    {{-- Workout Structure: full width --}}
+    @if($workout->sections->isNotEmpty())
+        <div class="mt-6">
+            <x-workout.structure :sections="$workout->sections" />
+        </div>
+    @endif
 
     {{-- Include duplicate modal component --}}
     <livewire:workout.duplicate />

@@ -22,6 +22,8 @@ class Show extends Component
             abort(403);
         }
 
+        $workout->load('sections.blocks.exercises.exerciseable');
+
         $this->workout = $workout;
     }
 

@@ -30,4 +30,34 @@ enum BlockType: string
             self::Rest => 'Rest',
         };
     }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::StraightSets => 'zinc',
+            self::Circuit => 'amber',
+            self::Superset => 'violet',
+            self::Interval => 'blue',
+            self::Amrap => 'red',
+            self::ForTime => 'orange',
+            self::Emom => 'cyan',
+            self::DistanceDuration => 'green',
+            self::Rest => 'zinc',
+        };
+    }
+
+    public function icon(): string
+    {
+        return match ($this) {
+            self::StraightSets => 'bars-3',
+            self::Circuit => 'arrow-path',
+            self::Superset => 'arrows-right-left',
+            self::Interval => 'clock',
+            self::Amrap => 'fire',
+            self::ForTime => 'bolt',
+            self::Emom => 'clock',
+            self::DistanceDuration => 'map-pin',
+            self::Rest => 'pause',
+        };
+    }
 }

@@ -61,21 +61,9 @@
             @endif
 
             @if($this->nextWorkout->blockTree->isNotEmpty())
-                <div class="space-y-2 mt-4">
-                    <flux:heading size="sm" class="text-zinc-500 dark:text-zinc-400">Workout Structure</flux:heading>
-                    <div class="space-y-1">
-                        @foreach($this->nextWorkout->blockTree->take(3) as $block)
-                            <div class="flex items-center gap-2 py-1 px-2 rounded bg-zinc-50 dark:bg-zinc-800/50 text-sm">
-                                <flux:badge size="sm" color="zinc">{{ ucfirst(str_replace('_', ' ', $block->type->value)) }}</flux:badge>
-                                @if($block->label)
-                                    <span class="text-zinc-700 dark:text-zinc-300">{{ $block->label }}</span>
-                                @endif
-                                @if($block->repeat_count > 1)
-                                    <flux:badge size="sm">{{ $block->repeat_count }}x</flux:badge>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
+                <div class="mt-4">
+                    <flux:heading size="sm" class="text-zinc-500 dark:text-zinc-400 mb-2">Workout Structure</flux:heading>
+                    <x-workout-block-tree :blocks="$this->nextWorkout->blockTree->take(3)" :compact="true" />
 
                     @if($this->nextWorkout->blockTree->count() > 3)
                         <a href="{{ route('workouts.show', $this->nextWorkout) }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-block">

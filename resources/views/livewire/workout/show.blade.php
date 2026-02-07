@@ -96,28 +96,10 @@
             @endif
 
             {{-- Workout Structure --}}
-            @if($workout->blockTree->isNotEmpty())
-                <flux:card>
-                    <flux:heading size="lg" class="mb-4">Workout Structure</flux:heading>
-                    <div class="space-y-2">
-                        @foreach($workout->blockTree as $block)
-                            <div class="flex items-center gap-2 py-1.5 px-2 rounded bg-zinc-50 dark:bg-zinc-800/50">
-                                <flux:badge size="sm" color="zinc">{{ ucfirst(str_replace('_', ' ', $block->type->value)) }}</flux:badge>
-                                @if($block->label)
-                                    <flux:text class="font-medium">{{ $block->label }}</flux:text>
-                                @endif
-                                @if($block->repeat_count > 1)
-                                    <flux:badge size="sm">{{ $block->repeat_count }}x</flux:badge>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
-                </flux:card>
-            @else
-                <flux:card>
-                    <x-empty-state icon="document" message="No workout structure defined" />
-                </flux:card>
-            @endif
+            <flux:card>
+                <flux:heading size="lg" class="mb-4">Workout Structure</flux:heading>
+                <x-workout-block-tree :blocks="$workout->blockTree" />
+            </flux:card>
         </div>
 
         {{-- Sidebar: 1/3 width --}}

@@ -78,7 +78,12 @@ class Workout extends Model
      */
     public function blockTree(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->blocks()->with('nestedChildren', 'blockable');
+        return $this->blocks()->with([
+            'nestedChildren',
+            'blockable' => fn (\Illuminate\Database\Eloquent\Relations\MorphTo $morphTo) => $morphTo->morphWith([
+                ExerciseGroup::class => ['entries.exercise'],
+            ]),
+        ]);
     }
 
     /**

@@ -1,8 +1,15 @@
 <?php
 
 use App\Livewire\Workout\Show;
+use App\Models\Exercise;
+use App\Models\ExerciseEntry;
+use App\Models\ExerciseGroup;
+use App\Models\IntervalBlock;
+use App\Models\NoteBlock;
+use App\Models\RestBlock;
 use App\Models\User;
 use App\Models\Workout;
+use App\Models\WorkoutBlock;
 use Livewire\Livewire;
 
 // Authorization tests
@@ -371,6 +378,97 @@ it('canceling evaluation keeps workout uncompleted', function () {
         ->assertSet('feeling', null);
 
     expect($workout->fresh()->completed_at)->toBeNull();
+});
+
+// Block tree display tests
+it('renders a multi-level block tree with all block types', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now()->addDay(),
+    ]);
+
+    // Root group block
+    $groupBlock = WorkoutBlock::factory()->group('Warm-up')->for($workout)->create([
+        'position' => 0,
+        'repeat_count' => 2,
+        'rest_between_repeats_seconds' => 60,
+    ]);
+
+    // Nested interval under group
+    $intervalBlockable = IntervalBlock::factory()->create([
+        'duration_seconds' => 300,
+        'intensity' => \App\Enums\Workout\IntervalIntensity::Easy,
+    ]);
+    WorkoutBlock::factory()->interval()->for($workout)->create([
+        'parent_id' => $groupBlock->id,
+        'position' => 0,
+        'blockable_type' => 'interval_block',
+        'blockable_id' => $intervalBlockable->id,
+    ]);
+
+    // Root exercise group block
+    $exerciseGroup = ExerciseGroup::factory()->superset()->create();
+    $exerciseGroupBlock = WorkoutBlock::factory()->exerciseGroup()->for($workout)->create([
+        'position' => 1,
+        'blockable_type' => 'exercise_group',
+        'blockable_id' => $exerciseGroup->id,
+    ]);
+
+    // Exercise entry
+    $exercise = Exercise::factory()->create(['name' => 'Bench Press']);
+    ExerciseEntry::factory()->weighted(80.0)->create([
+        'exercise_group_id' => $exerciseGroup->id,
+        'exercise_id' => $exercise->id,
+        'sets' => 4,
+        'reps' => 8,
+        'rpe_target' => 7,
+        'rest_between_sets_seconds' => 120,
+    ]);
+
+    // Root rest block
+    $restBlockable = RestBlock::factory()->create(['duration_seconds' => 120]);
+    WorkoutBlock::factory()->rest()->for($workout)->create([
+        'position' => 2,
+        'blockable_type' => 'rest_block',
+        'blockable_id' => $restBlockable->id,
+    ]);
+
+    // Root note block
+    $noteBlockable = NoteBlock::factory()->create(['content' => 'Focus on form today']);
+    WorkoutBlock::factory()->note()->for($workout)->create([
+        'position' => 3,
+        'blockable_type' => 'note_block',
+        'blockable_id' => $noteBlockable->id,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->assertSee('Workout Structure')
+        ->assertSee('Warm-up')
+        ->assertSee('2x')
+        ->assertSee('Group')
+        ->assertSee('Interval')
+        ->assertSee('Easy')
+        ->assertSee('5min')
+        ->assertSee('Exercise Group')
+        ->assertSee('Superset')
+        ->assertSee('Bench Press')
+        ->assertSee('80 kg')
+        ->assertSee('RPE 7')
+        ->assertSee('Rest')
+        ->assertSee('2min')
+        ->assertSee('Focus on form today');
+});
+
+it('shows empty state when workout has no blocks', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create([
+        'scheduled_at' => now()->addDay(),
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->assertSee('No workout structure defined');
 });
 
 it('displays evaluation data for completed workout', function () {

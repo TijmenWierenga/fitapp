@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Workout\BlockType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class WorkoutBlock extends Model
 {
@@ -59,7 +60,12 @@ class WorkoutBlock extends Model
      */
     public function nestedChildren(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->children()->with('nestedChildren', 'blockable');
+        return $this->children()->with([
+            'nestedChildren',
+            'blockable' => fn (MorphTo $morphTo) => $morphTo->morphWith([
+                ExerciseGroup::class => ['entries.exercise'],
+            ]),
+        ]);
     }
 
     /**

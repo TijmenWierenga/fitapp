@@ -119,3 +119,205 @@ it('trims empty notes to null', function () {
         'notes' => null,
     ]);
 });
+
+it('creates a structured workout with sections, blocks, and exercises', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
+        'name' => 'Structured Strength',
+        'activity' => 'strength',
+        'scheduled_at' => '2026-02-10 08:00:00',
+        'sections' => [
+            [
+                'name' => 'Warm-up',
+                'order' => 0,
+                'blocks' => [
+                    [
+                        'block_type' => 'distance_duration',
+                        'order' => 0,
+                        'exercises' => [
+                            [
+                                'name' => 'Light Jog',
+                                'order' => 0,
+                                'type' => 'cardio',
+                                'target_duration' => 300,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Main',
+                'order' => 1,
+                'blocks' => [
+                    [
+                        'block_type' => 'straight_sets',
+                        'order' => 0,
+                        'exercises' => [
+                            [
+                                'name' => 'Squat',
+                                'order' => 0,
+                                'type' => 'strength',
+                                'target_sets' => 4,
+                                'target_reps_max' => 8,
+                                'target_weight' => 100.0,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ]);
+
+    $response->assertOk()
+        ->assertSee('Structured Strength')
+        ->assertSee('Warm-up')
+        ->assertSee('Main')
+        ->assertSee('Light Jog')
+        ->assertSee('Squat')
+        ->assertSee('strength_exercise')
+        ->assertSee('cardio_exercise');
+
+    assertDatabaseHas('sections', ['name' => 'Warm-up']);
+    assertDatabaseHas('sections', ['name' => 'Main']);
+    assertDatabaseHas('block_exercises', ['name' => 'Light Jog']);
+    assertDatabaseHas('block_exercises', ['name' => 'Squat']);
+    assertDatabaseHas('strength_exercises', ['target_sets' => 4, 'target_reps_max' => 8]);
+    assertDatabaseHas('cardio_exercises', ['target_duration' => 300]);
+});
+
+it('rejects strength-only fields on a cardio exercise', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
+        'name' => 'Invalid Workout',
+        'activity' => 'cardio',
+        'scheduled_at' => '2026-02-10 08:00:00',
+        'sections' => [
+            [
+                'name' => 'Main',
+                'order' => 0,
+                'blocks' => [
+                    [
+                        'block_type' => 'straight_sets',
+                        'order' => 0,
+                        'exercises' => [
+                            [
+                                'name' => 'Run',
+                                'order' => 0,
+                                'type' => 'cardio',
+                                'target_duration' => 600,
+                                'target_sets' => 3,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('target_sets');
+});
+
+it('rejects cardio-only fields on a strength exercise', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
+        'name' => 'Invalid Workout',
+        'activity' => 'strength',
+        'scheduled_at' => '2026-02-10 08:00:00',
+        'sections' => [
+            [
+                'name' => 'Main',
+                'order' => 0,
+                'blocks' => [
+                    [
+                        'block_type' => 'straight_sets',
+                        'order' => 0,
+                        'exercises' => [
+                            [
+                                'name' => 'Bench Press',
+                                'order' => 0,
+                                'type' => 'strength',
+                                'target_sets' => 3,
+                                'target_distance' => 5.0,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('target_distance');
+});
+
+it('rejects target_rpe on a cardio exercise', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
+        'name' => 'Invalid Workout',
+        'activity' => 'cardio',
+        'scheduled_at' => '2026-02-10 08:00:00',
+        'sections' => [
+            [
+                'name' => 'Main',
+                'order' => 0,
+                'blocks' => [
+                    [
+                        'block_type' => 'distance_duration',
+                        'order' => 0,
+                        'exercises' => [
+                            [
+                                'name' => 'Run',
+                                'order' => 0,
+                                'type' => 'cardio',
+                                'target_duration' => 600,
+                                'target_rpe' => 7.0,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('target_rpe');
+});
+
+it('allows target_duration on a duration exercise', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
+        'name' => 'Plank Workout',
+        'activity' => 'strength',
+        'scheduled_at' => '2026-02-10 08:00:00',
+        'sections' => [
+            [
+                'name' => 'Main',
+                'order' => 0,
+                'blocks' => [
+                    [
+                        'block_type' => 'straight_sets',
+                        'order' => 0,
+                        'exercises' => [
+                            [
+                                'name' => 'Plank',
+                                'order' => 0,
+                                'type' => 'duration',
+                                'target_duration' => 60,
+                                'target_rpe' => 6.0,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ]);
+
+    $response->assertOk();
+    assertDatabaseHas('duration_exercises', ['target_duration' => 60]);
+});

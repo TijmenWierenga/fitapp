@@ -184,9 +184,4 @@ enum Activity: string
             default => 'zinc',
         };
     }
-
-    public function hasSteps(): bool
-    {
-        return $this->category() === 'running';
-    }
 }

@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Gate;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
 
+#[IsDestructive]
 class RemoveInjuryTool extends Tool
 {
     /**
@@ -35,19 +37,13 @@ class RemoveInjuryTool extends Tool
         $injury = $user->injuries()->find($validated['injury_id']);
 
         if (! $injury) {
-            return Response::text(json_encode([
-                'success' => false,
-                'error' => 'Injury not found or does not belong to this user.',
-            ]));
+            return Response::error('Injury not found or does not belong to this user.');
         }
 
         try {
             Gate::forUser($user)->authorize('delete', $injury);
         } catch (AuthorizationException) {
-            return Response::text(json_encode([
-                'success' => false,
-                'error' => 'You are not authorized to remove this injury.',
-            ]));
+            return Response::error('You are not authorized to remove this injury.');
         }
 
         $injuryData = [
@@ -72,6 +68,22 @@ class RemoveInjuryTool extends Tool
     {
         return [
             'injury_id' => $schema->integer()->description('The ID of the injury to remove'),
+        ];
+    }
+
+    /**
+     * Get the tool's output schema.
+     */
+    public function outputSchema(JsonSchema $schema): array
+    {
+        return [
+            'success' => $schema->boolean()->required(),
+            'removed_injury' => $schema->object([
+                'id' => $schema->integer()->required(),
+                'body_part' => $schema->string()->required(),
+                'injury_type' => $schema->string()->required(),
+            ])->required(),
+            'message' => $schema->string()->required(),
         ];
     }
 }

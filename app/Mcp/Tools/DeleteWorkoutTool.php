@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Gate;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
 
+#[IsDestructive]
 class DeleteWorkoutTool extends Tool
 {
     /**
@@ -62,6 +64,17 @@ class DeleteWorkoutTool extends Tool
     {
         return [
             'workout_id' => $schema->integer()->description('The ID of the workout to delete'),
+        ];
+    }
+
+    /**
+     * Get the tool's output schema.
+     */
+    public function outputSchema(JsonSchema $schema): array
+    {
+        return [
+            'success' => $schema->boolean()->required(),
+            'message' => $schema->string()->required(),
         ];
     }
 }

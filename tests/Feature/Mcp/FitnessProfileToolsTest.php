@@ -215,8 +215,7 @@ describe('RemoveInjuryTool', function () {
             'injury_id' => $injury->id,
         ]);
 
-        $response->assertOk()
-            ->assertSee('"success":false')
+        $response->assertHasErrors()
             ->assertSee('does not belong to this user');
 
         // Injury should still exist

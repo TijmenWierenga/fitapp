@@ -2,6 +2,10 @@
 
 use App\Mcp\Servers\WorkoutServer;
 use App\Mcp\Tools\GetWorkoutTool;
+use App\Models\Block;
+use App\Models\BlockExercise;
+use App\Models\Section;
+use App\Models\StrengthExercise;
 use App\Models\User;
 use App\Models\Workout;
 
@@ -75,4 +79,34 @@ it('converts dates to user timezone', function () {
 
     $response->assertOk()
         ->assertSee('2026-01-26T07:00:00+01:00');
+});
+
+it('returns full nested structure with sections blocks and exercises', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+    $workout = Workout::factory()->for($user)->create(['name' => 'Structured Workout']);
+
+    $section = Section::factory()->for($workout)->create(['name' => 'Main', 'order' => 0]);
+    $block = Block::factory()->for($section)->create(['block_type' => 'straight_sets', 'order' => 0]);
+
+    $strength = StrengthExercise::factory()->create(['target_sets' => 3, 'target_reps_max' => 10]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'name' => 'Bench Press',
+        'order' => 0,
+        'exerciseable_type' => 'strength_exercise',
+        'exerciseable_id' => $strength->id,
+    ]);
+
+    $response = WorkoutServer::actingAs($user)->tool(GetWorkoutTool::class, [
+        'workout_id' => $workout->id,
+    ]);
+
+    $response->assertOk()
+        ->assertSee('Structured Workout')
+        ->assertSee('Main')
+        ->assertSee('straight_sets')
+        ->assertSee('Bench Press')
+        ->assertSee('strength_exercise')
+        ->assertSee('"target_sets":3')
+        ->assertSee('"target_reps_max":10');
 });

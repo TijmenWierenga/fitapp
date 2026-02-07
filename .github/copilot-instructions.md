@@ -126,6 +126,46 @@ if (auth()->user()->id !== $post->user_id) {
 }
 ```
 
+## Local Development
+
+### Quick Authentication
+
+In the local environment, a route is available to log in as any user without credentials: `GET /login/as/{user}`.
+Use this route when you need to bypass authentication for browser-based testing instead of going through the login form.
+
+## Units of Measurement
+
+This application uses **metric units exclusively**. No imperial units are supported.
+
+### Storage Units
+
+All values are stored in their base unit in the database:
+
+| Measurement | Storage Unit | DB Column Type |
+|---|---|---|
+| Duration / time | Seconds | `integer` |
+| Distance | Kilometers | `decimal(10, 2)` |
+| Weight | Kilograms | `decimal(8, 2)` |
+| Pace | Seconds per km | `integer` |
+| Heart rate | Beats per minute (bpm) | `integer` |
+| Power | Watts | `integer` |
+
+### Converters
+
+Use the converter classes in `App\Support\Workout` when converting between storage and display formats:
+
+- `TimeConverter` — converts between seconds and hours/minutes/seconds
+- `DistanceConverter` — converts between kilometers and meters
+- `PaceConverter` — converts between seconds-per-km and minutes:seconds format
+
+### Subjective Scales
+
+| Scale | Range | Usage |
+|---|---|---|
+| RPE (Rate of Perceived Exertion) | 1–10 | Exercise-level and workout-level effort |
+| Feeling | 1–5 | Post-workout subjective feeling |
+| Heart rate zone | 1–5 | Cardio training zones |
+
 ## Architecture Constraints
 
 ### No Service Location in Models

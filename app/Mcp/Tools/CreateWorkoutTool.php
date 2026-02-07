@@ -3,6 +3,7 @@
 namespace App\Mcp\Tools;
 
 use App\Actions\CreateStructuredWorkout;
+use App\DataTransferObjects\Workout\SectionData;
 use App\Enums\Workout\Activity;
 use App\Enums\Workout\BlockType;
 use App\Models\Workout;
@@ -64,23 +65,23 @@ class CreateWorkoutTool extends Tool
             'sections.*.blocks.*.exercises.*.type' => 'required|in:strength,cardio,duration',
             'sections.*.blocks.*.exercises.*.notes' => 'nullable|string|max:5000',
             // Strength exercise fields
-            'sections.*.blocks.*.exercises.*.target_sets' => 'nullable|integer|min:1',
-            'sections.*.blocks.*.exercises.*.target_reps_min' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_reps_max' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_weight' => 'nullable|numeric|min:0',
-            'sections.*.blocks.*.exercises.*.target_tempo' => 'nullable|string|max:20',
-            'sections.*.blocks.*.exercises.*.rest_after' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_sets' => ['nullable', 'integer', 'min:1', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
+            'sections.*.blocks.*.exercises.*.target_reps_min' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
+            'sections.*.blocks.*.exercises.*.target_reps_max' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
+            'sections.*.blocks.*.exercises.*.target_weight' => ['nullable', 'numeric', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
+            'sections.*.blocks.*.exercises.*.target_tempo' => ['nullable', 'string', 'max:20', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
+            'sections.*.blocks.*.exercises.*.rest_after' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
             // Cardio exercise fields
-            'sections.*.blocks.*.exercises.*.target_duration' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_distance' => 'nullable|numeric|min:0',
-            'sections.*.blocks.*.exercises.*.target_pace_min' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_pace_max' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_heart_rate_zone' => 'nullable|integer|min:1|max:5',
-            'sections.*.blocks.*.exercises.*.target_heart_rate_min' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_heart_rate_max' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_power' => 'nullable|integer|min:0',
-            // Shared field
-            'sections.*.blocks.*.exercises.*.target_rpe' => 'nullable|numeric|min:1|max:10',
+            'sections.*.blocks.*.exercises.*.target_duration' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio,duration'],
+            'sections.*.blocks.*.exercises.*.target_distance' => ['nullable', 'numeric', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            'sections.*.blocks.*.exercises.*.target_pace_min' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            'sections.*.blocks.*.exercises.*.target_pace_max' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            'sections.*.blocks.*.exercises.*.target_heart_rate_zone' => ['nullable', 'integer', 'min:1', 'max:5', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            'sections.*.blocks.*.exercises.*.target_heart_rate_min' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            'sections.*.blocks.*.exercises.*.target_heart_rate_max' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            'sections.*.blocks.*.exercises.*.target_power' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            // Shared: strength + duration
+            'sections.*.blocks.*.exercises.*.target_rpe' => ['nullable', 'numeric', 'min:1', 'max:10', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength,duration'],
         ], [
             'activity.Enum' => 'Invalid activity type. See available activity values.',
             'scheduled_at.date' => 'Please provide a valid date and time.',
@@ -90,13 +91,16 @@ class CreateWorkoutTool extends Tool
         $scheduledAt = CarbonImmutable::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
 
         if (! empty($validated['sections'])) {
+            $sections = collect($validated['sections'])
+                ->map(fn (array $section): SectionData => SectionData::fromArray($section));
+
             $workout = app(CreateStructuredWorkout::class)->execute(
                 user: $user,
                 name: $validated['name'],
                 activity: Activity::from($validated['activity']),
                 scheduledAt: $scheduledAt,
                 notes: $validated['notes'] ?? null,
-                sections: $validated['sections'],
+                sections: $sections,
             );
         } else {
             $workout = Workout::create([

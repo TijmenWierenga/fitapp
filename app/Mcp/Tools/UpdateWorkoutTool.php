@@ -3,6 +3,7 @@
 namespace App\Mcp\Tools;
 
 use App\Actions\CreateStructuredWorkout;
+use App\DataTransferObjects\Workout\SectionData;
 use App\Enums\Workout\Activity;
 use App\Enums\Workout\BlockType;
 use Carbon\CarbonImmutable;
@@ -58,23 +59,23 @@ class UpdateWorkoutTool extends Tool
             'sections.*.blocks.*.exercises.*.type' => 'required|in:strength,cardio,duration',
             'sections.*.blocks.*.exercises.*.notes' => 'nullable|string|max:5000',
             // Strength exercise fields
-            'sections.*.blocks.*.exercises.*.target_sets' => 'nullable|integer|min:1',
-            'sections.*.blocks.*.exercises.*.target_reps_min' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_reps_max' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_weight' => 'nullable|numeric|min:0',
-            'sections.*.blocks.*.exercises.*.target_tempo' => 'nullable|string|max:20',
-            'sections.*.blocks.*.exercises.*.rest_after' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_sets' => ['nullable', 'integer', 'min:1', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
+            'sections.*.blocks.*.exercises.*.target_reps_min' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
+            'sections.*.blocks.*.exercises.*.target_reps_max' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
+            'sections.*.blocks.*.exercises.*.target_weight' => ['nullable', 'numeric', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
+            'sections.*.blocks.*.exercises.*.target_tempo' => ['nullable', 'string', 'max:20', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
+            'sections.*.blocks.*.exercises.*.rest_after' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
             // Cardio exercise fields
-            'sections.*.blocks.*.exercises.*.target_duration' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_distance' => 'nullable|numeric|min:0',
-            'sections.*.blocks.*.exercises.*.target_pace_min' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_pace_max' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_heart_rate_zone' => 'nullable|integer|min:1|max:5',
-            'sections.*.blocks.*.exercises.*.target_heart_rate_min' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_heart_rate_max' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.exercises.*.target_power' => 'nullable|integer|min:0',
-            // Shared field
-            'sections.*.blocks.*.exercises.*.target_rpe' => 'nullable|numeric|min:1|max:10',
+            'sections.*.blocks.*.exercises.*.target_duration' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio,duration'],
+            'sections.*.blocks.*.exercises.*.target_distance' => ['nullable', 'numeric', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            'sections.*.blocks.*.exercises.*.target_pace_min' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            'sections.*.blocks.*.exercises.*.target_pace_max' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            'sections.*.blocks.*.exercises.*.target_heart_rate_zone' => ['nullable', 'integer', 'min:1', 'max:5', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            'sections.*.blocks.*.exercises.*.target_heart_rate_min' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            'sections.*.blocks.*.exercises.*.target_heart_rate_max' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            'sections.*.blocks.*.exercises.*.target_power' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
+            // Shared: strength + duration
+            'sections.*.blocks.*.exercises.*.target_rpe' => ['nullable', 'numeric', 'min:1', 'max:10', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength,duration'],
         ], [
             'activity.Enum' => 'Invalid activity type. See available activity values.',
             'scheduled_at.date' => 'Please provide a valid date and time.',
@@ -115,12 +116,12 @@ class UpdateWorkoutTool extends Tool
         $workout->update($updateData);
 
         if (isset($validated['sections'])) {
-            // Delete existing sections (cascade handles blocks and exercises)
             $this->deleteExistingStructure($workout);
 
-            // Recreate structure using the action's section-building logic
-            $action = app(CreateStructuredWorkout::class);
-            $this->buildSections($action, $workout, $validated['sections']);
+            $sections = collect($validated['sections'])
+                ->map(fn (array $section): SectionData => SectionData::fromArray($section));
+
+            app(CreateStructuredWorkout::class)->buildSections($workout, $sections);
         }
 
         return Response::text(json_encode([
@@ -145,70 +146,6 @@ class UpdateWorkoutTool extends Tool
 
         // Cascade delete handles block_exercises and blocks via FK constraints
         $workout->sections()->delete();
-    }
-
-    /**
-     * @param  array<int, array<string, mixed>>  $sections
-     */
-    protected function buildSections(CreateStructuredWorkout $action, \App\Models\Workout $workout, array $sections): void
-    {
-        foreach ($sections as $sectionData) {
-            $section = $workout->sections()->create([
-                'name' => $sectionData['name'],
-                'order' => $sectionData['order'],
-                'notes' => $sectionData['notes'] ?? null,
-            ]);
-
-            foreach ($sectionData['blocks'] ?? [] as $blockData) {
-                $block = $section->blocks()->create([
-                    'block_type' => \App\Enums\Workout\BlockType::from($blockData['block_type']),
-                    'order' => $blockData['order'],
-                    'rounds' => $blockData['rounds'] ?? null,
-                    'rest_between_exercises' => $blockData['rest_between_exercises'] ?? null,
-                    'rest_between_rounds' => $blockData['rest_between_rounds'] ?? null,
-                    'time_cap' => $blockData['time_cap'] ?? null,
-                    'work_interval' => $blockData['work_interval'] ?? null,
-                    'rest_interval' => $blockData['rest_interval'] ?? null,
-                    'notes' => $blockData['notes'] ?? null,
-                ]);
-
-                foreach ($blockData['exercises'] ?? [] as $exerciseData) {
-                    $exerciseable = match ($exerciseData['type']) {
-                        'strength' => \App\Models\StrengthExercise::create([
-                            'target_sets' => $exerciseData['target_sets'] ?? null,
-                            'target_reps_min' => $exerciseData['target_reps_min'] ?? null,
-                            'target_reps_max' => $exerciseData['target_reps_max'] ?? null,
-                            'target_weight' => $exerciseData['target_weight'] ?? null,
-                            'target_rpe' => $exerciseData['target_rpe'] ?? null,
-                            'target_tempo' => $exerciseData['target_tempo'] ?? null,
-                            'rest_after' => $exerciseData['rest_after'] ?? null,
-                        ]),
-                        'cardio' => \App\Models\CardioExercise::create([
-                            'target_duration' => $exerciseData['target_duration'] ?? null,
-                            'target_distance' => $exerciseData['target_distance'] ?? null,
-                            'target_pace_min' => $exerciseData['target_pace_min'] ?? null,
-                            'target_pace_max' => $exerciseData['target_pace_max'] ?? null,
-                            'target_heart_rate_zone' => $exerciseData['target_heart_rate_zone'] ?? null,
-                            'target_heart_rate_min' => $exerciseData['target_heart_rate_min'] ?? null,
-                            'target_heart_rate_max' => $exerciseData['target_heart_rate_max'] ?? null,
-                            'target_power' => $exerciseData['target_power'] ?? null,
-                        ]),
-                        'duration' => \App\Models\DurationExercise::create([
-                            'target_duration' => $exerciseData['target_duration'] ?? null,
-                            'target_rpe' => $exerciseData['target_rpe'] ?? null,
-                        ]),
-                    };
-
-                    $block->exercises()->create([
-                        'name' => $exerciseData['name'],
-                        'order' => $exerciseData['order'],
-                        'exerciseable_type' => $exerciseable->getMorphClass(),
-                        'exerciseable_id' => $exerciseable->getKey(),
-                        'notes' => $exerciseData['notes'] ?? null,
-                    ]);
-                }
-            }
-        }
     }
 
     /**

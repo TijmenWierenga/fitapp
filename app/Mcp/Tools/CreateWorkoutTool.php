@@ -18,6 +18,7 @@ class CreateWorkoutTool extends Tool
 {
     public function __construct(
         private WorkoutSchemaBuilder $schemaBuilder,
+        private CreateStructuredWorkout $createStructuredWorkout,
     ) {}
 
     /**
@@ -98,7 +99,7 @@ class CreateWorkoutTool extends Tool
             $sections = collect($validated['sections'])
                 ->map(fn (array $section): SectionData => SectionData::fromArray($section));
 
-            $workout = app(CreateStructuredWorkout::class)->execute(
+            $workout = $this->createStructuredWorkout->execute(
                 user: $user,
                 name: $validated['name'],
                 activity: Activity::from($validated['activity']),

@@ -11,7 +11,6 @@ use App\Mcp\Tools\AddInjuryTool;
 use App\Mcp\Tools\CompleteWorkoutTool;
 use App\Mcp\Tools\CreateWorkoutTool;
 use App\Mcp\Tools\DeleteWorkoutTool;
-use App\Mcp\Tools\GetTrainingAnalyticsTool;
 use App\Mcp\Tools\GetWorkoutTool;
 use App\Mcp\Tools\ListWorkoutsTool;
 use App\Mcp\Tools\PingTool;
@@ -147,7 +146,6 @@ class WorkoutServer extends Server
         - **complete-workout**: Mark workout as completed with ratings
         - **list-workouts**: Query workouts with filtering (upcoming/completed/overdue/all)
         - **get-workout**: Fetch a single workout by ID with full details
-        - **get-training-analytics**: Aggregated training stats (completion rate, RPE, streaks, etc.)
         - **update-fitness-profile**: Set or update user's fitness goals and availability
         - **add-injury**: Add an injury record to track limitations
         - **remove-injury**: Remove an injury record
@@ -232,7 +230,6 @@ class WorkoutServer extends Server
         CompleteWorkoutTool::class,
         ListWorkoutsTool::class,
         GetWorkoutTool::class,
-        GetTrainingAnalyticsTool::class,
         UpdateFitnessProfileTool::class,
         AddInjuryTool::class,
         RemoveInjuryTool::class,

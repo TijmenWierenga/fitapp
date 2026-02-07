@@ -16,6 +16,10 @@ use Laravel\Mcp\Server\Tool;
 
 class CreateWorkoutTool extends Tool
 {
+    public function __construct(
+        private WorkoutSchemaBuilder $schemaBuilder,
+    ) {}
+
     /**
      * The tool's description.
      */
@@ -129,7 +133,7 @@ class CreateWorkoutTool extends Tool
             'activity' => $schema->string()->description('The activity type (e.g., run, strength, cardio, hiit, bike, pool_swim, hike, yoga, etc.)'),
             'scheduled_at' => $schema->string()->description('The date and time when the workout is scheduled (in user\'s timezone)'),
             'notes' => $schema->string()->description('Optional Markdown notes for the workout.')->nullable(),
-            'sections' => $schema->array()->description('Optional structured workout sections with blocks and exercises.')->nullable(),
+            'sections' => $schema->array()->items($this->schemaBuilder->section())->description('Optional structured workout sections with blocks and exercises.')->nullable(),
         ];
     }
 }

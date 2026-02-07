@@ -57,3 +57,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/fitness-profile', FitnessProfile::class)->name('fitness-profile.edit');
 });
+
+if (app()->environment('local')) {
+    Route::get('login/as/{user}', function (\App\Models\User $user) {
+        auth()->loginUsingId($user);
+        return redirect()->route('dashboard');
+    });
+}

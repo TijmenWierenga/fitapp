@@ -117,6 +117,12 @@ if (auth()->user()->id !== $post->user_id) {
 }
 ```
 
+## Local Development
+
+### Quick Authentication
+In the local environment, a route is available to log in as any user without credentials: `GET /login/as/{user}`.
+Use this route when you need to bypass authentication for browser-based testing instead of going through the login form.
+
 ## Architecture Constraints
 
 ### No Service Location in Models

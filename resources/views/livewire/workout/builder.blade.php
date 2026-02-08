@@ -40,4 +40,36 @@
             </div>
         </flux:card>
     </div>
+
+    {{-- Workout Structure Editor --}}
+    <div class="max-w-3xl mt-6 space-y-3">
+        <div class="flex items-center justify-between">
+            <flux:heading size="lg">Workout Structure</flux:heading>
+            <flux:button wire:click="addSection" variant="primary" size="sm" icon="plus">
+                Add Section
+            </flux:button>
+        </div>
+
+        @if(count($sections) > 0)
+            <div wire:sort="sortSections" class="space-y-2">
+                @foreach($sections as $si => $section)
+                    <div wire:key="{{ $section['_key'] }}" wire:sort:item="{{ $section['_key'] }}">
+                        @include('livewire.workout.partials.section-editor', [
+                            'section' => $section,
+                            'si' => $si,
+                        ])
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="rounded-lg border border-dashed border-zinc-300 dark:border-zinc-600 p-6 text-center">
+                <flux:text class="text-sm text-zinc-400 dark:text-zinc-500">
+                    No structure yet. Add a section to get started.
+                </flux:text>
+                <flux:button wire:click="addSection" variant="subtle" size="sm" icon="plus" class="mt-3">
+                    Add Section
+                </flux:button>
+            </div>
+        @endif
+    </div>
 </div>

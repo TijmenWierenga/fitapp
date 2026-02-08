@@ -2,7 +2,7 @@
 
 namespace App\Mcp\Tools;
 
-use App\Actions\CreateStructuredWorkout;
+use App\Actions\UpdateStructuredWorkout;
 use App\DataTransferObjects\Workout\SectionData;
 use App\Enums\Workout\Activity;
 use App\Enums\Workout\BlockType;
@@ -21,6 +21,7 @@ class UpdateWorkoutTool extends Tool
 {
     public function __construct(
         private WorkoutSchemaBuilder $schemaBuilder,
+        private UpdateStructuredWorkout $updateStructuredWorkout,
     ) {}
 
     /**
@@ -122,12 +123,10 @@ class UpdateWorkoutTool extends Tool
         $workout->update($updateData);
 
         if (isset($validated['sections'])) {
-            $this->deleteExistingStructure($workout);
-
             $sections = collect($validated['sections'])
                 ->map(fn (array $section): SectionData => SectionData::fromArray($section));
 
-            app(CreateStructuredWorkout::class)->buildSections($workout, $sections);
+            $this->updateStructuredWorkout->execute($workout, $sections);
         }
 
         return Response::text(json_encode([
@@ -135,23 +134,6 @@ class UpdateWorkoutTool extends Tool
             'workout' => WorkoutResponseFormatter::format($workout->fresh(), $user),
             'message' => 'Workout updated successfully',
         ]));
-    }
-
-    protected function deleteExistingStructure(\App\Models\Workout $workout): void
-    {
-        // Collect exerciseable IDs before deleting to clean up polymorphic records
-        $workout->load('sections.blocks.exercises');
-
-        foreach ($workout->sections as $section) {
-            foreach ($section->blocks as $block) {
-                foreach ($block->exercises as $exercise) {
-                    $exercise->exerciseable?->delete();
-                }
-            }
-        }
-
-        // Cascade delete handles block_exercises and blocks via FK constraints
-        $workout->sections()->delete();
     }
 
     /**

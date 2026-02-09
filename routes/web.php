@@ -60,7 +60,7 @@ Route::middleware(['auth'])->group(function () {
 
 if (app()->environment('local')) {
     Route::get('login/as/{user}', function (\App\Models\User $user) {
-        auth()->loginUsingId($user);
+        auth()->login($user);
         return redirect()->route('dashboard');
     });
 }

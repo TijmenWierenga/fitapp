@@ -24,18 +24,32 @@ class WorkoutSchemaBuilder
 
     public function block(): ObjectType
     {
+        $fieldGuide = self::blockTypeFieldGuide();
+
         return $this->schema->object([
-            'block_type' => $this->schema->string()->enum(BlockType::class)->description('Block type: straight_sets, circuit, superset, interval, amrap, for_time, emom, distance_duration, or rest')->required(),
+            'block_type' => $this->schema->string()->enum(BlockType::class)->description("Block type. Each type uses specific fields — only set the fields listed for the chosen type. {$fieldGuide}")->required(),
             'order' => $this->schema->integer()->description('Display order (0-based)')->required(),
-            'rounds' => $this->schema->integer()->description('Number of rounds')->nullable(),
-            'rest_between_exercises' => $this->schema->integer()->description('Rest between exercises in seconds')->nullable(),
-            'rest_between_rounds' => $this->schema->integer()->description('Rest between rounds in seconds')->nullable(),
-            'time_cap' => $this->schema->integer()->description('Time cap in seconds')->nullable(),
-            'work_interval' => $this->schema->integer()->description('Work interval duration in seconds')->nullable(),
-            'rest_interval' => $this->schema->integer()->description('Rest interval duration in seconds')->nullable(),
+            'rounds' => $this->schema->integer()->description('Number of rounds/intervals. Used by: circuit, superset, interval, for_time, emom. For emom, this is the number of intervals (e.g., 10 = 10-minute EMOM).')->nullable(),
+            'rest_between_exercises' => $this->schema->integer()->description('Rest between exercises in seconds. Used by: circuit only.')->nullable(),
+            'rest_between_rounds' => $this->schema->integer()->description('Rest between rounds in seconds. Used by: circuit, superset.')->nullable(),
+            'time_cap' => $this->schema->integer()->description('Time cap in seconds. Used by: amrap, for_time.')->nullable(),
+            'work_interval' => $this->schema->integer()->description('Work interval duration in seconds. Used by: interval (work period per rep), emom (seconds available each minute). For distance-based intervals, omit this — the work is defined by exercise distance/pace.')->nullable(),
+            'rest_interval' => $this->schema->integer()->description('Rest interval duration in seconds. Used by: interval only.')->nullable(),
             'notes' => $this->schema->string()->description('Optional notes for the block')->nullable(),
             'exercises' => $this->schema->array()->items($this->exercise())->description('Exercises within this block')->nullable(),
         ]);
+    }
+
+    public static function blockTypeFieldGuide(): string
+    {
+        $lines = [];
+
+        foreach (BlockType::fieldGuide() as $type => $fields) {
+            $fieldList = $fields ? implode(', ', $fields) : '(none)';
+            $lines[] = "{$type}: {$fieldList}";
+        }
+
+        return 'Fields per type: '.implode('; ', $lines).'.';
     }
 
     /**
@@ -110,16 +124,16 @@ class WorkoutSchemaBuilder
         return $this->schema->object([
             'name' => $this->schema->string()->description('Exercise name (e.g., "Barbell Squat", "Treadmill Run")')->required(),
             'order' => $this->schema->integer()->description('Display order (0-based)')->required(),
-            'type' => $this->schema->string()->enum(['strength', 'cardio', 'duration'])->description('Exercise type: strength, cardio, or duration')->required(),
+            'type' => $this->schema->string()->enum(['strength', 'cardio', 'duration'])->description('Exercise type. strength: target_sets, target_reps_min/max, target_weight, target_tempo, rest_after, target_rpe. cardio: target_distance, target_pace_min/max, target_heart_rate_zone, target_heart_rate_min/max, target_power, target_duration. duration: target_duration, target_rpe.')->required(),
             'notes' => $this->schema->string()->description('Optional notes for the exercise')->nullable(),
 
             // Strength fields
-            'target_sets' => $this->schema->integer()->description('Number of sets (strength only)')->nullable(),
+            'target_sets' => $this->schema->integer()->description('Number of sets (strength only). In circuit/interval/emom blocks, the block controls repetition — omit this and use block rounds instead.')->nullable(),
             'target_reps_min' => $this->schema->integer()->description('Minimum reps per set (strength only)')->nullable(),
             'target_reps_max' => $this->schema->integer()->description('Maximum reps per set (strength only)')->nullable(),
             'target_weight' => $this->schema->number()->description('Target weight in kilograms (strength only)')->nullable(),
             'target_tempo' => $this->schema->string()->description('Tempo notation, e.g. "3-1-1-0" for eccentric-pause-concentric-pause in seconds (strength only)')->nullable(),
-            'rest_after' => $this->schema->integer()->description('Rest after exercise in seconds (strength only)')->nullable(),
+            'rest_after' => $this->schema->integer()->description('Rest after exercise in seconds (strength only). In circuit/interval blocks, the block controls rest — omit this and use block rest fields instead.')->nullable(),
 
             // Cardio fields
             'target_distance' => $this->schema->number()->description('Target distance in meters (cardio only)')->nullable(),

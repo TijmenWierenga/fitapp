@@ -288,6 +288,98 @@ it('rejects target_rpe on a cardio exercise', function () {
         ->assertSee('target_rpe');
 });
 
+it('creates a for_time workout with rounds', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
+        'name' => 'CrossFit WOD',
+        'activity' => 'hiit',
+        'scheduled_at' => '2026-02-10 09:00:00',
+        'sections' => [
+            [
+                'name' => 'WOD',
+                'order' => 0,
+                'blocks' => [
+                    [
+                        'block_type' => 'for_time',
+                        'order' => 0,
+                        'rounds' => 3,
+                        'time_cap' => 900,
+                        'exercises' => [
+                            [
+                                'name' => 'Thruster',
+                                'order' => 0,
+                                'type' => 'strength',
+                                'target_reps_max' => 15,
+                                'target_weight' => 43.0,
+                            ],
+                            [
+                                'name' => 'Box Jump',
+                                'order' => 1,
+                                'type' => 'strength',
+                                'target_reps_max' => 15,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ]);
+
+    $response->assertOk()
+        ->assertSee('CrossFit WOD')
+        ->assertSee('for_time');
+
+    assertDatabaseHas('blocks', [
+        'block_type' => 'for_time',
+        'rounds' => 3,
+        'time_cap' => 900,
+    ]);
+});
+
+it('creates an EMOM workout', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
+        'name' => '10min EMOM',
+        'activity' => 'hiit',
+        'scheduled_at' => '2026-02-10 09:00:00',
+        'sections' => [
+            [
+                'name' => 'EMOM',
+                'order' => 0,
+                'blocks' => [
+                    [
+                        'block_type' => 'emom',
+                        'order' => 0,
+                        'rounds' => 10,
+                        'work_interval' => 60,
+                        'exercises' => [
+                            [
+                                'name' => 'Power Clean',
+                                'order' => 0,
+                                'type' => 'strength',
+                                'target_reps_max' => 3,
+                                'target_weight' => 70.0,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ]);
+
+    $response->assertOk()
+        ->assertSee('10min EMOM')
+        ->assertSee('emom');
+
+    assertDatabaseHas('blocks', [
+        'block_type' => 'emom',
+        'rounds' => 10,
+        'work_interval' => 60,
+    ]);
+});
+
 it('allows target_duration on a duration exercise', function () {
     $user = User::factory()->withTimezone('UTC')->create();
 

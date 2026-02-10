@@ -66,6 +66,7 @@ class BlockFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'block_type' => BlockType::ForTime,
+            'rounds' => fake()->numberBetween(1, 5),
             'time_cap' => fake()->randomElement([600, 900, 1200]),
         ]);
     }

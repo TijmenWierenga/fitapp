@@ -35,9 +35,21 @@ class CreateWorkoutTool extends Tool
 
         You can optionally provide a `sections` array to create a fully structured workout with sections, blocks, and exercises.
 
-        Each section contains blocks (e.g., straight_sets, circuit, superset, interval, amrap, for_time, emom, distance_duration, rest).
+        Each section contains blocks, and each block contains exercises with a `type` field (strength, cardio, or duration) plus type-specific fields.
 
-        Each block contains exercises with a `type` field (strength, cardio, or duration) plus type-specific fields.
+        ## Block Types & Fields
+
+        Only set the fields listed for each block type — omit all others:
+
+        - **straight_sets**: _(no block-level fields)_ — exercises define their own sets/reps/rest
+        - **circuit**: rounds, rest_between_exercises, rest_between_rounds
+        - **superset**: rounds, rest_between_rounds
+        - **interval**: rounds, work_interval, rest_interval — for distance-based intervals, omit work_interval (exercise distance/pace defines the work)
+        - **amrap**: time_cap
+        - **for_time**: rounds, time_cap
+        - **emom**: rounds (= number of intervals), work_interval (= seconds per interval)
+        - **distance_duration**: _(no block-level fields)_ — exercise distance/duration defines the work
+        - **rest**: _(no block-level fields)_
     MARKDOWN;
 
     /**

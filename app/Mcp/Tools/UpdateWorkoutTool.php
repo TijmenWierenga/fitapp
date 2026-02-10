@@ -33,6 +33,20 @@ class UpdateWorkoutTool extends Tool
         You can update the name, activity, scheduled time, notes, or sections. Only provide the fields you want to change.
 
         If `sections` is provided, the existing structure will be replaced entirely with the new sections/blocks/exercises.
+
+        ## Block Types & Fields
+
+        Only set the fields listed for each block type — omit all others:
+
+        - **straight_sets**: _(no block-level fields)_ — exercises define their own sets/reps/rest
+        - **circuit**: rounds, rest_between_exercises, rest_between_rounds
+        - **superset**: rounds, rest_between_rounds
+        - **interval**: rounds, work_interval, rest_interval — for distance-based intervals, omit work_interval (exercise distance/pace defines the work)
+        - **amrap**: time_cap
+        - **for_time**: rounds, time_cap
+        - **emom**: rounds (= number of intervals), work_interval (= seconds per interval)
+        - **distance_duration**: _(no block-level fields)_ — exercise distance/duration defines the work
+        - **rest**: _(no block-level fields)_
     MARKDOWN;
 
     /**

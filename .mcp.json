@@ -19,6 +19,10 @@
     "traiq-local": {
       "type": "http",
       "url": "http://fitapp.test/mcp/workout"
+    },
+    "traiq": {
+      "type": "http",
+      "url": "https://traiq.nl/mcp/workout"
     }
   }
 }

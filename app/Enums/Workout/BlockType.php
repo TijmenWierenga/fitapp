@@ -60,4 +60,39 @@ enum BlockType: string
             self::Rest => 'pause',
         };
     }
+
+    /**
+     * @return list<string>
+     */
+    public function fields(): array
+    {
+        return match ($this) {
+            self::StraightSets, self::DistanceDuration, self::Rest => [],
+            self::Circuit => ['rounds', 'rest_between_exercises', 'rest_between_rounds'],
+            self::Superset => ['rounds', 'rest_between_rounds'],
+            self::Interval => ['rounds', 'work_interval', 'rest_interval'],
+            self::Amrap => ['time_cap'],
+            self::ForTime => ['rounds', 'time_cap'],
+            self::Emom => ['rounds', 'work_interval'],
+        };
+    }
+
+    public function hasField(string $field): bool
+    {
+        return in_array($field, $this->fields(), true);
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    public static function fieldGuide(): array
+    {
+        $guide = [];
+
+        foreach (self::cases() as $case) {
+            $guide[$case->value] = $case->fields();
+        }
+
+        return $guide;
+    }
 }

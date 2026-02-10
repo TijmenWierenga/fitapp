@@ -1,0 +1,282 @@
+<?php
+
+use App\Livewire\Workout\Builder;
+use App\Models\Block;
+use App\Models\BlockExercise;
+use App\Models\Section;
+use App\Models\StrengthExercise;
+use App\Models\User;
+use App\Models\Workout;
+use Livewire\Livewire;
+
+it('adds a section', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->assertSet('sections', [])
+        ->call('addSection')
+        ->assertCount('sections', 1);
+});
+
+it('removes a section', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->call('addSection')
+        ->call('addSection')
+        ->assertCount('sections', 2)
+        ->call('removeSection', 0)
+        ->assertCount('sections', 1);
+});
+
+it('adds a block to a section', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->call('addSection')
+        ->call('addBlock', 0)
+        ->assertCount('sections.0.blocks', 1);
+});
+
+it('removes a block from a section', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->call('addSection')
+        ->call('addBlock', 0)
+        ->call('addBlock', 0)
+        ->assertCount('sections.0.blocks', 2)
+        ->call('removeBlock', 0, 0)
+        ->assertCount('sections.0.blocks', 1);
+});
+
+it('adds an exercise to a block', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->call('addSection')
+        ->call('addBlock', 0)
+        ->call('addExercise', 0, 0)
+        ->assertCount('sections.0.blocks.0.exercises', 1);
+});
+
+it('removes an exercise from a block', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->call('addSection')
+        ->call('addBlock', 0)
+        ->call('addExercise', 0, 0)
+        ->call('addExercise', 0, 0)
+        ->assertCount('sections.0.blocks.0.exercises', 2)
+        ->call('removeExercise', 0, 0, 0)
+        ->assertCount('sections.0.blocks.0.exercises', 1);
+});
+
+it('reorders sections via sortSections', function () {
+    $user = User::factory()->create();
+
+    $component = Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->call('addSection')
+        ->set('sections.0.name', 'First')
+        ->call('addSection')
+        ->set('sections.1.name', 'Second');
+
+    $key = $component->get('sections.1._key');
+
+    $component->call('sortSections', $key, 0)
+        ->assertSet('sections.0.name', 'Second')
+        ->assertSet('sections.1.name', 'First');
+});
+
+it('reorders blocks via sortBlocks', function () {
+    $user = User::factory()->create();
+
+    $component = Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->call('addSection')
+        ->call('addBlock', 0)
+        ->set('sections.0.blocks.0.block_type', 'circuit')
+        ->call('addBlock', 0)
+        ->set('sections.0.blocks.1.block_type', 'interval');
+
+    $key = $component->get('sections.0.blocks.1._key');
+
+    $component->call('sortBlocks', $key, 0)
+        ->assertSet('sections.0.blocks.0.block_type', 'interval')
+        ->assertSet('sections.0.blocks.1.block_type', 'circuit');
+});
+
+it('reorders exercises via sortExercises', function () {
+    $user = User::factory()->create();
+
+    $component = Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->call('addSection')
+        ->call('addBlock', 0)
+        ->call('addExercise', 0, 0)
+        ->set('sections.0.blocks.0.exercises.0.name', 'Push-up')
+        ->call('addExercise', 0, 0)
+        ->set('sections.0.blocks.0.exercises.1.name', 'Squat');
+
+    $key = $component->get('sections.0.blocks.0.exercises.1._key');
+
+    $component->call('sortExercises', $key, 0)
+        ->assertSet('sections.0.blocks.0.exercises.0.name', 'Squat')
+        ->assertSet('sections.0.blocks.0.exercises.1.name', 'Push-up');
+});
+
+it('creates a workout with structure', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->set('name', 'Test Workout')
+        ->set('scheduled_date', '2026-03-01')
+        ->set('scheduled_time', '08:00')
+        ->call('addSection')
+        ->set('sections.0.name', 'Warm-up')
+        ->call('addBlock', 0)
+        ->set('sections.0.blocks.0.block_type', 'straight_sets')
+        ->call('addExercise', 0, 0)
+        ->set('sections.0.blocks.0.exercises.0.name', 'Push-up')
+        ->set('sections.0.blocks.0.exercises.0.type', 'strength')
+        ->set('sections.0.blocks.0.exercises.0.target_sets', 3)
+        ->set('sections.0.blocks.0.exercises.0.target_reps_max', 15)
+        ->call('saveWorkout')
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('workouts', ['name' => 'Test Workout']);
+    $this->assertDatabaseHas('sections', ['name' => 'Warm-up', 'order' => 0]);
+    $this->assertDatabaseHas('block_exercises', ['name' => 'Push-up']);
+    $this->assertDatabaseHas('strength_exercises', ['target_sets' => 3, 'target_reps_max' => 15]);
+});
+
+it('creates a workout without structure', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->set('name', 'Simple Run')
+        ->set('scheduled_date', '2026-03-01')
+        ->set('scheduled_time', '07:00')
+        ->call('saveWorkout')
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('workouts', ['name' => 'Simple Run']);
+    $this->assertDatabaseCount('sections', 0);
+});
+
+it('edits an existing workout and replaces structure', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create(['name' => 'Old Workout']);
+    $section = Section::factory()->for($workout)->create(['name' => 'Old Section']);
+    $block = Block::factory()->for($section)->create();
+    $strength = StrengthExercise::factory()->create();
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'name' => 'Old Exercise',
+        'exerciseable_type' => 'strength_exercise',
+        'exerciseable_id' => $strength->id,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Builder::class, ['workout' => $workout])
+        ->assertSet('name', 'Old Workout')
+        ->assertCount('sections', 1)
+        ->assertSet('sections.0.name', 'Old Section')
+        ->set('name', 'Updated Workout')
+        ->set('sections.0.name', 'Updated Section')
+        ->set('sections.0.blocks.0.exercises.0.name', 'Updated Exercise')
+        ->call('saveWorkout')
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('workouts', ['id' => $workout->id, 'name' => 'Updated Workout']);
+    $this->assertDatabaseHas('sections', ['name' => 'Updated Section']);
+    $this->assertDatabaseHas('block_exercises', ['name' => 'Updated Exercise']);
+    $this->assertDatabaseMissing('sections', ['name' => 'Old Section']);
+});
+
+it('hydrates sections from existing workout on edit', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create();
+    $section = Section::factory()->for($workout)->create(['name' => 'Main']);
+    $block = Block::factory()->circuit()->for($section)->create(['rounds' => 4]);
+    $strength = StrengthExercise::factory()->create(['target_sets' => 5, 'target_weight' => 100]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'name' => 'Deadlift',
+        'exerciseable_type' => 'strength_exercise',
+        'exerciseable_id' => $strength->id,
+    ]);
+
+    $component = Livewire::actingAs($user)
+        ->test(Builder::class, ['workout' => $workout]);
+
+    $component
+        ->assertCount('sections', 1)
+        ->assertSet('sections.0.name', 'Main')
+        ->assertSet('sections.0.blocks.0.block_type', 'circuit')
+        ->assertSet('sections.0.blocks.0.rounds', 4)
+        ->assertSet('sections.0.blocks.0.exercises.0.name', 'Deadlift')
+        ->assertSet('sections.0.blocks.0.exercises.0.type', 'strength')
+        ->assertSet('sections.0.blocks.0.exercises.0.target_sets', 5)
+        ->assertSet('sections.0.blocks.0.exercises.0.target_weight', 100.0);
+});
+
+it('validates required section name', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->set('name', 'Test')
+        ->set('scheduled_date', '2026-03-01')
+        ->set('scheduled_time', '08:00')
+        ->call('addSection')
+        ->call('saveWorkout')
+        ->assertHasErrors('sections.0.name');
+});
+
+it('validates required exercise name', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->set('name', 'Test')
+        ->set('scheduled_date', '2026-03-01')
+        ->set('scheduled_time', '08:00')
+        ->call('addSection')
+        ->set('sections.0.name', 'Main')
+        ->call('addBlock', 0)
+        ->call('addExercise', 0, 0)
+        ->call('saveWorkout')
+        ->assertHasErrors('sections.0.blocks.0.exercises.0.name');
+});
+
+it('aborts editing a completed workout', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->completed()->create();
+
+    Livewire::actingAs($user)
+        ->test(Builder::class, ['workout' => $workout])
+        ->assertForbidden();
+});
+
+it('redirects to workout show page after save', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->set('name', 'Redirect Test')
+        ->set('scheduled_date', '2026-03-01')
+        ->set('scheduled_time', '08:00')
+        ->call('saveWorkout')
+        ->assertRedirectToRoute('workouts.show', Workout::latest()->first());
+});

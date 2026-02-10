@@ -2,7 +2,7 @@
 
 namespace App\Mcp\Tools;
 
-use App\Actions\CreateStructuredWorkout;
+use App\Actions\UpdateStructuredWorkout;
 use App\DataTransferObjects\Workout\SectionData;
 use App\Enums\Workout\Activity;
 use App\Enums\Workout\BlockType;
@@ -21,6 +21,7 @@ class UpdateWorkoutTool extends Tool
 {
     public function __construct(
         private WorkoutSchemaBuilder $schemaBuilder,
+        private UpdateStructuredWorkout $updateStructuredWorkout,
     ) {}
 
     /**
@@ -32,6 +33,20 @@ class UpdateWorkoutTool extends Tool
         You can update the name, activity, scheduled time, notes, or sections. Only provide the fields you want to change.
 
         If `sections` is provided, the existing structure will be replaced entirely with the new sections/blocks/exercises.
+
+        ## Block Types & Fields
+
+        Only set the fields listed for each block type — omit all others:
+
+        - **straight_sets**: _(no block-level fields)_ — exercises define their own sets/reps/rest
+        - **circuit**: rounds, rest_between_exercises, rest_between_rounds
+        - **superset**: rounds, rest_between_rounds
+        - **interval**: rounds, work_interval, rest_interval — for distance-based intervals, omit work_interval (exercise distance/pace defines the work)
+        - **amrap**: time_cap
+        - **for_time**: rounds, time_cap
+        - **emom**: rounds (= number of intervals), work_interval (= seconds per interval)
+        - **distance_duration**: _(no block-level fields)_ — exercise distance/duration defines the work
+        - **rest**: _(no block-level fields)_
     MARKDOWN;
 
     /**
@@ -122,12 +137,10 @@ class UpdateWorkoutTool extends Tool
         $workout->update($updateData);
 
         if (isset($validated['sections'])) {
-            $this->deleteExistingStructure($workout);
-
             $sections = collect($validated['sections'])
                 ->map(fn (array $section): SectionData => SectionData::fromArray($section));
 
-            app(CreateStructuredWorkout::class)->buildSections($workout, $sections);
+            $this->updateStructuredWorkout->execute($workout, $sections);
         }
 
         return Response::text(json_encode([
@@ -135,23 +148,6 @@ class UpdateWorkoutTool extends Tool
             'workout' => WorkoutResponseFormatter::format($workout->fresh(), $user),
             'message' => 'Workout updated successfully',
         ]));
-    }
-
-    protected function deleteExistingStructure(\App\Models\Workout $workout): void
-    {
-        // Collect exerciseable IDs before deleting to clean up polymorphic records
-        $workout->load('sections.blocks.exercises');
-
-        foreach ($workout->sections as $section) {
-            foreach ($section->blocks as $block) {
-                foreach ($block->exercises as $exercise) {
-                    $exercise->exerciseable?->delete();
-                }
-            }
-        }
-
-        // Cascade delete handles block_exercises and blocks via FK constraints
-        $workout->sections()->delete();
     }
 
     /**

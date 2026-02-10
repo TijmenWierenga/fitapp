@@ -134,7 +134,7 @@ All values are stored in their base unit in the database:
 | Measurement | Storage Unit | DB Column Type |
 |---|---|---|
 | Duration / time | Seconds | `integer` |
-| Distance | Kilometers | `decimal(10, 2)` |
+| Distance | Meters | `decimal(10, 2)` |
 | Weight | Kilograms | `decimal(8, 2)` |
 | Pace | Seconds per km | `integer` |
 | Heart rate | Beats per minute (bpm) | `integer` |

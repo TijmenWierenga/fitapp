@@ -85,23 +85,4 @@ class UpdateFitnessProfileTool extends Tool
             'minutes_per_session' => $schema->integer()->description('Typical workout session duration in minutes (15-180)'),
         ];
     }
-
-    /**
-     * Get the tool's output schema.
-     */
-    public function outputSchema(JsonSchema $schema): array
-    {
-        return [
-            'success' => $schema->boolean()->required(),
-            'profile' => $schema->object([
-                'id' => $schema->integer()->required(),
-                'primary_goal' => $schema->string()->required(),
-                'primary_goal_label' => $schema->string()->required(),
-                'goal_details' => $schema->string()->nullable(),
-                'available_days_per_week' => $schema->integer()->required(),
-                'minutes_per_session' => $schema->integer()->required(),
-            ])->required(),
-            'message' => $schema->string()->required(),
-        ];
-    }
 }

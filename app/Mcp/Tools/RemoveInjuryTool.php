@@ -70,20 +70,4 @@ class RemoveInjuryTool extends Tool
             'injury_id' => $schema->integer()->description('The ID of the injury to remove'),
         ];
     }
-
-    /**
-     * Get the tool's output schema.
-     */
-    public function outputSchema(JsonSchema $schema): array
-    {
-        return [
-            'success' => $schema->boolean()->required(),
-            'removed_injury' => $schema->object([
-                'id' => $schema->integer()->required(),
-                'body_part' => $schema->string()->required(),
-                'injury_type' => $schema->string()->required(),
-            ])->required(),
-            'message' => $schema->string()->required(),
-        ];
-    }
 }

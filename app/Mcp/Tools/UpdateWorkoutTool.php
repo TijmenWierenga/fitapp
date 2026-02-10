@@ -164,16 +164,4 @@ class UpdateWorkoutTool extends Tool
             'sections' => $schema->array()->items($this->schemaBuilder->section())->description('Replace entire workout structure with new sections/blocks/exercises. If provided, existing structure is deleted and replaced.')->nullable(),
         ];
     }
-
-    /**
-     * Get the tool's output schema.
-     */
-    public function outputSchema(JsonSchema $schema): array
-    {
-        return [
-            'success' => $schema->boolean()->required(),
-            'workout' => $schema->object($this->schemaBuilder->workoutOutputSchema())->required(),
-            'message' => $schema->string()->required(),
-        ];
-    }
 }

@@ -82,26 +82,4 @@ class ListWorkoutsTool extends Tool
             'limit' => $schema->integer()->description('Maximum number of workouts to return (default: 20, max: 100)')->nullable(),
         ];
     }
-
-    /**
-     * Get the tool's output schema.
-     */
-    public function outputSchema(JsonSchema $schema): array
-    {
-        return [
-            'success' => $schema->boolean()->required(),
-            'filter' => $schema->string()->required(),
-            'count' => $schema->integer()->required(),
-            'workouts' => $schema->array()->items($schema->object([
-                'id' => $schema->integer()->required(),
-                'name' => $schema->string()->required(),
-                'activity' => $schema->string()->required(),
-                'scheduled_at' => $schema->string()->description('ISO 8601 datetime in user timezone')->required(),
-                'completed' => $schema->boolean()->required(),
-                'completed_at' => $schema->string()->nullable(),
-                'notes' => $schema->string()->nullable(),
-                'sections_count' => $schema->integer()->required(),
-            ]))->required(),
-        ];
-    }
 }

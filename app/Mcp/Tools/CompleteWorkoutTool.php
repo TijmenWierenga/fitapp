@@ -91,23 +91,4 @@ class CompleteWorkoutTool extends Tool
             'feeling' => $schema->integer()->description('Post-workout feeling (1-5): 1=Terrible, 2=Poor, 3=Average, 4=Good, 5=Great'),
         ];
     }
-
-    /**
-     * Get the tool's output schema.
-     */
-    public function outputSchema(JsonSchema $schema): array
-    {
-        return [
-            'success' => $schema->boolean()->required(),
-            'workout' => $schema->object([
-                'id' => $schema->integer()->required(),
-                'name' => $schema->string()->required(),
-                'completed_at' => $schema->string()->description('ISO 8601 datetime in user timezone')->required(),
-                'rpe' => $schema->integer()->required(),
-                'rpe_label' => $schema->string()->required(),
-                'feeling' => $schema->integer()->required(),
-            ])->required(),
-            'message' => $schema->string()->required(),
-        ];
-    }
 }

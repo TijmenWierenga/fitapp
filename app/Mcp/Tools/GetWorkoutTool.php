@@ -62,15 +62,4 @@ class GetWorkoutTool extends Tool
             'workout_id' => $schema->integer()->description('The ID of the workout to fetch'),
         ];
     }
-
-    /**
-     * Get the tool's output schema.
-     */
-    public function outputSchema(JsonSchema $schema): array
-    {
-        return [
-            'success' => $schema->boolean()->required(),
-            'workout' => $schema->object($this->schemaBuilder->workoutOutputSchema())->required(),
-        ];
-    }
 }

@@ -149,16 +149,4 @@ class CreateWorkoutTool extends Tool
             'sections' => $schema->array()->items($this->schemaBuilder->section())->description('Optional structured workout sections with blocks and exercises.')->nullable(),
         ];
     }
-
-    /**
-     * Get the tool's output schema.
-     */
-    public function outputSchema(JsonSchema $schema): array
-    {
-        return [
-            'success' => $schema->boolean()->required(),
-            'workout' => $schema->object($this->schemaBuilder->workoutOutputSchema())->required(),
-            'message' => $schema->string()->required(),
-        ];
-    }
 }

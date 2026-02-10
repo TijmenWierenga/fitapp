@@ -66,15 +66,4 @@ class DeleteWorkoutTool extends Tool
             'workout_id' => $schema->integer()->description('The ID of the workout to delete'),
         ];
     }
-
-    /**
-     * Get the tool's output schema.
-     */
-    public function outputSchema(JsonSchema $schema): array
-    {
-        return [
-            'success' => $schema->boolean()->required(),
-            'message' => $schema->string()->required(),
-        ];
-    }
 }

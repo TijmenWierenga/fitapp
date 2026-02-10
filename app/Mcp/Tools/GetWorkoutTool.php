@@ -2,21 +2,22 @@
 
 namespace App\Mcp\Tools;
 
-use App\Models\Workout;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
+#[IsReadOnly]
 class GetWorkoutTool extends Tool
 {
     /**
      * The tool's description.
      */
     protected string $description = <<<'MARKDOWN'
-        Fetch a single workout by ID. Returns full workout details including RPE and feeling if completed.
+        Fetch a single workout by ID. Returns full workout details including sections, blocks, exercises, RPE and feeling if completed.
     MARKDOWN;
 
     /**
@@ -42,24 +43,15 @@ class GetWorkoutTool extends Tool
             return Response::error('Workout not found or access denied');
         }
 
-        $data = [
-            'id' => $workout->id,
-            'name' => $workout->name,
-            'activity' => $workout->activity->value,
-            'scheduled_at' => $user->toUserTimezone($workout->scheduled_at)->toIso8601String(),
-            'completed' => $workout->isCompleted(),
-            'completed_at' => $workout->completed_at ? $user->toUserTimezone($workout->completed_at)->toIso8601String() : null,
-            'rpe' => $workout->rpe,
-            'rpe_label' => Workout::getRpeLabel($workout->rpe),
-            'feeling' => $workout->feeling,
-            'notes' => $workout->notes,
-        ];
-
         return Response::text(json_encode([
             'success' => true,
-            'workout' => $data,
+            'workout' => WorkoutResponseFormatter::format($workout, $user),
         ]));
     }
+
+    public function __construct(
+        private WorkoutSchemaBuilder $schemaBuilder,
+    ) {}
 
     /**
      * Get the tool's input schema.
@@ -68,6 +60,17 @@ class GetWorkoutTool extends Tool
     {
         return [
             'workout_id' => $schema->integer()->description('The ID of the workout to fetch'),
+        ];
+    }
+
+    /**
+     * Get the tool's output schema.
+     */
+    public function outputSchema(JsonSchema $schema): array
+    {
+        return [
+            'success' => $schema->boolean()->required(),
+            'workout' => $schema->object($this->schemaBuilder->workoutOutputSchema())->required(),
         ];
     }
 }

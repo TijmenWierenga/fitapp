@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\CardioExercise;
+use App\Models\DurationExercise;
+use App\Models\StrengthExercise;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
@@ -24,5 +28,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Passport::authorizationView(fn ($parameters) => view('mcp.authorize', $parameters)); // @phpstan-ignore-line
         Date::use(CarbonImmutable::class);
+
+        Relation::morphMap([
+            'strength_exercise' => StrengthExercise::class,
+            'cardio_exercise' => CardioExercise::class,
+            'duration_exercise' => DurationExercise::class,
+        ]);
     }
 }

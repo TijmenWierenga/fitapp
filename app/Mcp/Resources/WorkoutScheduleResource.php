@@ -2,10 +2,15 @@
 
 namespace App\Mcp\Resources;
 
+use Laravel\Mcp\Enums\Role;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\Server\Annotations\Audience;
+use Laravel\Mcp\Server\Annotations\Priority;
 use Laravel\Mcp\Server\Resource;
 
+#[Audience(Role::Assistant)]
+#[Priority(0.9)]
 class WorkoutScheduleResource extends Resource
 {
     /**
@@ -36,8 +41,8 @@ class WorkoutScheduleResource extends Resource
         $upcomingLimit = min((int) ($request->get('upcoming_limit') ?? 20), 50);
         $completedLimit = min((int) ($request->get('completed_limit') ?? 10), 50);
 
-        $upcomingWorkouts = $user->workouts()->upcoming()->limit($upcomingLimit)->get();
-        $completedWorkouts = $user->workouts()->completed()->limit($completedLimit)->get();
+        $upcomingWorkouts = $user->workouts()->upcoming()->withCount('sections')->limit($upcomingLimit)->get();
+        $completedWorkouts = $user->workouts()->completed()->withCount('sections')->limit($completedLimit)->get();
 
         $content = "# Workout Schedule for {$user->name}\n\n";
 
@@ -47,7 +52,11 @@ class WorkoutScheduleResource extends Resource
         } else {
             foreach ($upcomingWorkouts as $workout) {
                 $scheduledAt = $user->toUserTimezone($workout->scheduled_at)->format('Y-m-d H:i');
-                $content .= "- **{$workout->name}** ({$workout->activity->label()})\n";
+                $content .= "- **{$workout->name}** ({$workout->activity->label()})";
+                if ($workout->sections_count > 0) {
+                    $content .= " [{$workout->sections_count} sections]";
+                }
+                $content .= "\n";
                 $content .= "  Scheduled: {$scheduledAt}\n";
                 if ($workout->notes) {
                     $content .= "  Notes: {$workout->notes}\n";

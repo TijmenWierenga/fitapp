@@ -7,7 +7,9 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
+#[IsReadOnly]
 class ListWorkoutsTool extends Tool
 {
     /**
@@ -40,7 +42,7 @@ class ListWorkoutsTool extends Tool
         $filter = $validated['filter'] ?? 'all';
         $limit = $validated['limit'] ?? 20;
 
-        $query = $user->workouts();
+        $query = $user->workouts()->withCount('sections');
 
         match ($filter) {
             'upcoming' => $query->upcoming(),
@@ -59,6 +61,7 @@ class ListWorkoutsTool extends Tool
             'completed' => $workout->isCompleted(),
             'completed_at' => $workout->completed_at ? $user->toUserTimezone($workout->completed_at)->toIso8601String() : null,
             'notes' => $workout->notes,
+            'sections_count' => $workout->sections_count,
         ]);
 
         return Response::text(json_encode([
@@ -77,6 +80,28 @@ class ListWorkoutsTool extends Tool
         return [
             'filter' => $schema->string()->description('Filter workouts: upcoming, completed, overdue, or all (default)')->nullable(),
             'limit' => $schema->integer()->description('Maximum number of workouts to return (default: 20, max: 100)')->nullable(),
+        ];
+    }
+
+    /**
+     * Get the tool's output schema.
+     */
+    public function outputSchema(JsonSchema $schema): array
+    {
+        return [
+            'success' => $schema->boolean()->required(),
+            'filter' => $schema->string()->required(),
+            'count' => $schema->integer()->required(),
+            'workouts' => $schema->array()->items($schema->object([
+                'id' => $schema->integer()->required(),
+                'name' => $schema->string()->required(),
+                'activity' => $schema->string()->required(),
+                'scheduled_at' => $schema->string()->description('ISO 8601 datetime in user timezone')->required(),
+                'completed' => $schema->boolean()->required(),
+                'completed_at' => $schema->string()->nullable(),
+                'notes' => $schema->string()->nullable(),
+                'sections_count' => $schema->integer()->required(),
+            ]))->required(),
         ];
     }
 }

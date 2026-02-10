@@ -2,17 +2,16 @@
 
 namespace App\Livewire\Workout;
 
+use App\Actions\CreateStructuredWorkout;
+use App\Actions\UpdateStructuredWorkout;
+use App\DataTransferObjects\Workout\SectionData;
 use App\Enums\Workout\Activity;
-use App\Enums\Workout\DurationType;
-use App\Enums\Workout\Intensity;
-use App\Enums\Workout\StepKind;
-use App\Enums\Workout\TargetMode;
-use App\Enums\Workout\TargetType;
+use App\Enums\Workout\BlockType;
 use App\Models\Workout;
-use App\Support\Workout\DistanceConverter;
-use App\Support\Workout\PaceConverter;
-use App\Support\Workout\TimeConverter;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class Builder extends Component
@@ -29,18 +28,8 @@ class Builder extends Component
 
     public string $scheduled_time = '';
 
-    public array $steps = [];
-
-    public bool $showingActivityTypeChangeModal = false;
-
-    public ?Activity $pendingActivity = null;
-
-    // Modal state
-    public bool $showingStepModal = false;
-
-    public array $editingStepData = [];
-
-    public ?string $editingStepPath = null; // e.g. "0" or "1.children.0"
+    /** @var array<int, array<string, mixed>> */
+    public array $sections = [];
 
     public function mount(?Workout $workout = null): void
     {
@@ -55,353 +44,381 @@ class Builder extends Component
             $this->activity = $workout->activity;
             $this->scheduled_date = $workout->scheduled_at->format('Y-m-d');
             $this->scheduled_time = $workout->scheduled_at->format('H:i');
-            $this->loadSteps();
+            $this->sections = $this->hydrateFromWorkout($workout);
         } else {
             $this->scheduled_date = now()->format('Y-m-d');
             $this->scheduled_time = now()->format('H:i');
-            // Default first step for running activity
-            $this->addStep();
-        }
-    }
-
-    protected function loadSteps(): void
-    {
-        $this->steps = $this->workout->rootSteps()
-            ->with('children')
-            ->get()
-            ->map(fn ($step) => $this->mapStepToArray($step))
-            ->toArray();
-    }
-
-    protected function mapStepToArray($step): array
-    {
-        $data = $step->toArray();
-        if ($step->step_kind === StepKind::Repeat) {
-            $data['children'] = $step->children->map(fn ($child) => $this->mapStepToArray($child))->toArray();
-        }
-
-        return $data;
-    }
-
-    public function addStep(?int $repeatIndex = null): void
-    {
-        $newStep = [
-            'step_kind' => StepKind::Run->value,
-            'intensity' => Intensity::Active->value,
-            'duration_type' => DurationType::Distance->value,
-            'duration_value' => 1000,
-            'target_type' => TargetType::None->value,
-            'target_mode' => null,
-            'target_zone' => null,
-            'target_low' => null,
-            'target_high' => null,
-            'name' => null,
-            'notes' => null,
-        ];
-
-        if ($repeatIndex !== null) {
-            $this->steps[$repeatIndex]['children'][] = $newStep;
-        } else {
-            $this->steps[] = $newStep;
-        }
-    }
-
-    public function addRepeat(): void
-    {
-        $this->steps[] = [
-            'step_kind' => StepKind::Repeat->value,
-            'repeat_count' => 2,
-            'skip_last_recovery' => false,
-            'children' => [
-                [
-                    'step_kind' => StepKind::Run->value,
-                    'intensity' => Intensity::Active->value,
-                    'duration_type' => DurationType::Distance->value,
-                    'duration_value' => 1000,
-                    'target_type' => TargetType::None->value,
-                    'target_mode' => null,
-                    'target_zone' => null,
-                    'target_low' => null,
-                    'target_high' => null,
-                    'name' => null,
-                    'notes' => null,
-                ],
-                [
-                    'step_kind' => StepKind::Recovery->value,
-                    'intensity' => Intensity::Rest->value,
-                    'duration_type' => DurationType::Time->value,
-                    'duration_value' => 60,
-                    'target_type' => TargetType::None->value,
-                    'target_mode' => null,
-                    'target_zone' => null,
-                    'target_low' => null,
-                    'target_high' => null,
-                    'name' => null,
-                    'notes' => null,
-                ],
-            ],
-        ];
-    }
-
-    public function removeStep(string $path): void
-    {
-        if (! str_contains($path, '.')) {
-            unset($this->steps[$path]);
-            $this->steps = array_values($this->steps);
-        } else {
-            [$repeatIndex, $childKey, $stepIndex] = explode('.', $path);
-            unset($this->steps[$repeatIndex][$childKey][$stepIndex]);
-            $this->steps[$repeatIndex][$childKey] = array_values($this->steps[$repeatIndex][$childKey]);
-        }
-    }
-
-    public function editStep(string $path): void
-    {
-        $this->editingStepPath = $path;
-        $step = data_get($this->steps, $path);
-
-        $this->editingStepData = $step;
-
-        // Initialize human-readable fields for the form
-        if ($step['step_kind'] !== StepKind::Repeat->value) {
-            if ($step['duration_type'] === DurationType::Time->value) {
-                $totalSeconds = $step['duration_value'] ?? 0;
-                $this->editingStepData['duration_minutes'] = (int) floor($totalSeconds / 60);
-                $this->editingStepData['duration_seconds'] = $totalSeconds % 60;
-            } elseif ($step['duration_type'] === DurationType::Distance->value) {
-                $this->editingStepData['duration_km'] = ($step['duration_value'] ?? 0) / 1000;
-            }
-
-            if ($step['target_type'] === TargetType::Pace->value && $step['target_mode'] === TargetMode::Range->value) {
-                $low = PaceConverter::fromSecondsPerKm($step['target_low'] ?? 0);
-                $high = PaceConverter::fromSecondsPerKm($step['target_high'] ?? 0);
-                $this->editingStepData['target_low_min'] = $low['minutes'];
-                $this->editingStepData['target_low_sec'] = $low['seconds'];
-                $this->editingStepData['target_high_min'] = $high['minutes'];
-                $this->editingStepData['target_high_sec'] = $high['seconds'];
-            }
-        }
-
-        $this->showingStepModal = true;
-    }
-
-    public function updatedEditingStepDataStepKind($value): void
-    {
-        $this->editingStepData['intensity'] = match ($value) {
-            StepKind::Warmup->value => Intensity::Warmup->value,
-            StepKind::Run->value => Intensity::Active->value,
-            StepKind::Recovery->value => Intensity::Rest->value,
-            StepKind::Cooldown->value => Intensity::Cooldown->value,
-            default => $this->editingStepData['intensity'] ?? Intensity::Active->value,
-        };
-    }
-
-    public function saveStep(): void
-    {
-        // Convert human-readable back to normalized
-        if ($this->editingStepData['step_kind'] !== StepKind::Repeat->value) {
-            if ($this->editingStepData['duration_type'] === DurationType::Time->value) {
-                $this->editingStepData['duration_value'] = TimeConverter::toSeconds(
-                    (int) ($this->editingStepData['duration_minutes'] ?? 0),
-                    (int) ($this->editingStepData['duration_seconds'] ?? 0)
-                );
-            } elseif ($this->editingStepData['duration_type'] === DurationType::Distance->value) {
-                $this->editingStepData['duration_value'] = DistanceConverter::toMeters(
-                    (int) ($this->editingStepData['duration_km'] ?? 0),
-                    (int) ($this->editingStepData['duration_tens'] ?? 0)
-                );
-            }
-
-            if ($this->editingStepData['target_type'] === TargetType::Pace->value && $this->editingStepData['target_mode'] === TargetMode::Range->value) {
-                $this->editingStepData['target_low'] = PaceConverter::toSecondsPerKm(
-                    (int) ($this->editingStepData['target_low_min'] ?? 0),
-                    (int) ($this->editingStepData['target_low_sec'] ?? 0)
-                );
-                $this->editingStepData['target_high'] = PaceConverter::toSecondsPerKm(
-                    (int) ($this->editingStepData['target_high_min'] ?? 0),
-                    (int) ($this->editingStepData['target_high_sec'] ?? 0)
-                );
-            }
-
-            if ($this->editingStepData['target_type'] === TargetType::None->value) {
-                $this->editingStepData['target_mode'] = null;
-                $this->editingStepData['target_zone'] = null;
-                $this->editingStepData['target_low'] = null;
-                $this->editingStepData['target_high'] = null;
-            }
-        }
-
-        data_set($this->steps, $this->editingStepPath, $this->editingStepData);
-        $this->showingStepModal = false;
-    }
-
-    public function moveUp(string $path): void
-    {
-        if (! str_contains($path, '.')) {
-            $index = (int) $path;
-            if ($index > 0) {
-                $temp = $this->steps[$index - 1];
-                $this->steps[$index - 1] = $this->steps[$index];
-                $this->steps[$index] = $temp;
-            }
-        } else {
-            [$repeatIndex, $childKey, $stepIndex] = explode('.', $path);
-            $stepIndex = (int) $stepIndex;
-            if ($stepIndex > 0) {
-                $temp = $this->steps[$repeatIndex][$childKey][$stepIndex - 1];
-                $this->steps[$repeatIndex][$childKey][$stepIndex - 1] = $this->steps[$repeatIndex][$childKey][$stepIndex];
-                $this->steps[$repeatIndex][$childKey][$stepIndex] = $temp;
-            }
-        }
-    }
-
-    public function moveDown(string $path): void
-    {
-        if (! str_contains($path, '.')) {
-            $index = (int) $path;
-            if ($index < count($this->steps) - 1) {
-                $temp = $this->steps[$index + 1];
-                $this->steps[$index + 1] = $this->steps[$index];
-                $this->steps[$index] = $temp;
-            }
-        } else {
-            [$repeatIndex, $childKey, $stepIndex] = explode('.', $path);
-            $stepIndex = (int) $stepIndex;
-            if ($stepIndex < count($this->steps[$repeatIndex][$childKey]) - 1) {
-                $temp = $this->steps[$repeatIndex][$childKey][$stepIndex + 1];
-                $this->steps[$repeatIndex][$childKey][$stepIndex + 1] = $this->steps[$repeatIndex][$childKey][$stepIndex];
-                $this->steps[$repeatIndex][$childKey][$stepIndex] = $temp;
-            }
         }
     }
 
     public function selectActivity(Activity $activity): void
     {
-        // If changing FROM running to another type and there are steps, show confirmation
-        if ($this->activity->hasSteps() && ! $activity->hasSteps() && count($this->steps) > 0) {
-            $this->pendingActivity = $activity;
-            $this->showingActivityTypeChangeModal = true;
+        $this->activity = $activity;
+    }
 
+    public function addSection(): void
+    {
+        $this->sections[] = [
+            '_key' => uniqid('sec_'),
+            'name' => '',
+            'notes' => null,
+            'blocks' => [],
+        ];
+    }
+
+    public function removeSection(int $index): void
+    {
+        array_splice($this->sections, $index, 1);
+    }
+
+    public function addBlock(int $sectionIndex): void
+    {
+        $this->sections[$sectionIndex]['blocks'][] = [
+            '_key' => uniqid('blk_'),
+            'block_type' => BlockType::StraightSets->value,
+            'rounds' => null,
+            'rest_between_exercises' => null,
+            'rest_between_rounds' => null,
+            'time_cap' => null,
+            'work_interval' => null,
+            'rest_interval' => null,
+            'notes' => null,
+            'exercises' => [],
+        ];
+    }
+
+    public function removeBlock(int $sectionIndex, int $blockIndex): void
+    {
+        array_splice($this->sections[$sectionIndex]['blocks'], $blockIndex, 1);
+    }
+
+    public function addExercise(int $sectionIndex, int $blockIndex): void
+    {
+        $this->sections[$sectionIndex]['blocks'][$blockIndex]['exercises'][] = [
+            '_key' => uniqid('ex_'),
+            'name' => '',
+            'type' => 'strength',
+            'notes' => null,
+            'target_sets' => null,
+            'target_reps_min' => null,
+            'target_reps_max' => null,
+            'target_weight' => null,
+            'target_rpe' => null,
+            'target_tempo' => null,
+            'rest_after' => null,
+            'target_duration' => null,
+            'target_distance' => null,
+            'target_pace_min' => null,
+            'target_pace_max' => null,
+            'target_heart_rate_zone' => null,
+            'target_heart_rate_min' => null,
+            'target_heart_rate_max' => null,
+            'target_power' => null,
+        ];
+    }
+
+    public function removeExercise(int $sectionIndex, int $blockIndex, int $exerciseIndex): void
+    {
+        array_splice($this->sections[$sectionIndex]['blocks'][$blockIndex]['exercises'], $exerciseIndex, 1);
+    }
+
+    public function sortSections(string $key, int $position): void
+    {
+        $currentIndex = collect($this->sections)->search(fn (array $s): bool => $s['_key'] === $key);
+
+        if ($currentIndex === false || $currentIndex === $position) {
             return;
         }
 
-        $this->applyActivityChange($activity);
+        $item = array_splice($this->sections, $currentIndex, 1)[0];
+        array_splice($this->sections, $position, 0, [$item]);
     }
 
-    public function confirmActivityChange(): void
+    public function sortBlocks(string $key, int $position): void
     {
-        $this->applyActivityChange($this->pendingActivity);
-        $this->showingActivityTypeChangeModal = false;
-        $this->pendingActivity = null;
-    }
+        foreach ($this->sections as $si => $section) {
+            $currentIndex = collect($section['blocks'])->search(fn (array $b): bool => $b['_key'] === $key);
 
-    public function cancelActivityChange(): void
-    {
-        $this->showingActivityTypeChangeModal = false;
-        $this->pendingActivity = null;
-        // Force re-render to reset the select value
-        $this->dispatch('$refresh');
-    }
+            if ($currentIndex === false) {
+                continue;
+            }
 
-    protected function applyActivityChange(Activity $activity): void
-    {
-        $oldActivity = $this->activity;
-        $this->activity = $activity;
+            if ($currentIndex === $position) {
+                return;
+            }
 
-        // Clear steps when changing FROM running to another type
-        if ($oldActivity->hasSteps() && ! $activity->hasSteps()) {
-            $this->steps = [];
+            $item = array_splice($this->sections[$si]['blocks'], $currentIndex, 1)[0];
+            array_splice($this->sections[$si]['blocks'], $position, 0, [$item]);
+
+            return;
         }
+    }
 
-        // Add default step when changing TO running if there are no steps
-        if ($activity->hasSteps() && count($this->steps) === 0) {
-            $this->addStep();
+    public function sortExercises(string $key, int $position): void
+    {
+        foreach ($this->sections as $si => $section) {
+            foreach ($section['blocks'] as $bi => $block) {
+                $currentIndex = collect($block['exercises'])->search(fn (array $e): bool => $e['_key'] === $key);
+
+                if ($currentIndex === false) {
+                    continue;
+                }
+
+                if ($currentIndex === $position) {
+                    return;
+                }
+
+                $item = array_splice($this->sections[$si]['blocks'][$bi]['exercises'], $currentIndex, 1)[0];
+                array_splice($this->sections[$si]['blocks'][$bi]['exercises'], $position, 0, [$item]);
+
+                return;
+            }
         }
     }
 
     public function saveWorkout(): void
     {
-        $rules = [
-            'name' => 'required|string|max:255',
-            'scheduled_date' => 'required|date',
-            'scheduled_time' => 'required',
-        ];
-
-        if ($this->activity->hasSteps()) {
-            $rules['steps'] = 'required|array|min:1';
-        }
-
-        $this->validate($rules);
-
-        $scheduledAt = "{$this->scheduled_date} {$this->scheduled_time}";
+        $this->validate($this->validationRules());
 
         if ($this->workout && $this->workout->exists && ! $this->workout->fresh()->canBeEdited()) {
             abort(403, 'Completed workouts cannot be edited.');
         }
 
-        if (! $this->workout) {
-            $this->workout = new Workout;
-            $this->workout->user_id = auth()->id();
-        }
+        $scheduledAt = CarbonImmutable::parse("{$this->scheduled_date} {$this->scheduled_time}");
+        $sectionDtos = $this->buildSectionDtos();
 
-        $this->workout->name = $this->name;
-        $this->workout->notes = $this->notes;
-        $this->workout->activity = $this->activity;
-        $this->workout->scheduled_at = $scheduledAt;
-        $this->workout->save();
+        if ($this->workout && $this->workout->exists) {
+            $this->workout->update([
+                'name' => $this->name,
+                'notes' => $this->notes,
+                'activity' => $this->activity,
+                'scheduled_at' => $scheduledAt,
+            ]);
 
-        if ($this->activity->hasSteps()) {
-            $this->syncSteps();
+            app(UpdateStructuredWorkout::class)->execute($this->workout, $sectionDtos);
         } else {
-            // Delete any existing steps when changing to a non-step-builder activity
-            $this->workout->steps()->delete();
+            $this->workout = app(CreateStructuredWorkout::class)->execute(
+                user: auth()->user(),
+                name: $this->name,
+                activity: $this->activity,
+                scheduledAt: $scheduledAt,
+                notes: $this->notes,
+                sections: $sectionDtos,
+            );
         }
 
-        $this->redirect(route('dashboard'));
-    }
-
-    protected function syncSteps(): void
-    {
-        $this->workout->steps()->delete();
-
-        $order = 0;
-        foreach ($this->steps as $stepData) {
-            $this->createStep($stepData, $order++);
-        }
-    }
-
-    protected function createStep(array $data, int $order, ?int $parentId = null): void
-    {
-        $children = $data['children'] ?? [];
-        unset($data['children'], $data['id'], $data['workout_id'], $data['parent_step_id'], $data['created_at'], $data['updated_at']);
-
-        // Remove human-readable helper fields if they exist
-        unset(
-            $data['duration_minutes'],
-            $data['duration_seconds'],
-            $data['duration_km'],
-            $data['duration_tens'],
-            $data['target_low_min'],
-            $data['target_low_sec'],
-            $data['target_high_min'],
-            $data['target_high_sec']
-        );
-
-        $step = $this->workout->steps()->create(array_merge($data, [
-            'sort_order' => $order,
-            'parent_step_id' => $parentId,
-        ]));
-
-        if (! empty($children)) {
-            $childOrder = 0;
-            foreach ($children as $childData) {
-                $this->createStep($childData, $childOrder++, $step->id);
-            }
-        }
+        $this->redirect(route('workouts.show', $this->workout));
     }
 
     public function render(): View
     {
         return view('livewire.workout.builder');
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function hydrateFromWorkout(Workout $workout): array
+    {
+        $workout->load('sections.blocks.exercises.exerciseable');
+
+        return $workout->sections->map(fn ($section): array => [
+            '_key' => uniqid('sec_'),
+            'name' => $section->name,
+            'notes' => $section->notes,
+            'blocks' => $section->blocks->map(fn ($block): array => [
+                '_key' => uniqid('blk_'),
+                'block_type' => $block->block_type->value,
+                'rounds' => $block->rounds,
+                'rest_between_exercises' => $block->rest_between_exercises,
+                'rest_between_rounds' => $block->rest_between_rounds,
+                'time_cap' => $block->time_cap,
+                'work_interval' => $block->work_interval,
+                'rest_interval' => $block->rest_interval,
+                'notes' => $block->notes,
+                'exercises' => $block->exercises->map(fn ($exercise): array => [
+                    '_key' => uniqid('ex_'),
+                    'name' => $exercise->name,
+                    'type' => $this->morphClassToType($exercise->exerciseable->getMorphClass()),
+                    'notes' => $exercise->notes,
+                    ...$this->hydrateExerciseable($exercise->exerciseable),
+                ])->all(),
+            ])->all(),
+        ])->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function hydrateExerciseable(object $exerciseable): array
+    {
+        return match ($exerciseable->getMorphClass()) {
+            'strength_exercise' => [
+                'target_sets' => $exerciseable->target_sets,
+                'target_reps_min' => $exerciseable->target_reps_min,
+                'target_reps_max' => $exerciseable->target_reps_max,
+                'target_weight' => $exerciseable->target_weight,
+                'target_rpe' => $exerciseable->target_rpe,
+                'target_tempo' => $exerciseable->target_tempo,
+                'rest_after' => $exerciseable->rest_after,
+                'target_duration' => null,
+                'target_distance' => null,
+                'target_pace_min' => null,
+                'target_pace_max' => null,
+                'target_heart_rate_zone' => null,
+                'target_heart_rate_min' => null,
+                'target_heart_rate_max' => null,
+                'target_power' => null,
+            ],
+            'cardio_exercise' => [
+                'target_sets' => null,
+                'target_reps_min' => null,
+                'target_reps_max' => null,
+                'target_weight' => null,
+                'target_tempo' => null,
+                'rest_after' => null,
+                'target_duration' => $exerciseable->target_duration,
+                'target_distance' => $exerciseable->target_distance !== null ? (int) $exerciseable->target_distance : null,
+                'target_pace_min' => $exerciseable->target_pace_min,
+                'target_pace_max' => $exerciseable->target_pace_max,
+                'target_heart_rate_zone' => $exerciseable->target_heart_rate_zone,
+                'target_heart_rate_min' => $exerciseable->target_heart_rate_min,
+                'target_heart_rate_max' => $exerciseable->target_heart_rate_max,
+                'target_power' => $exerciseable->target_power,
+                'target_rpe' => null,
+            ],
+            'duration_exercise' => [
+                'target_sets' => null,
+                'target_reps_min' => null,
+                'target_reps_max' => null,
+                'target_weight' => null,
+                'target_tempo' => null,
+                'rest_after' => null,
+                'target_duration' => $exerciseable->target_duration,
+                'target_rpe' => $exerciseable->target_rpe,
+                'target_distance' => null,
+                'target_pace_min' => null,
+                'target_pace_max' => null,
+                'target_heart_rate_zone' => null,
+                'target_heart_rate_min' => null,
+                'target_heart_rate_max' => null,
+                'target_power' => null,
+            ],
+        };
+    }
+
+    private function toNullableInt(mixed $value): ?int
+    {
+        return $value === null || $value === '' ? null : (int) $value;
+    }
+
+    private function toNullableFloat(mixed $value): ?float
+    {
+        return $value === null || $value === '' ? null : (float) $value;
+    }
+
+    private function morphClassToType(string $morphClass): string
+    {
+        return match ($morphClass) {
+            'strength_exercise' => 'strength',
+            'cardio_exercise' => 'cardio',
+            'duration_exercise' => 'duration',
+        };
+    }
+
+    /**
+     * @return Collection<int, SectionData>
+     */
+    private function buildSectionDtos(): Collection
+    {
+        return collect($this->sections)
+            ->values()
+            ->map(fn (array $section, int $index): array => [
+                'name' => $section['name'],
+                'order' => $index,
+                'notes' => $section['notes'],
+                'blocks' => collect($section['blocks'])
+                    ->values()
+                    ->map(fn (array $block, int $bi): array => [
+                        'block_type' => $block['block_type'],
+                        'order' => $bi,
+                        'rounds' => $this->toNullableInt($block['rounds']),
+                        'rest_between_exercises' => $this->toNullableInt($block['rest_between_exercises']),
+                        'rest_between_rounds' => $this->toNullableInt($block['rest_between_rounds']),
+                        'time_cap' => $this->toNullableInt($block['time_cap']),
+                        'work_interval' => $this->toNullableInt($block['work_interval']),
+                        'rest_interval' => $this->toNullableInt($block['rest_interval']),
+                        'notes' => $block['notes'],
+                        'exercises' => collect($block['exercises'])
+                            ->values()
+                            ->map(fn (array $exercise, int $ei): array => [
+                                'name' => $exercise['name'],
+                                'order' => $ei,
+                                'type' => $exercise['type'],
+                                'notes' => $exercise['notes'],
+                                'target_sets' => $this->toNullableInt($exercise['target_sets']),
+                                'target_reps_min' => $this->toNullableInt($exercise['target_reps_min']),
+                                'target_reps_max' => $this->toNullableInt($exercise['target_reps_max']),
+                                'target_weight' => $this->toNullableFloat($exercise['target_weight']),
+                                'target_rpe' => $this->toNullableFloat($exercise['target_rpe']),
+                                'target_tempo' => $exercise['target_tempo'],
+                                'rest_after' => $this->toNullableInt($exercise['rest_after']),
+                                'target_duration' => $this->toNullableInt($exercise['target_duration']),
+                                'target_distance' => $this->toNullableFloat($exercise['target_distance']),
+                                'target_pace_min' => $this->toNullableInt($exercise['target_pace_min']),
+                                'target_pace_max' => $this->toNullableInt($exercise['target_pace_max']),
+                                'target_heart_rate_zone' => $this->toNullableInt($exercise['target_heart_rate_zone']),
+                                'target_heart_rate_min' => $this->toNullableInt($exercise['target_heart_rate_min']),
+                                'target_heart_rate_max' => $this->toNullableInt($exercise['target_heart_rate_max']),
+                                'target_power' => $this->toNullableInt($exercise['target_power']),
+                            ])
+                            ->all(),
+                    ])
+                    ->all(),
+            ])
+            ->map(fn (array $section): SectionData => SectionData::fromArray($section));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validationRules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'scheduled_date' => 'required|date',
+            'scheduled_time' => 'required',
+            'sections' => 'array',
+            'sections.*.name' => 'required|string|max:255',
+            'sections.*.notes' => 'nullable|string|max:5000',
+            'sections.*.blocks' => 'array',
+            'sections.*.blocks.*.block_type' => ['required', Rule::enum(BlockType::class)],
+            'sections.*.blocks.*.rounds' => 'nullable|integer|min:1',
+            'sections.*.blocks.*.rest_between_exercises' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.rest_between_rounds' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.time_cap' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.work_interval' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.rest_interval' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.notes' => 'nullable|string|max:5000',
+            'sections.*.blocks.*.exercises' => 'array',
+            'sections.*.blocks.*.exercises.*.name' => 'required|string|max:255',
+            'sections.*.blocks.*.exercises.*.type' => 'required|in:strength,cardio,duration',
+            'sections.*.blocks.*.exercises.*.notes' => 'nullable|string|max:5000',
+            'sections.*.blocks.*.exercises.*.target_sets' => 'nullable|integer|min:1',
+            'sections.*.blocks.*.exercises.*.target_reps_min' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_reps_max' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_weight' => 'nullable|numeric|min:0',
+            'sections.*.blocks.*.exercises.*.target_rpe' => 'nullable|numeric|min:1|max:10',
+            'sections.*.blocks.*.exercises.*.target_tempo' => 'nullable|string|max:20',
+            'sections.*.blocks.*.exercises.*.rest_after' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_duration' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_distance' => 'nullable|numeric|min:0',
+            'sections.*.blocks.*.exercises.*.target_pace_min' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_pace_max' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_heart_rate_zone' => 'nullable|integer|min:1|max:5',
+            'sections.*.blocks.*.exercises.*.target_heart_rate_min' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_heart_rate_max' => 'nullable|integer|min:0',
+            'sections.*.blocks.*.exercises.*.target_power' => 'nullable|integer|min:0',
+        ];
     }
 }

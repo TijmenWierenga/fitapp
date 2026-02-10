@@ -122,7 +122,7 @@ class WorkoutSchemaBuilder
             'rest_after' => $this->schema->integer()->description('Rest after exercise in seconds (strength only)')->nullable(),
 
             // Cardio fields
-            'target_distance' => $this->schema->number()->description('Target distance in kilometers (cardio only)')->nullable(),
+            'target_distance' => $this->schema->number()->description('Target distance in meters (cardio only)')->nullable(),
             'target_pace_min' => $this->schema->integer()->description('Minimum pace in seconds per kilometer (cardio only)')->nullable(),
             'target_pace_max' => $this->schema->integer()->description('Maximum pace in seconds per kilometer (cardio only)')->nullable(),
             'target_heart_rate_zone' => $this->schema->integer()->description('Target heart rate zone, 1–5 (cardio only)')->nullable(),

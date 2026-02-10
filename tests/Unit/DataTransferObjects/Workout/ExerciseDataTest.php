@@ -41,7 +41,7 @@ it('maps cardio type to CardioExerciseData', function () {
         'order' => 0,
         'type' => 'cardio',
         'target_duration' => 1800,
-        'target_distance' => 5.0,
+        'target_distance' => 5000.0,
         'target_pace_min' => 330,
         'target_pace_max' => 360,
         'target_heart_rate_zone' => 3,
@@ -53,7 +53,7 @@ it('maps cardio type to CardioExerciseData', function () {
     expect($exercise->type)->toBe(ExerciseType::Cardio)
         ->and($exercise->exerciseable)->toBeInstanceOf(CardioExerciseData::class)
         ->and($exercise->exerciseable->targetDuration)->toBe(1800)
-        ->and($exercise->exerciseable->targetDistance)->toBe(5.0)
+        ->and($exercise->exerciseable->targetDistance)->toBe(5000.0)
         ->and($exercise->exerciseable->targetPaceMin)->toBe(330)
         ->and($exercise->exerciseable->targetPaceMax)->toBe(360)
         ->and($exercise->exerciseable->targetHeartRateZone)->toBe(3)

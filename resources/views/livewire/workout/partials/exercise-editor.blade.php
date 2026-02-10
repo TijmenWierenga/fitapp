@@ -47,7 +47,7 @@
         @elseif($exercise['type'] === 'cardio')
             @if($exercise['target_duration'] || $exercise['target_distance'])
                 <flux:text class="text-xs text-zinc-400 whitespace-nowrap">
-                    @if($exercise['target_distance']) {{ $exercise['target_distance'] }}km @endif
+                    @if($exercise['target_distance']) {{ $exercise['target_distance'] }}m @endif
                     @if($exercise['target_duration']) {{ gmdate('H:i:s', $exercise['target_duration']) }} @endif
                 </flux:text>
             @endif

@@ -57,13 +57,19 @@ class WorkoutDisplayFormatter
         return TimeConverter::format($seconds);
     }
 
-    public static function distance(?int $meters): ?string
+    public static function distance(float|string|null $meters): ?string
     {
-        if ($meters === null || $meters <= 0) {
+        if ($meters === null) {
             return null;
         }
 
-        return DistanceConverter::format($meters);
+        $value = (int) $meters;
+
+        if ($value <= 0) {
+            return null;
+        }
+
+        return DistanceConverter::format($value);
     }
 
     public static function paceRange(?int $min, ?int $max): ?string

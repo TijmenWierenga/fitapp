@@ -278,7 +278,7 @@ class Builder extends Component
                 'target_tempo' => null,
                 'rest_after' => null,
                 'target_duration' => $exerciseable->target_duration,
-                'target_distance' => $exerciseable->target_distance,
+                'target_distance' => $exerciseable->target_distance !== null ? (int) $exerciseable->target_distance : null,
                 'target_pace_min' => $exerciseable->target_pace_min,
                 'target_pace_max' => $exerciseable->target_pace_max,
                 'target_heart_rate_zone' => $exerciseable->target_heart_rate_zone,

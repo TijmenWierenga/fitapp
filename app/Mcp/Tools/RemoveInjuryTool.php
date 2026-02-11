@@ -2,9 +2,7 @@
 
 namespace App\Mcp\Tools;
 
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Support\Facades\Gate;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
@@ -38,12 +36,6 @@ class RemoveInjuryTool extends Tool
 
         if (! $injury) {
             return Response::error('Injury not found or does not belong to this user.');
-        }
-
-        try {
-            Gate::forUser($user)->authorize('delete', $injury);
-        } catch (AuthorizationException) {
-            return Response::error('You are not authorized to remove this injury.');
         }
 
         $injuryData = [

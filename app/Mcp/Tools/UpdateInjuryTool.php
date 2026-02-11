@@ -5,9 +5,7 @@ namespace App\Mcp\Tools;
 use App\Enums\BodyPart;
 use App\Enums\InjuryType;
 use Carbon\CarbonImmutable;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -62,12 +60,6 @@ class UpdateInjuryTool extends Tool
 
         if (! $injury) {
             return Response::error('Injury not found or does not belong to this user.');
-        }
-
-        try {
-            Gate::forUser($user)->authorize('update', $injury);
-        } catch (AuthorizationException) {
-            return Response::error('You are not authorized to update this injury.');
         }
 
         $updateData = [];

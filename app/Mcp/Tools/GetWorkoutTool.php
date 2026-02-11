@@ -2,9 +2,7 @@
 
 namespace App\Mcp\Tools;
 
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Support\Facades\Gate;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
@@ -34,12 +32,6 @@ class GetWorkoutTool extends Tool
         $workout = $user->workouts()->find($validated['workout_id']);
 
         if (! $workout) {
-            return Response::error('Workout not found or access denied');
-        }
-
-        try {
-            Gate::forUser($user)->authorize('view', $workout);
-        } catch (AuthorizationException) {
             return Response::error('Workout not found or access denied');
         }
 

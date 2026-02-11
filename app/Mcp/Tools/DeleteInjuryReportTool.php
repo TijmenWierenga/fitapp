@@ -3,9 +3,7 @@
 namespace App\Mcp\Tools;
 
 use App\Models\InjuryReport;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Support\Facades\Gate;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
@@ -36,9 +34,7 @@ class DeleteInjuryReportTool extends Tool
             return Response::error('Injury report not found.');
         }
 
-        try {
-            Gate::forUser($user)->authorize('delete', $report);
-        } catch (AuthorizationException) {
+        if ($user->cannot('delete', $report)) {
             return Response::error('You are not authorized to delete this report.');
         }
 

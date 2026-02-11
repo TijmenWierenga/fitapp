@@ -46,10 +46,6 @@ class AddInjuryReportTool extends Tool
             return Response::error('Injury not found or does not belong to this user.');
         }
 
-        if ($user->id !== $injury->user_id) {
-            return Response::error('You are not authorized to add reports to this injury.');
-        }
-
         $report = $injury->injuryReports()->create([
             'user_id' => $user->id,
             'type' => InjuryReportType::from($validated['type']),

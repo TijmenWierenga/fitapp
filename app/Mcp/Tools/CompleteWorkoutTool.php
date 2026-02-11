@@ -3,9 +3,7 @@
 namespace App\Mcp\Tools;
 
 use App\Models\Workout;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Support\Facades\Gate;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
@@ -57,9 +55,7 @@ class CompleteWorkoutTool extends Tool
             return Response::error('Workout not found or access denied');
         }
 
-        try {
-            Gate::forUser($user)->authorize('complete', $workout);
-        } catch (AuthorizationException) {
+        if ($user->cannot('complete', $workout)) {
             return Response::error('Workout is already completed');
         }
 

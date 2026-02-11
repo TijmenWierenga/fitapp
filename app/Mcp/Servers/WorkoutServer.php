@@ -41,6 +41,11 @@ class WorkoutServer extends Server
     protected string $version = '1.0.0';
 
     /**
+     * The default number of items per page when listing tools, resources, or prompts.
+     */
+    public int $defaultPaginationLength = 50;
+
+    /**
      * The MCP server's instructions for the LLM.
      */
     protected string $instructions = <<<'MARKDOWN'

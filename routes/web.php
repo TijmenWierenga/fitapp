@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\GetStarted;
+use App\Livewire\Injury\Reports as InjuryReports;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\FitnessProfile;
 use App\Livewire\Settings\Password;
@@ -56,11 +57,14 @@ Route::middleware(['auth'])->group(function () {
         ->name('two-factor.show');
 
     Route::get('settings/fitness-profile', FitnessProfile::class)->name('fitness-profile.edit');
+
+    Route::get('injuries/{injury}/reports', InjuryReports::class)->name('injuries.reports');
 });
 
 if (app()->environment('local')) {
     Route::get('login/as/{user}', function (\App\Models\User $user) {
         auth()->login($user);
+
         return redirect()->route('dashboard');
     });
 }

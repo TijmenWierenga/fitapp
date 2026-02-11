@@ -1,56 +1,38 @@
 <?php
 
-namespace App\Mcp\Resources;
+namespace App\Mcp\Tools;
 
 use App\Models\Injury;
-use App\Models\User;
-use Laravel\Mcp\Enums\Role;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Annotations\Audience;
-use Laravel\Mcp\Server\Annotations\Priority;
-use Laravel\Mcp\Server\Resource;
+use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
-#[Audience(Role::Assistant)]
-#[Priority(0.8)]
-class UserInjuriesResource extends Resource
+#[IsReadOnly]
+class GetInjuriesTool extends Tool
 {
     /**
-     * The resource URI.
-     */
-    protected string $uri = 'user://injuries';
-
-    /**
-     * The resource's description.
+     * The tool's description.
      */
     protected string $description = <<<'MARKDOWN'
-        Read-only injury information including active and past injuries with body parts, injury types, dates, and notes.
-
-        Use URI: user://injuries
+        Get the authenticated user's injuries including active and past injuries with body parts, injury types, dates, notes, and recent reports.
     MARKDOWN;
 
     /**
-     * Handle the resource request.
+     * Handle the tool request.
      */
     public function handle(Request $request): Response
     {
         $user = $request->user();
         $user->load(['injuries.injuryReports' => fn ($query) => $query->latest()->limit(3)]);
 
-        $content = $this->buildInjuriesContent($user);
-
-        return Response::text($content);
-    }
-
-    protected function buildInjuriesContent(User $user): string
-    {
-        $activeInjuries = $user->injuries->filter(fn (Injury $injury) => $injury->is_active);
-        $resolvedInjuries = $user->injuries->filter(fn (Injury $injury) => ! $injury->is_active);
+        $activeInjuries = $user->injuries->filter(fn (Injury $injury): bool => $injury->is_active);
+        $resolvedInjuries = $user->injuries->filter(fn (Injury $injury): bool => ! $injury->is_active);
 
         $content = "# Injuries & Limitations\n\n";
 
         if ($activeInjuries->isEmpty() && $resolvedInjuries->isEmpty()) {
-            return $content."*No injuries recorded.*\n\nUse the `add-injury` tool to track current or past injuries.\n";
+            return Response::text($content."*No injuries recorded.*\n\nUse the `add-injury` tool to track current or past injuries.\n");
         }
 
         if ($activeInjuries->isNotEmpty()) {
@@ -67,7 +49,7 @@ class UserInjuriesResource extends Resource
             }
         }
 
-        return $content;
+        return Response::text($content);
     }
 
     protected function formatInjury(Injury $injury): string

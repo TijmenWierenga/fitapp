@@ -231,3 +231,8 @@ class CreateWorkoutPlan
 - Accept all context as explicit parameters to `execute()` - no hidden dependencies on request, session, or auth
 - Never perform authorization - that belongs in the transport layer (controller, Livewire component, command)
 - Should be executable from any context: Livewire views, controllers, CLI commands, Tinker, or queued jobs
+
+## Database Safety
+
+- **Never** run `migrate:fresh` or `migrate:reset` without explicit permission — it destroys local data.
+- Use `--env=testing` for destructive migration commands: `php artisan migrate:fresh --env=testing`

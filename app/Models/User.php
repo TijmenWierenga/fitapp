@@ -100,6 +100,14 @@ class User extends Authenticatable implements OAuthenticatable
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<InjuryReport, $this>
+     */
+    public function injuryReports(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(InjuryReport::class);
+    }
+
+    /**
      * Get the user's timezone as a DateTimeZone object.
      * Falls back to UTC if no timezone is set.
      */

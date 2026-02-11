@@ -126,6 +126,12 @@
                                             <flux:button
                                                 variant="ghost"
                                                 size="sm"
+                                                icon="document-text"
+                                                :href="route('injuries.reports', $injury)"
+                                            />
+                                            <flux:button
+                                                variant="ghost"
+                                                size="sm"
                                                 icon="pencil"
                                                 wire:click="openInjuryModal({{ $injury->id }})"
                                             />

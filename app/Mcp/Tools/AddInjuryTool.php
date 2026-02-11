@@ -9,6 +9,7 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 
 class AddInjuryTool extends Tool
@@ -36,7 +37,7 @@ class AddInjuryTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
             'injury_type' => ['required', Rule::enum(InjuryType::class)],
@@ -60,7 +61,7 @@ class AddInjuryTool extends Tool
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        return Response::text(json_encode([
+        return Response::structured([
             'success' => true,
             'injury' => [
                 'id' => $injury->id,
@@ -75,7 +76,7 @@ class AddInjuryTool extends Tool
                 'notes' => $injury->notes,
             ],
             'message' => 'Injury added successfully',
-        ]));
+        ]);
     }
 
     /**

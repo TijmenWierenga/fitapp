@@ -9,6 +9,7 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
 
@@ -40,7 +41,7 @@ class UpdateInjuryTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
             'injury_id' => 'required|integer',
@@ -96,7 +97,7 @@ class UpdateInjuryTool extends Tool
 
         $injury->update($updateData);
 
-        return Response::text(json_encode([
+        return Response::structured([
             'success' => true,
             'injury' => [
                 'id' => $injury->id,
@@ -111,7 +112,7 @@ class UpdateInjuryTool extends Tool
                 'notes' => $injury->notes,
             ],
             'message' => 'Injury updated successfully',
-        ]));
+        ]);
     }
 
     /**

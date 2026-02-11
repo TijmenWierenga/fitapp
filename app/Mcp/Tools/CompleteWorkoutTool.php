@@ -6,6 +6,7 @@ use App\Models\Workout;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 
 class CompleteWorkoutTool extends Tool
@@ -34,7 +35,7 @@ class CompleteWorkoutTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
             'workout_id' => 'required|integer',
@@ -62,7 +63,7 @@ class CompleteWorkoutTool extends Tool
         $workout->markAsCompleted($validated['rpe'], $validated['feeling']);
         $workout->refresh();
 
-        return Response::text(json_encode([
+        return Response::structured([
             'success' => true,
             'workout' => [
                 'id' => $workout->id,
@@ -73,7 +74,7 @@ class CompleteWorkoutTool extends Tool
                 'feeling' => $workout->feeling,
             ],
             'message' => 'Workout completed successfully',
-        ]));
+        ]);
     }
 
     /**

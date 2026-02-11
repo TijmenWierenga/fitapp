@@ -12,6 +12,7 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 
 class CreateWorkoutTool extends Tool
@@ -55,7 +56,7 @@ class CreateWorkoutTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -129,11 +130,11 @@ class CreateWorkoutTool extends Tool
             ]);
         }
 
-        return Response::text(json_encode([
+        return Response::structured([
             'success' => true,
             'workout' => WorkoutResponseFormatter::format($workout, $user),
             'message' => 'Workout created successfully',
-        ]));
+        ]);
     }
 
     /**

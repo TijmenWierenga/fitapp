@@ -5,6 +5,7 @@ namespace App\Mcp\Tools;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
 
@@ -23,7 +24,7 @@ class DeleteWorkoutTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
             'workout_id' => 'required|integer',
@@ -47,10 +48,10 @@ class DeleteWorkoutTool extends Tool
 
         $workout->delete();
 
-        return Response::text(json_encode([
+        return Response::structured([
             'success' => true,
             'message' => 'Workout deleted successfully',
-        ]));
+        ]);
     }
 
     /**

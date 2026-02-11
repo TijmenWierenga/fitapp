@@ -5,6 +5,7 @@ namespace App\Mcp\Tools;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
 
@@ -22,7 +23,7 @@ class RemoveInjuryTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
             'injury_id' => 'required|integer|exists:injuries,id',
@@ -46,11 +47,11 @@ class RemoveInjuryTool extends Tool
 
         $injury->delete();
 
-        return Response::text(json_encode([
+        return Response::structured([
             'success' => true,
             'removed_injury' => $injuryData,
             'message' => 'Injury removed successfully',
-        ]));
+        ]);
     }
 
     /**

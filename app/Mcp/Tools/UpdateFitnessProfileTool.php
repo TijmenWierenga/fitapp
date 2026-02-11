@@ -7,6 +7,7 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
 
@@ -30,7 +31,7 @@ class UpdateFitnessProfileTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
             'primary_goal' => ['required', Rule::enum(FitnessGoal::class)],
@@ -59,7 +60,7 @@ class UpdateFitnessProfileTool extends Tool
             ]
         );
 
-        return Response::text(json_encode([
+        return Response::structured([
             'success' => true,
             'profile' => [
                 'id' => $profile->id,
@@ -70,7 +71,7 @@ class UpdateFitnessProfileTool extends Tool
                 'minutes_per_session' => $profile->minutes_per_session,
             ],
             'message' => 'Fitness profile updated successfully',
-        ]));
+        ]);
     }
 
     /**

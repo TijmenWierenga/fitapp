@@ -11,6 +11,7 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
 
@@ -50,7 +51,7 @@ class UpdateWorkoutTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
             'workout_id' => 'required|integer',
@@ -139,11 +140,11 @@ class UpdateWorkoutTool extends Tool
             $this->updateStructuredWorkout->execute($workout, $sections);
         }
 
-        return Response::text(json_encode([
+        return Response::structured([
             'success' => true,
             'workout' => WorkoutResponseFormatter::format($workout->fresh(), $user),
             'message' => 'Workout updated successfully',
-        ]));
+        ]);
     }
 
     /**

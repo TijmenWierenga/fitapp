@@ -20,7 +20,7 @@ it('renders for the injury owner', function () {
         ->assertOk();
 });
 
-it('aborts for non-owner', function () {
+it('forbids creating a report for another user\'s injury', function () {
     $user = User::factory()->create();
     $other = User::factory()->create();
     $injury = Injury::factory()->for($other)->create();
@@ -28,7 +28,27 @@ it('aborts for non-owner', function () {
     actingAs($user);
 
     Livewire::test(Reports::class, ['injury' => $injury])
+        ->call('openReportModal')
+        ->set('reportType', 'self_reporting')
+        ->set('reportContent', 'Test content')
+        ->set('reportedAt', '2026-02-04')
+        ->call('saveReport')
         ->assertForbidden();
+});
+
+it('forbids deleting a report on another user\'s injury', function () {
+    $owner = User::factory()->create();
+    $injury = Injury::factory()->for($owner)->create();
+    $report = InjuryReport::factory()->for($injury)->for($owner)->create();
+
+    $stranger = User::factory()->create();
+    actingAs($stranger);
+
+    Livewire::test(Reports::class, ['injury' => $injury])
+        ->call('deleteReport', $report->id)
+        ->assertForbidden();
+
+    $this->assertModelExists($report->fresh());
 });
 
 it('displays existing reports', function () {

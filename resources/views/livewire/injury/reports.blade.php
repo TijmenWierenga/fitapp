@@ -55,11 +55,7 @@
                             />
                         </div>
                         <div class="prose prose-sm prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400">
-                            @if (str_starts_with(trim($report->content), '<'))
-                                {!! Str::markdown($report->content, ['html_input' => 'allow']) !!}
-                            @else
-                                {!! Str::markdown($report->content, ['html_input' => 'escape']) !!}
-                            @endif
+                            {!! Str::markdown($report->content, ['html_input' => 'escape']) !!}
                         </div>
                     </flux:card>
                 @endforeach

@@ -117,32 +117,6 @@ if (auth()->user()->id !== $post->user_id) {
 }
 ```
 
-### Authorization in Livewire
-Use `$this->authorize()` with policies in Livewire action methods. Use `#[CurrentUser]` for injecting the authenticated user instead of the `Auth` facade.
-
-```php
-// Good
-use Illuminate\Container\Attributes\CurrentUser;
-
-public function saveReport(#[CurrentUser] User $user): void
-{
-    $this->authorize('create', [InjuryReport::class, $this->injury]);
-    // ...
-}
-
-// Bad
-public function saveReport(): void
-{
-    if (Auth::id() !== $this->injury->user_id) {
-        return;
-    }
-    // ...
-}
-```
-
-### Livewire Mount Methods
-Omit `mount()` when it only assigns typed public properties — Livewire handles this automatically.
-
 ## Local Development
 
 ### Quick Authentication

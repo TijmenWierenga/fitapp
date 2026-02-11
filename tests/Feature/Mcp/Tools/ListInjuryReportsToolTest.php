@@ -16,7 +16,7 @@ it('lists reports for an injury', function () {
     ]);
 
     $response->assertOk()
-        ->assertSee('"total":3');
+        ->assertSee('"total": 3');
 });
 
 it('filters reports by type', function () {
@@ -31,7 +31,7 @@ it('filters reports by type', function () {
     ]);
 
     $response->assertOk()
-        ->assertSee('"total":2');
+        ->assertSee('"total": 2');
 });
 
 it('respects limit parameter', function () {
@@ -45,7 +45,7 @@ it('respects limit parameter', function () {
     ]);
 
     $response->assertOk()
-        ->assertSee('"total":2');
+        ->assertSee('"total": 2');
 });
 
 it('returns empty list when no reports exist', function () {
@@ -57,7 +57,7 @@ it('returns empty list when no reports exist', function () {
     ]);
 
     $response->assertOk()
-        ->assertSee('"total":0');
+        ->assertSee('"total": 0');
 });
 
 it('fails when injury does not belong to user', function () {

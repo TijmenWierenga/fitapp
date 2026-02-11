@@ -8,6 +8,7 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 
 class AddInjuryReportTool extends Tool
@@ -27,7 +28,7 @@ class AddInjuryReportTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
             'injury_id' => 'required|integer',
@@ -53,7 +54,7 @@ class AddInjuryReportTool extends Tool
             'reported_at' => isset($validated['reported_at']) ? CarbonImmutable::parse($validated['reported_at']) : CarbonImmutable::today(),
         ]);
 
-        return Response::text(json_encode([
+        return Response::structured([
             'success' => true,
             'report' => [
                 'id' => $report->id,
@@ -65,7 +66,7 @@ class AddInjuryReportTool extends Tool
                 'created_at' => $report->created_at->toIso8601String(),
             ],
             'message' => 'Injury report added successfully',
-        ]));
+        ]);
     }
 
     /**

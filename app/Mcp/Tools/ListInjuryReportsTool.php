@@ -7,6 +7,7 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
@@ -28,7 +29,7 @@ class ListInjuryReportsTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
             'injury_id' => 'required|integer',
@@ -55,7 +56,7 @@ class ListInjuryReportsTool extends Tool
         $limit = $validated['limit'] ?? 20;
         $reports = $query->limit($limit)->get();
 
-        return Response::text(json_encode([
+        return Response::structured([
             'injury_id' => $injury->id,
             'total' => $reports->count(),
             'reports' => $reports->map(fn ($report): array => [
@@ -67,7 +68,7 @@ class ListInjuryReportsTool extends Tool
                 'author' => $report->user->name,
                 'created_at' => $report->created_at->toIso8601String(),
             ])->all(),
-        ]));
+        ]);
     }
 
     /**

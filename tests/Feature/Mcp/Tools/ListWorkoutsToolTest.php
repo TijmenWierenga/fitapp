@@ -12,8 +12,8 @@ it('lists all workouts by default', function () {
     $response = WorkoutServer::actingAs($user)->tool(ListWorkoutsTool::class, []);
 
     $response->assertOk()
-        ->assertSee('"count":3')
-        ->assertSee('"filter":"all"');
+        ->assertSee('"count": 3')
+        ->assertSee('"filter": "all"');
 });
 
 it('lists upcoming workouts only', function () {
@@ -26,8 +26,8 @@ it('lists upcoming workouts only', function () {
     ]);
 
     $response->assertOk()
-        ->assertSee('"count":2')
-        ->assertSee('"filter":"upcoming"');
+        ->assertSee('"count": 2')
+        ->assertSee('"filter": "upcoming"');
 });
 
 it('lists completed workouts only', function () {
@@ -40,8 +40,8 @@ it('lists completed workouts only', function () {
     ]);
 
     $response->assertOk()
-        ->assertSee('"count":3')
-        ->assertSee('"filter":"completed"');
+        ->assertSee('"count": 3')
+        ->assertSee('"filter": "completed"');
 });
 
 it('lists overdue workouts only', function () {
@@ -58,8 +58,8 @@ it('lists overdue workouts only', function () {
     ]);
 
     $response->assertOk()
-        ->assertSee('"count":1')
-        ->assertSee('"filter":"overdue"');
+        ->assertSee('"count": 1')
+        ->assertSee('"filter": "overdue"');
 });
 
 it('respects limit parameter', function () {
@@ -71,7 +71,7 @@ it('respects limit parameter', function () {
     ]);
 
     $response->assertOk()
-        ->assertSee('"count":5');
+        ->assertSee('"count": 5');
 });
 
 it('applies default limit of 20', function () {
@@ -81,7 +81,7 @@ it('applies default limit of 20', function () {
     $response = WorkoutServer::actingAs($user)->tool(ListWorkoutsTool::class, []);
 
     $response->assertOk()
-        ->assertSee('"count":20');
+        ->assertSee('"count": 20');
 });
 
 it('converts dates to user timezone in response', function () {
@@ -102,8 +102,8 @@ it('returns empty list for user with no workouts', function () {
     $response = WorkoutServer::actingAs($user)->tool(ListWorkoutsTool::class, []);
 
     $response->assertOk()
-        ->assertSee('"count":0')
-        ->assertSee('"workouts":[]');
+        ->assertSee('"count": 0')
+        ->assertSee('"workouts": []');
 });
 
 it('fails with invalid filter', function () {

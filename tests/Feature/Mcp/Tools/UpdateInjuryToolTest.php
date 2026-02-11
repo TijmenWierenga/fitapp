@@ -93,7 +93,7 @@ it('marks injury as resolved by setting ended_at', function () {
 
     $response->assertOk()
         ->assertSee('2025-06-01')
-        ->assertSee('"is_active":false');
+        ->assertSee('"is_active": false');
 
     assertDatabaseHas('injuries', [
         'id' => $injury->id,
@@ -111,7 +111,7 @@ it('reopens injury by setting ended_at to null', function () {
     ]);
 
     $response->assertOk()
-        ->assertSee('"is_active":true');
+        ->assertSee('"is_active": true');
 
     assertDatabaseHas('injuries', [
         'id' => $injury->id,

@@ -6,6 +6,7 @@ use App\Models\Workout;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
@@ -30,7 +31,7 @@ class ListWorkoutsTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
             'filter' => 'nullable|in:upcoming,completed,overdue,all',
@@ -64,12 +65,12 @@ class ListWorkoutsTool extends Tool
             'sections_count' => $workout->sections_count,
         ]);
 
-        return Response::text(json_encode([
+        return Response::structured([
             'success' => true,
             'filter' => $filter,
             'count' => $workoutData->count(),
             'workouts' => $workoutData->toArray(),
-        ]));
+        ]);
     }
 
     /**

@@ -132,7 +132,7 @@ describe('AddInjuryTool', function () {
         ]);
 
         $response->assertOk()
-            ->assertSee('"is_active":false');
+            ->assertSee('"is_active": false');
 
         $injury = $user->injuries()->first();
         expect($injury->ended_at->toDateString())->toBe('2024-01-01');

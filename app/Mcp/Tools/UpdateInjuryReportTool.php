@@ -6,6 +6,7 @@ use App\Models\InjuryReport;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
 
@@ -20,7 +21,7 @@ class UpdateInjuryReportTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
             'report_id' => 'required|integer',
@@ -47,7 +48,7 @@ class UpdateInjuryReportTool extends Tool
 
         $report->update($updateData);
 
-        return Response::text(json_encode([
+        return Response::structured([
             'success' => true,
             'report' => [
                 'id' => $report->id,
@@ -60,7 +61,7 @@ class UpdateInjuryReportTool extends Tool
                 'updated_at' => $report->updated_at->toIso8601String(),
             ],
             'message' => 'Injury report updated successfully',
-        ]));
+        ]);
     }
 
     /**

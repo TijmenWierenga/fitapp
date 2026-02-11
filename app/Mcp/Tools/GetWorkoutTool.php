@@ -5,6 +5,7 @@ namespace App\Mcp\Tools;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
@@ -21,7 +22,7 @@ class GetWorkoutTool extends Tool
     /**
      * Handle the tool request.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
             'workout_id' => 'required|integer',
@@ -35,10 +36,10 @@ class GetWorkoutTool extends Tool
             return Response::error('Workout not found or access denied');
         }
 
-        return Response::text(json_encode([
+        return Response::structured([
             'success' => true,
             'workout' => WorkoutResponseFormatter::format($workout, $user),
-        ]));
+        ]);
     }
 
     public function __construct(

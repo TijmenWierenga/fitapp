@@ -6,6 +6,7 @@ namespace App\Models;
 use Carbon\CarbonImmutable;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -16,7 +17,7 @@ use Laravel\Passport\HasApiTokens;
 class User extends Authenticatable implements OAuthenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use Authorizable, HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -97,6 +98,14 @@ class User extends Authenticatable implements OAuthenticatable
     public function activeInjuries(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->injuries()->active();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<InjuryReport, $this>
+     */
+    public function injuryReports(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(InjuryReport::class);
     }
 
     /**

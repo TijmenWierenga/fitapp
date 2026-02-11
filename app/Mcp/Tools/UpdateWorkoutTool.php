@@ -7,9 +7,7 @@ use App\DataTransferObjects\Workout\SectionData;
 use App\Enums\Workout\Activity;
 use App\Enums\Workout\BlockType;
 use Carbon\CarbonImmutable;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -110,9 +108,7 @@ class UpdateWorkoutTool extends Tool
             return Response::error('Workout not found or access denied');
         }
 
-        try {
-            Gate::forUser($user)->authorize('update', $workout);
-        } catch (AuthorizationException) {
+        if ($user->cannot('update', $workout)) {
             return Response::error('Cannot update completed workouts');
         }
 

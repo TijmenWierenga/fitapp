@@ -15,8 +15,9 @@
     "skills": [
         "mcp-development",
         "fluxui-development",
-        "livewire-development",
         "pest-testing",
-        "tailwindcss-development"
+        "tailwindcss-development",
+        "developing-with-fortify",
+        "livewire-development"
     ]
 }

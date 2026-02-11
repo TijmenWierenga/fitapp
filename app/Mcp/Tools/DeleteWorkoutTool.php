@@ -2,9 +2,7 @@
 
 namespace App\Mcp\Tools;
 
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Support\Facades\Gate;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
@@ -39,9 +37,7 @@ class DeleteWorkoutTool extends Tool
             return Response::error('Workout not found or access denied');
         }
 
-        try {
-            Gate::forUser($user)->authorize('delete', $workout);
-        } catch (AuthorizationException) {
+        if ($user->cannot('delete', $workout)) {
             if ($workout->isCompleted()) {
                 return Response::error('Cannot delete completed workouts');
             }

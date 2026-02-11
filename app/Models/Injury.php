@@ -66,6 +66,14 @@ class Injury extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<InjuryReport, $this>
+     */
+    public function injuryReports(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(InjuryReport::class);
+    }
+
+    /**
      * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
      */
     public function scopeActive(\Illuminate\Database\Eloquent\Builder $query): void

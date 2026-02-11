@@ -7,15 +7,23 @@ use App\Mcp\Resources\UserFitnessProfileResource;
 use App\Mcp\Resources\UserInjuriesResource;
 use App\Mcp\Resources\UserProfileResource;
 use App\Mcp\Resources\WorkoutScheduleResource;
+use App\Mcp\Tools\AddInjuryReportTool;
 use App\Mcp\Tools\AddInjuryTool;
 use App\Mcp\Tools\CompleteWorkoutTool;
 use App\Mcp\Tools\CreateWorkoutTool;
+use App\Mcp\Tools\DeleteInjuryReportTool;
 use App\Mcp\Tools\DeleteWorkoutTool;
+use App\Mcp\Tools\GetFitnessProfileTool;
+use App\Mcp\Tools\GetInjuriesTool;
+use App\Mcp\Tools\GetUserProfileTool;
+use App\Mcp\Tools\GetWorkoutScheduleTool;
 use App\Mcp\Tools\GetWorkoutTool;
+use App\Mcp\Tools\ListInjuryReportsTool;
 use App\Mcp\Tools\ListWorkoutsTool;
 use App\Mcp\Tools\PingTool;
 use App\Mcp\Tools\RemoveInjuryTool;
 use App\Mcp\Tools\UpdateFitnessProfileTool;
+use App\Mcp\Tools\UpdateInjuryReportTool;
 use App\Mcp\Tools\UpdateInjuryTool;
 use App\Mcp\Tools\UpdateWorkoutTool;
 use Laravel\Mcp\Server;
@@ -145,10 +153,18 @@ class WorkoutServer extends Server
         CompleteWorkoutTool::class,
         ListWorkoutsTool::class,
         GetWorkoutTool::class,
+        GetUserProfileTool::class,
+        GetFitnessProfileTool::class,
+        GetInjuriesTool::class,
+        GetWorkoutScheduleTool::class,
         UpdateFitnessProfileTool::class,
         AddInjuryTool::class,
         UpdateInjuryTool::class,
         RemoveInjuryTool::class,
+        AddInjuryReportTool::class,
+        ListInjuryReportsTool::class,
+        UpdateInjuryReportTool::class,
+        DeleteInjuryReportTool::class,
     ];
 
     /**

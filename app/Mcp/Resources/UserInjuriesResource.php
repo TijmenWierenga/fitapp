@@ -35,7 +35,7 @@ class UserInjuriesResource extends Resource
     public function handle(Request $request): Response
     {
         $user = $request->user();
-        $user->load('injuries');
+        $user->load(['injuries.injuryReports' => fn ($query) => $query->latest()->limit(3)]);
 
         $content = $this->buildInjuriesContent($user);
 
@@ -72,10 +72,17 @@ class UserInjuriesResource extends Resource
 
     protected function formatInjury(Injury $injury): string
     {
-        $status = $injury->is_active ? 'Active' : 'Resolved';
         $endDate = $injury->ended_at ? " - {$injury->ended_at->toDateString()}" : ' - Present';
         $notes = $injury->notes ? " ({$injury->notes})" : '';
 
-        return "- **{$injury->body_part->label()}** [{$injury->injury_type->label()}]: {$injury->started_at->toDateString()}{$endDate}{$notes}\n";
+        $line = "- **{$injury->body_part->label()}** [{$injury->injury_type->label()}]: {$injury->started_at->toDateString()}{$endDate}{$notes}\n";
+
+        if ($injury->injuryReports->isNotEmpty()) {
+            foreach ($injury->injuryReports as $report) {
+                $line .= "  - [{$report->type->label()}] {$report->reported_at->toDateString()}: {$report->content}\n";
+            }
+        }
+
+        return $line;
     }
 }

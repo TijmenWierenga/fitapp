@@ -185,6 +185,9 @@ class User extends Model
 }
 ```
 
+### Livewire Authorization Placement
+Livewire components should authorize at the action level (e.g. `saveReport`, `deleteReport`), not in `mount()`. This keeps authorization close to the mutation and leverages policies consistently.
+
 ### Action Classes
 
 Use action classes to encapsulate business logic that's reusable across transport layers.
@@ -231,3 +234,12 @@ class CreateWorkoutPlan
 - Accept all context as explicit parameters to `execute()` - no hidden dependencies on request, session, or auth
 - Never perform authorization - that belongs in the transport layer (controller, Livewire component, command)
 - Should be executable from any context: Livewire views, controllers, CLI commands, Tinker, or queued jobs
+
+## Guideline Self-Improvement
+
+When you discover a recurring pattern, convention, or gotcha that isn't documented here, propose adding it to the relevant section in `.ai/guidelines/project-guidelines.md`. Only propose additions that are confirmed across multiple files or interactions — not one-off observations. Always explain the proposed change before making it so the user can approve.
+
+## Database Safety
+
+- **Never** run `migrate:fresh` or `migrate:reset` without explicit permission — it destroys local data.
+- Use `--env=testing` for destructive migration commands: `php artisan migrate:fresh --env=testing`

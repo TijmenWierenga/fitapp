@@ -126,6 +126,34 @@ if (auth()->user()->id !== $post->user_id) {
 }
 ```
 
+### Authorization in Livewire
+
+Use `$this->authorize()` with policies in Livewire action methods. Use `#[CurrentUser]` for injecting the authenticated user instead of the `Auth` facade.
+
+```php
+// Good
+use Illuminate\Container\Attributes\CurrentUser;
+
+public function saveReport(#[CurrentUser] User $user): void
+{
+    $this->authorize('create', [InjuryReport::class, $this->injury]);
+    // ...
+}
+
+// Bad
+public function saveReport(): void
+{
+    if (Auth::id() !== $this->injury->user_id) {
+        return;
+    }
+    // ...
+}
+```
+
+### Livewire Mount Methods
+
+Omit `mount()` when it only assigns typed public properties — Livewire handles this automatically.
+
 ## Local Development
 
 ### Quick Authentication
@@ -144,7 +172,7 @@ All values are stored in their base unit in the database:
 | Measurement | Storage Unit | DB Column Type |
 |---|---|---|
 | Duration / time | Seconds | `integer` |
-| Distance | Kilometers | `decimal(10, 2)` |
+| Distance | Meters | `decimal(10, 2)` |
 | Weight | Kilograms | `decimal(8, 2)` |
 | Pace | Seconds per km | `integer` |
 | Heart rate | Beats per minute (bpm) | `integer` |
@@ -196,6 +224,10 @@ class User extends Model
 }
 ```
 
+### Livewire Authorization Placement
+
+Livewire components should authorize at the action level (e.g. `saveReport`, `deleteReport`), not in `mount()`. This keeps authorization close to the mutation and leverages policies consistently.
+
 ### Action Classes
 
 Use action classes to encapsulate business logic that's reusable across transport layers.
@@ -243,6 +275,15 @@ class CreateWorkoutPlan
 - Never perform authorization - that belongs in the transport layer (controller, Livewire component, command)
 - Should be executable from any context: Livewire views, controllers, CLI commands, Tinker, or queued jobs
 
+## Guideline Self-Improvement
+
+When you discover a recurring pattern, convention, or gotcha that isn't documented here, propose adding it to the relevant section in `.ai/guidelines/project-guidelines.md`. Only propose additions that are confirmed across multiple files or interactions — not one-off observations. Always explain the proposed change before making it so the user can approve.
+
+## Database Safety
+
+- **Never** run `migrate:fresh` or `migrate:reset` without explicit permission — it destroys local data.
+- Use `--env=testing` for destructive migration commands: `php artisan migrate:fresh --env=testing`
+
 === foundation rules ===
 
 # Laravel Boost Guidelines
@@ -275,9 +316,10 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 - `mcp-development` — Develops MCP servers, tools, resources, and prompts. Activates when creating MCP tools, resources, or prompts; setting up AI integrations; debugging MCP connections; working with routes/ai.php; or when the user mentions MCP, Model Context Protocol, AI tools, AI server, or building tools for AI assistants.
 - `fluxui-development` — Develops UIs with Flux UI Pro components. Activates when creating buttons, forms, modals, inputs, tables, charts, date pickers, or UI components; replacing HTML elements with Flux; working with flux: components; or when the user mentions Flux, component library, UI components, form fields, or asks about available Flux components.
-- `livewire-development` — Develops reactive Livewire 4 components. Activates when creating, updating, or modifying Livewire components; working with wire:model, wire:click, wire:loading, or any wire: directives; adding real-time updates, loading states, or reactivity; debugging component behavior; writing Livewire tests; or when the user mentions Livewire, component, counter, or reactive UI.
 - `pest-testing` — Tests applications using the Pest 4 PHP framework. Activates when writing tests, creating unit or feature tests, adding assertions, testing Livewire components, browser testing, debugging test failures, working with datasets or mocking; or when the user mentions test, spec, TDD, expects, assertion, coverage, or needs to verify functionality works.
 - `tailwindcss-development` — Styles applications using Tailwind CSS v4 utilities. Activates when adding styles, restyling components, working with gradients, spacing, layout, flex, grid, responsive design, dark mode, colors, typography, or borders; or when the user mentions CSS, styling, classes, Tailwind, restyle, hero section, cards, buttons, or any visual/UI changes.
+- `developing-with-fortify` — Laravel Fortify headless authentication backend development. Activate when implementing authentication features including login, registration, password reset, email verification, two-factor authentication (2FA/TOTP), profile updates, headless auth, authentication scaffolding, or auth guards in Laravel applications.
+- `livewire-development` — Develops reactive Livewire 4 components. Activates when creating, updating, or modifying Livewire components; working with wire:model, wire:click, wire:loading, or any wire: directives; adding real-time updates, loading states, or reactivity; debugging component behavior; writing Livewire tests; or when the user mentions Livewire, component, counter, or reactive UI.
 
 ## Conventions
 
@@ -324,6 +366,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 - You should use the `tinker` tool when you need to execute PHP to debug code or query Eloquent models directly.
 - Use the `database-query` tool when you only need to read from the database.
+- Use the `database-schema` tool to inspect table structure before writing migrations or models.
 
 ## Reading Browser Logs With the `browser-logs` Tool
 
@@ -354,7 +397,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 ## Constructors
 
 - Use PHP 8 constructor property promotion in `__construct()`.
-    - <code-snippet>public function __construct(public GitHub $github) { }</code-snippet>
+    - `public function __construct(public GitHub $github) { }`
 - Do not allow empty `__construct()` methods with zero parameters unless the constructor is private.
 
 ## Type Declarations
@@ -362,12 +405,13 @@ This project has domain-specific skills available. You MUST activate the relevan
 - Always use explicit return type declarations for methods and functions.
 - Use appropriate PHP type hints for method parameters.
 
-<code-snippet name="Explicit Return Types and Method Params" lang="php">
+<!-- Explicit Return Types and Method Params -->
+```php
 protected function isAccessible(User $user, ?string $path = null): bool
 {
     ...
 }
-</code-snippet>
+```
 
 ## Enums
 
@@ -491,21 +535,12 @@ protected function isAccessible(User $user, ?string $path = null): bool
 - Use `<flux:*>` components when available; they are the recommended way to build Livewire interfaces.
 - IMPORTANT: Activate `fluxui-development` when working with Flux UI components.
 
-=== livewire/core rules ===
-
-# Livewire
-
-- Livewire allows you to build dynamic, reactive interfaces using only PHP — no JavaScript required.
-- Instead of writing frontend code in JavaScript frameworks, you use Alpine.js to build the UI when client-side interactions are required.
-- State lives on the server; the UI reflects it. Validate and authorize in actions (they're like HTTP requests).
-- IMPORTANT: Activate `livewire-development` every time you're working with Livewire-related tasks.
-
 === pint/core rules ===
 
 # Laravel Pint Code Formatter
 
-- You must run `vendor/bin/pint --dirty` before finalizing changes to ensure your code matches the project's expected style.
-- Do not run `vendor/bin/pint --test`, simply run `vendor/bin/pint` to fix any formatting issues.
+- You must run `vendor/bin/pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
+- Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` to fix any formatting issues.
 
 === pest/core rules ===
 
@@ -527,32 +562,9 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 === laravel/fortify rules ===
 
-## Laravel Fortify
+# Laravel Fortify
 
-Fortify is a headless authentication backend that provides authentication routes and controllers for Laravel applications.
-
-**Before implementing any authentication features, use the `search-docs` tool to get the latest docs for that specific feature.**
-
-### Configuration & Setup
-
-- Check `config/fortify.php` to see what's enabled. Use `search-docs` for detailed information on specific features.
-- Enable features by adding them to the `'features' => []` array: `Features::registration()`, `Features::resetPasswords()`, etc.
-- To see the all Fortify registered routes, use the `list-routes` tool with the `only_vendor: true` and `action: "Fortify"` parameters.
-- Fortify includes view routes by default (login, register). Set `'views' => false` in the configuration file to disable them if you're handling views yourself.
-
-### Customization
-
-- Views can be customized in `FortifyServiceProvider`'s `boot()` method using `Fortify::loginView()`, `Fortify::registerView()`, etc.
-- Customize authentication logic with `Fortify::authenticateUsing()` for custom user retrieval / validation.
-- Actions in `app/Actions/Fortify/` handle business logic (user creation, password reset, etc.). They're fully customizable, so you can modify them to change feature behavior.
-
-## Available Features
-
-- `Features::registration()` for user registration.
-- `Features::emailVerification()` to verify new user emails.
-- `Features::twoFactorAuthentication()` for 2FA with QR codes and recovery codes.
-  - Add options: `['confirmPassword' => true, 'confirm' => true]` to require password confirmation and OTP confirmation before enabling 2FA.
-- `Features::updateProfileInformation()` to let users update their profile.
-- `Features::updatePasswords()` to let users change their passwords.
-- `Features::resetPasswords()` for password reset via email.
+- Fortify is a headless authentication backend that provides authentication routes and controllers for Laravel applications.
+- IMPORTANT: Always use the `search-docs` tool for detailed Laravel Fortify patterns and documentation.
+- IMPORTANT: Activate `developing-with-fortify` skill when working with Fortify authentication features.
 </laravel-boost-guidelines>

@@ -13,6 +13,8 @@ it('belongs to a block', function () {
         'exerciseable_id' => $strength->id,
     ]);
 
+    $exercise->load('block');
+
     expect($exercise->block)->toBeInstanceOf(Block::class);
 });
 
@@ -22,6 +24,8 @@ it('morphs to strength exercise', function () {
         'exerciseable_type' => 'strength_exercise',
         'exerciseable_id' => $strength->id,
     ]);
+
+    $exercise->load('exerciseable');
 
     expect($exercise->exerciseable)->toBeInstanceOf(StrengthExercise::class)
         ->and($exercise->exerciseable->target_sets)->toBe(4)
@@ -35,6 +39,8 @@ it('morphs to cardio exercise', function () {
         'exerciseable_id' => $cardio->id,
     ]);
 
+    $exercise->load('exerciseable');
+
     expect($exercise->exerciseable)->toBeInstanceOf(CardioExercise::class)
         ->and($exercise->exerciseable->target_duration)->toBe(1800);
 });
@@ -45,6 +51,8 @@ it('morphs to duration exercise', function () {
         'exerciseable_type' => 'duration_exercise',
         'exerciseable_id' => $duration->id,
     ]);
+
+    $exercise->load('exerciseable');
 
     expect($exercise->exerciseable)->toBeInstanceOf(DurationExercise::class)
         ->and($exercise->exerciseable->target_duration)->toBe(60);

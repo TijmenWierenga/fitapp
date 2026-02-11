@@ -52,5 +52,5 @@ it('preserves the user association when duplicating', function () {
     $newScheduledAt = new DateTime('2026-02-01 10:00:00');
     $duplicatedWorkout = $originalWorkout->duplicate($newScheduledAt);
 
-    expect($duplicatedWorkout->user->id)->toBe($user->id);
+    expect($duplicatedWorkout->user_id)->toBe($user->id);
 });

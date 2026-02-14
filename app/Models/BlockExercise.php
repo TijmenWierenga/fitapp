@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property-read Exercise|null $exercise
+ */
 class BlockExercise extends Model
 {
     /** @use HasFactory<\Database\Factories\BlockExerciseFactory> */
@@ -14,6 +17,7 @@ class BlockExercise extends Model
 
     protected $fillable = [
         'block_id',
+        'exercise_id',
         'name',
         'order',
         'exerciseable_type',
@@ -31,6 +35,14 @@ class BlockExercise extends Model
     public function block(): BelongsTo
     {
         return $this->belongsTo(Block::class);
+    }
+
+    /**
+     * @return BelongsTo<Exercise, $this>
+     */
+    public function exercise(): BelongsTo
+    {
+        return $this->belongsTo(Exercise::class);
     }
 
     /**

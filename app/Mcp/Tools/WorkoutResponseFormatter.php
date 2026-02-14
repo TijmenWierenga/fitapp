@@ -81,6 +81,7 @@ class WorkoutResponseFormatter
             'name' => $exercise->name,
             'order' => $exercise->order,
             'type' => $exercise->exerciseable_type,
+            'exercise_id' => $exercise->exercise_id,
             'notes' => $exercise->notes,
         ];
 

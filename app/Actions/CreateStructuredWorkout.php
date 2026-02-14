@@ -76,6 +76,7 @@ class CreateStructuredWorkout
                     $block->exercises()->create([
                         'name' => $exerciseData->name,
                         'order' => $exerciseData->order,
+                        'exercise_id' => $exerciseData->exerciseId,
                         'exerciseable_type' => $exerciseable->getMorphClass(),
                         'exerciseable_id' => $exerciseable->getKey(),
                         'notes' => $exerciseData->notes,

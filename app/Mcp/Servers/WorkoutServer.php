@@ -16,6 +16,7 @@ use App\Mcp\Tools\DeleteWorkoutTool;
 use App\Mcp\Tools\GetFitnessProfileTool;
 use App\Mcp\Tools\GetInjuriesTool;
 use App\Mcp\Tools\GetUserProfileTool;
+use App\Mcp\Tools\GetWorkloadTool;
 use App\Mcp\Tools\GetWorkoutScheduleTool;
 use App\Mcp\Tools\GetWorkoutTool;
 use App\Mcp\Tools\ListInjuryReportsTool;
@@ -81,6 +82,15 @@ class WorkoutServer extends Server
         ## Workout Notes
 
         Notes support Markdown. Write detailed, actionable notes including: equipment needed, step-by-step phases (warm-up, main work, cool-down), sets/reps/intensity, rest periods, and modifications. Adapt detail level to workout type.
+
+        ## Workload Tracking
+
+        Use the `get-workload` tool to check muscle group load before creating workout plans:
+        - **ACWR zones**: undertraining (<0.8), sweet_spot (0.8–1.3), caution (1.3–1.5), danger (>1.5)
+        - Avoid programming heavy work for muscle groups in caution/danger zones
+        - Prioritize undertrained muscle groups when balancing weekly plans
+        - Cross-reference active injuries with muscle group load — if a muscle group near an injured body part is in caution/danger, flag this to the user
+        - Link exercises to the exercise library (via `exercise_id`) to enable workload tracking
 
         ## Business Rules
 
@@ -161,6 +171,7 @@ class WorkoutServer extends Server
         GetUserProfileTool::class,
         GetFitnessProfileTool::class,
         GetInjuriesTool::class,
+        GetWorkloadTool::class,
         GetWorkoutScheduleTool::class,
         UpdateFitnessProfileTool::class,
         AddInjuryTool::class,

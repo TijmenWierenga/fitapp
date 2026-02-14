@@ -81,6 +81,7 @@ class CreateWorkoutTool extends Tool
             'sections.*.blocks.*.exercises.*.name' => 'required|string|max:255',
             'sections.*.blocks.*.exercises.*.order' => 'required|integer|min:0',
             'sections.*.blocks.*.exercises.*.type' => 'required|in:strength,cardio,duration',
+            'sections.*.blocks.*.exercises.*.exercise_id' => 'nullable|integer|exists:exercises,id',
             'sections.*.blocks.*.exercises.*.notes' => 'nullable|string|max:5000',
             // Strength exercise fields
             'sections.*.blocks.*.exercises.*.target_sets' => ['nullable', 'integer', 'min:1', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],

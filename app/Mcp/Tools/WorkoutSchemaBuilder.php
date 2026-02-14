@@ -64,6 +64,7 @@ class WorkoutSchemaBuilder
             'name' => $this->schema->string()->required(),
             'order' => $this->schema->integer()->required(),
             'type' => $this->schema->string()->required(),
+            'exercise_id' => $this->schema->integer()->nullable(),
             'notes' => $this->schema->string()->nullable(),
             'target_sets' => $this->schema->integer()->nullable(),
             'target_reps_min' => $this->schema->integer()->nullable(),
@@ -125,6 +126,7 @@ class WorkoutSchemaBuilder
             'name' => $this->schema->string()->description('Exercise name (e.g., "Barbell Squat", "Treadmill Run")')->required(),
             'order' => $this->schema->integer()->description('Display order (0-based)')->required(),
             'type' => $this->schema->string()->enum(['strength', 'cardio', 'duration'])->description('Exercise type. strength: target_sets, target_reps_min/max, target_weight, target_tempo, rest_after, target_rpe. cardio: target_distance, target_pace_min/max, target_heart_rate_zone, target_heart_rate_min/max, target_power, target_duration. duration: target_duration, target_rpe.')->required(),
+            'exercise_id' => $this->schema->integer()->description('Optional ID from the exercise library. Links to muscle group data for workload tracking.')->nullable(),
             'notes' => $this->schema->string()->description('Optional notes for the exercise')->nullable(),
 
             // Strength fields

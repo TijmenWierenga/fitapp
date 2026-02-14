@@ -103,10 +103,17 @@ class SearchExercisesTool extends Tool
     {
         return [
             'query' => $schema->string()->description('Text search on exercise name (e.g., "bench press", "squat")')->nullable(),
-            'muscle_group' => $schema->string()->description('Filter by muscle group name. Read the `exercise://muscle-groups` resource for valid values.')->nullable(),
-            'category' => $schema->string()->description('Filter by category: strength, stretching, plyometrics, cardio')->nullable(),
-            'equipment' => $schema->string()->description('Filter by equipment type (e.g., "barbell", "dumbbell", "body only", "machine")')->nullable(),
-            'level' => $schema->string()->description('Filter by difficulty: beginner, intermediate, expert')->nullable(),
+            'muscle_group' => $schema->string()->enum([
+                'abdominals', 'abductors', 'adductors', 'biceps', 'calves', 'chest',
+                'forearms', 'glutes', 'hamstrings', 'lats', 'lower back', 'middle back',
+                'neck', 'quadriceps', 'shoulders', 'traps', 'triceps',
+            ])->description('Filter by muscle group name.')->nullable(),
+            'category' => $schema->string()->enum(['strength', 'stretching', 'plyometrics', 'cardio'])->description('Filter by category.')->nullable(),
+            'equipment' => $schema->string()->enum([
+                'bands', 'barbell', 'body only', 'cable', 'dumbbell', 'e-z curl bar',
+                'exercise ball', 'foam roll', 'kettlebells', 'machine', 'medicine ball', 'other',
+            ])->description('Filter by equipment type.')->nullable(),
+            'level' => $schema->string()->enum(['beginner', 'intermediate', 'expert'])->description('Filter by difficulty.')->nullable(),
             'limit' => $schema->integer()->description('Maximum number of results to return (default: 20, max: 50)')->nullable(),
         ];
     }

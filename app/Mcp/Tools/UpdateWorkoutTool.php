@@ -104,7 +104,7 @@ class UpdateWorkoutTool extends Tool
         return [
             'workout_id' => $schema->integer()->description('The ID of the workout to update'),
             'name' => $schema->string()->description('The new name for the workout')->nullable(),
-            'activity' => $schema->string()->description('The new activity type (e.g., run, strength, cardio, hiit, bike, pool_swim, hike, yoga, etc.)')->nullable(),
+            'activity' => $schema->string()->enum(Activity::class)->description('The new activity type.')->nullable(),
             'scheduled_at' => $schema->string()->description('The new scheduled date and time (in user\'s timezone)')->nullable(),
             'notes' => $schema->string()->description('The new notes for the workout')->nullable(),
             'sections' => $schema->array()->items($this->schemaBuilder->section())->description('Replace entire workout structure with new sections/blocks/exercises. If provided, existing structure is deleted and replaced.')->nullable(),

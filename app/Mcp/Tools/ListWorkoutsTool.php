@@ -79,7 +79,7 @@ class ListWorkoutsTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'filter' => $schema->string()->description('Filter workouts: upcoming, completed, overdue, or all (default)')->nullable(),
+            'filter' => $schema->string()->enum(['upcoming', 'completed', 'overdue', 'all'])->description('Filter workouts (default: all).')->nullable(),
             'limit' => $schema->integer()->description('Maximum number of workouts to return (default: 20, max: 100)')->nullable(),
         ];
     }

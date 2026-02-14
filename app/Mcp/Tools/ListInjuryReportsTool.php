@@ -78,7 +78,7 @@ class ListInjuryReportsTool extends Tool
     {
         return [
             'injury_id' => $schema->integer()->description('The ID of the injury to list reports for'),
-            'type' => $schema->string()->description('Filter by report type: self_reporting, pt_visit, or milestone')->nullable(),
+            'type' => $schema->string()->enum(InjuryReportType::class)->description('Filter by report type.')->nullable(),
             'limit' => $schema->integer()->description('Maximum number of reports to return (default: 20, max: 100)')->nullable(),
         ];
     }

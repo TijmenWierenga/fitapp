@@ -80,7 +80,7 @@ class UpdateFitnessProfileTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'primary_goal' => $schema->string()->description('Primary fitness goal: weight_loss, muscle_gain, endurance, or general_fitness'),
+            'primary_goal' => $schema->string()->enum(FitnessGoal::class)->description('Primary fitness goal.'),
             'goal_details' => $schema->string()->description('Optional detailed description of specific goals (e.g., "Run a sub-4hr marathon by October")')->nullable(),
             'available_days_per_week' => $schema->integer()->description('Number of days available for training per week (1-7)'),
             'minutes_per_session' => $schema->integer()->description('Typical workout session duration in minutes (15-180)'),

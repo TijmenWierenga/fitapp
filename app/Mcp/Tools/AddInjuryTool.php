@@ -85,8 +85,8 @@ class AddInjuryTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'injury_type' => $schema->string()->description('Type of injury: acute, chronic, recurring, or post_surgery'),
-            'body_part' => $schema->string()->description('Affected body part (e.g., knee, shoulder, lower_back)'),
+            'injury_type' => $schema->string()->enum(InjuryType::class)->description('Type of injury.'),
+            'body_part' => $schema->string()->enum(BodyPart::class)->description('Affected body part.'),
             'started_at' => $schema->string()->description('Date when the injury started (YYYY-MM-DD)'),
             'ended_at' => $schema->string()->description('Date when the injury was resolved (YYYY-MM-DD). Leave null if ongoing.')->nullable(),
             'notes' => $schema->string()->description('Optional notes about the injury')->nullable(),

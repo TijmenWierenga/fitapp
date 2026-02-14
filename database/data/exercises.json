@@ -4047,6 +4047,28 @@
     "category": "strength"
   },
   {
+    "name": "Dead Hang",
+    "force": "static",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "other",
+    "primaryMuscles": [
+      "forearms"
+    ],
+    "secondaryMuscles": [
+      "lats",
+      "shoulders",
+      "middle back"
+    ],
+    "instructions": [
+      "Grip a pull-up bar with both hands using an overhand grip, slightly wider than shoulder-width apart.",
+      "Step off the platform or jump up so that you are hanging freely with your arms fully extended. Keep your shoulders engaged by pulling them slightly down and back.",
+      "Hang for the desired amount of time, keeping your body still and avoiding swinging.",
+      "Step back onto the platform or drop down carefully to finish."
+    ],
+    "category": "strength"
+  },
+  {
     "name": "Deadlift with Bands",
     "force": "pull",
     "level": "expert",
@@ -6858,6 +6880,27 @@
       "Pause at the top of the motion, and return to the starting position."
     ],
     "category": "powerlifting"
+  },
+  {
+    "name": "Hollow Hold",
+    "force": "static",
+    "level": "beginner",
+    "mechanic": "compound",
+    "equipment": "body only",
+    "primaryMuscles": [
+      "abdominals"
+    ],
+    "secondaryMuscles": [
+      "quadriceps",
+      "glutes"
+    ],
+    "instructions": [
+      "Lie flat on your back with your arms extended overhead and your legs straight.",
+      "Press your lower back firmly into the floor by engaging your core and tilting your pelvis slightly upward.",
+      "Simultaneously lift your arms, head, shoulder blades, and legs a few inches off the ground, forming a shallow banana shape with your body.",
+      "Hold this position for the desired duration, keeping your lower back in contact with the floor throughout. If your back arches off the floor, raise your legs higher or bend your knees to reduce difficulty."
+    ],
+    "category": "strength"
   },
   {
     "name": "Hug A Ball",

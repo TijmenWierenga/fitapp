@@ -112,7 +112,7 @@ it('shows data reliability warning for incomplete history', function (): void {
     $response = WorkoutServer::actingAs($user)->resource(WorkloadResource::class, []);
 
     $response->assertOk()
-        ->assertSee('Data reliability')
+        ->assertSee('Warning')
         ->assertSee('ACWR values may not be reliable yet');
 });
 
@@ -122,7 +122,7 @@ it('does not show data reliability warning for empty state', function (): void {
     $response = WorkoutServer::actingAs($user)->resource(WorkloadResource::class, []);
 
     $response->assertOk()
-        ->assertDontSee('Data reliability');
+        ->assertDontSee('ACWR values may not be reliable yet');
 });
 
 it('includes active injuries', function (): void {

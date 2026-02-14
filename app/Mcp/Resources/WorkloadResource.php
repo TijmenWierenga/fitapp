@@ -58,8 +58,12 @@ class WorkloadResource extends Resource
             return $this->appendInjuries($content, $summary);
         }
 
-        if ($summary->dataSpanDays < 28) {
-            $content .= "> **Data reliability:** Based on {$summary->dataSpanDays} of 28 days. ACWR values may not be reliable yet.\n\n";
+        $warnings = $summary->warnings();
+
+        if ($warnings->isNotEmpty()) {
+            foreach ($warnings as $warning) {
+                $content .= "> **Warning:** {$warning}\n\n";
+            }
         }
 
         $content .= "| Muscle Group | Acute Load | Chronic Load | ACWR | Zone |\n";
@@ -75,7 +79,7 @@ class WorkloadResource extends Resource
         $dangerGroups = $summary->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Danger);
 
         if ($cautionGroups->isNotEmpty() || $dangerGroups->isNotEmpty()) {
-            $content .= "## Warnings\n\n";
+            $content .= "## Alerts\n\n";
 
             foreach ($dangerGroups as $workload) {
                 $content .= "- **DANGER:** {$workload->muscleGroupLabel} (ACWR {$workload->acwr}) — strongly recommend reducing load\n";
@@ -86,10 +90,6 @@ class WorkloadResource extends Resource
             }
 
             $content .= "\n";
-        }
-
-        if ($summary->unlinkedExerciseCount > 0) {
-            $content .= "*Note: {$summary->unlinkedExerciseCount} exercise(s) in recent workouts are not linked to the exercise library and are excluded from workload tracking.*\n\n";
         }
 
         return $this->appendInjuries($content, $summary);

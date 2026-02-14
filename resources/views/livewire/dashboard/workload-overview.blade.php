@@ -37,11 +37,11 @@
                         'red' => 'bg-red-500 dark:bg-red-400',
                         default => 'bg-zinc-400 dark:bg-zinc-500',
                     };
-                    $badgeVariant = match ($workload->zone->color()) {
-                        'green' => 'success',
-                        'yellow' => 'warning',
-                        'red' => 'danger',
-                        default => 'pill',
+                    $badgeColor = match ($workload->zone->color()) {
+                        'green' => 'green',
+                        'yellow' => 'yellow',
+                        'red' => 'red',
+                        default => 'zinc',
                     };
                     $hasInjuryWarning = in_array($workload->bodyPart, $injuredBodyParts)
                         && in_array($workload->zone, [\App\Enums\WorkloadZone::Caution, \App\Enums\WorkloadZone::Danger]);
@@ -61,7 +61,7 @@
                             </flux:tooltip>
                             @if($workload->acwr > 0)
                                 <flux:tooltip toggleable>
-                                    <flux:badge size="sm" variant="{{ $badgeVariant }}">{{ $workload->acwr }}</flux:badge>
+                                    <flux:badge size="sm" variant="pill" color="{{ $badgeColor }}">{{ $workload->acwr }}</flux:badge>
                                     <flux:tooltip.content class="max-w-[16rem]">
                                         ACWR {{ $workload->acwr }} — {{ $zoneLabel }} zone. Ratio of 7-day load to 4-week weekly average.
                                     </flux:tooltip.content>

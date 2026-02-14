@@ -5,6 +5,7 @@ use App\Models\Block;
 use App\Models\BlockExercise;
 use App\Models\CardioExercise;
 use App\Models\DurationExercise;
+use App\Models\Exercise;
 use App\Models\Section;
 use App\Models\StrengthExercise;
 use App\Models\User;
@@ -213,4 +214,45 @@ it('shows exercise Do and Effort labels', function () {
         ->test(Show::class, ['workout' => $workout])
         ->assertSeeInOrder(['Do', '4 sets of 6 reps'])
         ->assertSeeInOrder(['Effort', 'RPE 8 (Hard)']);
+});
+
+it('renders exercise name as clickable when linked to exercise library', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->create(['user_id' => $user->id]);
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->create(['section_id' => $section->id]);
+    $exercise = Exercise::factory()->create();
+    $strengthExercise = StrengthExercise::factory()->create();
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'name' => 'Linked Exercise',
+        'exercise_id' => $exercise->id,
+        'exerciseable_type' => 'strength_exercise',
+        'exerciseable_id' => $strengthExercise->id,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->assertSee('Linked Exercise')
+        ->assertSeeHtml("exerciseId: {$exercise->id}");
+});
+
+it('renders exercise name as plain text when not linked to exercise library', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->create(['user_id' => $user->id]);
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->create(['section_id' => $section->id]);
+    $strengthExercise = StrengthExercise::factory()->create();
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'name' => 'Custom Exercise',
+        'exercise_id' => null,
+        'exerciseable_type' => 'strength_exercise',
+        'exerciseable_id' => $strengthExercise->id,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['workout' => $workout])
+        ->assertSee('Custom Exercise')
+        ->assertDontSeeHtml('exerciseId:');
 });

@@ -139,6 +139,9 @@
     {{-- Include duplicate modal component --}}
     <livewire:workout.duplicate />
 
+    {{-- Include exercise detail modal --}}
+    <livewire:exercise.detail />
+
     {{-- Evaluation Modal --}}
     <flux:modal name="evaluation-modal" wire:model.live="showEvaluationModal" @cancel="cancelEvaluation">
         <form wire:submit="submitEvaluation" class="space-y-6">

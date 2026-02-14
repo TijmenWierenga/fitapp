@@ -15,6 +15,7 @@ class Exercise extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'force',
         'level',
         'mechanic',
@@ -25,6 +26,11 @@ class Exercise extends Model
         'description',
         'tips',
     ];
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     protected $casts = [
         'instructions' => 'array',

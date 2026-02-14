@@ -8,11 +8,30 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class Workout extends Model
 {
     /** @use HasFactory<\Database\Factories\WorkoutFactory> */
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Workout $workout): void {
+            $exerciseables = BlockExercise::query()
+                ->whereIn('block_id', Block::query()
+                    ->select('id')
+                    ->whereIn('section_id', $workout->sections()->select('id')))
+                ->select('exerciseable_type', 'exerciseable_id')
+                ->get()
+                ->groupBy('exerciseable_type');
+
+            foreach ($exerciseables as $type => $records) {
+                $model = Relation::getMorphedModel($type) ?? $type;
+                $model::whereIn('id', $records->pluck('exerciseable_id'))->delete();
+            }
+        });
+    }
 
     protected $fillable = [
         'user_id',

@@ -1,5 +1,10 @@
 <?php
 
+use App\Models\Block;
+use App\Models\BlockExercise;
+use App\Models\CardioExercise;
+use App\Models\Section;
+use App\Models\StrengthExercise;
 use App\Models\User;
 use App\Models\Workout;
 
@@ -146,4 +151,30 @@ it('cannot delete a completed past workout', function () {
 
     expect($result)->toBeFalse()
         ->and(Workout::find($workout->id))->not->toBeNull();
+});
+
+it('deleting a workout removes related exerciseables', function () {
+    $workout = Workout::factory()->create(['scheduled_at' => now()->addDay()]);
+    $section = Section::factory()->for($workout)->create();
+    $block = Block::factory()->for($section)->create();
+
+    $strengthExercise = StrengthExercise::factory()->create();
+    $cardioExercise = CardioExercise::factory()->create();
+
+    BlockExercise::factory()->for($block)->create([
+        'exerciseable_type' => 'strength_exercise',
+        'exerciseable_id' => $strengthExercise->id,
+    ]);
+    BlockExercise::factory()->for($block)->create([
+        'exerciseable_type' => 'cardio_exercise',
+        'exerciseable_id' => $cardioExercise->id,
+    ]);
+
+    $workout->deleteIfAllowed();
+
+    expect(StrengthExercise::find($strengthExercise->id))->toBeNull()
+        ->and(CardioExercise::find($cardioExercise->id))->toBeNull()
+        ->and(Section::where('workout_id', $workout->id)->count())->toBe(0)
+        ->and(Block::where('section_id', $section->id)->count())->toBe(0)
+        ->and(BlockExercise::where('block_id', $block->id)->count())->toBe(0);
 });

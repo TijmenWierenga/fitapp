@@ -12,11 +12,11 @@ return new class extends Migration
             $table->id();
             $table->string('name')->index();
             $table->string('force')->nullable();
-            $table->string('level')->nullable();
+            $table->string('level');
             $table->string('mechanic')->nullable();
             $table->string('equipment')->nullable();
-            $table->string('category')->nullable();
-            $table->json('instructions')->nullable();
+            $table->string('category');
+            $table->json('instructions')->default('[]');
             $table->json('aliases')->nullable();
             $table->text('description')->nullable();
             $table->json('tips')->nullable();

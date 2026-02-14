@@ -44,7 +44,7 @@ class ListInjuryReportsTool extends Tool
         $injury = $user->injuries()->find($validated['injury_id']);
 
         if (! $injury) {
-            return Response::error('Injury not found or does not belong to this user.');
+            return Response::error('Injury not found or access denied.');
         }
 
         $query = $injury->injuryReports()->with('user')->latest();

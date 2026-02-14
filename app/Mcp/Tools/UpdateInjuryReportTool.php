@@ -38,7 +38,7 @@ class UpdateInjuryReportTool extends Tool
         }
 
         if ($user->cannot('update', $report)) {
-            return Response::error('You are not authorized to update this report.');
+            return Response::error('Cannot update report. Access denied.');
         }
 
         $updateData = array_filter([

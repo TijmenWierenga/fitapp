@@ -2,6 +2,7 @@
 
 namespace App\Mcp\Tools;
 
+use App\Mcp\Resources\UserFitnessProfileResource;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
@@ -10,11 +11,17 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsReadOnly]
 class GetFitnessProfileTool extends Tool
 {
+    public function __construct(
+        private UserFitnessProfileResource $resource,
+    ) {}
+
     /**
      * The tool's description.
      */
     protected string $description = <<<'MARKDOWN'
         Get the authenticated user's fitness profile including primary goal, goal details, available training days, and session duration preferences.
+
+        Use this before creating workout plans to respect the user's goals and schedule. Returns the same data as the `user://fitness-profile` resource.
     MARKDOWN;
 
     /**
@@ -22,32 +29,6 @@ class GetFitnessProfileTool extends Tool
      */
     public function handle(Request $request): Response
     {
-        $user = $request->user();
-        $user->load('fitnessProfile');
-
-        if (! $user->fitnessProfile) {
-            return Response::text(<<<'TEXT'
-            # Fitness Profile
-
-            *No fitness profile configured yet.*
-
-            Use the `update-fitness-profile` tool to set fitness goals and training preferences.
-
-            TEXT);
-        }
-
-        $profile = $user->fitnessProfile;
-        $goalDetails = $profile->goal_details ? "\n**Goal Details:** {$profile->goal_details}" : '';
-
-        $content = <<<TEXT
-        # Fitness Profile
-
-        **Primary Goal:** {$profile->primary_goal->label()}$goalDetails
-        **Available Days Per Week:** {$profile->available_days_per_week}
-        **Minutes Per Session:** {$profile->minutes_per_session}
-
-        TEXT;
-
-        return Response::text($content);
+        return $this->resource->handle($request);
     }
 }

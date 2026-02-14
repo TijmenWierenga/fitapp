@@ -99,5 +99,5 @@ it('fails to complete workout owned by different user', function () {
     ]);
 
     $response->assertHasErrors()
-        ->assertSee('Workout not found or access denied');
+        ->assertSee('Workout not found or access denied.');
 });

@@ -40,7 +40,7 @@ it('fails when user is not the author', function () {
     ]);
 
     $response->assertHasErrors()
-        ->assertSee('You are not authorized to update this report');
+        ->assertSee('Cannot update report. Access denied.');
 });
 
 it('fails with non-existent report id', function () {

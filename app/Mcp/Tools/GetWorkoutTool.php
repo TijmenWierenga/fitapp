@@ -33,7 +33,7 @@ class GetWorkoutTool extends Tool
         $workout = $user->workouts()->find($validated['workout_id']);
 
         if (! $workout) {
-            return Response::error('Workout not found or access denied');
+            return Response::error('Workout not found or access denied.');
         }
 
         return Response::structured([

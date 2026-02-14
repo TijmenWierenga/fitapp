@@ -49,7 +49,7 @@ it('fails to delete completed workout', function () {
     ]);
 
     $response->assertHasErrors()
-        ->assertSee('Cannot delete completed workouts');
+        ->assertSee('Cannot delete a completed workout.');
 });
 
 it('fails to delete past workout (not today)', function () {
@@ -63,7 +63,7 @@ it('fails to delete past workout (not today)', function () {
     ]);
 
     $response->assertHasErrors()
-        ->assertSee('Cannot delete past workouts');
+        ->assertSee('Cannot delete past workouts (except today).');
 });
 
 it('fails to delete workout owned by different user', function () {
@@ -76,7 +76,7 @@ it('fails to delete workout owned by different user', function () {
     ]);
 
     $response->assertHasErrors()
-        ->assertSee('Workout not found or access denied');
+        ->assertSee('Workout not found or access denied.');
 });
 
 it('fails with non-existent workout_id', function () {
@@ -87,5 +87,5 @@ it('fails with non-existent workout_id', function () {
     ]);
 
     $response->assertHasErrors()
-        ->assertSee('Workout not found or access denied');
+        ->assertSee('Workout not found or access denied.');
 });

@@ -5,7 +5,6 @@ namespace App\Mcp\Tools;
 use App\Actions\UpdateStructuredWorkout;
 use App\DataTransferObjects\Workout\SectionData;
 use App\Enums\Workout\Activity;
-use App\Enums\Workout\BlockType;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
@@ -31,21 +30,7 @@ class UpdateWorkoutTool extends Tool
 
         You can update the name, activity, scheduled time, notes, or sections. Only provide the fields you want to change.
 
-        If `sections` is provided, the existing structure will be replaced entirely with the new sections/blocks/exercises.
-
-        ## Block Types & Fields
-
-        Only set the fields listed for each block type — omit all others:
-
-        - **straight_sets**: _(no block-level fields)_ — exercises define their own sets/reps/rest
-        - **circuit**: rounds, rest_between_exercises, rest_between_rounds
-        - **superset**: rounds, rest_between_rounds
-        - **interval**: rounds, work_interval, rest_interval — for distance-based intervals, omit work_interval (exercise distance/pace defines the work)
-        - **amrap**: time_cap
-        - **for_time**: rounds, time_cap
-        - **emom**: rounds (= number of intervals), work_interval (= seconds per interval)
-        - **distance_duration**: _(no block-level fields)_ — exercise distance/duration defines the work
-        - **rest**: _(no block-level fields)_
+        If `sections` is provided, the existing structure will be replaced entirely with the new sections/blocks/exercises. See the `block_type` schema for field guidance per type.
     MARKDOWN;
 
     /**
@@ -59,44 +44,7 @@ class UpdateWorkoutTool extends Tool
             'activity' => ['sometimes', Rule::enum(Activity::class)],
             'scheduled_at' => 'sometimes|date',
             'notes' => 'nullable|string|max:5000',
-            'sections' => 'sometimes|array',
-            'sections.*.name' => 'required|string|max:255',
-            'sections.*.order' => 'required|integer|min:0',
-            'sections.*.notes' => 'nullable|string|max:5000',
-            'sections.*.blocks' => 'sometimes|array',
-            'sections.*.blocks.*.block_type' => ['required', Rule::enum(BlockType::class)],
-            'sections.*.blocks.*.order' => 'required|integer|min:0',
-            'sections.*.blocks.*.rounds' => 'nullable|integer|min:1',
-            'sections.*.blocks.*.rest_between_exercises' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.rest_between_rounds' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.time_cap' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.work_interval' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.rest_interval' => 'nullable|integer|min:0',
-            'sections.*.blocks.*.notes' => 'nullable|string|max:5000',
-            'sections.*.blocks.*.exercises' => 'sometimes|array',
-            'sections.*.blocks.*.exercises.*.name' => 'required|string|max:255',
-            'sections.*.blocks.*.exercises.*.order' => 'required|integer|min:0',
-            'sections.*.blocks.*.exercises.*.type' => 'required|in:strength,cardio,duration',
-            'sections.*.blocks.*.exercises.*.exercise_id' => 'nullable|integer|exists:exercises,id',
-            'sections.*.blocks.*.exercises.*.notes' => 'nullable|string|max:5000',
-            // Strength exercise fields
-            'sections.*.blocks.*.exercises.*.target_sets' => ['nullable', 'integer', 'min:1', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
-            'sections.*.blocks.*.exercises.*.target_reps_min' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
-            'sections.*.blocks.*.exercises.*.target_reps_max' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
-            'sections.*.blocks.*.exercises.*.target_weight' => ['nullable', 'numeric', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
-            'sections.*.blocks.*.exercises.*.target_tempo' => ['nullable', 'string', 'max:20', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
-            'sections.*.blocks.*.exercises.*.rest_after' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength'],
-            // Cardio exercise fields
-            'sections.*.blocks.*.exercises.*.target_duration' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio,duration'],
-            'sections.*.blocks.*.exercises.*.target_distance' => ['nullable', 'numeric', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
-            'sections.*.blocks.*.exercises.*.target_pace_min' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
-            'sections.*.blocks.*.exercises.*.target_pace_max' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
-            'sections.*.blocks.*.exercises.*.target_heart_rate_zone' => ['nullable', 'integer', 'min:1', 'max:5', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
-            'sections.*.blocks.*.exercises.*.target_heart_rate_min' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
-            'sections.*.blocks.*.exercises.*.target_heart_rate_max' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
-            'sections.*.blocks.*.exercises.*.target_power' => ['nullable', 'integer', 'min:0', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,cardio'],
-            // Shared: strength + duration
-            'sections.*.blocks.*.exercises.*.target_rpe' => ['nullable', 'numeric', 'min:1', 'max:10', 'prohibited_unless:sections.*.blocks.*.exercises.*.type,strength,duration'],
+            ...WorkoutSchemaBuilder::sectionValidationRules(),
         ], [
             'activity.Enum' => 'Invalid activity type. See available activity values.',
             'scheduled_at.date' => 'Please provide a valid date and time.',
@@ -107,11 +55,11 @@ class UpdateWorkoutTool extends Tool
         $workout = $user->workouts()->find($validated['workout_id']);
 
         if (! $workout) {
-            return Response::error('Workout not found or access denied');
+            return Response::error('Workout not found or access denied.');
         }
 
         if ($user->cannot('update', $workout)) {
-            return Response::error('Cannot update completed workouts');
+            return Response::error('Cannot update a completed workout.');
         }
 
         $updateData = [];

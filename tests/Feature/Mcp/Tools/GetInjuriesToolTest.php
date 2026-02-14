@@ -40,3 +40,17 @@ it('includes recent injury reports', function () {
     $response->assertOk()
         ->assertSee('Feeling better today');
 });
+
+it('only returns injuries belonging to the authenticated user', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+    $otherUser = User::factory()->withTimezone('UTC')->create();
+
+    Injury::factory()->for($user)->active()->create(['notes' => 'My knee problem']);
+    Injury::factory()->for($otherUser)->active()->create(['notes' => 'Someone else shoulder issue']);
+
+    $response = WorkoutServer::actingAs($user)->tool(GetInjuriesTool::class);
+
+    $response->assertOk()
+        ->assertSee('My knee problem')
+        ->assertDontSee('Someone else shoulder issue');
+});

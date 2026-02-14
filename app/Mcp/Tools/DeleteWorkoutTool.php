@@ -35,15 +35,15 @@ class DeleteWorkoutTool extends Tool
         $workout = $user->workouts()->find($validated['workout_id']);
 
         if (! $workout) {
-            return Response::error('Workout not found or access denied');
+            return Response::error('Workout not found or access denied.');
         }
 
         if ($user->cannot('delete', $workout)) {
             if ($workout->isCompleted()) {
-                return Response::error('Cannot delete completed workouts');
+                return Response::error('Cannot delete a completed workout.');
             }
 
-            return Response::error('Cannot delete past workouts (except today)');
+            return Response::error('Cannot delete past workouts (except today).');
         }
 
         $workout->delete();

@@ -14,6 +14,7 @@ readonly class ExerciseData
         public ExerciseType $type,
         public StrengthExerciseData|CardioExerciseData|DurationExerciseData $exerciseable,
         public ?string $notes = null,
+        public ?int $exerciseId = null,
     ) {}
 
     /**
@@ -35,6 +36,7 @@ readonly class ExerciseData
             type: $type,
             exerciseable: $exerciseable,
             notes: $data['notes'] ?? null,
+            exerciseId: $data['exercise_id'] ?? null,
         );
     }
 }

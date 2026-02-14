@@ -44,7 +44,7 @@ class AddInjuryReportTool extends Tool
         $injury = $user->injuries()->find($validated['injury_id']);
 
         if (! $injury) {
-            return Response::error('Injury not found or does not belong to this user.');
+            return Response::error('Injury not found or access denied.');
         }
 
         $report = $injury->injuryReports()->create([
@@ -76,7 +76,7 @@ class AddInjuryReportTool extends Tool
     {
         return [
             'injury_id' => $schema->integer()->description('The ID of the injury to add a report to'),
-            'type' => $schema->string()->description('Report type: self_reporting, pt_visit, or milestone'),
+            'type' => $schema->string()->enum(InjuryReportType::class)->description('Report type.'),
             'content' => $schema->string()->description('The report content (supports Markdown)'),
             'reported_at' => $schema->string()->description('The date the report is about (YYYY-MM-DD). Defaults to today.')->nullable(),
         ];

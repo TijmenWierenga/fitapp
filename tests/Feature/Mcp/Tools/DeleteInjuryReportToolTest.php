@@ -51,7 +51,7 @@ it('denies non-owner non-author from deleting', function () {
     ]);
 
     $response->assertHasErrors()
-        ->assertSee('You are not authorized to delete this report');
+        ->assertSee('Cannot delete report. Access denied.');
 });
 
 it('fails with non-existent report id', function () {

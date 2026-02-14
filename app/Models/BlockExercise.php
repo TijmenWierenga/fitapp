@@ -14,6 +14,7 @@ class BlockExercise extends Model
 
     protected $fillable = [
         'block_id',
+        'exercise_id',
         'name',
         'order',
         'exerciseable_type',
@@ -31,6 +32,14 @@ class BlockExercise extends Model
     public function block(): BelongsTo
     {
         return $this->belongsTo(Block::class);
+    }
+
+    /**
+     * @return BelongsTo<Exercise, $this>
+     */
+    public function exercise(): BelongsTo
+    {
+        return $this->belongsTo(Exercise::class);
     }
 
     /**

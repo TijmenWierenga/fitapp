@@ -91,7 +91,7 @@ it('fails to update workout owned by different user', function () {
     ]);
 
     $response->assertHasErrors()
-        ->assertSee('Workout not found or access denied');
+        ->assertSee('Workout not found or access denied.');
 });
 
 it('fails to update completed workout', function () {
@@ -104,7 +104,7 @@ it('fails to update completed workout', function () {
     ]);
 
     $response->assertHasErrors()
-        ->assertSee('Cannot update completed workouts');
+        ->assertSee('Cannot update a completed workout.');
 });
 
 it('fails with non-existent workout_id', function () {
@@ -116,7 +116,7 @@ it('fails with non-existent workout_id', function () {
     ]);
 
     $response->assertHasErrors()
-        ->assertSee('Workout not found or access denied');
+        ->assertSee('Workout not found or access denied.');
 });
 
 it('replaces workout structure when sections provided', function () {

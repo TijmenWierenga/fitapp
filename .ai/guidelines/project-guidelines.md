@@ -158,6 +158,39 @@ Use the converter classes in `App\Support\Workout` when converting between stora
 
 ## Architecture Constraints
 
+### Value Objects Over Primitives
+Prefer rich domain objects and value objects over primitive types (arrays, floats, strings) for domain concepts. Value objects make intent explicit, centralize behavior, and are easier to test.
+
+```php
+// Good - value object with domain behavior
+readonly class Load
+{
+    public function __construct(
+        public float $acute,
+        public float $chronic,
+    ) {}
+
+    public function addVolume(float $volume, bool $isAcute): self
+    {
+        return new self(
+            acute: $isAcute ? $this->acute + $volume : $this->acute,
+            chronic: $this->chronic + $volume,
+        );
+    }
+}
+
+// Bad - primitive array with implicit structure
+/** @var array{acute: float, chronic: float} */
+$load = ['acute' => 0.0, 'chronic' => 0.0];
+$load['chronic'] += $volume;
+```
+
+### Enums Over String Constants
+When a domain concept has a fixed set of values with associated behavior (labels, colors, formatting), use a backed enum instead of string constants. Derive related attributes as methods on the enum.
+
+### Factory Methods on DTOs
+When constructing a DTO requires computing derived values, use a named static factory method (e.g. `fromLoad()`) instead of putting logic in the constructor. The constructor should accept all values explicitly; the factory method computes and passes them.
+
 ### No Service Location in Models
 Eloquent models must not use the `app()` helper. Extract business logic to dedicated action classes instead.
 

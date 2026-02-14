@@ -70,5 +70,5 @@ it('fails when injury does not belong to user', function () {
     ]);
 
     $response->assertHasErrors()
-        ->assertSee('Injury not found or does not belong to this user');
+        ->assertSee('Injury not found or access denied.');
 });

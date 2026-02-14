@@ -2,13 +2,14 @@
 
 namespace App\Mcp\Tools;
 
-use App\Models\Workout;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
 
+#[IsDestructive]
 class CompleteWorkoutTool extends Tool
 {
     /**
@@ -53,26 +54,18 @@ class CompleteWorkoutTool extends Tool
         $workout = $user->workouts()->find($validated['workout_id']);
 
         if (! $workout) {
-            return Response::error('Workout not found or access denied');
+            return Response::error('Workout not found or access denied.');
         }
 
         if ($user->cannot('complete', $workout)) {
-            return Response::error('Workout is already completed');
+            return Response::error('Cannot complete an already completed workout.');
         }
 
         $workout->markAsCompleted($validated['rpe'], $validated['feeling']);
-        $workout->refresh();
 
         return Response::structured([
             'success' => true,
-            'workout' => [
-                'id' => $workout->id,
-                'name' => $workout->name,
-                'completed_at' => $user->toUserTimezone($workout->completed_at)->toIso8601String(),
-                'rpe' => $workout->rpe,
-                'rpe_label' => Workout::getRpeLabel($workout->rpe),
-                'feeling' => $workout->feeling,
-            ],
+            'workout' => WorkoutResponseFormatter::format($workout->fresh(), $user),
             'message' => 'Workout completed successfully',
         ]);
     }

@@ -3,9 +3,11 @@
 namespace App\Mcp\Servers;
 
 use App\Mcp\Prompts\CreateWorkoutPrompt;
+use App\Mcp\Resources\MuscleGroupsResource;
 use App\Mcp\Resources\UserFitnessProfileResource;
 use App\Mcp\Resources\UserInjuriesResource;
 use App\Mcp\Resources\UserProfileResource;
+use App\Mcp\Resources\WorkloadResource;
 use App\Mcp\Resources\WorkoutScheduleResource;
 use App\Mcp\Tools\AddInjuryReportTool;
 use App\Mcp\Tools\AddInjuryTool;
@@ -16,12 +18,14 @@ use App\Mcp\Tools\DeleteWorkoutTool;
 use App\Mcp\Tools\GetFitnessProfileTool;
 use App\Mcp\Tools\GetInjuriesTool;
 use App\Mcp\Tools\GetUserProfileTool;
+use App\Mcp\Tools\GetWorkloadTool;
 use App\Mcp\Tools\GetWorkoutScheduleTool;
 use App\Mcp\Tools\GetWorkoutTool;
 use App\Mcp\Tools\ListInjuryReportsTool;
 use App\Mcp\Tools\ListWorkoutsTool;
 use App\Mcp\Tools\PingTool;
 use App\Mcp\Tools\RemoveInjuryTool;
+use App\Mcp\Tools\SearchExercisesTool;
 use App\Mcp\Tools\UpdateFitnessProfileTool;
 use App\Mcp\Tools\UpdateInjuryReportTool;
 use App\Mcp\Tools\UpdateInjuryTool;
@@ -78,9 +82,41 @@ class WorkoutServer extends Server
         - Each workout is independent but can follow a progression
         - Use descriptive names to indicate plan structure (e.g., "Week 1: Easy Run", "Week 2: Tempo Run")
 
+        ## Workout Structure
+
+        Every structured workout MUST include three sections in this order:
+
+        1. **Warm-Up** — Prepare the body for the main work. Include light cardio, dynamic stretches, or activation exercises relevant to the workout. Typically 5–10 minutes.
+        2. **Main Work** — The core training block(s) with the primary exercises.
+        3. **Cool-Down** — Aid recovery with static stretching, foam rolling, or light movement targeting the muscles worked. Typically 5–10 minutes.
+
+        Adapt warm-up and cool-down content to the workout type:
+        - **Strength:** Warm-up with light sets or mobility drills for the target muscles; cool-down with static stretches for worked muscle groups
+        - **Running/Cardio:** Warm-up with easy pace or dynamic leg stretches; cool-down with walking and lower body stretches
+        - **Yoga/Mobility:** Warm-up can be gentler; cool-down may include savasana or breathing exercises
+
         ## Workout Notes
 
         Notes support Markdown. Write detailed, actionable notes including: equipment needed, step-by-step phases (warm-up, main work, cool-down), sets/reps/intensity, rest periods, and modifications. Adapt detail level to workout type.
+
+        ## Workload Tracking
+
+        Use the `get-workload` tool to check muscle group load before creating workout plans:
+        - **ACWR zones**: undertraining (<0.8), sweet_spot (0.8–1.3), caution (1.3–1.5), danger (>1.5)
+        - Avoid programming heavy work for muscle groups in caution/danger zones
+        - Prioritize undertrained muscle groups when balancing weekly plans
+        - Cross-reference active injuries with muscle group load — if a muscle group near an injured body part is in caution/danger, flag this to the user
+        - Link exercises to the exercise library (via `exercise_id`) to enable workload tracking
+
+        ## Exercise Library
+
+        Use the `search-exercises` tool to find exercises from the catalog:
+        - Read the `exercise://muscle-groups` resource for a complete list of available muscle groups and their names
+        - Search by name, muscle group, category, equipment, or difficulty level
+        - Always link exercises to workouts via `exercise_id` to enable workload tracking
+        - Primary muscles (load factor 1.0) receive full training volume
+        - Secondary muscles (load factor 0.5) receive half the training volume
+        - Cross-reference with workload zones before selecting exercises
 
         ## Business Rules
 
@@ -161,6 +197,7 @@ class WorkoutServer extends Server
         GetUserProfileTool::class,
         GetFitnessProfileTool::class,
         GetInjuriesTool::class,
+        GetWorkloadTool::class,
         GetWorkoutScheduleTool::class,
         UpdateFitnessProfileTool::class,
         AddInjuryTool::class,
@@ -170,6 +207,7 @@ class WorkoutServer extends Server
         ListInjuryReportsTool::class,
         UpdateInjuryReportTool::class,
         DeleteInjuryReportTool::class,
+        SearchExercisesTool::class,
     ];
 
     /**
@@ -182,6 +220,8 @@ class WorkoutServer extends Server
         UserFitnessProfileResource::class,
         UserInjuriesResource::class,
         WorkoutScheduleResource::class,
+        WorkloadResource::class,
+        MuscleGroupsResource::class,
     ];
 
     /**

@@ -2,8 +2,12 @@
 
 namespace App\Mcp\Prompts;
 
+use App\Actions\CalculateWorkload;
+use App\DataTransferObjects\Workload\MuscleGroupWorkload;
+use App\DataTransferObjects\Workload\WorkloadSummary;
 use App\Enums\BodyPart;
 use App\Enums\FitnessGoal;
+use App\Enums\WorkloadZone;
 use App\Enums\Workout\Activity;
 use App\Models\Injury;
 use App\Models\User;
@@ -18,6 +22,10 @@ use Laravel\Mcp\Server\Prompts\Argument;
 
 class CreateWorkoutPrompt extends Prompt
 {
+    public function __construct(
+        private CalculateWorkload $calculateWorkload,
+    ) {}
+
     protected string $description = <<<'MARKDOWN'
         Interactive guide for creating a new workout with smart defaults based on your fitness profile, schedule, and any active injuries.
 
@@ -68,18 +76,27 @@ class CreateWorkoutPrompt extends Prompt
             $responses[] = Response::text("How long should this workout be? (Default: {$defaultDuration} minutes based on your fitness profile)");
         }
 
-        // Step 6: Notes generation guidance
+        // Step 6: Exercise selection guidance
+        $responses[] = Response::text($this->buildExerciseSelectionGuidance())->asAssistant();
+
+        // Step 7: Workload-aware constraints
+        $workloadGuidance = $this->buildWorkloadGuidance($context['workload']);
+        if ($workloadGuidance) {
+            $responses[] = Response::text($workloadGuidance)->asAssistant();
+        }
+
+        // Step 8: Notes generation guidance
         $includeNotes = $validated['include_notes'] ?? true;
         if ($includeNotes) {
             $responses[] = Response::text($this->buildNotesGuidance($context))->asAssistant();
         }
 
-        // Step 7: Injury constraints reminder (if applicable)
+        // Step 9: Injury constraints reminder (if applicable)
         if ($context['active_injuries']->isNotEmpty()) {
             $responses[] = Response::text($this->buildInjuryConstraints($context['active_injuries']))->asAssistant();
         }
 
-        // Step 8: Final instructions
+        // Step 10: Final instructions
         $responses[] = Response::text($this->buildFinalInstructions())->asAssistant();
 
         return $responses;
@@ -117,14 +134,15 @@ class CreateWorkoutPrompt extends Prompt
     }
 
     /**
-     * @return array{fitness_profile: \App\Models\FitnessProfile|null, active_injuries: Collection<int, Injury>, upcoming_workouts: Collection<int, Workout>}
+     * @return array{fitness_profile: \App\Models\FitnessProfile|null, active_injuries: Collection<int, Injury>, upcoming_workouts: Collection<int, Workout>, workload: WorkloadSummary}
      */
     protected function gatherContext(User $user): array
     {
         return [
             'fitness_profile' => $user->fitnessProfile,
-            'active_injuries' => $user->injuries->filter(fn (Injury $injury) => $injury->is_active),
+            'active_injuries' => $user->injuries->filter(fn (Injury $injury): bool => $injury->is_active),
             'upcoming_workouts' => $user->workouts()->upcoming()->limit(10)->get(),
+            'workload' => $this->calculateWorkload->execute($user),
         ];
     }
 
@@ -159,6 +177,50 @@ class CreateWorkoutPrompt extends Prompt
                 }
                 $greeting .= "\n";
             }
+            $greeting .= "\n";
+        }
+
+        // Workload summary
+        $workload = $context['workload'];
+        if ($workload->muscleGroups->isNotEmpty()) {
+            $greeting .= "## Current Workload\n\n";
+
+            $cautionGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Caution);
+            $dangerGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Danger);
+            $undertrainingGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Undertraining);
+
+            if ($dangerGroups->isNotEmpty()) {
+                $names = $dangerGroups->map(fn (MuscleGroupWorkload $w): string => "{$w->muscleGroupLabel} (ACWR {$w->acwr})")->implode(', ');
+                $greeting .= "- **DANGER:** {$names} — strongly recommend reducing load\n";
+            }
+
+            if ($cautionGroups->isNotEmpty()) {
+                $names = $cautionGroups->map(fn (MuscleGroupWorkload $w): string => "{$w->muscleGroupLabel} (ACWR {$w->acwr})")->implode(', ');
+                $greeting .= "- **CAUTION:** {$names} — consider reducing load\n";
+            }
+
+            if ($undertrainingGroups->isNotEmpty()) {
+                $names = $undertrainingGroups->map(fn (MuscleGroupWorkload $w): string => $w->muscleGroupLabel)->implode(', ');
+                $greeting .= "- **Undertrained:** {$names} — could use more stimulus\n";
+            }
+
+            $sweetSpotCount = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::SweetSpot)->count();
+            if ($sweetSpotCount > 0) {
+                $greeting .= "- **Sweet Spot:** {$sweetSpotCount} muscle group(s) in optimal training zone\n";
+            }
+
+            // Cross-reference injuries with workload
+            if ($activeInjuries->isNotEmpty() && ($cautionGroups->isNotEmpty() || $dangerGroups->isNotEmpty())) {
+                $warningGroups = $cautionGroups->merge($dangerGroups);
+                $injuredBodyParts = $activeInjuries->pluck('body_part')->unique();
+
+                foreach ($warningGroups as $workloadItem) {
+                    if ($injuredBodyParts->contains(fn (BodyPart $bp): bool => $bp->value === $workloadItem->bodyPart)) {
+                        $greeting .= "- **WARNING:** {$workloadItem->muscleGroupLabel} is in {$workloadItem->zone->value} zone AND near an active injury\n";
+                    }
+                }
+            }
+
             $greeting .= "\n";
         }
 
@@ -356,7 +418,7 @@ class CreateWorkoutPrompt extends Prompt
 
     /**
      * @param  Collection<int, Workout>  $upcomingWorkouts
-     * @return array<Carbon>
+     * @return array<CarbonImmutable>
      */
     protected function suggestScheduleTimes(User $user, Collection $upcomingWorkouts): array
     {
@@ -450,6 +512,59 @@ class CreateWorkoutPrompt extends Prompt
         return $constraints;
     }
 
+    protected function buildExerciseSelectionGuidance(): string
+    {
+        $guidance = "## Exercise Selection\n\n";
+        $guidance .= "When building this workout, use the `search-exercises` tool to find exercises from the library:\n\n";
+        $guidance .= "- **Always** link exercises via `exercise_id` to enable workload tracking\n";
+        $guidance .= "- Search by name, muscle group, category, equipment, or difficulty level\n";
+        $guidance .= "- Prefer compound exercises for efficiency when time is limited\n";
+        $guidance .= "- Include exercise alternatives for injured body parts\n";
+        $guidance .= "- Primary muscles (load factor 1.0) receive full training stimulus\n";
+        $guidance .= "- Secondary muscles (load factor 0.5) receive half the training stimulus\n";
+
+        return $guidance;
+    }
+
+    protected function buildWorkloadGuidance(WorkloadSummary $workload): ?string
+    {
+        $cautionGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Caution);
+        $dangerGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Danger);
+        $undertrainingGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Undertraining);
+
+        if ($cautionGroups->isEmpty() && $dangerGroups->isEmpty() && $undertrainingGroups->isEmpty()) {
+            return null;
+        }
+
+        $guidance = "## Workload-Aware Constraints\n\n";
+
+        if ($dangerGroups->isNotEmpty()) {
+            $guidance .= "**AVOID** exercises targeting these muscle groups (danger zone):\n";
+            foreach ($dangerGroups as $w) {
+                $guidance .= "- {$w->muscleGroupLabel} — ACWR {$w->acwr}, strongly recommend no additional load\n";
+            }
+            $guidance .= "\n";
+        }
+
+        if ($cautionGroups->isNotEmpty()) {
+            $guidance .= "**REDUCE** volume for these muscle groups (caution zone):\n";
+            foreach ($cautionGroups as $w) {
+                $guidance .= "- {$w->muscleGroupLabel} — ACWR {$w->acwr}, reduce sets/reps or use lighter intensity\n";
+            }
+            $guidance .= "\n";
+        }
+
+        if ($undertrainingGroups->isNotEmpty()) {
+            $guidance .= "**PRIORITIZE** these undertrained muscle groups when possible:\n";
+            foreach ($undertrainingGroups as $w) {
+                $guidance .= "- {$w->muscleGroupLabel} — ACWR {$w->acwr}, could benefit from more stimulus\n";
+            }
+            $guidance .= "\n";
+        }
+
+        return $guidance;
+    }
+
     protected function buildFinalInstructions(): string
     {
         return <<<'TEXT'
@@ -460,7 +575,10 @@ Once you provide all the details, I'll use the `create-workout` tool to create y
 1. **Name** - Descriptive workout title
 2. **Activity** - Type of workout
 3. **Scheduled Time** - When you'll do it (in your timezone)
-4. **Notes** - Detailed workout plan with proper structure and injury modifications
+4. **Structure** - Sections, blocks, and exercises with `exercise_id` from the library
+5. **Notes** - Detailed workout plan with proper structure and injury modifications
+
+Use the `search-exercises` tool to find appropriate exercises and link them via `exercise_id` for workload tracking.
 
 Let's get started!
 TEXT;

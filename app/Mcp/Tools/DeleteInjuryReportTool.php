@@ -36,7 +36,7 @@ class DeleteInjuryReportTool extends Tool
         }
 
         if ($user->cannot('delete', $report)) {
-            return Response::error('You are not authorized to delete this report.');
+            return Response::error('Cannot delete report. Access denied.');
         }
 
         $report->delete();

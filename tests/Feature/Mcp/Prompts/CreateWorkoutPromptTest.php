@@ -6,8 +6,14 @@ use App\Enums\InjuryType;
 use App\Enums\Workout\Activity;
 use App\Mcp\Prompts\CreateWorkoutPrompt;
 use App\Mcp\Servers\WorkoutServer;
+use App\Models\Block;
+use App\Models\BlockExercise;
+use App\Models\Exercise;
 use App\Models\FitnessProfile;
 use App\Models\Injury;
+use App\Models\MuscleGroup;
+use App\Models\Section;
+use App\Models\StrengthExercise;
 use App\Models\User;
 use App\Models\Workout;
 use Carbon\CarbonImmutable;
@@ -285,4 +291,76 @@ it('does not include injury constraints section when user has no active injuries
     $response->assertOk()
         ->assertDontSee('Important: Active Injury Constraints')
         ->assertDontSee('CRITICAL');
+});
+
+it('includes workload summary in greeting when workload data exists', function () {
+    $user = User::factory()->withTimezone('Europe/Amsterdam')->create();
+    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);
+    $exercise = Exercise::factory()->create();
+    $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
+
+    $workout = Workout::factory()->create([
+        'user_id' => $user->id,
+        'completed_at' => now()->subDays(2),
+        'scheduled_at' => now()->subDays(2),
+        'rpe' => 7,
+        'feeling' => 4,
+    ]);
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->create(['section_id' => $section->id]);
+    $strength = StrengthExercise::factory()->create(['target_sets' => 3, 'target_reps_max' => 10, 'target_rpe' => 7.0]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exercise_id' => $exercise->id,
+        'exerciseable_type' => $strength->getMorphClass(),
+        'exerciseable_id' => $strength->id,
+    ]);
+
+    $response = WorkoutServer::actingAs($user)->prompt(CreateWorkoutPrompt::class);
+
+    $response->assertOk()
+        ->assertSee('Current Workload');
+});
+
+it('includes exercise selection guidance', function () {
+    $user = User::factory()->withTimezone('Europe/Amsterdam')->create();
+
+    $response = WorkoutServer::actingAs($user)->prompt(CreateWorkoutPrompt::class);
+
+    $response->assertOk()
+        ->assertSee('Exercise Selection')
+        ->assertSee('search-exercises')
+        ->assertSee('exercise_id');
+});
+
+it('includes workload guidance for caution and danger zones', function () {
+    $user = User::factory()->withTimezone('Europe/Amsterdam')->create();
+    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);
+    $exercise = Exercise::factory()->create();
+    $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
+
+    // Create heavy acute load with minimal chronic base to push into caution/danger zone
+    foreach (range(1, 3) as $i) {
+        $workout = Workout::factory()->create([
+            'user_id' => $user->id,
+            'completed_at' => now()->subDays($i),
+            'scheduled_at' => now()->subDays($i),
+            'rpe' => 8,
+            'feeling' => 3,
+        ]);
+        $section = Section::factory()->create(['workout_id' => $workout->id]);
+        $block = Block::factory()->create(['section_id' => $section->id]);
+        $strength = StrengthExercise::factory()->create(['target_sets' => 5, 'target_reps_max' => 12, 'target_rpe' => 9.0]);
+        BlockExercise::factory()->create([
+            'block_id' => $block->id,
+            'exercise_id' => $exercise->id,
+            'exerciseable_type' => $strength->getMorphClass(),
+            'exerciseable_id' => $strength->id,
+        ]);
+    }
+
+    $response = WorkoutServer::actingAs($user)->prompt(CreateWorkoutPrompt::class);
+
+    $response->assertOk()
+        ->assertSee('Workload-Aware Constraints');
 });

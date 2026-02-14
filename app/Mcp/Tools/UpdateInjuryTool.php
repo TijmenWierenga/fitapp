@@ -60,7 +60,7 @@ class UpdateInjuryTool extends Tool
         $injury = $user->injuries()->find($validated['injury_id']);
 
         if (! $injury) {
-            return Response::error('Injury not found or does not belong to this user.');
+            return Response::error('Injury not found or access denied.');
         }
 
         $updateData = [];
@@ -122,8 +122,8 @@ class UpdateInjuryTool extends Tool
     {
         return [
             'injury_id' => $schema->integer()->description('The ID of the injury to update'),
-            'injury_type' => $schema->string()->description('Type of injury: acute, chronic, recurring, or post_surgery')->nullable(),
-            'body_part' => $schema->string()->description('Affected body part (e.g., knee, shoulder, lower_back)')->nullable(),
+            'injury_type' => $schema->string()->enum(InjuryType::class)->description('Type of injury.')->nullable(),
+            'body_part' => $schema->string()->enum(BodyPart::class)->description('Affected body part.')->nullable(),
             'started_at' => $schema->string()->description('Date when the injury started (YYYY-MM-DD)')->nullable(),
             'ended_at' => $schema->string()->description('Date when the injury was resolved (YYYY-MM-DD). Set to null to reopen.')->nullable(),
             'notes' => $schema->string()->description('Notes about the injury. Set to null to clear.')->nullable(),

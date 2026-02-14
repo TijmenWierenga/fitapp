@@ -48,3 +48,23 @@ it('respects custom limits', function () {
 
     $response->assertOk();
 });
+
+it('only returns workouts belonging to the authenticated user', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+    $otherUser = User::factory()->withTimezone('UTC')->create();
+
+    Workout::factory()->for($user)->create([
+        'name' => 'My Morning Run',
+        'scheduled_at' => now()->addDay(),
+    ]);
+    Workout::factory()->for($otherUser)->create([
+        'name' => 'Someone Else Yoga',
+        'scheduled_at' => now()->addDay(),
+    ]);
+
+    $response = WorkoutServer::actingAs($user)->tool(GetWorkoutScheduleTool::class);
+
+    $response->assertOk()
+        ->assertSee('My Morning Run')
+        ->assertDontSee('Someone Else Yoga');
+});

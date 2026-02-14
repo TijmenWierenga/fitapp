@@ -30,3 +30,19 @@ it('returns not configured message when no fitness profile exists', function () 
     $response->assertOk()
         ->assertSee('No fitness profile configured yet');
 });
+
+it('does not return another user\'s fitness profile', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+    $otherUser = User::factory()->withTimezone('UTC')->create();
+    FitnessProfile::factory()->for($otherUser)->create([
+        'goal_details' => 'Secret training plan',
+        'available_days_per_week' => 6,
+        'minutes_per_session' => 120,
+    ]);
+
+    $response = WorkoutServer::actingAs($user)->tool(GetFitnessProfileTool::class);
+
+    $response->assertOk()
+        ->assertSee('No fitness profile configured yet')
+        ->assertDontSee('Secret training plan');
+});

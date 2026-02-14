@@ -16,9 +16,7 @@ class DeleteWorkoutTool extends Tool
      * The tool's description.
      */
     protected string $description = <<<'MARKDOWN'
-        Delete a workout. Business rules:
-        - Cannot delete completed workouts
-        - Cannot delete past workouts (except today's workouts)
+        Delete a workout when it is no longer needed.
     MARKDOWN;
 
     /**
@@ -39,11 +37,7 @@ class DeleteWorkoutTool extends Tool
         }
 
         if ($user->cannot('delete', $workout)) {
-            if ($workout->isCompleted()) {
-                return Response::error('Cannot delete a completed workout.');
-            }
-
-            return Response::error('Cannot delete past workouts (except today).');
+            return Response::error('You do not have permission to delete this workout.');
         }
 
         $workout->delete();

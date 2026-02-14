@@ -186,7 +186,7 @@ it('can delete a workout scheduled for today', function () {
     expect(Workout::count())->toBe(0);
 });
 
-it('cannot delete a past workout', function () {
+it('can delete a past workout', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create([
         'scheduled_at' => now()->subDay(),
@@ -199,9 +199,7 @@ it('cannot delete a past workout', function () {
         ->call('deleteWorkout', $workout->id)
         ->assertStatus(200);
 
-    // Workout should still exist
-    expect(Workout::count())->toBe(1);
-    expect($workout->fresh())->not->toBeNull();
+    expect(Workout::count())->toBe(0);
 });
 
 it('cannot delete another users workout', function () {

@@ -101,8 +101,7 @@
                                             </flux:button>
                                         </div>
 
-                                        @if($workout->canBeEdited())
-                                            <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                                        <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
                                                 <flux:button
                                                     href="{{ route('workouts.edit', $workout) }}"
                                                     variant="ghost"
@@ -112,7 +111,6 @@
                                                     Edit Workout
                                                 </flux:button>
                                             </div>
-                                        @endif
 
                                         <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
                                             <flux:button

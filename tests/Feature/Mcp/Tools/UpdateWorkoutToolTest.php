@@ -94,8 +94,8 @@ it('fails to update workout owned by different user', function () {
         ->assertSee('Workout not found or access denied.');
 });
 
-it('fails to update completed workout', function () {
-    $user = User::factory()->create();
+it('updates completed workout successfully', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
     $workout = Workout::factory()->for($user)->completed()->create();
 
     $response = WorkoutServer::actingAs($user)->tool(UpdateWorkoutTool::class, [
@@ -103,8 +103,13 @@ it('fails to update completed workout', function () {
         'name' => 'New Name',
     ]);
 
-    $response->assertHasErrors()
-        ->assertSee('Cannot update a completed workout.');
+    $response->assertOk()
+        ->assertSee('Workout updated successfully');
+
+    assertDatabaseHas('workouts', [
+        'id' => $workout->id,
+        'name' => 'New Name',
+    ]);
 });
 
 it('fails with non-existent workout_id', function () {

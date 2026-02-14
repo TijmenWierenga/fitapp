@@ -95,8 +95,7 @@
                         </flux:button>
                     @endif
 
-                    @if($workout->canBeEdited())
-                        <flux:button
+                    <flux:button
                             href="{{ route('workouts.edit', $workout) }}"
                             variant="filled"
                             icon="pencil"
@@ -104,7 +103,6 @@
                         >
                             Edit Workout
                         </flux:button>
-                    @endif
 
                     <flux:button
                         wire:click="$dispatch('duplicate-workout', { workoutId: {{ $workout->id }} })"

@@ -26,7 +26,7 @@ class UpdateWorkoutTool extends Tool
      * The tool's description.
      */
     protected string $description = <<<'MARKDOWN'
-        Update an existing workout. Only workouts that have not been completed can be updated.
+        Update an existing workout.
 
         You can update the name, activity, scheduled time, notes, or sections. Only provide the fields you want to change.
 
@@ -59,7 +59,7 @@ class UpdateWorkoutTool extends Tool
         }
 
         if ($user->cannot('update', $workout)) {
-            return Response::error('Cannot update a completed workout.');
+            return Response::error('You do not have permission to update this workout.');
         }
 
         $updateData = [];

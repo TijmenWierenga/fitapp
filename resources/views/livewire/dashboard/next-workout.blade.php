@@ -64,15 +64,13 @@
             @endif
 
             <div class="mt-auto pt-4 flex flex-col sm:flex-row gap-2">
-                @if($this->nextWorkout->canBeEdited())
-                    <flux:button
+                <flux:button
                         href="{{ route('workouts.edit', $this->nextWorkout) }}"
                         variant="ghost"
                         class="flex-1 w-full sm:w-auto"
                     >
                         Edit Workout
                     </flux:button>
-                @endif
                 <flux:button
                     href="{{ route('workouts.show', $this->nextWorkout) }}"
                     variant="primary"

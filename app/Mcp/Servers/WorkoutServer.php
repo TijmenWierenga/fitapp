@@ -71,9 +71,9 @@ class WorkoutServer extends Server
         ## Workout Lifecycle
 
         1. **Create** workout with activity, name, and schedule
-        2. **Update** (optional) before completion — modify name, activity, schedule, notes, or structure
+        2. **Update** — modify name, activity, schedule, notes, or structure
         3. **Complete** with RPE and feeling ratings
-        4. **Delete** only if not completed and not past (except today's workouts)
+        4. **Delete** when no longer needed
 
         ## Creating Workout Plans
 
@@ -120,8 +120,6 @@ class WorkoutServer extends Server
 
         ## Business Rules
 
-        - Completed workouts cannot be edited or deleted
-        - Past workouts cannot be deleted (except today's workouts)
         - Workouts can only be completed once
         - All dates/times are handled in the user's timezone
 

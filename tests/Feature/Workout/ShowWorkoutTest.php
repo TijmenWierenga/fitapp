@@ -119,7 +119,7 @@ it('shows edit button for editable workout', function () {
         ->assertSee('Edit Workout');
 });
 
-it('hides edit button for completed workout', function () {
+it('shows edit button for completed workout', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create([
         'completed_at' => now(),
@@ -127,7 +127,7 @@ it('hides edit button for completed workout', function () {
 
     Livewire::actingAs($user)
         ->test(Show::class, ['workout' => $workout])
-        ->assertDontSee('Edit Workout');
+        ->assertSee('Edit Workout');
 });
 
 it('can delete a deletable workout', function () {
@@ -147,7 +147,7 @@ it('can delete a deletable workout', function () {
     expect(Workout::count())->toBe(0);
 });
 
-it('cannot delete a completed workout', function () {
+it('can delete a completed workout', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create([
         'completed_at' => now(),
@@ -155,9 +155,10 @@ it('cannot delete a completed workout', function () {
 
     Livewire::actingAs($user)
         ->test(Show::class, ['workout' => $workout])
-        ->call('deleteWorkout');
+        ->call('deleteWorkout')
+        ->assertRedirect(route('dashboard'));
 
-    expect(Workout::count())->toBe(1);
+    expect(Workout::count())->toBe(0);
 });
 
 it('shows duplicate button', function () {
@@ -217,7 +218,7 @@ it('shows delete button for deletable workout', function () {
         ->assertSee('Delete');
 });
 
-it('hides delete button for completed workout', function () {
+it('shows delete button for completed workout', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create([
         'scheduled_at' => now(),
@@ -226,7 +227,7 @@ it('hides delete button for completed workout', function () {
 
     Livewire::actingAs($user)
         ->test(Show::class, ['workout' => $workout])
-        ->assertDontSee('Delete');
+        ->assertSee('Delete');
 });
 
 // Workout Evaluation tests

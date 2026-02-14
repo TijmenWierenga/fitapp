@@ -24,7 +24,7 @@ class SearchExercisesTool extends Tool
 
         **Usage tips:**
         - Use `query` to search by exercise name (e.g., "bench press", "squat")
-        - Use `muscle_group` to find exercises targeting a specific muscle (e.g., "chest", "hamstrings")
+        - Use `muscle_group` to find exercises targeting a specific muscle — read the `exercise://muscle-groups` resource for valid values
         - Combine filters for precise results (e.g., query="press" + equipment="dumbbell")
         - Primary muscles (load_factor 1.0) receive full training volume; secondary (0.5) receive half
     MARKDOWN;
@@ -103,7 +103,7 @@ class SearchExercisesTool extends Tool
     {
         return [
             'query' => $schema->string()->description('Text search on exercise name (e.g., "bench press", "squat")')->nullable(),
-            'muscle_group' => $schema->string()->description('Filter by muscle group name (e.g., "chest", "hamstrings", "quadriceps")')->nullable(),
+            'muscle_group' => $schema->string()->description('Filter by muscle group name. Read the `exercise://muscle-groups` resource for valid values.')->nullable(),
             'category' => $schema->string()->description('Filter by category: strength, stretching, plyometrics, cardio')->nullable(),
             'equipment' => $schema->string()->description('Filter by equipment type (e.g., "barbell", "dumbbell", "body only", "machine")')->nullable(),
             'level' => $schema->string()->description('Filter by difficulty: beginner, intermediate, expert')->nullable(),

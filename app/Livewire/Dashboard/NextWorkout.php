@@ -15,6 +15,7 @@ class NextWorkout extends Component
         return auth()->user()
             ->workouts()
             ->upcoming()
+            ->with(['sections.blocks.exercises.exerciseable'])
             ->first();
     }
 

@@ -10,29 +10,56 @@
                     </a>
                     <x-activity-badge :activity="$this->nextWorkout->activity" />
                 </div>
-                <flux:text class="text-zinc-500 dark:text-zinc-400 text-sm sm:text-base">
-                    {{ $this->nextWorkout->scheduled_at->format('l, F j, Y') }}
-                </flux:text>
-                <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-1">
+                <div class="flex items-center gap-2 flex-wrap">
                     <flux:text class="text-zinc-500 dark:text-zinc-400 text-sm">
-                        {{ $this->nextWorkout->scheduled_at->format('g:i A') }}
+                        {{ $this->nextWorkout->scheduled_at->format('l, M j') }} &middot; {{ $this->nextWorkout->scheduled_at->format('g:i A') }}
                     </flux:text>
+                    <x-workout-schedule-badge :scheduled-at="$this->nextWorkout->scheduled_at" />
                 </div>
             </div>
 
-            <div class="flex flex-col gap-2">
-                <x-workout-schedule-badge :scheduled-at="$this->nextWorkout->scheduled_at" />
-            </div>
-
             @if($this->nextWorkout->notes)
-                <flux:card class="bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700">
+                <flux:card class="bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700" x-data="{ clamped: false }" x-init="$nextTick(() => { clamped = $refs.notes.scrollHeight > $refs.notes.clientHeight })">
                     <flux:heading size="sm" class="mb-2 text-zinc-700 dark:text-zinc-300">Notes</flux:heading>
-                    <div class="prose prose-sm prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400 line-clamp-3">
+                    <div x-ref="notes" class="prose prose-sm prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400 line-clamp-3">
                         {!! Str::markdown($this->nextWorkout->notes, ['html_input' => 'escape']) !!}
                     </div>
-                    <a href="{{ route('workouts.show', $this->nextWorkout) }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-1 inline-block">
+                    <a x-show="clamped" x-cloak href="{{ route('workouts.show', $this->nextWorkout) }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-1 inline-block">
                         Read more
                     </a>
+                </flux:card>
+            @endif
+
+            @if($this->nextWorkout->sections->isNotEmpty())
+                <flux:card class="bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700">
+                    <flux:heading size="sm" class="mb-2 text-zinc-700 dark:text-zinc-300">Workout Structure</flux:heading>
+                    <div class="space-y-4">
+                        @foreach($this->nextWorkout->sections as $section)
+                            <div>
+                                @if($section->name)
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500 mb-1">{{ $section->name }}</p>
+                                @endif
+                                <div class="space-y-0.5">
+                                    @foreach($section->blocks as $block)
+                                        @if(!$loop->first)
+                                            <flux:separator class="!my-2" />
+                                        @endif
+                                        @foreach($block->exercises as $exercise)
+                                            @php $presentation = $exercise->exerciseable->present(); @endphp
+                                            <div class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                                                <span class="size-1.5 rounded-full {{ $presentation->dotColor }} shrink-0"></span>
+                                                <span class="font-medium text-zinc-700 dark:text-zinc-300">{{ $exercise->name }}</span>
+                                                @if(!empty($presentation->whatLines))
+                                                    <span class="text-zinc-400 dark:text-zinc-500">&middot;</span>
+                                                    <span class="truncate">{{ implode(', ', $presentation->whatLines) }}</span>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </flux:card>
             @endif
 

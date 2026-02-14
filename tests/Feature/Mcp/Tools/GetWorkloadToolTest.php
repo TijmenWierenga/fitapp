@@ -20,7 +20,8 @@ it('returns empty workload for user with no completed workouts', function (): vo
 
     $response->assertOk()
         ->assertSee('"muscle_groups": []')
-        ->assertSee('"unlinked_exercise_count": 0');
+        ->assertSee('"unlinked_exercise_count": 0')
+        ->assertSee('"data_span_days": 0');
 });
 
 it('returns workload data with muscle group loads', function (): void {
@@ -50,7 +51,8 @@ it('returns workload data with muscle group loads', function (): void {
 
     $response->assertOk()
         ->assertSee('"muscle_group": "chest"')
-        ->assertSee('"acute_load": 21');
+        ->assertSee('"acute_load": 21')
+        ->assertSee('"data_span_days":');
 });
 
 it('includes active injuries', function (): void {

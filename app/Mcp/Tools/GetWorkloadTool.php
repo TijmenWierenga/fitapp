@@ -28,6 +28,8 @@ class GetWorkloadTool extends Tool
         - **caution** (1.3–1.5): Elevated injury risk, consider reducing load
         - **danger** (> 1.5): High injury risk, strongly recommend reducing load
 
+        The response includes a `data_span_days` field (0–28) indicating how many days of workout history are available. When `data_span_days` is below 28, ACWR values may be unreliable because the chronic load is calculated over a fixed 4-week window regardless of actual data coverage. Treat zone classifications with caution when data is incomplete.
+
         Use this data to:
         - Balance workouts across muscle groups
         - Avoid overloading muscles in caution/danger zones

@@ -166,6 +166,7 @@ it('calculates ACWR and determines zones', function (): void {
     // ACWR = 30 / 30 = 1.0
     expect($chestWorkload->acwr)->toBe(1.0);
     expect($chestWorkload->zone)->toBe(WorkloadZone::SweetSpot);
+    expect($result->dataSpanDays)->toBe(24);
 });
 
 it('excludes unlinked exercises and counts them', function (): void {
@@ -195,6 +196,7 @@ it('returns empty results for empty history', function (): void {
 
     expect($result->muscleGroups)->toBeEmpty();
     expect($result->unlinkedExerciseCount)->toBe(0);
+    expect($result->dataSpanDays)->toBe(0);
 });
 
 it('uses block rounds as fallback when target_sets is null', function (): void {
@@ -324,4 +326,36 @@ it('uses default RPE when not specified for strength', function (): void {
     $chestWorkload = $result->muscleGroups->firstWhere('muscleGroupName', 'chest');
     // 3 x 10 x (5/10) = 15.0 (default RPE = 5)
     expect($chestWorkload->acuteLoad)->toBe(15.0);
+});
+
+it('calculates data span days from earliest workout', function (): void {
+    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
+    $exercise = Exercise::factory()->create();
+    $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
+
+    // Earliest workout 5 days ago
+    $workout = createCompletedWorkout($this->user, $this->now->subDays(5));
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->create(['section_id' => $section->id]);
+    createLinkedStrengthExercise($block, $exercise);
+
+    $result = $this->action->execute($this->user, $this->now);
+
+    expect($result->dataSpanDays)->toBe(5);
+});
+
+it('caps data span days at 28', function (): void {
+    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
+    $exercise = Exercise::factory()->create();
+    $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
+
+    // Workout exactly 28 days ago (the query window boundary)
+    $workout = createCompletedWorkout($this->user, $this->now->subDays(27));
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->create(['section_id' => $section->id]);
+    createLinkedStrengthExercise($block, $exercise);
+
+    $result = $this->action->execute($this->user, $this->now);
+
+    expect($result->dataSpanDays)->toBe(27);
 });

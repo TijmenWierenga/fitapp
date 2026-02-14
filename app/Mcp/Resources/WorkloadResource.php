@@ -58,6 +58,10 @@ class WorkloadResource extends Resource
             return $this->appendInjuries($content, $summary);
         }
 
+        if ($summary->dataSpanDays < 28) {
+            $content .= "> **Data reliability:** Based on {$summary->dataSpanDays} of 28 days. ACWR values may not be reliable yet.\n\n";
+        }
+
         $content .= "| Muscle Group | Acute Load | Chronic Load | ACWR | Zone |\n";
         $content .= "|---|---|---|---|---|\n";
 

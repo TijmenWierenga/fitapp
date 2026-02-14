@@ -27,6 +27,11 @@
             No workload data yet. Complete workouts with linked exercises to see your muscle group workload distribution.
         </flux:text>
     @else
+        @if($summary->dataSpanDays < 28)
+            <flux:callout variant="warning" class="mb-4">
+                Based on {{ $summary->dataSpanDays }} {{ Str::plural('day', $summary->dataSpanDays) }} of data. ACWR zones require 4 weeks of history to be reliable.
+            </flux:callout>
+        @endif
         <div class="space-y-3">
             @foreach($muscleGroups->sortByDesc('acuteLoad') as $workload)
                 @php

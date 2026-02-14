@@ -16,6 +16,7 @@ readonly class WorkloadSummary
         public Collection $muscleGroups,
         public Collection $activeInjuries,
         public int $unlinkedExerciseCount,
+        public int $dataSpanDays,
     ) {}
 
     /**
@@ -27,6 +28,7 @@ readonly class WorkloadSummary
             'muscle_groups' => $this->muscleGroups->map(fn (MuscleGroupWorkload $workload): array => $workload->toArray())->values()->toArray(),
             'active_injuries' => $this->activeInjuries->toArray(),
             'unlinked_exercise_count' => $this->unlinkedExerciseCount,
+            'data_span_days' => $this->dataSpanDays,
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Mcp\Servers;
 
 use App\Mcp\Prompts\CreateWorkoutPrompt;
+use App\Mcp\Resources\MuscleGroupsResource;
 use App\Mcp\Resources\UserFitnessProfileResource;
 use App\Mcp\Resources\UserInjuriesResource;
 use App\Mcp\Resources\UserProfileResource;
@@ -81,6 +82,19 @@ class WorkoutServer extends Server
         - Each workout is independent but can follow a progression
         - Use descriptive names to indicate plan structure (e.g., "Week 1: Easy Run", "Week 2: Tempo Run")
 
+        ## Workout Structure
+
+        Every structured workout MUST include three sections in this order:
+
+        1. **Warm-Up** — Prepare the body for the main work. Include light cardio, dynamic stretches, or activation exercises relevant to the workout. Typically 5–10 minutes.
+        2. **Main Work** — The core training block(s) with the primary exercises.
+        3. **Cool-Down** — Aid recovery with static stretching, foam rolling, or light movement targeting the muscles worked. Typically 5–10 minutes.
+
+        Adapt warm-up and cool-down content to the workout type:
+        - **Strength:** Warm-up with light sets or mobility drills for the target muscles; cool-down with static stretches for worked muscle groups
+        - **Running/Cardio:** Warm-up with easy pace or dynamic leg stretches; cool-down with walking and lower body stretches
+        - **Yoga/Mobility:** Warm-up can be gentler; cool-down may include savasana or breathing exercises
+
         ## Workout Notes
 
         Notes support Markdown. Write detailed, actionable notes including: equipment needed, step-by-step phases (warm-up, main work, cool-down), sets/reps/intensity, rest periods, and modifications. Adapt detail level to workout type.
@@ -97,6 +111,7 @@ class WorkoutServer extends Server
         ## Exercise Library
 
         Use the `search-exercises` tool to find exercises from the catalog:
+        - Read the `exercise://muscle-groups` resource for a complete list of available muscle groups and their names
         - Search by name, muscle group, category, equipment, or difficulty level
         - Always link exercises to workouts via `exercise_id` to enable workload tracking
         - Primary muscles (load factor 1.0) receive full training volume
@@ -206,6 +221,7 @@ class WorkoutServer extends Server
         UserInjuriesResource::class,
         WorkoutScheduleResource::class,
         WorkloadResource::class,
+        MuscleGroupsResource::class,
     ];
 
     /**

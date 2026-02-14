@@ -52,7 +52,7 @@ class CalculateWorkload
     {
         return $user->workouts()
             ->completedBetween($asOf->subDays(self::CHRONIC_WINDOW_DAYS), $asOf)
-            ->with('sections.blocks.exercises.exerciseable', 'sections.blocks.exercises.exercise.muscleGroups')
+            ->with(['sections.blocks.exercises.exerciseable', 'sections.blocks.exercises.exercise.muscleGroups'])
             ->get();
     }
 

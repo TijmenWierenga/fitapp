@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Scout\Searchable;
 
 class Exercise extends Model
 {
     /** @use HasFactory<\Database\Factories\ExerciseFactory> */
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $fillable = [
         'name',
@@ -30,6 +31,20 @@ class Exercise extends Model
         'aliases' => 'array',
         'tips' => 'array',
     ];
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'category' => $this->category,
+            'equipment' => $this->equipment,
+            'level' => $this->level,
+        ];
+    }
 
     /**
      * @return BelongsToMany<MuscleGroup, $this>

@@ -6,6 +6,7 @@ use App\Mcp\Prompts\CreateWorkoutPrompt;
 use App\Mcp\Resources\UserFitnessProfileResource;
 use App\Mcp\Resources\UserInjuriesResource;
 use App\Mcp\Resources\UserProfileResource;
+use App\Mcp\Resources\WorkloadResource;
 use App\Mcp\Resources\WorkoutScheduleResource;
 use App\Mcp\Tools\AddInjuryReportTool;
 use App\Mcp\Tools\AddInjuryTool;
@@ -23,6 +24,7 @@ use App\Mcp\Tools\ListInjuryReportsTool;
 use App\Mcp\Tools\ListWorkoutsTool;
 use App\Mcp\Tools\PingTool;
 use App\Mcp\Tools\RemoveInjuryTool;
+use App\Mcp\Tools\SearchExercisesTool;
 use App\Mcp\Tools\UpdateFitnessProfileTool;
 use App\Mcp\Tools\UpdateInjuryReportTool;
 use App\Mcp\Tools\UpdateInjuryTool;
@@ -91,6 +93,15 @@ class WorkoutServer extends Server
         - Prioritize undertrained muscle groups when balancing weekly plans
         - Cross-reference active injuries with muscle group load — if a muscle group near an injured body part is in caution/danger, flag this to the user
         - Link exercises to the exercise library (via `exercise_id`) to enable workload tracking
+
+        ## Exercise Library
+
+        Use the `search-exercises` tool to find exercises from the catalog:
+        - Search by name, muscle group, category, equipment, or difficulty level
+        - Always link exercises to workouts via `exercise_id` to enable workload tracking
+        - Primary muscles (load factor 1.0) receive full training volume
+        - Secondary muscles (load factor 0.5) receive half the training volume
+        - Cross-reference with workload zones before selecting exercises
 
         ## Business Rules
 
@@ -181,6 +192,7 @@ class WorkoutServer extends Server
         ListInjuryReportsTool::class,
         UpdateInjuryReportTool::class,
         DeleteInjuryReportTool::class,
+        SearchExercisesTool::class,
     ];
 
     /**
@@ -193,6 +205,7 @@ class WorkoutServer extends Server
         UserFitnessProfileResource::class,
         UserInjuriesResource::class,
         WorkoutScheduleResource::class,
+        WorkloadResource::class,
     ];
 
     /**

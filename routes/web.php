@@ -39,6 +39,8 @@ Route::get('workouts/{workout}', WorkoutShow::class)
     ->name('workouts.show');
 
 Route::middleware(['auth'])->group(function () {
+    Route::view('workload-guide', 'workload-guide')->name('workload-guide');
+
     Route::redirect('settings', 'settings/profile');
 
     Route::get('settings/profile', Profile::class)->name('profile.edit');

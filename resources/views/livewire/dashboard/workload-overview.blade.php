@@ -1,5 +1,19 @@
 <flux:card>
-    <flux:heading size="lg" class="mb-4">Muscle Group Workload</flux:heading>
+    <div class="mb-4">
+        <flux:heading size="lg" class="flex items-center gap-2">
+            Muscle Group Workload
+            <flux:tooltip toggleable>
+                <flux:button icon="information-circle" size="sm" variant="ghost" />
+                <flux:tooltip.content class="max-w-[18rem]">
+                    Shows training stress on each muscle group over the past 7 days, compared to your 4-week average.
+                </flux:tooltip.content>
+            </flux:tooltip>
+        </flux:heading>
+        <flux:text class="mt-1 text-sm">
+            Your recent training load per muscle group.
+            <flux:link href="{{ route('workload-guide') }}" variant="subtle" class="inline" wire:navigate>Learn how it works</flux:link>
+        </flux:text>
+    </div>
 
     @php
         $summary = $this->workloadSummary;
@@ -31,6 +45,13 @@
                     };
                     $hasInjuryWarning = in_array($workload->bodyPart, $injuredBodyParts)
                         && in_array($workload->zone, ['caution', 'danger']);
+                    $zoneLabel = match ($workload->zone) {
+                        'sweet_spot' => 'Sweet Spot',
+                        'caution' => 'Caution',
+                        'danger' => 'Danger',
+                        'undertraining' => 'Undertraining',
+                        default => 'Inactive',
+                    };
                 @endphp
                 <div>
                     <div class="flex items-center justify-between mb-1">
@@ -41,9 +62,16 @@
                             @endif
                         </div>
                         <div class="flex items-center gap-2">
-                            <flux:text class="text-xs text-zinc-500 dark:text-zinc-400">{{ number_format($workload->acuteLoad, 1) }}</flux:text>
+                            <flux:tooltip toggleable content="Total volume for this muscle group in the last 7 days.">
+                                <flux:text class="text-xs text-zinc-500 dark:text-zinc-400 cursor-help">{{ number_format($workload->acuteLoad, 1) }}</flux:text>
+                            </flux:tooltip>
                             @if($workload->acwr > 0)
-                                <flux:badge size="sm" variant="{{ $badgeVariant }}">{{ $workload->acwr }}</flux:badge>
+                                <flux:tooltip toggleable>
+                                    <flux:badge size="sm" variant="{{ $badgeVariant }}">{{ $workload->acwr }}</flux:badge>
+                                    <flux:tooltip.content class="max-w-[16rem]">
+                                        ACWR {{ $workload->acwr }} — {{ $zoneLabel }} zone. Ratio of 7-day load to 4-week weekly average.
+                                    </flux:tooltip.content>
+                                </flux:tooltip>
                             @endif
                         </div>
                     </div>
@@ -56,18 +84,26 @@
         </div>
 
         <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-            <div class="flex items-center gap-1">
-                <span class="inline-block w-2 h-2 rounded-full bg-zinc-400"></span> Undertraining
-            </div>
-            <div class="flex items-center gap-1">
-                <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span> Sweet Spot
-            </div>
-            <div class="flex items-center gap-1">
-                <span class="inline-block w-2 h-2 rounded-full bg-yellow-500"></span> Caution
-            </div>
-            <div class="flex items-center gap-1">
-                <span class="inline-block w-2 h-2 rounded-full bg-red-500"></span> Danger
-            </div>
+            <flux:tooltip toggleable content="ACWR below 0.8 — you may be losing fitness.">
+                <div class="flex items-center gap-1 cursor-help">
+                    <span class="inline-block w-2 h-2 rounded-full bg-zinc-400"></span> Undertraining
+                </div>
+            </flux:tooltip>
+            <flux:tooltip toggleable content="ACWR 0.8–1.3 — optimal training zone.">
+                <div class="flex items-center gap-1 cursor-help">
+                    <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span> Sweet Spot
+                </div>
+            </flux:tooltip>
+            <flux:tooltip toggleable content="ACWR 1.3–1.5 — elevated injury risk.">
+                <div class="flex items-center gap-1 cursor-help">
+                    <span class="inline-block w-2 h-2 rounded-full bg-yellow-500"></span> Caution
+                </div>
+            </flux:tooltip>
+            <flux:tooltip toggleable content="ACWR above 1.5 — high injury risk, consider reducing load.">
+                <div class="flex items-center gap-1 cursor-help">
+                    <span class="inline-block w-2 h-2 rounded-full bg-red-500"></span> Danger
+                </div>
+            </flux:tooltip>
         </div>
     @endif
 

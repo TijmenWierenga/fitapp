@@ -75,6 +75,44 @@ it('shows unlinked exercise count', function (): void {
         ->assertSee('1 exercise not linked');
 });
 
+it('renders explanation text and guide link', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    Livewire::actingAs($user)
+        ->test(WorkloadOverview::class)
+        ->assertSee('Your recent training load per muscle group.')
+        ->assertSee('Learn how it works');
+});
+
+it('renders tooltip content for zone legend', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);
+    $exercise = Exercise::factory()->create();
+    $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
+
+    $workout = Workout::factory()->create([
+        'user_id' => $user->id,
+        'completed_at' => now()->subDays(2),
+        'scheduled_at' => now()->subDays(2),
+        'rpe' => 7,
+        'feeling' => 4,
+    ]);
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->create(['section_id' => $section->id]);
+    $strength = StrengthExercise::factory()->create(['target_sets' => 3, 'target_reps_max' => 10, 'target_rpe' => 7.0]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exercise_id' => $exercise->id,
+        'exerciseable_type' => $strength->getMorphClass(),
+        'exerciseable_id' => $strength->id,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(WorkloadOverview::class)
+        ->assertSee('ACWR 0.8–1.3 — optimal training zone.')
+        ->assertSee('Total volume for this muscle group in the last 7 days.');
+});
+
 it('shows injury warning for injured muscles in caution zone', function (): void {
     $user = User::factory()->withTimezone('UTC')->create();
     $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);

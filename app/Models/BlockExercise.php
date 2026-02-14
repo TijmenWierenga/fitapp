@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-/**
- * @property-read Exercise|null $exercise
- */
 class BlockExercise extends Model
 {
     /** @use HasFactory<\Database\Factories\BlockExerciseFactory> */

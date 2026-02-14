@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\DataTransferObjects\Workload\MuscleGroupWorkload;
 use App\DataTransferObjects\Workload\WorkloadSummary;
 use App\Models\Block;
 use App\Models\BlockExercise;
@@ -11,7 +12,7 @@ use App\Models\MuscleGroup;
 use App\Models\StrengthExercise;
 use App\Models\User;
 use App\Models\Workout;
-use App\Support\Workout\LoadAccumulator;
+use App\Support\Workout\Load;
 use Carbon\CarbonImmutable;
 use Generator;
 use Illuminate\Support\Collection;
@@ -32,16 +33,26 @@ class CalculateWorkload
         $acuteStart = $asOf->subDays(self::ACUTE_WINDOW_DAYS);
 
         $workouts = $this->completedWorkoutsInWindow($user, $asOf);
-        $accumulator = new LoadAccumulator(MuscleGroup::all()->keyBy('id'));
+        $muscleGroups = MuscleGroup::all()->keyBy('id');
+
+        /** @var Collection<int, Load> $loads */
+        $loads = $muscleGroups->map(fn (): Load => Load::zero());
+        $unlinkedCount = 0;
 
         foreach ($this->allBlockExercises($workouts) as [$blockExercise, $block, $workout]) {
-            $this->distributeLoad($blockExercise, $block, $workout->completed_at >= $acuteStart, $accumulator);
+            if ($blockExercise->exercise_id === null) {
+                $unlinkedCount++;
+
+                continue;
+            }
+
+            $this->distributeLoad($blockExercise, $block, $workout->completed_at >= $acuteStart, $loads);
         }
 
         return new WorkloadSummary(
-            muscleGroups: $accumulator->toMuscleGroupWorkloads(self::CHRONIC_WINDOW_DAYS / 7),
+            muscleGroups: $this->buildMuscleGroupWorkloads($muscleGroups, $loads),
             activeInjuries: $this->activeInjuries($user),
-            unlinkedExerciseCount: $accumulator->unlinkedCount(),
+            unlinkedExerciseCount: $unlinkedCount,
         );
     }
 
@@ -73,14 +84,11 @@ class CalculateWorkload
         }
     }
 
-    private function distributeLoad(BlockExercise $blockExercise, Block $block, bool $isAcute, LoadAccumulator $accumulator): void
+    /**
+     * @param  Collection<int, Load>  $loads
+     */
+    private function distributeLoad(BlockExercise $blockExercise, Block $block, bool $isAcute, Collection $loads): void
     {
-        if ($blockExercise->exercise_id === null) {
-            $accumulator->recordUnlinked();
-
-            return;
-        }
-
         $exercise = $blockExercise->exercise;
 
         if (! $exercise || $exercise->muscleGroups->isEmpty()) {
@@ -91,8 +99,29 @@ class CalculateWorkload
 
         foreach ($exercise->muscleGroups as $muscleGroup) {
             $load = $volume * (float) $muscleGroup->pivot->load_factor;
-            $accumulator->addLoad($muscleGroup->id, $load, $isAcute);
+            $loads[$muscleGroup->id] = $loads[$muscleGroup->id]->addVolume($load, $isAcute);
         }
+    }
+
+    /**
+     * @param  Collection<int, MuscleGroup>  $muscleGroups
+     * @param  Collection<int, Load>  $loads
+     * @return Collection<int, MuscleGroupWorkload>
+     */
+    private function buildMuscleGroupWorkloads(Collection $muscleGroups, Collection $loads): Collection
+    {
+        $chronicWeeks = self::CHRONIC_WINDOW_DAYS / 7;
+
+        return $muscleGroups
+            ->map(fn (MuscleGroup $mg): MuscleGroupWorkload => new MuscleGroupWorkload(
+                muscleGroupName: $mg->name,
+                muscleGroupLabel: $mg->label,
+                bodyPart: $mg->body_part->value,
+                acuteLoad: $loads[$mg->id]->acute,
+                chronicLoad: $loads[$mg->id]->chronic / $chronicWeeks,
+            ))
+            ->filter(fn (MuscleGroupWorkload $w): bool => $w->acuteLoad > 0 || $w->chronicLoad > 0)
+            ->values();
     }
 
     /**

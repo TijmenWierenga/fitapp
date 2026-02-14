@@ -158,6 +158,33 @@ Use the converter classes in `App\Support\Workout` when converting between stora
 
 ## Architecture Constraints
 
+### Value Objects Over Primitives
+Prefer rich domain objects and value objects over primitive types (arrays, floats, strings) for domain concepts. Value objects make intent explicit, centralize behavior, and are easier to test.
+
+```php
+// Good - value object with domain behavior
+readonly class Load
+{
+    public function __construct(
+        public float $acute,
+        public float $chronic,
+    ) {}
+
+    public function addVolume(float $volume, bool $isAcute): self
+    {
+        return new self(
+            acute: $isAcute ? $this->acute + $volume : $this->acute,
+            chronic: $this->chronic + $volume,
+        );
+    }
+}
+
+// Bad - primitive array with implicit structure
+/** @var array{acute: float, chronic: float} */
+$load = ['acute' => 0.0, 'chronic' => 0.0];
+$load['chronic'] += $volume;
+```
+
 ### No Service Location in Models
 Eloquent models must not use the `app()` helper. Extract business logic to dedicated action classes instead.
 

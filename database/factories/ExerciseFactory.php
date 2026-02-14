@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Exercise>
@@ -16,8 +17,11 @@ class ExerciseFactory extends Factory
      */
     public function definition(): array
     {
+        $name = fake()->unique()->words(3, true);
+
         return [
-            'name' => fake()->unique()->words(3, true),
+            'name' => $name,
+            'slug' => Str::slug($name),
             'force' => fake()->randomElement(['push', 'pull', 'static', null]),
             'level' => fake()->randomElement(['beginner', 'intermediate', 'expert']),
             'mechanic' => fake()->randomElement(['compound', 'isolation', null]),

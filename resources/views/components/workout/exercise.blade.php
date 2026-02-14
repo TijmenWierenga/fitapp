@@ -11,7 +11,17 @@
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
             <span class="size-2.5 rounded-full {{ $presentation->dotColor }} shrink-0"></span>
-            <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{{ $exercise->name }}</span>
+            @if($exercise->exercise_id)
+                <button
+                    type="button"
+                    wire:click="$dispatch('show-exercise-detail', { exerciseId: {{ $exercise->exercise_id }} })"
+                    class="text-sm font-semibold text-accent hover:underline text-left cursor-pointer"
+                >
+                    {{ $exercise->name }}
+                </button>
+            @else
+                <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{{ $exercise->name }}</span>
+            @endif
         </div>
         <span class="text-xs text-zinc-400 dark:text-zinc-500">{{ $presentation->typeLabel }}</span>
     </div>

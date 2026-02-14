@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Exercise\Show as ExerciseShow;
 use App\Livewire\GetStarted;
 use App\Livewire\Injury\Reports as InjuryReports;
 use App\Livewire\Settings\Appearance;
@@ -39,6 +40,8 @@ Route::get('workouts/{workout}', WorkoutShow::class)
     ->name('workouts.show');
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('exercises/{exercise}', ExerciseShow::class)->name('exercises.show');
+
     Route::view('workload-guide', 'workload-guide')->name('workload-guide');
 
     Route::redirect('settings', 'settings/profile');

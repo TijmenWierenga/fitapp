@@ -7,6 +7,7 @@ use App\Models\Exercise;
 use App\Models\MuscleGroup;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ExerciseSeeder extends Seeder
 {
@@ -66,6 +67,7 @@ class ExerciseSeeder extends Seeder
                 $exercise = Exercise::updateOrCreate(
                     ['name' => $data['name']],
                     [
+                        'slug' => Str::slug($data['name']),
                         'force' => $data['force'] ?? null,
                         'level' => $data['level'],
                         'mechanic' => $data['mechanic'] ?? null,

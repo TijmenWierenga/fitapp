@@ -48,7 +48,17 @@
                                             @php $presentation = $exercise->exerciseable->present(); @endphp
                                             <div class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
                                                 <span class="size-1.5 rounded-full {{ $presentation->dotColor }} shrink-0"></span>
-                                                <span class="font-medium text-zinc-700 dark:text-zinc-300">{{ $exercise->name }}</span>
+                                                @if($exercise->exercise_id)
+                                                    <button
+                                                        type="button"
+                                                        wire:click="$dispatch('show-exercise-detail', { exerciseId: {{ $exercise->exercise_id }} })"
+                                                        class="font-medium text-accent hover:underline text-left cursor-pointer"
+                                                    >
+                                                        {{ $exercise->name }}
+                                                    </button>
+                                                @else
+                                                    <span class="font-medium text-zinc-700 dark:text-zinc-300">{{ $exercise->name }}</span>
+                                                @endif
                                                 @if(!empty($presentation->whatLines))
                                                     <span class="text-zinc-400 dark:text-zinc-500">&middot;</span>
                                                     <span class="truncate">{{ implode(', ', $presentation->whatLines) }}</span>
@@ -87,4 +97,6 @@
             </flux:button>
         </x-empty-state>
     @endif
+
+    <livewire:exercise.detail />
 </flux:card>

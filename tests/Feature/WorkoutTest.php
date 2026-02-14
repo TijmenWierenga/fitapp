@@ -52,14 +52,6 @@ it('shows overdue workouts', function () {
         ->and($overdueWorkouts->last()->id)->toBe($overdue2->id);
 });
 
-it('checks if workout can be edited', function () {
-    $incomplete = Workout::factory()->create(['completed_at' => null]);
-    $complete = Workout::factory()->create(['completed_at' => now()]);
-
-    expect($incomplete->canBeEdited())->toBeTrue()
-        ->and($complete->canBeEdited())->toBeFalse();
-});
-
 it('can mark workout as completed with evaluation', function () {
     $workout = Workout::factory()->create(['completed_at' => null]);
 
@@ -111,46 +103,46 @@ it('can delete a workout scheduled for today', function () {
         ->and(Workout::find($workout->id))->toBeNull();
 });
 
-it('cannot delete a completed workout', function () {
+it('can delete a completed workout', function () {
     $workout = Workout::factory()->create([
         'scheduled_at' => now()->addDay(),
         'completed_at' => now(),
     ]);
 
-    expect($workout->canBeDeleted())->toBeFalse();
+    expect($workout->canBeDeleted())->toBeTrue();
 
     $result = $workout->deleteIfAllowed();
 
-    expect($result)->toBeFalse()
-        ->and(Workout::find($workout->id))->not->toBeNull();
+    expect($result)->toBeTrue()
+        ->and(Workout::find($workout->id))->toBeNull();
 });
 
-it('cannot delete a past workout', function () {
+it('can delete a past workout', function () {
     $workout = Workout::factory()->create([
         'scheduled_at' => now()->subDay(),
         'completed_at' => null,
     ]);
 
-    expect($workout->canBeDeleted())->toBeFalse();
+    expect($workout->canBeDeleted())->toBeTrue();
 
     $result = $workout->deleteIfAllowed();
 
-    expect($result)->toBeFalse()
-        ->and(Workout::find($workout->id))->not->toBeNull();
+    expect($result)->toBeTrue()
+        ->and(Workout::find($workout->id))->toBeNull();
 });
 
-it('cannot delete a completed past workout', function () {
+it('can delete a completed past workout', function () {
     $workout = Workout::factory()->create([
         'scheduled_at' => now()->subDay(),
         'completed_at' => now(),
     ]);
 
-    expect($workout->canBeDeleted())->toBeFalse();
+    expect($workout->canBeDeleted())->toBeTrue();
 
     $result = $workout->deleteIfAllowed();
 
-    expect($result)->toBeFalse()
-        ->and(Workout::find($workout->id))->not->toBeNull();
+    expect($result)->toBeTrue()
+        ->and(Workout::find($workout->id))->toBeNull();
 });
 
 it('deleting a workout removes related exerciseables', function () {

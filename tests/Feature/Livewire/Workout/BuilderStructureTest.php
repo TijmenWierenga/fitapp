@@ -260,13 +260,14 @@ it('validates required exercise name', function () {
         ->assertHasErrors('sections.0.blocks.0.exercises.0.name');
 });
 
-it('aborts editing a completed workout', function () {
+it('allows editing a completed workout', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->completed()->create();
 
     Livewire::actingAs($user)
         ->test(Builder::class, ['workout' => $workout])
-        ->assertForbidden();
+        ->assertOk()
+        ->assertSet('name', $workout->name);
 });
 
 it('redirects to workout show page after save', function () {

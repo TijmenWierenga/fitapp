@@ -40,7 +40,7 @@ it('deletes today\'s workout successfully', function () {
     ]);
 });
 
-it('fails to delete completed workout', function () {
+it('deletes completed workout successfully', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->completed()->create();
 
@@ -48,11 +48,15 @@ it('fails to delete completed workout', function () {
         'workout_id' => $workout->id,
     ]);
 
-    $response->assertHasErrors()
-        ->assertSee('Cannot delete a completed workout.');
+    $response->assertOk()
+        ->assertSee('Workout deleted successfully');
+
+    assertDatabaseMissing('workouts', [
+        'id' => $workout->id,
+    ]);
 });
 
-it('fails to delete past workout (not today)', function () {
+it('deletes past workout successfully', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create([
         'scheduled_at' => now()->subDays(2),
@@ -62,8 +66,12 @@ it('fails to delete past workout (not today)', function () {
         'workout_id' => $workout->id,
     ]);
 
-    $response->assertHasErrors()
-        ->assertSee('Cannot delete past workouts (except today).');
+    $response->assertOk()
+        ->assertSee('Workout deleted successfully');
+
+    assertDatabaseMissing('workouts', [
+        'id' => $workout->id,
+    ]);
 });
 
 it('fails to delete workout owned by different user', function () {

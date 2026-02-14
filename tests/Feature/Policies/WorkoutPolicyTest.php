@@ -33,11 +33,11 @@ describe('update', function () {
         expect($this->policy->update($user, $workout))->toBeTrue();
     });
 
-    it('denies update for completed workout', function () {
+    it('allows update for completed workout', function () {
         $user = User::factory()->create();
         $workout = Workout::factory()->for($user)->completed()->create();
 
-        expect($this->policy->update($user, $workout))->toBeFalse();
+        expect($this->policy->update($user, $workout))->toBeTrue();
     });
 
     it('denies other users from updating workout', function () {
@@ -57,11 +57,11 @@ describe('delete', function () {
         expect($this->policy->delete($user, $workout))->toBeTrue();
     });
 
-    it('denies delete for completed workout', function () {
+    it('allows delete for completed workout', function () {
         $user = User::factory()->create();
         $workout = Workout::factory()->for($user)->completed()->create();
 
-        expect($this->policy->delete($user, $workout))->toBeFalse();
+        expect($this->policy->delete($user, $workout))->toBeTrue();
     });
 
     it('denies other users from deleting workout', function () {

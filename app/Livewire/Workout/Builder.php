@@ -34,10 +34,6 @@ class Builder extends Component
     public function mount(?Workout $workout = null): void
     {
         if ($workout && $workout->exists) {
-            if (! $workout->canBeEdited()) {
-                abort(403, 'Completed workouts cannot be edited.');
-            }
-
             $this->workout = $workout;
             $this->name = $workout->name;
             $this->notes = $workout->notes;
@@ -179,10 +175,6 @@ class Builder extends Component
     public function saveWorkout(): void
     {
         $this->validate($this->validationRules());
-
-        if ($this->workout && $this->workout->exists && ! $this->workout->fresh()->canBeEdited()) {
-            abort(403, 'Completed workouts cannot be edited.');
-        }
 
         $scheduledAt = CarbonImmutable::parse("{$this->scheduled_date} {$this->scheduled_time}");
         $sectionDtos = $this->buildSectionDtos();

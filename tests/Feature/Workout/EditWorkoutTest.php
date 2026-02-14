@@ -18,7 +18,7 @@ it('displays edit links for uncompleted workouts on the dashboard', function () 
         ->assertSee(route('workouts.edit', $workout));
 });
 
-it('does not display edit links for completed workouts in the calendar', function () {
+it('displays edit links for completed workouts in the calendar', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create([
         'completed_at' => now(),
@@ -28,7 +28,7 @@ it('does not display edit links for completed workouts in the calendar', functio
     $this->actingAs($user)
         ->get(route('dashboard'))
         ->assertOk()
-        ->assertDontSee(route('workouts.edit', $workout));
+        ->assertSee(route('workouts.edit', $workout));
 });
 
 it('allows editing an uncompleted workout', function () {
@@ -46,7 +46,7 @@ it('allows editing an uncompleted workout', function () {
         ->assertSet('name', $workout->name);
 });
 
-it('prevents editing a completed workout', function () {
+it('allows editing a completed workout', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create([
         'completed_at' => now(),
@@ -54,14 +54,14 @@ it('prevents editing a completed workout', function () {
 
     $this->actingAs($user)
         ->get(route('workouts.edit', $workout))
-        ->assertForbidden();
+        ->assertOk();
 
     Livewire::actingAs($user)
         ->test(Builder::class, ['workout' => $workout])
-        ->assertStatus(403);
+        ->assertSet('name', $workout->name);
 });
 
-it('prevents saving a completed workout', function () {
+it('allows saving a workout that was completed in the background', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create([
         'completed_at' => null,
@@ -75,5 +75,5 @@ it('prevents saving a completed workout', function () {
     $workout->update(['completed_at' => now()]);
 
     $component->call('saveWorkout')
-        ->assertStatus(403);
+        ->assertRedirect(route('workouts.show', $workout));
 });

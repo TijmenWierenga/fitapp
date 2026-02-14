@@ -131,11 +131,6 @@ class Workout extends Model
         return $this->completed_at !== null;
     }
 
-    public function canBeEdited(): bool
-    {
-        return ! $this->isCompleted();
-    }
-
     public function markAsCompleted(int $rpe, int $feeling): void
     {
         $this->update([
@@ -147,14 +142,6 @@ class Workout extends Model
 
     public function canBeDeleted(): bool
     {
-        if ($this->isCompleted()) {
-            return false;
-        }
-
-        if ($this->scheduled_at->isPast() && ! $this->scheduled_at->isToday()) {
-            return false;
-        }
-
         return true;
     }
 

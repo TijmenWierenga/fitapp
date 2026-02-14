@@ -113,7 +113,7 @@ class CalculateWorkload
         $chronicWeeks = self::CHRONIC_WINDOW_DAYS / 7;
 
         return $muscleGroups
-            ->map(fn (MuscleGroup $mg): MuscleGroupWorkload => new MuscleGroupWorkload(
+            ->map(fn (MuscleGroup $mg): MuscleGroupWorkload => MuscleGroupWorkload::fromLoad(
                 muscleGroupName: $mg->name,
                 muscleGroupLabel: $mg->label,
                 bodyPart: $mg->body_part->value,

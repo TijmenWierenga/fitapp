@@ -31,27 +31,21 @@
             @foreach($muscleGroups->sortByDesc('acuteLoad') as $workload)
                 @php
                     $barWidth = ($workload->acuteLoad / $maxLoad) * 100;
-                    $barColorClass = match ($workload->zoneColor) {
+                    $barColorClass = match ($workload->zone->color()) {
                         'green' => 'bg-green-500 dark:bg-green-400',
                         'yellow' => 'bg-yellow-500 dark:bg-yellow-400',
                         'red' => 'bg-red-500 dark:bg-red-400',
                         default => 'bg-zinc-400 dark:bg-zinc-500',
                     };
-                    $badgeVariant = match ($workload->zoneColor) {
+                    $badgeVariant = match ($workload->zone->color()) {
                         'green' => 'success',
                         'yellow' => 'warning',
                         'red' => 'danger',
                         default => 'pill',
                     };
                     $hasInjuryWarning = in_array($workload->bodyPart, $injuredBodyParts)
-                        && in_array($workload->zone, ['caution', 'danger']);
-                    $zoneLabel = match ($workload->zone) {
-                        'sweet_spot' => 'Sweet Spot',
-                        'caution' => 'Caution',
-                        'danger' => 'Danger',
-                        'undertraining' => 'Undertraining',
-                        default => 'Inactive',
-                    };
+                        && in_array($workload->zone, [\App\Enums\WorkloadZone::Caution, \App\Enums\WorkloadZone::Danger]);
+                    $zoneLabel = $workload->zone->label();
                 @endphp
                 <div>
                     <div class="flex items-center justify-between mb-1">

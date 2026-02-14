@@ -2,6 +2,7 @@
 
 use App\Actions\CalculateWorkload;
 use App\Enums\BodyPart;
+use App\Enums\WorkloadZone;
 use App\Models\Block;
 use App\Models\BlockExercise;
 use App\Models\CardioExercise;
@@ -164,8 +165,7 @@ it('calculates ACWR and determines zones', function (): void {
     // chronic = 120 / 4 weeks = 30
     // ACWR = 30 / 30 = 1.0
     expect($chestWorkload->acwr)->toBe(1.0);
-    expect($chestWorkload->zone)->toBe('sweet_spot');
-    expect($chestWorkload->zoneColor)->toBe('green');
+    expect($chestWorkload->zone)->toBe(WorkloadZone::SweetSpot);
 });
 
 it('excludes unlinked exercises and counts them', function (): void {

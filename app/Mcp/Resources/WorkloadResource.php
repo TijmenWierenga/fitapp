@@ -5,6 +5,7 @@ namespace App\Mcp\Resources;
 use App\Actions\CalculateWorkload;
 use App\DataTransferObjects\Workload\MuscleGroupWorkload;
 use App\DataTransferObjects\Workload\WorkloadSummary;
+use App\Enums\WorkloadZone;
 use Laravel\Mcp\Enums\Role;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -66,8 +67,8 @@ class WorkloadResource extends Resource
 
         $content .= "\n";
 
-        $cautionGroups = $summary->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === 'caution');
-        $dangerGroups = $summary->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === 'danger');
+        $cautionGroups = $summary->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Caution);
+        $dangerGroups = $summary->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Danger);
 
         if ($cautionGroups->isNotEmpty() || $dangerGroups->isNotEmpty()) {
             $content .= "## Warnings\n\n";
@@ -112,14 +113,16 @@ class WorkloadResource extends Resource
         return number_format($load, 1);
     }
 
-    protected function formatZone(string $zone): string
+    protected function formatZone(WorkloadZone $zone): string
     {
-        return match ($zone) {
-            'danger' => '🔴 Danger',
-            'caution' => '🟡 Caution',
-            'sweet_spot' => '🟢 Sweet Spot',
-            'undertraining' => '⚪ Undertraining',
-            'inactive' => '⚫ Inactive',
+        $emoji = match ($zone) {
+            WorkloadZone::Danger => '🔴',
+            WorkloadZone::Caution => '🟡',
+            WorkloadZone::SweetSpot => '🟢',
+            WorkloadZone::Undertraining => '⚪',
+            WorkloadZone::Inactive => '⚫',
         };
+
+        return "{$emoji} {$zone->label()}";
     }
 }

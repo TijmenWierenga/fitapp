@@ -7,6 +7,7 @@ use App\DataTransferObjects\Workload\MuscleGroupWorkload;
 use App\DataTransferObjects\Workload\WorkloadSummary;
 use App\Enums\BodyPart;
 use App\Enums\FitnessGoal;
+use App\Enums\WorkloadZone;
 use App\Enums\Workout\Activity;
 use App\Models\Injury;
 use App\Models\User;
@@ -184,9 +185,9 @@ class CreateWorkoutPrompt extends Prompt
         if ($workload->muscleGroups->isNotEmpty()) {
             $greeting .= "## Current Workload\n\n";
 
-            $cautionGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === 'caution');
-            $dangerGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === 'danger');
-            $undertrainingGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === 'undertraining');
+            $cautionGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Caution);
+            $dangerGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Danger);
+            $undertrainingGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Undertraining);
 
             if ($dangerGroups->isNotEmpty()) {
                 $names = $dangerGroups->map(fn (MuscleGroupWorkload $w): string => "{$w->muscleGroupLabel} (ACWR {$w->acwr})")->implode(', ');
@@ -203,7 +204,7 @@ class CreateWorkoutPrompt extends Prompt
                 $greeting .= "- **Undertrained:** {$names} — could use more stimulus\n";
             }
 
-            $sweetSpotCount = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === 'sweet_spot')->count();
+            $sweetSpotCount = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::SweetSpot)->count();
             if ($sweetSpotCount > 0) {
                 $greeting .= "- **Sweet Spot:** {$sweetSpotCount} muscle group(s) in optimal training zone\n";
             }
@@ -215,7 +216,7 @@ class CreateWorkoutPrompt extends Prompt
 
                 foreach ($warningGroups as $workloadItem) {
                     if ($injuredBodyParts->contains(fn (BodyPart $bp): bool => $bp->value === $workloadItem->bodyPart)) {
-                        $greeting .= "- **WARNING:** {$workloadItem->muscleGroupLabel} is in {$workloadItem->zone} zone AND near an active injury\n";
+                        $greeting .= "- **WARNING:** {$workloadItem->muscleGroupLabel} is in {$workloadItem->zone->value} zone AND near an active injury\n";
                     }
                 }
             }
@@ -527,9 +528,9 @@ class CreateWorkoutPrompt extends Prompt
 
     protected function buildWorkloadGuidance(WorkloadSummary $workload): ?string
     {
-        $cautionGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === 'caution');
-        $dangerGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === 'danger');
-        $undertrainingGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === 'undertraining');
+        $cautionGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Caution);
+        $dangerGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Danger);
+        $undertrainingGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Undertraining);
 
         if ($cautionGroups->isEmpty() && $dangerGroups->isEmpty() && $undertrainingGroups->isEmpty()) {
             return null;

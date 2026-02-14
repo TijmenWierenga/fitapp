@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Workout\Activity;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -103,6 +104,16 @@ class Workout extends Model
     {
         $query->whereNotNull('completed_at')
             ->orderBy('completed_at', 'desc');
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     */
+    public function scopeCompletedBetween(\Illuminate\Database\Eloquent\Builder $query, CarbonImmutable $from, CarbonImmutable $to): void
+    {
+        $query->completed()
+            ->where('completed_at', '>=', $from)
+            ->where('completed_at', '<=', $to);
     }
 
     /**

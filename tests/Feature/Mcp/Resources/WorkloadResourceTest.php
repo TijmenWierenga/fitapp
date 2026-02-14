@@ -86,6 +86,45 @@ it('includes zone information', function (): void {
         ->assertSee('Zone');
 });
 
+it('shows data reliability warning for incomplete history', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);
+    $exercise = Exercise::factory()->create();
+    $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
+
+    $workout = Workout::factory()->create([
+        'user_id' => $user->id,
+        'completed_at' => now()->subDays(5),
+        'scheduled_at' => now()->subDays(5),
+        'rpe' => 7,
+        'feeling' => 4,
+    ]);
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->create(['section_id' => $section->id]);
+    $strength = StrengthExercise::factory()->create(['target_sets' => 3, 'target_reps_max' => 10, 'target_rpe' => 7.0]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exercise_id' => $exercise->id,
+        'exerciseable_type' => $strength->getMorphClass(),
+        'exerciseable_id' => $strength->id,
+    ]);
+
+    $response = WorkoutServer::actingAs($user)->resource(WorkloadResource::class, []);
+
+    $response->assertOk()
+        ->assertSee('Data reliability')
+        ->assertSee('ACWR values may not be reliable yet');
+});
+
+it('does not show data reliability warning for empty state', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $response = WorkoutServer::actingAs($user)->resource(WorkloadResource::class, []);
+
+    $response->assertOk()
+        ->assertDontSee('Data reliability');
+});
+
 it('includes active injuries', function (): void {
     $user = User::factory()->withTimezone('UTC')->create();
     Injury::factory()->active()->create([

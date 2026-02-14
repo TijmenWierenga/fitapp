@@ -53,6 +53,7 @@ class CalculateWorkload
             muscleGroups: $this->buildMuscleGroupWorkloads($muscleGroups, $loads),
             activeInjuries: $this->activeInjuries($user),
             unlinkedExerciseCount: $unlinkedCount,
+            dataSpanDays: $this->calculateDataSpanDays($workouts, $asOf),
         );
     }
 
@@ -175,5 +176,19 @@ class CalculateWorkload
         $rpe = (float) ($exercise->target_rpe ?? self::DEFAULT_RPE);
 
         return $durationMin * ($rpe / 10);
+    }
+
+    /**
+     * @param  Collection<int, Workout>  $workouts
+     */
+    private function calculateDataSpanDays(Collection $workouts, CarbonImmutable $asOf): int
+    {
+        if ($workouts->isEmpty()) {
+            return 0;
+        }
+
+        $earliest = $workouts->min('completed_at');
+
+        return min((int) $earliest->diffInDays($asOf), self::CHRONIC_WINDOW_DAYS);
     }
 }

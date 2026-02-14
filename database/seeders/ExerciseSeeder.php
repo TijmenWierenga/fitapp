@@ -35,31 +35,6 @@ class ExerciseSeeder extends Seeder
         'neck' => BodyPart::Neck,
     ];
 
-    /**
-     * Muscle name → human-readable label.
-     *
-     * @var array<string, string>
-     */
-    private const MUSCLE_LABELS = [
-        'abdominals' => 'Abdominals',
-        'hamstrings' => 'Hamstrings',
-        'calves' => 'Calves',
-        'shoulders' => 'Shoulders',
-        'adductors' => 'Adductors',
-        'glutes' => 'Glutes',
-        'quadriceps' => 'Quadriceps',
-        'biceps' => 'Biceps',
-        'forearms' => 'Forearms',
-        'abductors' => 'Abductors',
-        'triceps' => 'Triceps',
-        'chest' => 'Chest',
-        'lower back' => 'Lower Back',
-        'traps' => 'Traps',
-        'middle back' => 'Middle Back',
-        'lats' => 'Lats',
-        'neck' => 'Neck',
-    ];
-
     public function run(): void
     {
         $this->seedMuscleGroups();
@@ -72,7 +47,7 @@ class ExerciseSeeder extends Seeder
             MuscleGroup::updateOrCreate(
                 ['name' => $name],
                 [
-                    'label' => self::MUSCLE_LABELS[$name],
+                    'label' => ucwords($name),
                     'body_part' => $bodyPart,
                 ],
             );

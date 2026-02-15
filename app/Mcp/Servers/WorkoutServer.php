@@ -12,6 +12,7 @@ use App\Mcp\Resources\WorkoutScheduleResource;
 use App\Mcp\Tools\AddInjuryReportTool;
 use App\Mcp\Tools\AddInjuryTool;
 use App\Mcp\Tools\CompleteWorkoutTool;
+use App\Mcp\Tools\CreateExerciseTool;
 use App\Mcp\Tools\CreateWorkoutTool;
 use App\Mcp\Tools\DeleteInjuryReportTool;
 use App\Mcp\Tools\DeleteWorkoutTool;
@@ -206,6 +207,7 @@ class WorkoutServer extends Server
         UpdateInjuryReportTool::class,
         DeleteInjuryReportTool::class,
         SearchExercisesTool::class,
+        CreateExerciseTool::class,
     ];
 
     /**

@@ -2260,6 +2260,30 @@
     "category": "strength"
   },
   {
+    "name": "Bulgarian Split Squat",
+    "force": "push",
+    "level": "intermediate",
+    "mechanic": "compound",
+    "equipment": "dumbbell",
+    "primaryMuscles": [
+      "quadriceps",
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "hamstrings",
+      "calves",
+      "adductors"
+    ],
+    "instructions": [
+      "Stand about two feet in front of a bench, holding a dumbbell in each hand at your sides.",
+      "Place the top of your rear foot on the bench behind you.",
+      "Lower your body by bending your front knee until your front thigh is approximately parallel to the floor.",
+      "Keep your torso upright and your front knee tracking over your toes.",
+      "Push through your front heel to return to the starting position."
+    ],
+    "category": "strength"
+  },
+  {
     "name": "Butt-Ups",
     "force": "pull",
     "level": "beginner",

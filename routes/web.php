@@ -39,6 +39,10 @@ Route::get('workouts/{workout}', WorkoutShow::class)
     ->middleware(['auth', 'verified'])
     ->name('workouts.show');
 
+Route::get('workouts/{workout}/export-fit', \App\Http\Controllers\ExportWorkoutFitController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('workouts.export-fit');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('exercises/{exercise}', ExerciseShow::class)->name('exercises.show');
 

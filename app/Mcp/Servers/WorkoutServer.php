@@ -16,6 +16,7 @@ use App\Mcp\Tools\CreateExerciseTool;
 use App\Mcp\Tools\CreateWorkoutTool;
 use App\Mcp\Tools\DeleteInjuryReportTool;
 use App\Mcp\Tools\DeleteWorkoutTool;
+use App\Mcp\Tools\ExportWorkoutTool;
 use App\Mcp\Tools\GetFitnessProfileTool;
 use App\Mcp\Tools\GetInjuriesTool;
 use App\Mcp\Tools\GetUserProfileTool;
@@ -208,6 +209,7 @@ class WorkoutServer extends Server
         DeleteInjuryReportTool::class,
         SearchExercisesTool::class,
         CreateExerciseTool::class,
+        ExportWorkoutTool::class,
     ];
 
     /**

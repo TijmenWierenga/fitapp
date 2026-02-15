@@ -422,7 +422,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 5
+        "garminExerciseName": 2
     },
     {
         "name": "Ankle On The Knee",
@@ -498,7 +498,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 8
+        "garminExerciseName": 5
     },
     {
         "name": "Arnold Dumbbell Press",
@@ -1405,7 +1405,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 62
+        "garminExerciseName": 66
     },
     {
         "name": "Barbell Walking Lunge",
@@ -1429,7 +1429,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 70
+        "garminExerciseName": 76
     },
     {
         "name": "Battling Ropes",
@@ -2040,7 +2040,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 57
+        "garminExerciseName": 61
     },
     {
         "name": "Bodyweight Walking Lunge",
@@ -2307,9 +2307,7 @@
             "Keep your torso upright and your front knee tracking over your toes.",
             "Push through your front heel to return to the starting position."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 28,
-        "garminExerciseName": 85
+        "category": "strength"
     },
     {
         "name": "Butt-Ups",
@@ -2612,7 +2610,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 5
+        "garminExerciseName": 4
     },
     {
         "name": "Cable One Arm Tricep Extension",
@@ -4509,9 +4507,7 @@
             "Once you feel the stretch, use your chest to bring your body back to the starting position as you breathe out. Tip: Remember to squeeze the chest at the top of the movement for a second.",
             "Repeat the movement for the prescribed amount of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 30,
-        "garminExerciseName": 2
+        "category": "strength"
     },
     {
         "name": "Dips - Triceps Version",
@@ -5324,7 +5320,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 25
+        "garminExerciseName": 29
     },
     {
         "name": "Dumbbell Squat To A Bench",
@@ -6452,7 +6448,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 33
+        "garminExerciseName": 37
     },
     {
         "name": "Good Morning",
@@ -6553,7 +6549,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 2
+        "garminExerciseName": 10
     },
     {
         "name": "Hack Squat",
@@ -6823,7 +6819,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 2
+        "garminExerciseName": 1
     },
     {
         "name": "Hanging Pike",
@@ -8766,7 +8762,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 10,
-        "garminExerciseName": 46
+        "garminExerciseName": 48
     },
     {
         "name": "Leg Press",
@@ -11091,7 +11087,7 @@
         ],
         "category": "olympic weightlifting",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 40
+        "garminExerciseName": 44
     },
     {
         "name": "Overhead Stretch",
@@ -13909,7 +13905,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 21
+        "garminExerciseName": 17
     },
     {
         "name": "Shoulder Press - With Bands",
@@ -14354,9 +14350,7 @@
             "Land on your jumping leg, and immediately rebound out of it by jumping back to the start position.",
             "Continue hopping back and forth."
         ],
-        "category": "plyometrics",
-        "garminExerciseCategory": 20,
-        "garminExerciseName": 33
+        "category": "plyometrics"
     },
     {
         "name": "Single-Leg Leg Extension",
@@ -15744,7 +15738,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 1,
-        "garminExerciseName": 11
+        "garminExerciseName": 17
     },
     {
         "name": "Standing Barbell Press Behind Neck",
@@ -15993,7 +15987,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 1,
-        "garminExerciseName": 14
+        "garminExerciseName": 20
     },
     {
         "name": "Standing Dumbbell Press",
@@ -18058,7 +18052,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 58
+        "garminExerciseName": 62
     },
     {
         "name": "Wide-Grip Barbell Bench Press",
@@ -18244,7 +18238,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 80
+        "garminExerciseName": 84
     },
     {
         "name": "Wide Stance Stiff Legs",
@@ -18497,7 +18491,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 0,
-        "garminExerciseName": 0
+        "garminExerciseName": 26
     },
     {
         "name": "Barbell Bench Press",
@@ -18911,7 +18905,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 0,
-        "garminExerciseName": 26
+        "garminExerciseName": 0
     },
     {
         "name": "3 Way Calf Raise",
@@ -19091,7 +19085,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 1,
-        "garminExerciseName": 9
+        "garminExerciseName": 15
     },
     {
         "name": "Single Leg Standing Dumbbell Calf Raise",
@@ -19111,7 +19105,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 1,
-        "garminExerciseName": 10
+        "garminExerciseName": 16
     },
     {
         "name": "Standing Calf Raise",
@@ -19131,7 +19125,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 1,
-        "garminExerciseName": 12
+        "garminExerciseName": 18
     },
     {
         "name": "Weighted Standing Calf Raise",
@@ -19151,7 +19145,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 1,
-        "garminExerciseName": 13
+        "garminExerciseName": 19
     },
     {
         "name": "Bob And Weave Circle",
@@ -19727,9 +19721,7 @@
             "Walk forward with steady, controlled steps for the desired distance.",
             "Carefully lower the load and repeat if needed."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 3,
-        "garminExerciseName": 3
+        "category": "strength"
     },
     {
         "name": "Weighted Fireman Carry",
@@ -19777,7 +19769,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 3,
-        "garminExerciseName": 5
+        "garminExerciseName": 4
     },
     {
         "name": "Weighted Overhead Carry",
@@ -19799,9 +19791,7 @@
             "Keep your posture tall and avoid leaning to either side.",
             "Walk for the desired distance, then lower the weight carefully."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 3,
-        "garminExerciseName": 6
+        "category": "strength"
     },
     {
         "name": "Cable Pull Through",
@@ -19845,9 +19835,7 @@
             "Drive your hips forward, pulling the cable through your legs until you stand upright.",
             "Squeeze your glutes at the top, then hinge back and repeat."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 4,
-        "garminExerciseName": 1
+        "category": "strength"
     },
     {
         "name": "Cable Rotational Lift",
@@ -19870,7 +19858,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 2
+        "garminExerciseName": 1
     },
     {
         "name": "Weighted Cable Rotational Lift",
@@ -19891,9 +19879,7 @@
             "Control the movement through your core, keeping your arms relatively straight.",
             "Return to the starting position with control and repeat for the desired repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 4,
-        "garminExerciseName": 3
+        "category": "strength"
     },
     {
         "name": "Cable Woodchop",
@@ -19916,7 +19902,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 4
+        "garminExerciseName": 2
     },
     {
         "name": "Weighted Cable Woodchop",
@@ -19937,9 +19923,7 @@
             "Control the movement through your core, keeping your arms relatively straight.",
             "Return to the starting position with control and repeat for the desired repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 4,
-        "garminExerciseName": 5
+        "category": "strength"
     },
     {
         "name": "Cross Chop To Knee",
@@ -19962,7 +19946,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 6
+        "garminExerciseName": 3
     },
     {
         "name": "Weighted Cross Chop To Knee",
@@ -19985,7 +19969,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 7
+        "garminExerciseName": 4
     },
     {
         "name": "Dumbbell Chop",
@@ -20008,7 +19992,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 8
+        "garminExerciseName": 5
     },
     {
         "name": "Half Kneeling Rotation",
@@ -20031,7 +20015,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 9
+        "garminExerciseName": 6
     },
     {
         "name": "Weighted Half Kneeling Rotation",
@@ -20054,7 +20038,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 10
+        "garminExerciseName": 7
     },
     {
         "name": "Half Kneeling Rotational Chop",
@@ -20077,7 +20061,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 11
+        "garminExerciseName": 8
     },
     {
         "name": "Half Kneeling Rotational Reverse Chop",
@@ -20100,7 +20084,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 12
+        "garminExerciseName": 9
     },
     {
         "name": "Half Kneeling Stability Chop",
@@ -20123,7 +20107,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 13
+        "garminExerciseName": 10
     },
     {
         "name": "Half Kneeling Stability Reverse Chop",
@@ -20146,7 +20130,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 14
+        "garminExerciseName": 11
     },
     {
         "name": "Kneeling Rotational Chop",
@@ -20169,7 +20153,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 15
+        "garminExerciseName": 12
     },
     {
         "name": "Kneeling Rotational Reverse Chop",
@@ -20192,7 +20176,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 16
+        "garminExerciseName": 13
     },
     {
         "name": "Kneeling Stability Chop",
@@ -20215,7 +20199,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 17
+        "garminExerciseName": 14
     },
     {
         "name": "Kneeling Woodchop",
@@ -20236,9 +20220,7 @@
             "Control the movement through your core, keeping your arms relatively straight.",
             "Return to the starting position with control and repeat for the desired repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 4,
-        "garminExerciseName": 18
+        "category": "strength"
     },
     {
         "name": "Medicine Ball Wood Chops",
@@ -20261,7 +20243,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 4,
-        "garminExerciseName": 19
+        "garminExerciseName": 16
     },
     {
         "name": "One Arm Standing Rotation",
@@ -20305,9 +20287,7 @@
             "Control the movement through your core, keeping your arms relatively straight.",
             "Return to the starting position with control and repeat for the desired repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 4,
-        "garminExerciseName": 21
+        "category": "strength"
     },
     {
         "name": "Overhead Walking Lunge",
@@ -20328,9 +20308,7 @@
             "Control the movement through your core, keeping your arms relatively straight.",
             "Return to the starting position with control and repeat for the desired repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 4,
-        "garminExerciseName": 22
+        "category": "strength"
     },
     {
         "name": "Reverse Wood Chop",
@@ -20351,9 +20329,7 @@
             "Control the movement through your core, keeping your arms relatively straight.",
             "Return to the starting position with control and repeat for the desired repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 4,
-        "garminExerciseName": 23
+        "category": "strength"
     },
     {
         "name": "Weighted Reverse Wood Chop",
@@ -20374,9 +20350,7 @@
             "Control the movement through your core, keeping your arms relatively straight.",
             "Return to the starting position with control and repeat for the desired repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 4,
-        "garminExerciseName": 24
+        "category": "strength"
     },
     {
         "name": "Rotation Standing Lift",
@@ -20397,9 +20371,7 @@
             "Control the movement through your core, keeping your arms relatively straight.",
             "Return to the starting position with control and repeat for the desired repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 4,
-        "garminExerciseName": 25
+        "category": "strength"
     },
     {
         "name": "Standing Woodchop",
@@ -20420,9 +20392,7 @@
             "Control the movement through your core, keeping your arms relatively straight.",
             "Return to the starting position with control and repeat for the desired repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 4,
-        "garminExerciseName": 26
+        "category": "strength"
     },
     {
         "name": "Abs Jabs",
@@ -21486,9 +21456,7 @@
             "Maintain tension in your abdominals throughout the entire range of motion.",
             "Return to the starting position and repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 5,
-        "garminExerciseName": 55
+        "category": "strength"
     },
     {
         "name": "Double Leg Stretch",
@@ -21508,7 +21476,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 56
+        "garminExerciseName": 55
     },
     {
         "name": "Knee Folds",
@@ -21528,7 +21496,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 57
+        "garminExerciseName": 56
     },
     {
         "name": "Lower Lift",
@@ -21548,7 +21516,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 58
+        "garminExerciseName": 57
     },
     {
         "name": "Neck Pull",
@@ -21568,7 +21536,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 59
+        "garminExerciseName": 58
     },
     {
         "name": "Pelvic Clocks",
@@ -21588,7 +21556,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 60
+        "garminExerciseName": 59
     },
     {
         "name": "Roll Over",
@@ -21608,7 +21576,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 61
+        "garminExerciseName": 60
     },
     {
         "name": "Roll Up",
@@ -21628,7 +21596,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 62
+        "garminExerciseName": 61
     },
     {
         "name": "Rolling",
@@ -21648,7 +21616,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 63
+        "garminExerciseName": 62
     },
     {
         "name": "Rowing 1",
@@ -21686,9 +21654,7 @@
             "Maintain tension in your abdominals throughout the entire range of motion.",
             "Return to the starting position and repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 5,
-        "garminExerciseName": 65
+        "category": "strength"
     },
     {
         "name": "Scissors",
@@ -21708,7 +21674,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 66
+        "garminExerciseName": 65
     },
     {
         "name": "Single Leg Circles",
@@ -21728,7 +21694,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 67
+        "garminExerciseName": 66
     },
     {
         "name": "Single Leg Stretch",
@@ -21748,7 +21714,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 68
+        "garminExerciseName": 67
     },
     {
         "name": "Snake Twist 1 And 2",
@@ -21766,9 +21732,7 @@
             "Maintain tension in your abdominals throughout the entire range of motion.",
             "Return to the starting position and repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 5,
-        "garminExerciseName": 69
+        "category": "strength"
     },
     {
         "name": "Swan",
@@ -21788,7 +21752,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 70
+        "garminExerciseName": 69
     },
     {
         "name": "Swimming",
@@ -21808,7 +21772,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 71
+        "garminExerciseName": 70
     },
     {
         "name": "Teaser",
@@ -21828,7 +21792,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 72
+        "garminExerciseName": 71
     },
     {
         "name": "The Hundred",
@@ -21848,7 +21812,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 5,
-        "garminExerciseName": 73
+        "garminExerciseName": 72
     },
     {
         "name": "Bicycle Crunch",
@@ -25812,7 +25776,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 10,
-        "garminExerciseName": 38
+        "garminExerciseName": 40
     },
     {
         "name": "Weighted Single Leg Hip Raise With Head On Bosu Ball",
@@ -25835,7 +25799,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 10,
-        "garminExerciseName": 39
+        "garminExerciseName": 41
     },
     {
         "name": "Weighted Clam Bridge",
@@ -25858,7 +25822,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 10,
-        "garminExerciseName": 40
+        "garminExerciseName": 42
     },
     {
         "name": "Single Leg Swiss Ball Hip Raise And Leg Curl",
@@ -25881,7 +25845,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 10,
-        "garminExerciseName": 41
+        "garminExerciseName": 43
     },
     {
         "name": "Clams",
@@ -25904,7 +25868,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 10,
-        "garminExerciseName": 42
+        "garminExerciseName": 44
     },
     {
         "name": "Inner Thigh Circles",
@@ -25927,7 +25891,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 10,
-        "garminExerciseName": 43
+        "garminExerciseName": 45
     },
     {
         "name": "Inner Thigh Side Lift",
@@ -25950,7 +25914,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 10,
-        "garminExerciseName": 44
+        "garminExerciseName": 46
     },
     {
         "name": "Leg Circles",
@@ -25973,7 +25937,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 10,
-        "garminExerciseName": 45
+        "garminExerciseName": 47
     },
     {
         "name": "Leg Lift Front And Back",
@@ -25994,9 +25958,7 @@
             "Squeeze your glutes at the top and hold briefly.",
             "Lower your hips slowly and repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 10,
-        "garminExerciseName": 47
+        "category": "strength"
     },
     {
         "name": "Leg Lift In External Rotation",
@@ -26019,7 +25981,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 10,
-        "garminExerciseName": 48
+        "garminExerciseName": 49
     },
     {
         "name": "Band Side Lying Leg Raise",
@@ -28519,9 +28481,7 @@
             "Slide your heels away from your body, extending your legs while maintaining hip height.",
             "Pull your heels back toward your glutes, curling your legs. Repeat."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 15,
-        "garminExerciseName": 7
+        "category": "strength"
     },
     {
         "name": "Split Barbell Good Morning",
@@ -28544,7 +28504,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 15,
-        "garminExerciseName": 8
+        "garminExerciseName": 7
     },
     {
         "name": "Split Stance Extension",
@@ -28567,7 +28527,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 15,
-        "garminExerciseName": 9
+        "garminExerciseName": 8
     },
     {
         "name": "Staggered Stance Good Morning",
@@ -28590,7 +28550,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 15,
-        "garminExerciseName": 10
+        "garminExerciseName": 9
     },
     {
         "name": "Swiss Ball Hip Raise And Leg Curl",
@@ -28613,7 +28573,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 15,
-        "garminExerciseName": 11
+        "garminExerciseName": 10
     },
     {
         "name": "Zercher Good Morning",
@@ -28636,7 +28596,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 15,
-        "garminExerciseName": 12
+        "garminExerciseName": 11
     },
     {
         "name": "Hanging Knee Raise",
@@ -28680,7 +28640,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 1
+        "garminExerciseName": 19
     },
     {
         "name": "Weighted Hanging Leg Raise",
@@ -28702,7 +28662,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 3
+        "garminExerciseName": 2
     },
     {
         "name": "Hanging Single Leg Raise",
@@ -28724,7 +28684,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 4
+        "garminExerciseName": 3
     },
     {
         "name": "Weighted Hanging Single Leg Raise",
@@ -28746,7 +28706,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 5
+        "garminExerciseName": 4
     },
     {
         "name": "Kettlebell Leg Raises",
@@ -28768,7 +28728,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 6
+        "garminExerciseName": 5
     },
     {
         "name": "Leg Lowering Drill",
@@ -28790,7 +28750,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 7
+        "garminExerciseName": 6
     },
     {
         "name": "Weighted Leg Lowering Drill",
@@ -28812,7 +28772,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 8
+        "garminExerciseName": 7
     },
     {
         "name": "Lying Straight Leg Raise",
@@ -28834,7 +28794,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 9
+        "garminExerciseName": 8
     },
     {
         "name": "Weighted Lying Straight Leg Raise",
@@ -28856,7 +28816,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 10
+        "garminExerciseName": 9
     },
     {
         "name": "Medicine Ball Leg Drops",
@@ -28878,7 +28838,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 11
+        "garminExerciseName": 10
     },
     {
         "name": "Quadruped Leg Raise",
@@ -28900,7 +28860,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 12
+        "garminExerciseName": 11
     },
     {
         "name": "Weighted Quadruped Leg Raise",
@@ -28922,7 +28882,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 13
+        "garminExerciseName": 12
     },
     {
         "name": "Reverse Leg Raise",
@@ -28944,7 +28904,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 14
+        "garminExerciseName": 13
     },
     {
         "name": "Weighted Reverse Leg Raise",
@@ -28966,7 +28926,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 15
+        "garminExerciseName": 14
     },
     {
         "name": "Reverse Leg Raise On Swiss Ball",
@@ -28988,7 +28948,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 16
+        "garminExerciseName": 15
     },
     {
         "name": "Weighted Reverse Leg Raise On Swiss Ball",
@@ -29010,7 +28970,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 17
+        "garminExerciseName": 16
     },
     {
         "name": "Single Leg Lowering Drill",
@@ -29032,7 +28992,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 18
+        "garminExerciseName": 17
     },
     {
         "name": "Weighted Single Leg Lowering Drill",
@@ -29054,7 +29014,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 16,
-        "garminExerciseName": 19
+        "garminExerciseName": 18
     },
     {
         "name": "Weighted Leg Raise",
@@ -29244,7 +29204,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 6
+        "garminExerciseName": 11
     },
     {
         "name": "Barbell Split Squat",
@@ -29268,7 +29228,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 7
+        "garminExerciseName": 13
     },
     {
         "name": "Barbell Step Up",
@@ -29316,7 +29276,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 9
+        "garminExerciseName": 14
     },
     {
         "name": "Diagonal Lunge",
@@ -29340,7 +29300,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 10
+        "garminExerciseName": 15
     },
     {
         "name": "Weighted Diagonal Lunge",
@@ -29362,9 +29322,7 @@
             "Keep your torso upright, core engaged, and front knee tracking over your toes.",
             " Push off your front foot to return to the starting position. Repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 17,
-        "garminExerciseName": 11
+        "category": "strength"
     },
     {
         "name": "Drop Lunge",
@@ -29388,7 +29346,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 12
+        "garminExerciseName": 16
     },
     {
         "name": "Weighted Drop Lunge",
@@ -29410,9 +29368,7 @@
             "Keep your torso upright, core engaged, and front knee tracking over your toes.",
             " Push off your front foot to return to the starting position. Repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 17,
-        "garminExerciseName": 13
+        "category": "strength"
     },
     {
         "name": "Dumbbell Box Lunge",
@@ -29436,7 +29392,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 14
+        "garminExerciseName": 17
     },
     {
         "name": "Dumbbell Bulgarian Split Squat",
@@ -29460,7 +29416,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 15
+        "garminExerciseName": 18
     },
     {
         "name": "Dumbbell Crossover Lunge",
@@ -29484,7 +29440,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 16
+        "garminExerciseName": 19
     },
     {
         "name": "Dumbbell Diagonal Lunge",
@@ -29508,7 +29464,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 17
+        "garminExerciseName": 20
     },
     {
         "name": "Dumbbell Lunge",
@@ -29532,7 +29488,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 18
+        "garminExerciseName": 21
     },
     {
         "name": "Dumbbell Lunge And Rotation",
@@ -29556,7 +29512,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 19
+        "garminExerciseName": 22
     },
     {
         "name": "Dumbbell Overhead Bulgarian Split Squat",
@@ -29580,7 +29536,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 20
+        "garminExerciseName": 23
     },
     {
         "name": "Dumbbell Reverse Lunge To High Knee And Press",
@@ -29604,7 +29560,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 21
+        "garminExerciseName": 24
     },
     {
         "name": "Dumbbell Side Lunge",
@@ -29628,7 +29584,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 22
+        "garminExerciseName": 25
     },
     {
         "name": "Elevated Front Foot Barbell Split Squat",
@@ -29652,7 +29608,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 23
+        "garminExerciseName": 26
     },
     {
         "name": "Front Foot Elevated Dumbbell Split Squat",
@@ -29676,7 +29632,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 24
+        "garminExerciseName": 27
     },
     {
         "name": "Gunslinger Lunge",
@@ -29700,7 +29656,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 25
+        "garminExerciseName": 28
     },
     {
         "name": "Weighted Gunslinger Lunge",
@@ -29722,9 +29678,7 @@
             "Keep your torso upright, core engaged, and front knee tracking over your toes.",
             " Push off your front foot to return to the starting position. Repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 17,
-        "garminExerciseName": 26
+        "category": "strength"
     },
     {
         "name": "Lunge With Arm Reach",
@@ -29748,7 +29702,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 27
+        "garminExerciseName": 34
     },
     {
         "name": "Lunge With Diagonal Reach",
@@ -29772,7 +29726,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 28
+        "garminExerciseName": 35
     },
     {
         "name": "Lunge With Side Bend",
@@ -29795,7 +29749,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 29
+        "garminExerciseName": 36
     },
     {
         "name": "Offset Dumbbell Lunge",
@@ -29819,7 +29773,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 30
+        "garminExerciseName": 37
     },
     {
         "name": "Offset Dumbbell Reverse Lunge",
@@ -29843,7 +29797,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 31
+        "garminExerciseName": 38
     },
     {
         "name": "Overhead Bulgarian Split Squat",
@@ -29867,7 +29821,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 32
+        "garminExerciseName": 39
     },
     {
         "name": "Overhead Dumbbell Reverse Lunge",
@@ -29891,7 +29845,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 33
+        "garminExerciseName": 40
     },
     {
         "name": "Overhead Dumbbell Split Squat",
@@ -29915,7 +29869,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 34
+        "garminExerciseName": 41
     },
     {
         "name": "Overhead Lunge With Rotation",
@@ -29939,7 +29893,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 35
+        "garminExerciseName": 42
     },
     {
         "name": "Reverse Barbell Box Lunge",
@@ -29963,7 +29917,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 36
+        "garminExerciseName": 43
     },
     {
         "name": "Reverse Box Lunge",
@@ -29987,7 +29941,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 37
+        "garminExerciseName": 44
     },
     {
         "name": "Weighted Reverse Box Lunge",
@@ -30035,7 +29989,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 39
+        "garminExerciseName": 45
     },
     {
         "name": "Reverse Dumbbell Crossover Lunge",
@@ -30059,7 +30013,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 40
+        "garminExerciseName": 46
     },
     {
         "name": "Reverse Dumbbell Diagonal Lunge",
@@ -30083,7 +30037,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 41
+        "garminExerciseName": 47
     },
     {
         "name": "Reverse Lunge With Reach Back",
@@ -30107,7 +30061,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 42
+        "garminExerciseName": 48
     },
     {
         "name": "Weighted Reverse Lunge With Reach Back",
@@ -30131,7 +30085,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 43
+        "garminExerciseName": 49
     },
     {
         "name": "Reverse Lunge With Twist And Overhead Reach",
@@ -30155,7 +30109,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 44
+        "garminExerciseName": 50
     },
     {
         "name": "Weighted Reverse Lunge With Twist And Overhead Reach",
@@ -30179,7 +30133,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 45
+        "garminExerciseName": 51
     },
     {
         "name": "Reverse Sliding Box Lunge",
@@ -30203,7 +30157,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 46
+        "garminExerciseName": 52
     },
     {
         "name": "Weighted Reverse Sliding Box Lunge",
@@ -30227,7 +30181,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 47
+        "garminExerciseName": 53
     },
     {
         "name": "Reverse Sliding Lunge",
@@ -30251,7 +30205,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 48
+        "garminExerciseName": 54
     },
     {
         "name": "Weighted Reverse Sliding Lunge",
@@ -30275,7 +30229,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 49
+        "garminExerciseName": 55
     },
     {
         "name": "Runners Lunge To Balance",
@@ -30299,7 +30253,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 50
+        "garminExerciseName": 56
     },
     {
         "name": "Weighted Runners Lunge To Balance",
@@ -30323,7 +30277,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 51
+        "garminExerciseName": 57
     },
     {
         "name": "Shifting Side Lunge",
@@ -30347,7 +30301,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 52
+        "garminExerciseName": 58
     },
     {
         "name": "Side And Crossover Lunge",
@@ -30371,7 +30325,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 53
+        "garminExerciseName": 59
     },
     {
         "name": "Weighted Side And Crossover Lunge",
@@ -30395,7 +30349,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 54
+        "garminExerciseName": 60
     },
     {
         "name": "Side Lunge",
@@ -30419,7 +30373,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 55
+        "garminExerciseName": 61
     },
     {
         "name": "Weighted Side Lunge",
@@ -30443,7 +30397,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 56
+        "garminExerciseName": 62
     },
     {
         "name": "Side Lunge And Press",
@@ -30467,7 +30421,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 57
+        "garminExerciseName": 63
     },
     {
         "name": "Side Lunge Jump Off",
@@ -30491,7 +30445,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 58
+        "garminExerciseName": 64
     },
     {
         "name": "Side Lunge Sweep",
@@ -30515,7 +30469,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 59
+        "garminExerciseName": 65
     },
     {
         "name": "Weighted Side Lunge Sweep",
@@ -30539,7 +30493,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 60
+        "garminExerciseName": 66
     },
     {
         "name": "Side Lunge To Crossover Tap",
@@ -30563,7 +30517,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 61
+        "garminExerciseName": 67
     },
     {
         "name": "Weighted Side Lunge To Crossover Tap",
@@ -30587,7 +30541,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 62
+        "garminExerciseName": 68
     },
     {
         "name": "Side To Side Lunge Chops",
@@ -30611,7 +30565,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 63
+        "garminExerciseName": 69
     },
     {
         "name": "Weighted Side To Side Lunge Chops",
@@ -30635,7 +30589,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 64
+        "garminExerciseName": 70
     },
     {
         "name": "Siff Jump Lunge",
@@ -30659,7 +30613,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 65
+        "garminExerciseName": 71
     },
     {
         "name": "Weighted Siff Jump Lunge",
@@ -30683,7 +30637,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 66
+        "garminExerciseName": 72
     },
     {
         "name": "Single Arm Reverse Lunge And Press",
@@ -30707,7 +30661,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 67
+        "garminExerciseName": 73
     },
     {
         "name": "Sliding Lateral Lunge",
@@ -30731,7 +30685,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 68
+        "garminExerciseName": 74
     },
     {
         "name": "Weighted Sliding Lateral Lunge",
@@ -30755,7 +30709,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 69
+        "garminExerciseName": 75
     },
     {
         "name": "Walking Dumbbell Lunge",
@@ -30779,7 +30733,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 71
+        "garminExerciseName": 77
     },
     {
         "name": "Walking Lunge",
@@ -30803,7 +30757,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 72
+        "garminExerciseName": 78
     },
     {
         "name": "Weighted Walking Lunge",
@@ -30827,7 +30781,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 73
+        "garminExerciseName": 79
     },
     {
         "name": "Wide Grip Overhead Barbell Split Squat",
@@ -30851,7 +30805,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 17,
-        "garminExerciseName": 74
+        "garminExerciseName": 80
     },
     {
         "name": "Barbell Hang Power Clean",
@@ -33493,7 +33447,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 101
+        "garminExerciseName": 126
     },
     {
         "name": "Swiss Ball Plank With Feet On Bench",
@@ -33515,7 +33469,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 102
+        "garminExerciseName": 101
     },
     {
         "name": "Weighted Swiss Ball Plank With Feet On Bench",
@@ -33537,7 +33491,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 103
+        "garminExerciseName": 102
     },
     {
         "name": "Swiss Ball Prone Jackknife",
@@ -33559,7 +33513,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 104
+        "garminExerciseName": 103
     },
     {
         "name": "Weighted Swiss Ball Prone Jackknife",
@@ -33581,7 +33535,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 105
+        "garminExerciseName": 104
     },
     {
         "name": "Swiss Ball Side Plank",
@@ -33603,7 +33557,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 106
+        "garminExerciseName": 105
     },
     {
         "name": "Weighted Swiss Ball Side Plank",
@@ -33625,7 +33579,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 107
+        "garminExerciseName": 106
     },
     {
         "name": "Three Way Plank",
@@ -33647,7 +33601,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 108
+        "garminExerciseName": 107
     },
     {
         "name": "Weighted Three Way Plank",
@@ -33669,7 +33623,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 109
+        "garminExerciseName": 108
     },
     {
         "name": "Towel Plank And Knee In",
@@ -33691,7 +33645,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 110
+        "garminExerciseName": 109
     },
     {
         "name": "Weighted Towel Plank And Knee In",
@@ -33713,7 +33667,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 111
+        "garminExerciseName": 110
     },
     {
         "name": "T Stabilization",
@@ -33735,7 +33689,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 112
+        "garminExerciseName": 111
     },
     {
         "name": "Weighted T Stabilization",
@@ -33757,7 +33711,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 113
+        "garminExerciseName": 112
     },
     {
         "name": "Turkish Get Up To Side Plank",
@@ -33779,7 +33733,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 114
+        "garminExerciseName": 113
     },
     {
         "name": "Weighted Turkish Get Up To Side Plank",
@@ -33801,7 +33755,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 115
+        "garminExerciseName": 114
     },
     {
         "name": "Two Point Plank",
@@ -33823,7 +33777,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 116
+        "garminExerciseName": 115
     },
     {
         "name": "Weighted Two Point Plank",
@@ -33845,7 +33799,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 117
+        "garminExerciseName": 116
     },
     {
         "name": "Weighted Plank",
@@ -33867,7 +33821,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 118
+        "garminExerciseName": 117
     },
     {
         "name": "Wide Stance Plank With Diagonal Arm Lift",
@@ -33889,7 +33843,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 119
+        "garminExerciseName": 118
     },
     {
         "name": "Weighted Wide Stance Plank With Diagonal Arm Lift",
@@ -33911,7 +33865,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 120
+        "garminExerciseName": 119
     },
     {
         "name": "Wide Stance Plank With Diagonal Leg Lift",
@@ -33933,7 +33887,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 121
+        "garminExerciseName": 120
     },
     {
         "name": "Weighted Wide Stance Plank With Diagonal Leg Lift",
@@ -33955,7 +33909,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 122
+        "garminExerciseName": 121
     },
     {
         "name": "Wide Stance Plank With Leg Lift",
@@ -33977,7 +33931,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 123
+        "garminExerciseName": 122
     },
     {
         "name": "Weighted Wide Stance Plank With Leg Lift",
@@ -33999,7 +33953,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 124
+        "garminExerciseName": 123
     },
     {
         "name": "Wide Stance Plank With Opposite Arm And Leg Lift",
@@ -34021,7 +33975,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 125
+        "garminExerciseName": 124
     },
     {
         "name": "Weighted Mountain Climber With Hands On Bench",
@@ -34043,7 +33997,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 126
+        "garminExerciseName": 125
     },
     {
         "name": "Weighted Wide Stance Plank With Opposite Arm And Leg Lift",
@@ -34065,7 +34019,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 128
+        "garminExerciseName": 127
     },
     {
         "name": "Plank With Feet On Swiss Ball",
@@ -34087,7 +34041,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 129
+        "garminExerciseName": 128
     },
     {
         "name": "Side Plank To Plank With Reach Under",
@@ -34109,7 +34063,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 19,
-        "garminExerciseName": 130
+        "garminExerciseName": 129
     },
     {
         "name": "Bridge",
@@ -34151,9 +34105,7 @@
             "Avoid letting your hips sag or pike up.",
             "Hold for the desired duration or perform the prescribed movement variation."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 19,
-        "garminExerciseName": 132
+        "category": "strength"
     },
     {
         "name": "Bridge Ii",
@@ -34173,9 +34125,7 @@
             "Avoid letting your hips sag or pike up.",
             "Hold for the desired duration or perform the prescribed movement variation."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 19,
-        "garminExerciseName": 133
+        "category": "strength"
     },
     {
         "name": "Bridge Iii",
@@ -34195,9 +34145,7 @@
             "Avoid letting your hips sag or pike up.",
             "Hold for the desired duration or perform the prescribed movement variation."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 19,
-        "garminExerciseName": 134
+        "category": "strength"
     },
     {
         "name": "Bridge Iv",
@@ -34217,9 +34165,7 @@
             "Avoid letting your hips sag or pike up.",
             "Hold for the desired duration or perform the prescribed movement variation."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 19,
-        "garminExerciseName": 135
+        "category": "strength"
     },
     {
         "name": "Alternating Jump Lunge",
@@ -35009,9 +34955,7 @@
             "Perform a push-up (optional), then jump your feet back to your hands.",
             "Explosively jump upward, reaching your arms overhead. Land softly and repeat."
         ],
-        "category": "plyometrics",
-        "garminExerciseCategory": 20,
-        "garminExerciseName": 34
+        "category": "plyometrics"
     },
     {
         "name": "Weighted Burpee",
@@ -35033,9 +34977,7 @@
             "Perform a push-up (optional), then jump your feet back to your hands.",
             "Explosively jump upward, reaching your arms overhead. Land softly and repeat."
         ],
-        "category": "plyometrics",
-        "garminExerciseCategory": 20,
-        "garminExerciseName": 35
+        "category": "plyometrics"
     },
     {
         "name": "Banded Pull Ups",
@@ -38370,7 +38312,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 23,
-        "garminExerciseName": 34
+        "garminExerciseName": 46
     },
     {
         "name": "Alternating Dumbbell Shoulder Press",
@@ -39554,9 +39496,7 @@
             "Hold briefly at the top, squeezing your shoulder stabilizers.",
             "Lower with control and repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 25,
-        "garminExerciseName": 33
+        "category": "strength"
     },
     {
         "name": "T Raise",
@@ -39574,9 +39514,7 @@
             "Hold briefly at the top, squeezing your shoulder stabilizers.",
             "Lower with control and repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 25,
-        "garminExerciseName": 34
+        "category": "strength"
     },
     {
         "name": "Y Raise",
@@ -39594,9 +39532,7 @@
             "Hold briefly at the top, squeezing your shoulder stabilizers.",
             "Lower with control and repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 25,
-        "garminExerciseName": 35
+        "category": "strength"
     },
     {
         "name": "L Raise",
@@ -39614,9 +39550,7 @@
             "Hold briefly at the top, squeezing your shoulder stabilizers.",
             "Lower with control and repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 25,
-        "garminExerciseName": 36
+        "category": "strength"
     },
     {
         "name": "Barbell Jump Shrug",
@@ -39768,9 +39702,7 @@
             "Hold the retracted position briefly, then release.",
             "Repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 26,
-        "garminExerciseName": 10
+        "category": "strength"
     },
     {
         "name": "Weighted Scapula Pull Up",
@@ -39790,9 +39722,7 @@
             "Hold the retracted position briefly, then release.",
             "Repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 26,
-        "garminExerciseName": 11
+        "category": "strength"
     },
     {
         "name": "Scapular Retraction",
@@ -39814,7 +39744,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 26,
-        "garminExerciseName": 12
+        "garminExerciseName": 11
     },
     {
         "name": "Serratus Chair Shrug",
@@ -39836,7 +39766,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 26,
-        "garminExerciseName": 13
+        "garminExerciseName": 12
     },
     {
         "name": "Weighted Serratus Chair Shrug",
@@ -39858,7 +39788,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 26,
-        "garminExerciseName": 14
+        "garminExerciseName": 13
     },
     {
         "name": "Serratus Shrug",
@@ -39880,7 +39810,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 26,
-        "garminExerciseName": 15
+        "garminExerciseName": 14
     },
     {
         "name": "Weighted Serratus Shrug",
@@ -39902,7 +39832,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 26,
-        "garminExerciseName": 16
+        "garminExerciseName": 15
     },
     {
         "name": "Wide Grip Jump Shrug",
@@ -39924,7 +39854,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 26,
-        "garminExerciseName": 17
+        "garminExerciseName": 16
     },
     {
         "name": "Alternating Sit Up",
@@ -40962,7 +40892,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 16
+        "garminExerciseName": 20
     },
     {
         "name": "Weighted Wall Squat",
@@ -40987,7 +40917,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 17
+        "garminExerciseName": 21
     },
     {
         "name": "Box Step Squat",
@@ -41012,7 +40942,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 18
+        "garminExerciseName": 22
     },
     {
         "name": "Weighted Box Step Squat",
@@ -41037,7 +40967,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 19
+        "garminExerciseName": 23
     },
     {
         "name": "Braced Squat",
@@ -41062,7 +40992,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 20
+        "garminExerciseName": 24
     },
     {
         "name": "Crossed Arm Barbell Front Squat",
@@ -41087,7 +41017,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 21
+        "garminExerciseName": 25
     },
     {
         "name": "Crossover Dumbbell Step Up",
@@ -41110,7 +41040,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 22
+        "garminExerciseName": 26
     },
     {
         "name": "Dumbbell Front Squat",
@@ -41135,7 +41065,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 23
+        "garminExerciseName": 27
     },
     {
         "name": "Dumbbell Split Squat",
@@ -41160,7 +41090,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 24
+        "garminExerciseName": 28
     },
     {
         "name": "Dumbbell Squat Clean",
@@ -41185,7 +41115,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 26
+        "garminExerciseName": 30
     },
     {
         "name": "Dumbbell Step Over",
@@ -41233,7 +41163,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 28
+        "garminExerciseName": 32
     },
     {
         "name": "Elevated Single Leg Squat",
@@ -41258,7 +41188,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 29
+        "garminExerciseName": 33
     },
     {
         "name": "Weighted Elevated Single Leg Squat",
@@ -41283,7 +41213,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 30
+        "garminExerciseName": 34
     },
     {
         "name": "Figure Four Squats",
@@ -41308,7 +41238,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 31
+        "garminExerciseName": 35
     },
     {
         "name": "Weighted Figure Four Squats",
@@ -41333,7 +41263,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 32
+        "garminExerciseName": 36
     },
     {
         "name": "Kettlebell Squat",
@@ -41358,7 +41288,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 34
+        "garminExerciseName": 38
     },
     {
         "name": "Kettlebell Swing Overhead",
@@ -41383,7 +41313,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 35
+        "garminExerciseName": 39
     },
     {
         "name": "Kettlebell Swing With Flip To Squat",
@@ -41408,7 +41338,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 36
+        "garminExerciseName": 40
     },
     {
         "name": "Lateral Dumbbell Step Up",
@@ -41431,7 +41361,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 37
+        "garminExerciseName": 41
     },
     {
         "name": "One Legged Squat",
@@ -41456,7 +41386,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 38
+        "garminExerciseName": 42
     },
     {
         "name": "Overhead Dumbbell Squat",
@@ -41481,7 +41411,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 39
+        "garminExerciseName": 43
     },
     {
         "name": "Partial Single Leg Squat",
@@ -41506,7 +41436,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 41
+        "garminExerciseName": 45
     },
     {
         "name": "Weighted Partial Single Leg Squat",
@@ -41531,7 +41461,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 42
+        "garminExerciseName": 46
     },
     {
         "name": "Pistol Squat",
@@ -41556,7 +41486,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 43
+        "garminExerciseName": 47
     },
     {
         "name": "Weighted Pistol Squat",
@@ -41581,7 +41511,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 44
+        "garminExerciseName": 48
     },
     {
         "name": "Plie Slides",
@@ -41606,7 +41536,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 45
+        "garminExerciseName": 49
     },
     {
         "name": "Weighted Plie Slides",
@@ -41631,7 +41561,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 46
+        "garminExerciseName": 50
     },
     {
         "name": "Plie Squat",
@@ -41656,7 +41586,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 47
+        "garminExerciseName": 51
     },
     {
         "name": "Weighted Plie Squat",
@@ -41681,7 +41611,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 48
+        "garminExerciseName": 52
     },
     {
         "name": "Prisoner Squat",
@@ -41706,7 +41636,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 49
+        "garminExerciseName": 53
     },
     {
         "name": "Weighted Prisoner Squat",
@@ -41731,7 +41661,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 50
+        "garminExerciseName": 54
     },
     {
         "name": "Single Leg Bench Get Up",
@@ -41756,7 +41686,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 51
+        "garminExerciseName": 55
     },
     {
         "name": "Weighted Single Leg Bench Get Up",
@@ -41781,7 +41711,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 52
+        "garminExerciseName": 56
     },
     {
         "name": "Single Leg Bench Squat",
@@ -41806,7 +41736,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 53
+        "garminExerciseName": 57
     },
     {
         "name": "Weighted Single Leg Bench Squat",
@@ -41831,7 +41761,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 54
+        "garminExerciseName": 58
     },
     {
         "name": "Single Leg Squat On Swiss Ball",
@@ -41856,7 +41786,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 55
+        "garminExerciseName": 59
     },
     {
         "name": "Weighted Single Leg Squat On Swiss Ball",
@@ -41881,7 +41811,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 56
+        "garminExerciseName": 60
     },
     {
         "name": "Squats With Band",
@@ -41906,7 +41836,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 59
+        "garminExerciseName": 63
     },
     {
         "name": "Staggered Squat",
@@ -41931,7 +41861,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 60
+        "garminExerciseName": 64
     },
     {
         "name": "Weighted Staggered Squat",
@@ -41956,7 +41886,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 61
+        "garminExerciseName": 65
     },
     {
         "name": "Weighted Step Up",
@@ -41979,7 +41909,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 63
+        "garminExerciseName": 67
     },
     {
         "name": "Suitcase Squats",
@@ -42004,7 +41934,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 64
+        "garminExerciseName": 68
     },
     {
         "name": "Sumo Squat",
@@ -42029,7 +41959,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 65
+        "garminExerciseName": 69
     },
     {
         "name": "Sumo Squat Slide In",
@@ -42054,7 +41984,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 66
+        "garminExerciseName": 70
     },
     {
         "name": "Weighted Sumo Squat Slide In",
@@ -42079,7 +42009,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 67
+        "garminExerciseName": 71
     },
     {
         "name": "Sumo Squat To High Pull",
@@ -42104,7 +42034,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 68
+        "garminExerciseName": 72
     },
     {
         "name": "Sumo Squat To Stand",
@@ -42129,7 +42059,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 69
+        "garminExerciseName": 73
     },
     {
         "name": "Weighted Sumo Squat To Stand",
@@ -42154,7 +42084,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 70
+        "garminExerciseName": 74
     },
     {
         "name": "Sumo Squat With Rotation",
@@ -42179,7 +42109,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 71
+        "garminExerciseName": 75
     },
     {
         "name": "Weighted Sumo Squat With Rotation",
@@ -42204,7 +42134,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 72
+        "garminExerciseName": 76
     },
     {
         "name": "Swiss Ball Body Weight Wall Squat",
@@ -42229,7 +42159,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 73
+        "garminExerciseName": 77
     },
     {
         "name": "Weighted Swiss Ball Wall Squat",
@@ -42254,7 +42184,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 74
+        "garminExerciseName": 78
     },
     {
         "name": "Thrusters",
@@ -42279,7 +42209,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 75
+        "garminExerciseName": 79
     },
     {
         "name": "Uneven Squat",
@@ -42304,7 +42234,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 76
+        "garminExerciseName": 80
     },
     {
         "name": "Weighted Uneven Squat",
@@ -42329,7 +42259,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 77
+        "garminExerciseName": 81
     },
     {
         "name": "Waist Slimming Squat",
@@ -42354,7 +42284,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 78
+        "garminExerciseName": 82
     },
     {
         "name": "Wall Ball",
@@ -42379,7 +42309,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 79
+        "garminExerciseName": 83
     },
     {
         "name": "Wide Stance Goblet Squat",
@@ -42404,7 +42334,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 81
+        "garminExerciseName": 85
     },
     {
         "name": "Zercher Squat",
@@ -42429,7 +42359,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 82
+        "garminExerciseName": 86
     },
     {
         "name": "KBS Overhead",
@@ -42454,7 +42384,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 83
+        "garminExerciseName": 87
     },
     {
         "name": "Dumbbell Squat Snatch",
@@ -42479,7 +42409,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 28,
-        "garminExerciseName": 84
+        "garminExerciseName": 94
     },
     {
         "name": "Alternate Dumbbell Swing",
@@ -42502,9 +42432,7 @@
             "Maintain proper form and control throughout the entire range of motion.",
             "Repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 29,
-        "garminExerciseName": 2
+        "category": "strength"
     },
     {
         "name": "Alternate Kettlebell Swing",
@@ -42527,9 +42455,7 @@
             "Maintain proper form and control throughout the entire range of motion.",
             "Repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 29,
-        "garminExerciseName": 3
+        "category": "strength"
     },
     {
         "name": "Barbell Burpee",
@@ -42554,7 +42480,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 29,
-        "garminExerciseName": 4
+        "garminExerciseName": 13
     },
     {
         "name": "Body Weight Squat Thrust",
@@ -42577,9 +42503,7 @@
             "Jump your feet back to a plank position, then immediately jump them back to your hands.",
             "Stand up and repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 29,
-        "garminExerciseName": 5
+        "category": "strength"
     },
     {
         "name": "Cable Crunch Plus Reverse Crunch",
@@ -42602,9 +42526,7 @@
             "Maintain proper form and control throughout the entire range of motion.",
             "Repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 29,
-        "garminExerciseName": 6
+        "category": "strength"
     },
     {
         "name": "Dumbbell Burpee",
@@ -42627,9 +42549,7 @@
             "Perform a push-up, then jump your feet forward toward your hands.",
             "Stand or jump up explosively and repeat."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 29,
-        "garminExerciseName": 7
+        "category": "strength"
     },
     {
         "name": "Dumbbell Squat Thrust Press",
@@ -42677,9 +42597,7 @@
             "Jump your feet back to a plank position, then immediately jump them back to your hands.",
             "Stand up and repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 29,
-        "garminExerciseName": 9
+        "category": "strength"
     },
     {
         "name": "Kettlebell Plank Row",
@@ -42702,9 +42620,7 @@
             "Maintain proper form and control throughout the entire range of motion.",
             "Repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 29,
-        "garminExerciseName": 10
+        "category": "strength"
     },
     {
         "name": "Medicine Ball Burpee",
@@ -42727,9 +42643,7 @@
             "Perform a push-up, then jump your feet forward toward your hands.",
             "Stand or jump up explosively and repeat."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 29,
-        "garminExerciseName": 11
+        "category": "strength"
     },
     {
         "name": "Weighted Body Weight Squat Thrust",
@@ -42752,9 +42666,7 @@
             "Jump your feet back to a plank position, then immediately jump them back to your hands.",
             "Stand up and repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 29,
-        "garminExerciseName": 12
+        "category": "strength"
     },
     {
         "name": "Dumbbell Thrusters",
@@ -42797,9 +42709,7 @@
             "Press back up to full arm extension, squeezing your triceps.",
             "Repeat for the desired number of repetitions."
         ],
-        "category": "strength",
-        "garminExerciseCategory": 30,
-        "garminExerciseName": 3
+        "category": "strength"
     },
     {
         "name": "Cable Kickback",
@@ -42819,7 +42729,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 4
+        "garminExerciseName": 3
     },
     {
         "name": "Cable Overhead Triceps Extension",
@@ -42839,7 +42749,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 6
+        "garminExerciseName": 5
     },
     {
         "name": "Dumbbell Kickback",
@@ -42859,7 +42769,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 7
+        "garminExerciseName": 6
     },
     {
         "name": "Dumbbell Lying Triceps Extension",
@@ -42879,7 +42789,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 8
+        "garminExerciseName": 7
     },
     {
         "name": "EZ Bar Overhead Triceps Extension",
@@ -42899,7 +42809,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 9
+        "garminExerciseName": 8
     },
     {
         "name": "Incline Dip",
@@ -42919,7 +42829,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 10
+        "garminExerciseName": 9
     },
     {
         "name": "Weighted Incline Dip",
@@ -42939,7 +42849,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 11
+        "garminExerciseName": 10
     },
     {
         "name": "Incline EZ Bar Lying Triceps Extension",
@@ -42959,7 +42869,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 12
+        "garminExerciseName": 11
     },
     {
         "name": "Lying Dumbbell Pullover To Extension",
@@ -42982,7 +42892,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 13
+        "garminExerciseName": 12
     },
     {
         "name": "Lying EZ Bar Triceps Extension",
@@ -43002,7 +42912,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 14
+        "garminExerciseName": 13
     },
     {
         "name": "Lying Triceps Extension To Close Grip Bench Press",
@@ -43022,7 +42932,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 15
+        "garminExerciseName": 14
     },
     {
         "name": "Overhead Dumbbell Triceps Extension",
@@ -43042,7 +42952,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 16
+        "garminExerciseName": 15
     },
     {
         "name": "Reclining Triceps Press",
@@ -43062,7 +42972,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 17
+        "garminExerciseName": 16
     },
     {
         "name": "Weighted Reclining Triceps Press",
@@ -43102,7 +43012,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 19
+        "garminExerciseName": 17
     },
     {
         "name": "Reverse Grip Triceps Pressdown",
@@ -43122,7 +43032,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 20
+        "garminExerciseName": 18
     },
     {
         "name": "Rope Pressdown",
@@ -43142,7 +43052,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 21
+        "garminExerciseName": 19
     },
     {
         "name": "Seated Barbell Overhead Triceps Extension",
@@ -43162,7 +43072,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 22
+        "garminExerciseName": 20
     },
     {
         "name": "Seated Dumbbell Overhead Triceps Extension",
@@ -43182,7 +43092,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 23
+        "garminExerciseName": 21
     },
     {
         "name": "Seated EZ Bar Overhead Triceps Extension",
@@ -43202,7 +43112,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 24
+        "garminExerciseName": 22
     },
     {
         "name": "Seated Single Arm Overhead Dumbbell Extension",
@@ -43222,7 +43132,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 25
+        "garminExerciseName": 23
     },
     {
         "name": "Single Arm Dumbbell Overhead Triceps Extension",
@@ -43242,7 +43152,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 26
+        "garminExerciseName": 24
     },
     {
         "name": "Swiss Ball Dumbbell Lying Triceps Extension",
@@ -43262,7 +43172,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 27
+        "garminExerciseName": 33
     },
     {
         "name": "Swiss Ball EZ Bar Lying Triceps Extension",
@@ -43282,7 +43192,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 28
+        "garminExerciseName": 34
     },
     {
         "name": "Swiss Ball EZ Bar Overhead Triceps Extension",
@@ -43302,7 +43212,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 29
+        "garminExerciseName": 35
     },
     {
         "name": "Tabletop Dip",
@@ -43322,7 +43232,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 30
+        "garminExerciseName": 36
     },
     {
         "name": "Weighted Tabletop Dip",
@@ -43342,7 +43252,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 31
+        "garminExerciseName": 37
     },
     {
         "name": "Triceps Extension On Floor",
@@ -43362,7 +43272,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 32
+        "garminExerciseName": 38
     },
     {
         "name": "Triceps Pressdown",
@@ -43382,7 +43292,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 33
+        "garminExerciseName": 39
     },
     {
         "name": "Weighted Dip",
@@ -43402,7 +43312,7 @@
         ],
         "category": "strength",
         "garminExerciseCategory": 30,
-        "garminExerciseName": 34
+        "garminExerciseName": 40
     },
     {
         "name": "Child Pose",
@@ -43418,9 +43328,7 @@
             "Breathe steadily and avoid forcing any range of motion.",
             "Repeat for the desired duration or number of repetitions."
         ],
-        "category": "stretching",
-        "garminExerciseCategory": 31,
-        "garminExerciseName": 0
+        "category": "stretching"
     },
     {
         "name": "Standing Cat Cow",
@@ -43436,9 +43344,7 @@
             "Breathe steadily and avoid forcing any range of motion.",
             "Repeat for the desired duration or number of repetitions."
         ],
-        "category": "stretching",
-        "garminExerciseCategory": 31,
-        "garminExerciseName": 1
+        "category": "stretching"
     },
     {
         "name": "Quadruped Rotation",
@@ -43454,9 +43360,7 @@
             "Gradually increase the range as the joint warms up.",
             "Repeat for 10-15 repetitions in each direction."
         ],
-        "category": "stretching",
-        "garminExerciseCategory": 31,
-        "garminExerciseName": 3
+        "category": "stretching"
     },
     {
         "name": "Neck Tilts",
@@ -43474,7 +43378,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 4
+        "garminExerciseName": 1
     },
     {
         "name": "Ankle Dorsiflexion With Band",
@@ -43492,7 +43396,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 6
+        "garminExerciseName": 3
     },
     {
         "name": "Ankle Internal Rotation",
@@ -43510,7 +43414,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 7
+        "garminExerciseName": 4
     },
     {
         "name": "Bent Over Reach To Sky",
@@ -43528,7 +43432,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 9
+        "garminExerciseName": 6
     },
     {
         "name": "Elbow To Foot Lunge",
@@ -43546,7 +43450,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 11
+        "garminExerciseName": 8
     },
     {
         "name": "Forward And Backward Leg Swings",
@@ -43564,7 +43468,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 12
+        "garminExerciseName": 9
     },
     {
         "name": "Inverted Hamstring Stretch",
@@ -43582,7 +43486,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 14
+        "garminExerciseName": 11
     },
     {
         "name": "Lateral Duck Under",
@@ -43600,7 +43504,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 15
+        "garminExerciseName": 12
     },
     {
         "name": "Neck Rotations",
@@ -43618,7 +43522,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 16
+        "garminExerciseName": 13
     },
     {
         "name": "Opposite Arm And Leg Balance",
@@ -43636,7 +43540,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 17
+        "garminExerciseName": 14
     },
     {
         "name": "Reach Roll And Lift",
@@ -43654,7 +43558,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 18
+        "garminExerciseName": 15
     },
     {
         "name": "Scorpion",
@@ -43672,7 +43576,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 19
+        "garminExerciseName": 16
     },
     {
         "name": "Weighted Scorpion",
@@ -43688,9 +43592,7 @@
             "Breathe steadily and avoid forcing any range of motion.",
             "Repeat for the desired duration or number of repetitions."
         ],
-        "category": "stretching",
-        "garminExerciseCategory": 31,
-        "garminExerciseName": 20
+        "category": "stretching"
     },
     {
         "name": "Side To Side Leg Swings",
@@ -43708,7 +43610,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 22
+        "garminExerciseName": 18
     },
     {
         "name": "Sleeper Stretch",
@@ -43726,7 +43628,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 23
+        "garminExerciseName": 19
     },
     {
         "name": "Slide Out",
@@ -43744,7 +43646,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 24
+        "garminExerciseName": 20
     },
     {
         "name": "Swiss Ball Hip Crossover",
@@ -43762,7 +43664,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 25
+        "garminExerciseName": 21
     },
     {
         "name": "Swiss Ball Reach Roll And Lift",
@@ -43780,7 +43682,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 26
+        "garminExerciseName": 22
     },
     {
         "name": "Thoracic Rotation",
@@ -43798,7 +43700,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 27
+        "garminExerciseName": 24
     },
     {
         "name": "Walking High Kicks",
@@ -43816,7 +43718,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 28
+        "garminExerciseName": 25
     },
     {
         "name": "Walking High Knees",
@@ -43834,7 +43736,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 29
+        "garminExerciseName": 26
     },
     {
         "name": "Walking Knee Hugs",
@@ -43852,7 +43754,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 30
+        "garminExerciseName": 27
     },
     {
         "name": "Walking Leg Cradles",
@@ -43870,7 +43772,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 31
+        "garminExerciseName": 28
     },
     {
         "name": "Walkout",
@@ -43888,7 +43790,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 32
+        "garminExerciseName": 29
     },
     {
         "name": "Walkout From Push Up Position",
@@ -43906,7 +43808,7 @@
         ],
         "category": "stretching",
         "garminExerciseCategory": 31,
-        "garminExerciseName": 33
+        "garminExerciseName": 30
     },
     {
         "name": "Run",

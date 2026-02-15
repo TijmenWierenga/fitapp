@@ -268,7 +268,7 @@ class WorkoutFitMapper
         $exerciseable = $exercise->exerciseable;
 
         if ($exerciseable instanceof StrengthExercise) {
-            $this->addOpenStep($exercise->name, $intensity, $this->strengthNotes($exerciseable));
+            $this->addOpenStep($exercise->name, $intensity, $this->strengthNotes($exercise->name, $exerciseable));
         } elseif ($exerciseable instanceof CardioExercise) {
             $target = $this->cardioTarget($exerciseable);
 
@@ -336,12 +336,12 @@ class WorkoutFitMapper
 
     private function addRepeatStep(int $backToIndex, int $count): void
     {
-        $this->addStep(null, 6, $backToIndex, 0, $count, null, null, 0);
+        $this->addStep(null, 6, $backToIndex, 2, $count, null, null, 0);
     }
 
     private function addRepeatUntilTimeStep(int $backToIndex, int $durationSeconds): void
     {
-        $this->addStep(null, 7, $backToIndex, 0, $durationSeconds * 1000, null, null, 0);
+        $this->addStep(null, 7, $backToIndex, 2, $durationSeconds * 1000, null, null, 0);
     }
 
     private function addStep(
@@ -370,7 +370,7 @@ class WorkoutFitMapper
         $this->stepIndex++;
     }
 
-    private function strengthNotes(StrengthExercise $exercise): ?string
+    private function strengthNotes(string $exerciseName, StrengthExercise $exercise): string
     {
         $parts = [];
 
@@ -400,7 +400,9 @@ class WorkoutFitMapper
             $parts[] = "Rest {$rest}";
         }
 
-        return empty($parts) ? null : implode(', ', $parts);
+        $details = empty($parts) ? '' : "\n".implode(', ', $parts);
+
+        return "{$exerciseName}{$details}";
     }
 
     /**

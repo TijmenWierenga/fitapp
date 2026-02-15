@@ -516,7 +516,8 @@ it('includes strength notes on exercise steps', function () {
 
     // field 8 = notes
     $notes = getStepField($steps[0], 8);
-    expect($notes)->toContain('3 sets of 8-10 reps')
+    expect($notes)->toContain('Bench Press')
+        ->and($notes)->toContain('3 sets of 8-10 reps')
         ->and($notes)->toContain('@ 80 kg')
         ->and($notes)->toContain('RPE 7')
         ->and($notes)->toContain('Tempo 3-1-2-0')

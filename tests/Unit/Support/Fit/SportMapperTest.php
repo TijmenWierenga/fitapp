@@ -42,14 +42,14 @@ it('maps swimming activities to sport 5', function (Activity $activity) {
 it('maps strength to training with strength sub sport', function () {
     $mapping = SportMapper::fromActivity(Activity::Strength);
 
-    expect($mapping->sport)->toBe(4)
+    expect($mapping->sport)->toBe(10)
         ->and($mapping->subSport)->toBe(20);
 });
 
 it('maps HIIT and cardio to training with cardio sub sport', function (Activity $activity) {
     $mapping = SportMapper::fromActivity($activity);
 
-    expect($mapping->sport)->toBe(4)
+    expect($mapping->sport)->toBe(10)
         ->and($mapping->subSport)->toBe(26);
 })->with([
     'hiit' => Activity::HIIT,
@@ -59,21 +59,21 @@ it('maps HIIT and cardio to training with cardio sub sport', function (Activity 
 it('maps yoga to training with yoga sub sport', function () {
     $mapping = SportMapper::fromActivity(Activity::Yoga);
 
-    expect($mapping->sport)->toBe(4)
+    expect($mapping->sport)->toBe(10)
         ->and($mapping->subSport)->toBe(43);
 });
 
 it('maps pilates to training with pilates sub sport', function () {
     $mapping = SportMapper::fromActivity(Activity::Pilates);
 
-    expect($mapping->sport)->toBe(4)
+    expect($mapping->sport)->toBe(10)
         ->and($mapping->subSport)->toBe(44);
 });
 
 it('maps mobility to training with flexibility sub sport', function () {
     $mapping = SportMapper::fromActivity(Activity::Mobility);
 
-    expect($mapping->sport)->toBe(4)
+    expect($mapping->sport)->toBe(10)
         ->and($mapping->subSport)->toBe(19);
 });
 

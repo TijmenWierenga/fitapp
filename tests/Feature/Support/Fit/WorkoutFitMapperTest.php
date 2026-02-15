@@ -1,10 +1,12 @@
 <?php
 
+use App\Enums\Fit\GarminExerciseCategory;
 use App\Enums\Workout\Activity;
 use App\Models\Block;
 use App\Models\BlockExercise;
 use App\Models\CardioExercise;
 use App\Models\DurationExercise;
+use App\Models\Exercise;
 use App\Models\Section;
 use App\Models\StrengthExercise;
 use App\Models\User;
@@ -27,6 +29,14 @@ function getStepMessages(array $messages): array
     return array_values(array_filter(
         $messages,
         fn (FitMessage $m): bool => $m->globalMessageNumber === 27,
+    ));
+}
+
+function getExerciseTitleMessages(array $messages): array
+{
+    return array_values(array_filter(
+        $messages,
+        fn (FitMessage $m): bool => $m->globalMessageNumber === 264,
     ));
 }
 
@@ -522,4 +532,159 @@ it('includes strength notes on exercise steps', function () {
         ->and($notes)->toContain('RPE 7')
         ->and($notes)->toContain('Tempo 3-1-2-0')
         ->and($notes)->toContain('Rest 1min 30s');
+});
+
+it('includes garmin exercise fields when exercise has mapping', function () {
+    $workout = createWorkout();
+    $section = Section::factory()->for($workout)->create(['name' => 'Main', 'order' => 0]);
+    $block = Block::factory()->for($section)->create(['block_type' => 'straight_sets', 'order' => 0]);
+
+    $catalogExercise = Exercise::factory()->withGarminMapping(GarminExerciseCategory::BenchPress, 1)->create();
+    $strength = StrengthExercise::factory()->create(['target_sets' => 1]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exercise_id' => $catalogExercise->id,
+        'name' => 'Barbell Bench Press',
+        'order' => 0,
+        'exerciseable_type' => 'strength_exercise',
+        'exerciseable_id' => $strength->id,
+    ]);
+
+    $mapper = new WorkoutFitMapper;
+    $messages = $mapper->map($workout);
+    $steps = getStepMessages($messages);
+
+    // field 10 = exercise_category, field 11 = exercise_name
+    expect(getStepField($steps[0], 10))->toBe(0) // BenchPress
+        ->and(getStepField($steps[0], 11))->toBe(1); // barbell_bench_press
+});
+
+it('includes null garmin exercise fields when exercise has no mapping', function () {
+    $workout = createWorkout();
+    $section = Section::factory()->for($workout)->create(['name' => 'Main', 'order' => 0]);
+    $block = Block::factory()->for($section)->create(['block_type' => 'straight_sets', 'order' => 0]);
+
+    $strength = StrengthExercise::factory()->create(['target_sets' => 1]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'name' => 'Custom Exercise',
+        'order' => 0,
+        'exerciseable_type' => 'strength_exercise',
+        'exerciseable_id' => $strength->id,
+    ]);
+
+    $mapper = new WorkoutFitMapper;
+    $messages = $mapper->map($workout);
+    $steps = getStepMessages($messages);
+
+    // field 10 = exercise_category, field 11 = exercise_name — null means invalid marker
+    expect(getStepField($steps[0], 10))->toBeNull()
+        ->and(getStepField($steps[0], 11))->toBeNull();
+});
+
+it('includes garmin fields on cardio exercise step', function () {
+    $workout = createWorkout(['activity' => Activity::Run]);
+    $section = Section::factory()->for($workout)->create(['name' => 'Main', 'order' => 0]);
+    $block = Block::factory()->distanceDuration()->for($section)->create(['order' => 0]);
+
+    $catalogExercise = Exercise::factory()->withGarminMapping(GarminExerciseCategory::Run, 0)->create();
+    $cardio = CardioExercise::factory()->create(['target_duration' => 1800]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exercise_id' => $catalogExercise->id,
+        'name' => 'Run',
+        'order' => 0,
+        'exerciseable_type' => 'cardio_exercise',
+        'exerciseable_id' => $cardio->id,
+    ]);
+
+    $mapper = new WorkoutFitMapper;
+    $messages = $mapper->map($workout);
+    $steps = getStepMessages($messages);
+
+    expect(getStepField($steps[0], 10))->toBe(32) // Run
+        ->and(getStepField($steps[0], 11))->toBe(0); // run
+});
+
+it('generates exercise_title messages for exercises with garmin mapping', function () {
+    $workout = createWorkout();
+    $section = Section::factory()->for($workout)->create(['name' => 'Main', 'order' => 0]);
+    $block = Block::factory()->for($section)->create(['block_type' => 'straight_sets', 'order' => 0]);
+
+    $catalogExercise = Exercise::factory()->withGarminMapping(GarminExerciseCategory::BenchPress, 1)->create();
+    $strength = StrengthExercise::factory()->create(['target_sets' => 1]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exercise_id' => $catalogExercise->id,
+        'name' => 'Barbell Bench Press',
+        'order' => 0,
+        'exerciseable_type' => 'strength_exercise',
+        'exerciseable_id' => $strength->id,
+    ]);
+
+    $mapper = new WorkoutFitMapper;
+    $messages = $mapper->map($workout);
+    $titles = getExerciseTitleMessages($messages);
+
+    expect($titles)->toHaveCount(1);
+
+    // field 0 = exercise_category, field 1 = exercise_name, field 2 = wkt_step_name
+    expect(getStepField($titles[0], 0))->toBe(0) // BenchPress
+        ->and(getStepField($titles[0], 1))->toBe(1) // barbell_bench_press
+        ->and(getStepField($titles[0], 2))->toBe('Barbell Bench Press');
+});
+
+it('does not generate exercise_title for exercises without garmin mapping', function () {
+    $workout = createWorkout();
+    $section = Section::factory()->for($workout)->create(['name' => 'Main', 'order' => 0]);
+    $block = Block::factory()->for($section)->create(['block_type' => 'straight_sets', 'order' => 0]);
+
+    $strength = StrengthExercise::factory()->create(['target_sets' => 1]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'name' => 'Custom Exercise',
+        'order' => 0,
+        'exerciseable_type' => 'strength_exercise',
+        'exerciseable_id' => $strength->id,
+    ]);
+
+    $mapper = new WorkoutFitMapper;
+    $messages = $mapper->map($workout);
+    $titles = getExerciseTitleMessages($messages);
+
+    expect($titles)->toHaveCount(0);
+});
+
+it('deduplicates exercise_title messages for repeated exercises', function () {
+    $workout = createWorkout();
+    $section = Section::factory()->for($workout)->create(['name' => 'Main', 'order' => 0]);
+    $block = Block::factory()->superset()->for($section)->create(['order' => 0, 'rounds' => 3]);
+
+    $catalogExercise = Exercise::factory()->withGarminMapping(GarminExerciseCategory::BenchPress, 1)->create();
+    $strength1 = StrengthExercise::factory()->create();
+    $strength2 = StrengthExercise::factory()->create();
+
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exercise_id' => $catalogExercise->id,
+        'name' => 'Bench Press',
+        'order' => 0,
+        'exerciseable_type' => 'strength_exercise',
+        'exerciseable_id' => $strength1->id,
+    ]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exercise_id' => $catalogExercise->id,
+        'name' => 'Bench Press Again',
+        'order' => 1,
+        'exerciseable_type' => 'strength_exercise',
+        'exerciseable_id' => $strength2->id,
+    ]);
+
+    $mapper = new WorkoutFitMapper;
+    $messages = $mapper->map($workout);
+    $titles = getExerciseTitleMessages($messages);
+
+    // Same garmin category+name → only 1 exercise_title
+    expect($titles)->toHaveCount(1);
 });

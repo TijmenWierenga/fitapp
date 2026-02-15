@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Fit\GarminExerciseCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -28,6 +29,16 @@ class ExerciseFactory extends Factory
             'equipment' => fake()->randomElement(['barbell', 'dumbbell', 'machine', 'body only', null]),
             'category' => fake()->randomElement(['strength', 'stretching', 'plyometrics', 'cardio']),
             'instructions' => [fake()->sentence(), fake()->sentence()],
+            'garmin_exercise_category' => null,
+            'garmin_exercise_name' => null,
         ];
+    }
+
+    public function withGarminMapping(GarminExerciseCategory $category = GarminExerciseCategory::BenchPress, int $exerciseName = 1): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'garmin_exercise_category' => $category,
+            'garmin_exercise_name' => $exerciseName,
+        ]);
     }
 }

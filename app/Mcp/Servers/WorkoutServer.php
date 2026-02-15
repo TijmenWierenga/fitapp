@@ -120,6 +120,14 @@ class WorkoutServer extends Server
         - Secondary muscles (load factor 0.5) receive half the training volume
         - Cross-reference with workload zones before selecting exercises
 
+        ## Garmin FIT Compatibility
+
+        Some exercises in the catalog have Garmin FIT exercise mappings (`garmin_compatible: true` in search results). When these exercises are used in workouts, the FIT export includes Garmin exercise category and name IDs, enabling Garmin devices to display exercise animations and properly track exercises.
+
+        - Check the user's `prefer_garmin_exercises` setting in their fitness profile (available via `user://fitness-profile` resource)
+        - When enabled, use `garmin_compatible: true` filter in `search-exercises` to prefer mapped exercises
+        - Unmapped exercises still export fine — they just won't show Garmin animations on the device
+
         ## Business Rules
 
         - Workouts can only be completed once

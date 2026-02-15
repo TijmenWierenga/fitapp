@@ -21,6 +21,9 @@ class WorkoutFitMapper
 
     private int $stepIndex = 0;
 
+    /** @var array<string, array{category: int, name: int, label: string}> */
+    private array $exerciseTitles = [];
+
     /**
      * @return list<FitMessage>
      */
@@ -28,6 +31,7 @@ class WorkoutFitMapper
     {
         $this->steps = [];
         $this->stepIndex = 0;
+        $this->exerciseTitles = [];
 
         foreach ($workout->sections as $section) {
             $intensity = $this->sectionIntensity($section);
@@ -48,7 +52,45 @@ class WorkoutFitMapper
                 numSteps: count($this->steps),
             ),
             ...$this->steps,
+            ...$this->buildExerciseTitles(),
         ];
+    }
+
+    /**
+     * @return list<FitMessage>
+     */
+    private function buildExerciseTitles(): array
+    {
+        $messages = [];
+        $index = 0;
+
+        foreach ($this->exerciseTitles as $title) {
+            $messages[] = FitMessageFactory::exerciseTitle(
+                messageIndex: $index++,
+                exerciseCategory: $title['category'],
+                exerciseName: $title['name'],
+                stepName: $title['label'],
+            );
+        }
+
+        return $messages;
+    }
+
+    private function registerExerciseTitle(string $label, ?int $exerciseCategory, ?int $exerciseName): void
+    {
+        if ($exerciseCategory === null || $exerciseName === null) {
+            return;
+        }
+
+        $key = "{$exerciseCategory}:{$exerciseName}";
+
+        if (! isset($this->exerciseTitles[$key])) {
+            $this->exerciseTitles[$key] = [
+                'category' => $exerciseCategory,
+                'name' => $exerciseName,
+                'label' => $label,
+            ];
+        }
     }
 
     private function sectionIntensity(Section $section): int
@@ -221,6 +263,8 @@ class WorkoutFitMapper
     {
         foreach ($block->exercises as $exercise) {
             $exerciseable = $exercise->exerciseable;
+            $garminCategory = $exercise->exercise?->garmin_exercise_category?->value;
+            $garminName = $exercise->exercise?->garmin_exercise_name;
 
             if ($exerciseable instanceof CardioExercise) {
                 $target = $this->cardioTarget($exerciseable);
@@ -231,6 +275,8 @@ class WorkoutFitMapper
                         (int) round((float) $exerciseable->target_distance * 100), // meters to centimeters
                         $sectionIntensity,
                         $target,
+                        $garminCategory,
+                        $garminName,
                     );
                 } elseif ($exerciseable->target_duration && $exerciseable->target_duration > 0) {
                     $this->addStep(
@@ -242,6 +288,8 @@ class WorkoutFitMapper
                         $target['customLow'],
                         $target['customHigh'],
                         $sectionIntensity,
+                        exerciseCategory: $garminCategory,
+                        exerciseName: $garminName,
                     );
                 } else {
                     $this->addStep(
@@ -253,12 +301,14 @@ class WorkoutFitMapper
                         $target['customLow'],
                         $target['customHigh'],
                         $sectionIntensity,
+                        exerciseCategory: $garminCategory,
+                        exerciseName: $garminName,
                     );
                 }
             } elseif ($exerciseable instanceof DurationExercise && $exerciseable->target_duration) {
-                $this->addTimeStep($exercise->name, $exerciseable->target_duration, $sectionIntensity);
+                $this->addTimeStep($exercise->name, $exerciseable->target_duration, $sectionIntensity, $garminCategory, $garminName);
             } else {
-                $this->addOpenStep($exercise->name, $sectionIntensity);
+                $this->addOpenStep($exercise->name, $sectionIntensity, exerciseCategory: $garminCategory, exerciseName: $garminName);
             }
         }
     }
@@ -266,9 +316,11 @@ class WorkoutFitMapper
     private function addExerciseStep(BlockExercise $exercise, int $intensity): void
     {
         $exerciseable = $exercise->exerciseable;
+        $garminCategory = $exercise->exercise?->garmin_exercise_category?->value;
+        $garminName = $exercise->exercise?->garmin_exercise_name;
 
         if ($exerciseable instanceof StrengthExercise) {
-            $this->addOpenStep($exercise->name, $intensity, $this->strengthNotes($exercise->name, $exerciseable));
+            $this->addOpenStep($exercise->name, $intensity, $this->strengthNotes($exercise->name, $exerciseable), $garminCategory, $garminName);
         } elseif ($exerciseable instanceof CardioExercise) {
             $target = $this->cardioTarget($exerciseable);
 
@@ -282,6 +334,8 @@ class WorkoutFitMapper
                     $target['customLow'],
                     $target['customHigh'],
                     $intensity,
+                    exerciseCategory: $garminCategory,
+                    exerciseName: $garminName,
                 );
             } else {
                 $this->addStep(
@@ -293,23 +347,25 @@ class WorkoutFitMapper
                     $target['customLow'],
                     $target['customHigh'],
                     $intensity,
+                    exerciseCategory: $garminCategory,
+                    exerciseName: $garminName,
                 );
             }
         } elseif ($exerciseable instanceof DurationExercise && $exerciseable->target_duration) {
-            $this->addTimeStep($exercise->name, $exerciseable->target_duration, $intensity);
+            $this->addTimeStep($exercise->name, $exerciseable->target_duration, $intensity, $garminCategory, $garminName);
         } else {
-            $this->addOpenStep($exercise->name, $intensity);
+            $this->addOpenStep($exercise->name, $intensity, exerciseCategory: $garminCategory, exerciseName: $garminName);
         }
     }
 
-    private function addOpenStep(string $name, int $intensity, ?string $notes = null): void
+    private function addOpenStep(string $name, int $intensity, ?string $notes = null, ?int $exerciseCategory = null, ?int $exerciseName = null): void
     {
-        $this->addStep($name, 5, null, 2, null, null, null, $intensity, $notes);
+        $this->addStep($name, 5, null, 2, null, null, null, $intensity, $notes, $exerciseCategory, $exerciseName);
     }
 
-    private function addTimeStep(string $name, int $durationSeconds, int $intensity): void
+    private function addTimeStep(string $name, int $durationSeconds, int $intensity, ?int $exerciseCategory = null, ?int $exerciseName = null): void
     {
-        $this->addStep($name, 0, $durationSeconds * 1000, 2, null, null, null, $intensity);
+        $this->addStep($name, 0, $durationSeconds * 1000, 2, null, null, null, $intensity, exerciseCategory: $exerciseCategory, exerciseName: $exerciseName);
     }
 
     private function addRestStep(string $name, int $durationSeconds): void
@@ -320,7 +376,7 @@ class WorkoutFitMapper
     /**
      * @param  array{targetType: int, targetValue: int|null, customLow: int|null, customHigh: int|null}  $target
      */
-    private function addDistanceStep(string $name, int $distanceCm, int $intensity, array $target): void
+    private function addDistanceStep(string $name, int $distanceCm, int $intensity, array $target, ?int $exerciseCategory = null, ?int $exerciseName = null): void
     {
         $this->addStep(
             $name,
@@ -331,6 +387,8 @@ class WorkoutFitMapper
             $target['customLow'],
             $target['customHigh'],
             $intensity,
+            exerciseCategory: $exerciseCategory,
+            exerciseName: $exerciseName,
         );
     }
 
@@ -354,7 +412,13 @@ class WorkoutFitMapper
         ?int $customTargetHigh,
         int $intensity,
         ?string $notes = null,
+        ?int $exerciseCategory = null,
+        ?int $exerciseName = null,
     ): void {
+        if ($name !== null) {
+            $this->registerExerciseTitle($name, $exerciseCategory, $exerciseName);
+        }
+
         $this->steps[] = FitMessageFactory::workoutStep(
             messageIndex: $this->stepIndex,
             stepName: $name,
@@ -366,6 +430,8 @@ class WorkoutFitMapper
             customTargetHigh: $customTargetHigh,
             intensity: $intensity,
             notes: $notes,
+            exerciseCategory: $exerciseCategory,
+            exerciseName: $exerciseName,
         );
         $this->stepIndex++;
     }

@@ -48,6 +48,8 @@ class FitMessageFactory
         ?int $customTargetHigh,
         int $intensity,
         ?string $notes = null,
+        ?int $exerciseCategory = null,
+        ?int $exerciseName = null,
     ): FitMessage {
         $fields = [
             new FitField(254, FitBaseType::UInt16, $messageIndex),
@@ -65,10 +67,31 @@ class FitMessageFactory
             $fields[] = new FitField(8, FitBaseType::String, $notes);
         }
 
+        $fields[] = new FitField(10, FitBaseType::UInt16, $exerciseCategory);
+        $fields[] = new FitField(11, FitBaseType::UInt16, $exerciseName);
+
         return new FitMessage(
             localMessageType: 2,
             globalMessageNumber: 27,
             fields: $fields,
+        );
+    }
+
+    public static function exerciseTitle(
+        int $messageIndex,
+        int $exerciseCategory,
+        int $exerciseName,
+        string $stepName,
+    ): FitMessage {
+        return new FitMessage(
+            localMessageType: 3,
+            globalMessageNumber: 264,
+            fields: [
+                new FitField(254, FitBaseType::UInt16, $messageIndex),
+                new FitField(0, FitBaseType::UInt16, $exerciseCategory),
+                new FitField(1, FitBaseType::UInt16, $exerciseName),
+                new FitField(2, FitBaseType::String, $stepName),
+            ],
         );
     }
 }

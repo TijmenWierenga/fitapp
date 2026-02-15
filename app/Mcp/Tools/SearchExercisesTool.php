@@ -27,6 +27,7 @@ class SearchExercisesTool extends Tool
         - Use `muscle_group` to find exercises targeting a specific muscle — read the `exercise://muscle-groups` resource for valid values
         - Combine filters for precise results (e.g., query="press" + equipment="dumbbell")
         - Primary muscles (load_factor 1.0) receive full training volume; secondary (0.5) receive half
+        - Use `garmin_compatible: true` to only return exercises with Garmin FIT exercise mappings (recommended when the user has `prefer_garmin_exercises` enabled)
     MARKDOWN;
 
     /**
@@ -40,6 +41,7 @@ class SearchExercisesTool extends Tool
             'category' => 'nullable|string|in:strength,stretching,plyometrics,cardio',
             'equipment' => 'nullable|string|max:255',
             'level' => 'nullable|string|in:beginner,intermediate,expert',
+            'garmin_compatible' => 'nullable|boolean',
             'limit' => 'nullable|integer|min:1|max:50',
         ]);
 
@@ -52,6 +54,8 @@ class SearchExercisesTool extends Tool
 
         $limit = $validated['limit'] ?? 20;
 
+        $garminCompatible = $validated['garmin_compatible'] ?? null;
+
         $searchQuery = Exercise::search($query ?? '')
             ->when(isset($validated['category']), fn ($search) => $search->where('category', $validated['category']))
             ->when(isset($validated['equipment']), fn ($search) => $search->where('equipment', $validated['equipment']))
@@ -61,6 +65,8 @@ class SearchExercisesTool extends Tool
                     'muscleGroups',
                     fn (Builder $mg) => $mg->where('name', $muscleGroup),
                 ))
+                ->when($garminCompatible === true, fn (Builder $q) => $q->whereNotNull('garmin_exercise_category'))
+                ->when($garminCompatible === false, fn (Builder $q) => $q->whereNull('garmin_exercise_category'))
                 ->with('muscleGroups')
             );
 
@@ -74,6 +80,7 @@ class SearchExercisesTool extends Tool
             'level' => $exercise->level,
             'force' => $exercise->force,
             'mechanic' => $exercise->mechanic,
+            'garmin_compatible' => $exercise->has_garmin_mapping,
             'primary_muscles' => $exercise->muscleGroups
                 ->where('pivot.load_factor', 1.0)
                 ->map(fn ($mg): array => [
@@ -114,6 +121,7 @@ class SearchExercisesTool extends Tool
                 'exercise ball', 'foam roll', 'kettlebells', 'machine', 'medicine ball', 'other',
             ])->description('Filter by equipment type.')->nullable(),
             'level' => $schema->string()->enum(['beginner', 'intermediate', 'expert'])->description('Filter by difficulty.')->nullable(),
+            'garmin_compatible' => $schema->boolean()->description('Filter by Garmin FIT exercise mapping availability. When true, only exercises that can be exported with Garmin exercise IDs are returned.')->nullable(),
             'limit' => $schema->integer()->description('Maximum number of results to return (default: 20, max: 50)')->nullable(),
         ];
     }

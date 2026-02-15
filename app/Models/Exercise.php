@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\Fit\GarminExerciseCategory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -25,6 +27,8 @@ class Exercise extends Model
         'aliases',
         'description',
         'tips',
+        'garmin_exercise_category',
+        'garmin_exercise_name',
     ];
 
     public function getRouteKeyName(): string
@@ -36,6 +40,7 @@ class Exercise extends Model
         'instructions' => 'array',
         'aliases' => 'array',
         'tips' => 'array',
+        'garmin_exercise_category' => GarminExerciseCategory::class,
     ];
 
     /**
@@ -50,6 +55,16 @@ class Exercise extends Model
             'equipment' => $this->equipment,
             'level' => $this->level,
         ];
+    }
+
+    /**
+     * @return Attribute<bool, never>
+     */
+    protected function hasGarminMapping(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): bool => $this->garmin_exercise_category !== null,
+        );
     }
 
     /**

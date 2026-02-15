@@ -15,7 +15,7 @@ class ExportWorkoutFit
 
     public function execute(Workout $workout): string
     {
-        $workout->loadMissing('sections.blocks.exercises.exerciseable');
+        $workout->loadMissing(['sections.blocks.exercises.exerciseable', 'sections.blocks.exercises.exercise']);
 
         return $this->encoder->encode($this->mapper->map($workout));
     }

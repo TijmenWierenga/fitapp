@@ -24,6 +24,7 @@ class FitnessProfileFactory extends Factory
             'goal_details' => fake()->boolean(50) ? fake()->sentence() : null,
             'available_days_per_week' => fake()->numberBetween(1, 7),
             'minutes_per_session' => fake()->randomElement([30, 45, 60, 90, 120]),
+            'prefer_garmin_exercises' => false,
         ];
     }
 
@@ -52,6 +53,13 @@ class FitnessProfileFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'primary_goal' => FitnessGoal::GeneralFitness,
+        ]);
+    }
+
+    public function preferGarmin(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'prefer_garmin_exercises' => true,
         ]);
     }
 }

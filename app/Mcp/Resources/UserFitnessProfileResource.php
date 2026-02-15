@@ -56,6 +56,7 @@ class UserFitnessProfileResource extends Resource
 
         $profile = $user->fitnessProfile;
         $goalDetails = $profile->goal_details ? "\n**Goal Details:** {$profile->goal_details}" : '';
+        $garminPref = $profile->prefer_garmin_exercises ? 'Yes' : 'No';
 
         return <<<TEXT
         # Fitness Profile
@@ -63,6 +64,7 @@ class UserFitnessProfileResource extends Resource
         **Primary Goal:** {$profile->primary_goal->label()}$goalDetails
         **Available Days Per Week:** {$profile->available_days_per_week}
         **Minutes Per Session:** {$profile->minutes_per_session}
+        **Prefer Garmin-Compatible Exercises:** {$garminPref}
 
         TEXT;
     }

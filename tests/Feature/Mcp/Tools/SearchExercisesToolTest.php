@@ -187,3 +187,48 @@ it('requires at least query or muscle_group', function (): void {
         ->assertSee('query')
         ->assertSee('muscle_group');
 });
+
+it('filters by garmin_compatible true', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    Exercise::factory()->withGarminMapping()->create(['name' => 'Garmin Bench Press']);
+    Exercise::factory()->create(['name' => 'Custom Press']);
+
+    $response = WorkoutServer::actingAs($user)->tool(SearchExercisesTool::class, [
+        'query' => 'Press',
+        'garmin_compatible' => true,
+    ]);
+
+    $response->assertOk()
+        ->assertSee('Garmin Bench Press')
+        ->assertDontSee('Custom Press');
+});
+
+it('filters by garmin_compatible false', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    Exercise::factory()->withGarminMapping()->create(['name' => 'Garmin Bench Press']);
+    Exercise::factory()->create(['name' => 'Custom Press']);
+
+    $response = WorkoutServer::actingAs($user)->tool(SearchExercisesTool::class, [
+        'query' => 'Press',
+        'garmin_compatible' => false,
+    ]);
+
+    $response->assertOk()
+        ->assertSee('Custom Press')
+        ->assertDontSee('Garmin Bench Press');
+});
+
+it('includes garmin_compatible flag in results', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    Exercise::factory()->withGarminMapping()->create(['name' => 'Mapped Exercise']);
+
+    $response = WorkoutServer::actingAs($user)->tool(SearchExercisesTool::class, [
+        'query' => 'Mapped Exercise',
+    ]);
+
+    $response->assertOk()
+        ->assertSee('"garmin_compatible": true');
+});

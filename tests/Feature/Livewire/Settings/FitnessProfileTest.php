@@ -253,6 +253,36 @@ it('displays injuries in the table', function () {
         ->assertSee('Chronic');
 });
 
+it('saves prefer garmin exercises preference', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(FitnessProfile::class)
+        ->set('primaryGoal', 'general_fitness')
+        ->set('availableDaysPerWeek', 3)
+        ->set('minutesPerSession', 60)
+        ->set('preferGarminExercises', true)
+        ->call('saveProfile')
+        ->assertHasNoErrors();
+
+    $this->assertDatabaseHas('fitness_profiles', [
+        'user_id' => $user->id,
+        'prefer_garmin_exercises' => true,
+    ]);
+});
+
+it('loads prefer garmin exercises on mount', function () {
+    $user = User::factory()->create();
+    FitnessProfileModel::factory()->preferGarmin()->create([
+        'user_id' => $user->id,
+        'primary_goal' => FitnessGoal::GeneralFitness,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(FitnessProfile::class)
+        ->assertSet('preferGarminExercises', true);
+});
+
 it('cannot access another users injuries', function () {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();

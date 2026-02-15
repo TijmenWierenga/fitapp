@@ -18,12 +18,14 @@ class FitnessProfile extends Model
         'goal_details',
         'available_days_per_week',
         'minutes_per_session',
+        'prefer_garmin_exercises',
     ];
 
     protected $casts = [
         'primary_goal' => FitnessGoal::class,
         'available_days_per_week' => 'integer',
         'minutes_per_session' => 'integer',
+        'prefer_garmin_exercises' => 'boolean',
     ];
 
     /**

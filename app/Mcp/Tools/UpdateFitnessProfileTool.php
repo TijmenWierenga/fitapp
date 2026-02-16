@@ -38,6 +38,7 @@ class UpdateFitnessProfileTool extends Tool
             'goal_details' => 'nullable|string|max:5000',
             'available_days_per_week' => 'required|integer|min:1|max:7',
             'minutes_per_session' => 'required|integer|min:15|max:180',
+            'prefer_garmin_exercises' => 'nullable|boolean',
         ], [
             'primary_goal.Enum' => 'Invalid goal. Must be one of: weight_loss, muscle_gain, endurance, general_fitness.',
             'available_days_per_week.min' => 'Available days must be at least 1.',
@@ -57,6 +58,9 @@ class UpdateFitnessProfileTool extends Tool
                 'goal_details' => $validated['goal_details'] ?? null,
                 'available_days_per_week' => $validated['available_days_per_week'],
                 'minutes_per_session' => $validated['minutes_per_session'],
+                ...array_key_exists('prefer_garmin_exercises', $validated)
+                    ? ['prefer_garmin_exercises' => $validated['prefer_garmin_exercises'] ?? false]
+                    : [],
             ]
         );
 
@@ -69,6 +73,7 @@ class UpdateFitnessProfileTool extends Tool
                 'goal_details' => $profile->goal_details,
                 'available_days_per_week' => $profile->available_days_per_week,
                 'minutes_per_session' => $profile->minutes_per_session,
+                'prefer_garmin_exercises' => $profile->prefer_garmin_exercises,
             ],
             'message' => 'Fitness profile updated successfully',
         ]);
@@ -84,6 +89,7 @@ class UpdateFitnessProfileTool extends Tool
             'goal_details' => $schema->string()->description('Optional detailed description of specific goals (e.g., "Run a sub-4hr marathon by October")')->nullable(),
             'available_days_per_week' => $schema->integer()->description('Number of days available for training per week (1-7)'),
             'minutes_per_session' => $schema->integer()->description('Typical workout session duration in minutes (15-180)'),
+            'prefer_garmin_exercises' => $schema->boolean()->description('When true, prefer exercises with Garmin FIT mapping for device compatibility. Use `garmin_compatible` filter in search-exercises tool.')->nullable(),
         ];
     }
 }

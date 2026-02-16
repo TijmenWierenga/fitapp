@@ -77,6 +77,8 @@ class ExerciseSeeder extends Seeder
                         'aliases' => $data['aliases'] ?? null,
                         'description' => $data['description'] ?? null,
                         'tips' => $data['tips'] ?? null,
+                        'garmin_exercise_category' => $data['garminExerciseCategory'] ?? null,
+                        'garmin_exercise_name' => $data['garminExerciseName'] ?? null,
                     ],
                 );
 

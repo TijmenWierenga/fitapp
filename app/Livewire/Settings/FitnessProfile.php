@@ -20,6 +20,8 @@ class FitnessProfile extends Component
 
     public int $minutesPerSession = 60;
 
+    public bool $preferGarminExercises = false;
+
     public bool $showInjuryModal = false;
 
     public ?int $editingInjuryId = null;
@@ -43,6 +45,7 @@ class FitnessProfile extends Component
             $this->goalDetails = $profile->goal_details;
             $this->availableDaysPerWeek = $profile->available_days_per_week;
             $this->minutesPerSession = $profile->minutes_per_session;
+            $this->preferGarminExercises = $profile->prefer_garmin_exercises;
         }
     }
 
@@ -53,6 +56,7 @@ class FitnessProfile extends Component
             'goalDetails' => ['nullable', 'string', 'max:5000'],
             'availableDaysPerWeek' => ['required', 'integer', 'min:1', 'max:7'],
             'minutesPerSession' => ['required', 'integer', 'min:15', 'max:180'],
+            'preferGarminExercises' => ['boolean'],
         ]);
 
         Auth::user()->fitnessProfile()->updateOrCreate(
@@ -62,6 +66,7 @@ class FitnessProfile extends Component
                 'goal_details' => $validated['goalDetails'],
                 'available_days_per_week' => $validated['availableDaysPerWeek'],
                 'minutes_per_session' => $validated['minutesPerSession'],
+                'prefer_garmin_exercises' => $validated['preferGarminExercises'],
             ]
         );
 

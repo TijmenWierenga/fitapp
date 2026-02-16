@@ -61,6 +61,11 @@
                     </flux:field>
                 </div>
 
+                <flux:field>
+                    <flux:switch wire:model="preferGarminExercises" label="{{ __('Prefer Garmin-compatible exercises') }}" />
+                    <flux:description>{{ __('When enabled, your AI assistant will prefer exercises that support Garmin device animations and tracking') }}</flux:description>
+                </flux:field>
+
                 <div class="flex items-center gap-4">
                     <flux:button variant="primary" type="submit">
                         {{ __('Save Profile') }}

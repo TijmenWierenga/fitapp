@@ -105,6 +105,15 @@
                         </flux:button>
 
                     <flux:button
+                        href="{{ route('workouts.export-fit', $workout) }}"
+                        variant="ghost"
+                        icon="arrow-down-tray"
+                        class="w-full"
+                    >
+                        Export to Garmin
+                    </flux:button>
+
+                    <flux:button
                         wire:click="$dispatch('duplicate-workout', { workoutId: {{ $workout->id }} })"
                         variant="ghost"
                         icon="document-duplicate"

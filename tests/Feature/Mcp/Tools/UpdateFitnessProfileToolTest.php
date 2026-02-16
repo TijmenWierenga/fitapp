@@ -89,3 +89,37 @@ it('fails with minutes out of range', function (int $minutes) {
 
     $response->assertHasErrors();
 })->with([10, 14, 181, 500]);
+
+it('sets prefer_garmin_exercises preference', function () {
+    $user = User::factory()->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(UpdateFitnessProfileTool::class, [
+        'primary_goal' => 'general_fitness',
+        'available_days_per_week' => 4,
+        'minutes_per_session' => 60,
+        'prefer_garmin_exercises' => true,
+    ]);
+
+    $response->assertOk()
+        ->assertSee('"prefer_garmin_exercises": true');
+
+    assertDatabaseHas('fitness_profiles', [
+        'user_id' => $user->id,
+        'prefer_garmin_exercises' => true,
+    ]);
+});
+
+it('defaults prefer_garmin_exercises to false when not provided', function () {
+    $user = User::factory()->create();
+
+    WorkoutServer::actingAs($user)->tool(UpdateFitnessProfileTool::class, [
+        'primary_goal' => 'general_fitness',
+        'available_days_per_week' => 3,
+        'minutes_per_session' => 45,
+    ]);
+
+    assertDatabaseHas('fitness_profiles', [
+        'user_id' => $user->id,
+        'prefer_garmin_exercises' => false,
+    ]);
+});

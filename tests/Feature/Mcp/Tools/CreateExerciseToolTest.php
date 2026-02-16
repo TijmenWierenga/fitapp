@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\BodyPart;
+use App\Enums\Fit\GarminExerciseCategory;
 use App\Mcp\Servers\WorkoutServer;
 use App\Mcp\Tools\CreateExerciseTool;
 use App\Models\Exercise;
@@ -72,12 +73,15 @@ it('creates exercise with only required fields', function (): void {
 
     $response->assertOk()
         ->assertSee('Basic Push Up')
-        ->assertSee('basic-push-up');
+        ->assertSee('basic-push-up')
+        ->assertSee('"garmin_compatible": false');
 
     $exercise = Exercise::where('name', 'Basic Push Up')->first();
     expect($exercise)->not->toBeNull();
     expect($exercise->force)->toBeNull();
     expect($exercise->equipment)->toBeNull();
+    expect($exercise->garmin_exercise_category)->toBeNull();
+    expect($exercise->garmin_exercise_name)->toBeNull();
 });
 
 it('rejects duplicate exercise name', function (): void {
@@ -170,4 +174,69 @@ it('returns muscle groups with correct load factors', function (): void {
     expect((float) $exercise->primaryMuscles->first()->pivot->load_factor)->toBe(1.0);
     expect($exercise->secondaryMuscles)->toHaveCount(2);
     expect((float) $exercise->secondaryMuscles->first()->pivot->load_factor)->toBe(0.5);
+});
+
+it('creates exercise with Garmin mapping', function (): void {
+    $admin = User::factory()->admin()->withTimezone('UTC')->create();
+
+    $response = WorkoutServer::actingAs($admin)->tool(CreateExerciseTool::class, [
+        'name' => 'Barbell Bench Press',
+        'category' => 'strength',
+        'level' => 'intermediate',
+        'garmin_exercise_category' => GarminExerciseCategory::BenchPress->value,
+        'garmin_exercise_name' => 0,
+    ]);
+
+    $response->assertOk()
+        ->assertSee('Barbell Bench Press')
+        ->assertSee('"garmin_compatible": true');
+
+    $exercise = Exercise::where('name', 'Barbell Bench Press')->first();
+    expect($exercise->garmin_exercise_category)->toBe(GarminExerciseCategory::BenchPress);
+    expect($exercise->garmin_exercise_name)->toBe(0);
+});
+
+it('rejects invalid Garmin exercise category', function (): void {
+    $admin = User::factory()->admin()->withTimezone('UTC')->create();
+
+    $response = WorkoutServer::actingAs($admin)->tool(CreateExerciseTool::class, [
+        'name' => 'Invalid Garmin Exercise',
+        'category' => 'strength',
+        'level' => 'beginner',
+        'garmin_exercise_category' => 999,
+        'garmin_exercise_name' => 0,
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('garmin exercise category');
+
+    expect(Exercise::where('name', 'Invalid Garmin Exercise')->exists())->toBeFalse();
+});
+
+it('requires both Garmin fields or neither', function (): void {
+    $admin = User::factory()->admin()->withTimezone('UTC')->create();
+
+    $categoryOnly = WorkoutServer::actingAs($admin)->tool(CreateExerciseTool::class, [
+        'name' => 'Category Only Exercise',
+        'category' => 'strength',
+        'level' => 'beginner',
+        'garmin_exercise_category' => GarminExerciseCategory::Squat->value,
+    ]);
+
+    $categoryOnly->assertHasErrors()
+        ->assertSee('garmin_exercise_category and garmin_exercise_name must be provided together');
+
+    expect(Exercise::where('name', 'Category Only Exercise')->exists())->toBeFalse();
+
+    $nameOnly = WorkoutServer::actingAs($admin)->tool(CreateExerciseTool::class, [
+        'name' => 'Name Only Exercise',
+        'category' => 'strength',
+        'level' => 'beginner',
+        'garmin_exercise_name' => 5,
+    ]);
+
+    $nameOnly->assertHasErrors()
+        ->assertSee('garmin_exercise_category and garmin_exercise_name must be provided together');
+
+    expect(Exercise::where('name', 'Name Only Exercise')->exists())->toBeFalse();
 });

@@ -317,14 +317,101 @@ it('maps interval block', function () {
     // Work(TIME) + Rest(TIME) + Repeat
     expect($steps)->toHaveCount(3);
 
-    expect(getStepField($steps[0], 1))->toBe(0) // TIME
+    expect(getStepField($steps[0], 0))->toBe('Work') // default name when no exercises
+        ->and(getStepField($steps[0], 1))->toBe(0) // TIME
         ->and(getStepField($steps[0], 2))->toBe(30_000)
         ->and(getStepField($steps[0], 7))->toBe(0) // ACTIVE
+        ->and(getStepField($steps[0], 8))->toBeNull() // no notes without exercises/targets
         ->and(getStepField($steps[1], 1))->toBe(0) // TIME
         ->and(getStepField($steps[1], 2))->toBe(15_000)
         ->and(getStepField($steps[1], 7))->toBe(1) // REST
         ->and(getStepField($steps[2], 1))->toBe(6) // REPEAT
         ->and(getStepField($steps[2], 4))->toBe(8);
+});
+
+it('includes notes on interval work step with cardio targets', function () {
+    $workout = createWorkout(['activity' => Activity::Run]);
+    $section = Section::factory()->for($workout)->create(['name' => 'Main', 'order' => 0]);
+    $block = Block::factory()->interval()->for($section)->create([
+        'order' => 0,
+        'rounds' => 6,
+        'work_interval' => 60,
+        'rest_interval' => 30,
+    ]);
+
+    $cardio = CardioExercise::factory()->create([
+        'target_heart_rate_zone' => 4,
+        'target_pace_min' => 300, // 5:00/km
+        'target_pace_max' => 270, // 4:30/km
+    ]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'name' => 'Fast Run',
+        'order' => 0,
+        'exerciseable_type' => 'cardio_exercise',
+        'exerciseable_id' => $cardio->id,
+    ]);
+
+    $mapper = new WorkoutFitMapper;
+    $messages = $mapper->map($workout);
+    $steps = getStepMessages($messages);
+
+    $notes = getStepField($steps[0], 8);
+    expect($notes)->toContain('Fast Run')
+        ->and($notes)->toContain('Zone 4')
+        ->and($notes)->toContain('/km');
+});
+
+it('forwards garmin exercise mapping on interval work step', function () {
+    $workout = createWorkout(['activity' => Activity::Run]);
+    $section = Section::factory()->for($workout)->create(['name' => 'Main', 'order' => 0]);
+    $block = Block::factory()->interval()->for($section)->create([
+        'order' => 0,
+        'rounds' => 4,
+        'work_interval' => 45,
+        'rest_interval' => 15,
+    ]);
+
+    $catalogExercise = Exercise::factory()->withGarminMapping(GarminExerciseCategory::Run, 0)->create();
+    $cardio = CardioExercise::factory()->create();
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exercise_id' => $catalogExercise->id,
+        'name' => 'Sprint',
+        'order' => 0,
+        'exerciseable_type' => 'cardio_exercise',
+        'exerciseable_id' => $cardio->id,
+    ]);
+
+    $mapper = new WorkoutFitMapper;
+    $messages = $mapper->map($workout);
+    $steps = getStepMessages($messages);
+    $titles = getExerciseTitleMessages($messages);
+
+    // field 10 = exercise_category, field 11 = exercise_name
+    expect(getStepField($steps[0], 10))->toBe(32) // Run
+        ->and(getStepField($steps[0], 11))->toBe(0);
+
+    expect($titles)->toHaveCount(1);
+});
+
+it('includes block notes on interval rest step', function () {
+    $workout = createWorkout(['activity' => Activity::Run]);
+    $section = Section::factory()->for($workout)->create(['name' => 'Main', 'order' => 0]);
+    $block = Block::factory()->interval()->for($section)->create([
+        'order' => 0,
+        'rounds' => 5,
+        'work_interval' => 30,
+        'rest_interval' => 30,
+        'notes' => 'Keep heart rate below 150 during rest',
+    ]);
+
+    $mapper = new WorkoutFitMapper;
+    $messages = $mapper->map($workout);
+    $steps = getStepMessages($messages);
+
+    // Rest step is index 1
+    expect(getStepField($steps[1], 8))->toBe('Keep heart rate below 150 during rest');
 });
 
 it('maps distance-based interval block', function () {

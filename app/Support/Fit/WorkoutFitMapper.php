@@ -206,8 +206,13 @@ class WorkoutFitMapper
         $startIndex = $this->stepIndex;
 
         if ($block->work_interval && $block->work_interval > 0) {
-            $name = $block->exercises->first()?->name ?? 'Work';
-            $this->addTimeStep($name, $block->work_interval, $sectionIntensity);
+            $firstExercise = $block->exercises->first();
+            $name = $firstExercise?->name ?? 'Work';
+            $garminCategory = $firstExercise?->exercise?->garmin_exercise_category?->value;
+            $garminName = $firstExercise?->exercise?->garmin_exercise_name;
+            $notes = $this->intervalWorkNotes($block);
+
+            $this->addTimeStep($name, $block->work_interval, $sectionIntensity, $garminCategory, $garminName, $notes);
         } else {
             foreach ($block->exercises as $exercise) {
                 $this->addExerciseStep($exercise, $sectionIntensity);
@@ -215,7 +220,7 @@ class WorkoutFitMapper
         }
 
         if ($block->rest_interval && $block->rest_interval > 0) {
-            $this->addRestStep('Rest', $block->rest_interval);
+            $this->addRestStep('Rest', $block->rest_interval, $block->notes);
         }
 
         if ($block->rounds && $block->rounds > 1) {
@@ -376,14 +381,14 @@ class WorkoutFitMapper
         $this->addStep($name, 5, null, 2, null, null, null, $intensity, $notes, $exerciseCategory, $exerciseName);
     }
 
-    private function addTimeStep(string $name, int $durationSeconds, int $intensity, ?int $exerciseCategory = null, ?int $exerciseName = null): void
+    private function addTimeStep(string $name, int $durationSeconds, int $intensity, ?int $exerciseCategory = null, ?int $exerciseName = null, ?string $notes = null): void
     {
-        $this->addStep($name, 0, $durationSeconds * 1000, 2, null, null, null, $intensity, exerciseCategory: $exerciseCategory, exerciseName: $exerciseName);
+        $this->addStep($name, 0, $durationSeconds * 1000, 2, null, null, null, $intensity, $notes, $exerciseCategory, $exerciseName);
     }
 
-    private function addRestStep(string $name, int $durationSeconds): void
+    private function addRestStep(string $name, int $durationSeconds, ?string $notes = null): void
     {
-        $this->addStep($name, 0, $durationSeconds * 1000, 2, null, null, null, 1);
+        $this->addStep($name, 0, $durationSeconds * 1000, 2, null, null, null, 1, $notes);
     }
 
     /**
@@ -447,6 +452,59 @@ class WorkoutFitMapper
             exerciseName: $exerciseName,
         );
         $this->stepIndex++;
+    }
+
+    private function intervalWorkNotes(Block $block): ?string
+    {
+        $lines = [];
+
+        foreach ($block->exercises as $exercise) {
+            $lines[] = $exercise->name;
+
+            $targets = [];
+            $exerciseable = $exercise->exerciseable;
+
+            if ($exerciseable instanceof CardioExercise) {
+                $hrZone = Format::hrZone($exerciseable->target_heart_rate_zone);
+                if ($hrZone) {
+                    $targets[] = $hrZone;
+                }
+
+                $hrRange = Format::hrRange($exerciseable->target_heart_rate_min, $exerciseable->target_heart_rate_max);
+                if ($hrRange) {
+                    $targets[] = $hrRange;
+                }
+
+                $paceRange = Format::paceRange($exerciseable->target_pace_min, $exerciseable->target_pace_max);
+                if ($paceRange) {
+                    $targets[] = $paceRange;
+                }
+
+                $power = Format::power($exerciseable->target_power);
+                if ($power) {
+                    $targets[] = $power;
+                }
+            } elseif ($exerciseable instanceof DurationExercise) {
+                $rpe = Format::rpe($exerciseable->target_rpe);
+                if ($rpe) {
+                    $targets[] = $rpe;
+                }
+            }
+
+            if (! empty($targets)) {
+                $lines[] = implode(', ', $targets);
+            }
+
+            if ($exercise->notes) {
+                $lines[] = $exercise->notes;
+            }
+        }
+
+        if ($block->notes) {
+            $lines[] = $block->notes;
+        }
+
+        return empty($lines) ? null : implode("\n", $lines);
     }
 
     private function strengthNotes(string $exerciseName, StrengthExercise $exercise): string

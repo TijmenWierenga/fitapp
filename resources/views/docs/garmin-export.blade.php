@@ -99,6 +99,28 @@
                                 <li>Disconnect. The workout will appear on your watch.</li>
                             </ol>
                         </div>
+
+                        <div>
+                            <h4 class="mb-2 font-medium text-zinc-900 dark:text-white">Android</h4>
+                            <p class="mb-2">
+                                You can transfer FIT files directly from your Android phone using a <strong class="text-zinc-900 dark:text-white">USB OTG (On-The-Go)</strong> adapter to connect your Garmin watch to your phone.
+                            </p>
+                            <ol class="list-decimal list-inside space-y-1.5">
+                                <li>Connect your Garmin watch to your phone using a USB OTG adapter (e.g. USB-C to USB-C or USB-C to Micro-USB, depending on your devices).</li>
+                                <li>Open a file manager app (most Android phones include one by default).</li>
+                                <li>The watch should appear as an external storage device.</li>
+                                <li>Navigate to <code class="rounded bg-zinc-100 px-1.5 py-0.5 text-xs dark:bg-zinc-800">GARMIN/NewFiles</code> on the watch.</li>
+                                <li>Copy the downloaded <code class="rounded bg-zinc-100 px-1.5 py-0.5 text-xs dark:bg-zinc-800">.fit</code> file into that folder.</li>
+                                <li>Disconnect the watch. The workout will appear on your watch.</li>
+                            </ol>
+                        </div>
+
+                        <div>
+                            <h4 class="mb-2 font-medium text-zinc-900 dark:text-white">iPhone</h4>
+                            <p>
+                                iOS does not support direct file transfer to Garmin watches via USB. To get the FIT file onto your watch, transfer it to a computer first — for example via <strong class="text-zinc-900 dark:text-white">AirDrop</strong>, <strong class="text-zinc-900 dark:text-white">iCloud Drive</strong>, or <strong class="text-zinc-900 dark:text-white">email</strong> — and then follow the Windows or Mac instructions above.
+                            </p>
+                        </div>
                     </div>
                 </flux:accordion.content>
             </flux:accordion.item>
@@ -146,6 +168,11 @@
                         <div>
                             <h4 class="font-medium text-zinc-900 dark:text-white">OpenMTP doesn't see the watch</h4>
                             <p>Try a different USB cable — some cables are charge-only and don't support data transfer.</p>
+                        </div>
+
+                        <div>
+                            <h4 class="font-medium text-zinc-900 dark:text-white">Watch not recognized (Android OTG)</h4>
+                            <p>Not all phones support USB OTG — check your device specifications. Also make sure you're using a data-capable OTG cable or adapter, not a charge-only cable.</p>
                         </div>
 
                         <div>

@@ -327,6 +327,55 @@ it('maps interval block', function () {
         ->and(getStepField($steps[2], 4))->toBe(8);
 });
 
+it('maps distance-based interval block', function () {
+    $workout = createWorkout(['activity' => Activity::Run]);
+    $section = Section::factory()->for($workout)->create(['name' => 'Main', 'order' => 0]);
+    $block = Block::factory()->interval()->for($section)->create([
+        'order' => 0,
+        'rounds' => 4,
+        'work_interval' => null,
+        'rest_interval' => 90,
+    ]);
+
+    $cardio = CardioExercise::factory()->create([
+        'target_distance' => 800.00,
+        'target_pace_min' => 240, // 4:00/km (slower)
+        'target_pace_max' => 210, // 3:30/km (faster)
+    ]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'name' => '800m Repeat',
+        'order' => 0,
+        'exerciseable_type' => 'cardio_exercise',
+        'exerciseable_id' => $cardio->id,
+    ]);
+
+    $mapper = new WorkoutFitMapper;
+    $messages = $mapper->map($workout);
+    $steps = getStepMessages($messages);
+
+    // Distance step + Rest step + Repeat step
+    expect($steps)->toHaveCount(3);
+
+    // Distance step: durationType 1 (DISTANCE), distance = 800m * 100 = 80000 cm
+    expect(getStepField($steps[0], 0))->toBe('800m Repeat')
+        ->and(getStepField($steps[0], 1))->toBe(1) // DISTANCE
+        ->and(getStepField($steps[0], 2))->toBe(80_000) // 800m in cm
+        ->and(getStepField($steps[0], 3))->toBe(0) // SPEED target
+        ->and(getStepField($steps[0], 5))->toBe((int) round(1_000_000 / 240)) // speed low
+        ->and(getStepField($steps[0], 6))->toBe((int) round(1_000_000 / 210)) // speed high
+        ->and(getStepField($steps[0], 7))->toBe(0); // ACTIVE
+
+    // Rest step
+    expect(getStepField($steps[1], 1))->toBe(0) // TIME
+        ->and(getStepField($steps[1], 2))->toBe(90_000) // 90s
+        ->and(getStepField($steps[1], 7))->toBe(1); // REST
+
+    // Repeat step
+    expect(getStepField($steps[2], 1))->toBe(6) // REPEAT
+        ->and(getStepField($steps[2], 4))->toBe(4); // 4 rounds
+});
+
 it('maps amrap block with repeat until time', function () {
     $workout = createWorkout();
     $section = Section::factory()->for($workout)->create(['name' => 'Main', 'order' => 0]);

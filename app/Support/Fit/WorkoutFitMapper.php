@@ -204,10 +204,14 @@ class WorkoutFitMapper
     private function mapInterval(Block $block, int $sectionIntensity): void
     {
         $startIndex = $this->stepIndex;
-        $name = $block->exercises->first()?->name ?? 'Work';
 
         if ($block->work_interval && $block->work_interval > 0) {
+            $name = $block->exercises->first()?->name ?? 'Work';
             $this->addTimeStep($name, $block->work_interval, $sectionIntensity);
+        } else {
+            foreach ($block->exercises as $exercise) {
+                $this->addExerciseStep($exercise, $sectionIntensity);
+            }
         }
 
         if ($block->rest_interval && $block->rest_interval > 0) {
@@ -324,7 +328,16 @@ class WorkoutFitMapper
         } elseif ($exerciseable instanceof CardioExercise) {
             $target = $this->cardioTarget($exerciseable);
 
-            if ($exerciseable->target_duration && $exerciseable->target_duration > 0) {
+            if ($exerciseable->target_distance && (float) $exerciseable->target_distance > 0) {
+                $this->addDistanceStep(
+                    $exercise->name,
+                    (int) round((float) $exerciseable->target_distance * 100),
+                    $intensity,
+                    $target,
+                    $garminCategory,
+                    $garminName,
+                );
+            } elseif ($exerciseable->target_duration && $exerciseable->target_duration > 0) {
                 $this->addStep(
                     $exercise->name,
                     0, // TIME

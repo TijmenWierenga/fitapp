@@ -11,7 +11,7 @@
         </flux:heading>
         <flux:text class="mt-1 text-sm">
             Your recent training load per muscle group.
-            <flux:link href="{{ route('workload-guide') }}" variant="subtle" class="inline" wire:navigate>Learn how it works</flux:link>
+            <flux:link href="{{ route('docs.workload-guide') }}" variant="subtle" class="inline" wire:navigate>Learn how it works</flux:link>
         </flux:text>
     </div>
 

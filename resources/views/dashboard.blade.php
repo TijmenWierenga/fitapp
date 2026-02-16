@@ -8,18 +8,11 @@
 
     <div class="flex h-full w-full flex-1 flex-col gap-4 mt-4">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div class="relative overflow-hidden rounded-xl">
-                <livewire:dashboard.next-workout />
-            </div>
-
-            <div class="relative overflow-hidden rounded-xl">
-                <livewire:dashboard.workload-overview />
-            </div>
+            <livewire:dashboard.next-workout />
+            <livewire:dashboard.workload-overview />
         </div>
 
-        <div class="relative overflow-hidden rounded-xl">
-            <livewire:dashboard.workout-calendar />
-        </div>
+        <livewire:dashboard.workout-calendar />
     </div>
 
     <livewire:workout.duplicate />

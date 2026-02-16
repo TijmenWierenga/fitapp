@@ -19,20 +19,22 @@
             </div>
 
             @if($this->nextWorkout->notes)
-                <flux:card class="bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700" x-data="{ clamped: false }" x-init="$nextTick(() => { clamped = $refs.notes.scrollHeight > $refs.notes.clientHeight })">
-                    <flux:heading size="sm" class="mb-2 text-zinc-700 dark:text-zinc-300">Notes</flux:heading>
+                <div x-data="{ clamped: false }" x-init="$nextTick(() => { clamped = $refs.notes.scrollHeight > $refs.notes.clientHeight })">
+                    <flux:separator />
+                    <flux:heading size="sm" class="mb-2 mt-4 text-zinc-500 dark:text-zinc-400">Notes</flux:heading>
                     <div x-ref="notes" class="prose prose-sm prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400 line-clamp-3">
                         {!! Str::markdown($this->nextWorkout->notes, ['html_input' => 'escape']) !!}
                     </div>
                     <a x-show="clamped" x-cloak href="{{ route('workouts.show', $this->nextWorkout) }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-1 inline-block">
                         Read more
                     </a>
-                </flux:card>
+                </div>
             @endif
 
             @if($this->nextWorkout->sections->isNotEmpty())
-                <flux:card class="bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700">
-                    <flux:heading size="sm" class="mb-2 text-zinc-700 dark:text-zinc-300">Workout Structure</flux:heading>
+                <div>
+                    <flux:separator />
+                    <flux:heading size="sm" class="mb-2 mt-4 text-zinc-500 dark:text-zinc-400">Workout Structure</flux:heading>
                     <div class="space-y-4">
                         @foreach($this->nextWorkout->sections as $section)
                             <div>
@@ -70,10 +72,11 @@
                             </div>
                         @endforeach
                     </div>
-                </flux:card>
+                </div>
             @endif
 
-            <div class="mt-auto pt-4 flex flex-col sm:flex-row gap-2">
+            <flux:separator />
+            <div class="flex flex-col sm:flex-row gap-2">
                 <flux:button
                         href="{{ route('workouts.edit', $this->nextWorkout) }}"
                         variant="ghost"

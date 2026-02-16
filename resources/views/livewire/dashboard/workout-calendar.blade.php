@@ -10,7 +10,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-7 gap-px bg-zinc-200 dark:bg-zinc-700 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700">
+    <div class="grid grid-cols-7 gap-px bg-zinc-200 dark:bg-zinc-700 rounded-lg overflow-hidden">
         {{-- Day headers --}}
         @foreach(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $index => $day)
             <div class="bg-zinc-50 dark:bg-zinc-800 p-1 sm:p-2 text-center text-xs font-semibold text-zinc-600 dark:text-zinc-400">

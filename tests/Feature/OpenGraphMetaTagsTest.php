@@ -29,5 +29,6 @@ test('pages include primary meta description', function () {
     $response->assertStatus(200);
 
     $response->assertSee('<meta name="description" content="', false);
-    $response->assertSee('<meta name="theme-color" content="#18181b">', false);
+    $response->assertSee('<meta name="theme-color" content="#f5f5f4" media="(prefers-color-scheme: light)">', false);
+    $response->assertSee('<meta name="theme-color" content="#1c1917" media="(prefers-color-scheme: dark)">', false);
 });

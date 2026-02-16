@@ -41,25 +41,10 @@
                             </div>
                         @endif
                         @if($workout->feeling)
-                            @php
-                                $feelingEmojis = [
-                                    1 => '😞',
-                                    2 => '😕',
-                                    3 => '😐',
-                                    4 => '🙂',
-                                    5 => '😊',
-                                ];
-                                $feelingLabels = [
-                                    1 => 'Very Bad',
-                                    2 => 'Bad',
-                                    3 => 'Okay',
-                                    4 => 'Good',
-                                    5 => 'Great',
-                                ];
-                            @endphp
+                            @php($feeling = \App\Models\Workout::feelingScale()[$workout->feeling])
                             <div class="flex items-center gap-2">
-                                <span class="text-xl">{{ $feelingEmojis[$workout->feeling] }}</span>
-                                <flux:text>Feeling: {{ $feelingLabels[$workout->feeling] }} ({{ $workout->feeling }}/5)</flux:text>
+                                <span class="text-xl">{{ $feeling['emoji'] }}</span>
+                                <flux:text>Feeling: {{ $feeling['label'] }} ({{ $workout->feeling }}/5)</flux:text>
                             </div>
                         @endif
                     @endif
@@ -194,17 +179,9 @@
                 <flux:label>Overall Feeling</flux:label>
                 <flux:description>How did you feel during this workout?</flux:description>
                 <div class="mt-3">
-                    @php
-                        $feelingEmojis = [
-                            1 => ['emoji' => '😞', 'label' => 'Very Bad'],
-                            2 => ['emoji' => '😕', 'label' => 'Bad'],
-                            3 => ['emoji' => '😐', 'label' => 'Okay'],
-                            4 => ['emoji' => '🙂', 'label' => 'Good'],
-                            5 => ['emoji' => '😊', 'label' => 'Great'],
-                        ];
-                    @endphp
+                    @php($feelingScale = \App\Models\Workout::feelingScale())
                     <div class="flex justify-between gap-2">
-                        @foreach($feelingEmojis as $value => $data)
+                        @foreach($feelingScale as $value => $data)
                             <button
                                 type="button"
                                 wire:click="$set('feeling', {{ $value }})"
@@ -215,7 +192,7 @@
                         @endforeach
                     </div>
                     <div class="flex justify-between mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                        @foreach($feelingEmojis as $data)
+                        @foreach($feelingScale as $data)
                             <span class="flex-1 text-center">{{ $data['label'] }}</span>
                         @endforeach
                     </div>

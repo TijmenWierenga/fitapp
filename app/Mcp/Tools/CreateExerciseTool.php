@@ -60,7 +60,7 @@ class CreateExerciseTool extends Tool
             'primary_muscles.*' => 'string|exists:muscle_groups,name',
             'secondary_muscles' => 'nullable|array',
             'secondary_muscles.*' => 'string|exists:muscle_groups,name',
-            'garmin_exercise_category' => ['nullable', 'integer', Rule::in(array_column(GarminExerciseCategory::cases(), 'value'))],
+            'garmin_exercise_category' => ['nullable', Rule::enum(GarminExerciseCategory::class)],
             'garmin_exercise_name' => 'nullable|integer|min:0',
         ]);
 
@@ -176,7 +176,7 @@ class CreateExerciseTool extends Tool
             'tips' => $schema->array()->description('Performance tips and cues.')->nullable(),
             'primary_muscles' => $schema->array()->description('Primary muscle groups (load factor 1.0). Use names from exercise://muscle-groups resource.')->nullable(),
             'secondary_muscles' => $schema->array()->description('Secondary muscle groups (load factor 0.5). Must not overlap with primary_muscles.')->nullable(),
-            'garmin_exercise_category' => $schema->integer()->description('Garmin FIT exercise category ID. Valid values: 0 (Bench Press), 1 (Calf Raise), 2 (Cardio), 3 (Carry), 4 (Chop), 5 (Core), 6 (Crunch), 7 (Curl), 8 (Deadlift), 9 (Flye), 10 (Hip Raise), 11 (Hip Stability), 12 (Hip Swing), 13 (Hyperextension), 14 (Lateral Raise), 15 (Leg Curl), 16 (Leg Raise), 17 (Lunge), 18 (Olympic Lift), 19 (Plank), 20 (Plyo), 21 (Pull-Up), 22 (Push-Up), 23 (Row), 24 (Shoulder Press), 25 (Shoulder Stability), 26 (Shrug), 27 (Sit-Up), 28 (Squat), 29 (Total Body), 30 (Triceps Extension), 31 (Warm Up), 32 (Run), 65534 (Unknown). Must be provided together with garmin_exercise_name.')->nullable(),
+            'garmin_exercise_category' => $schema->integer()->enum(array_column(GarminExerciseCategory::cases(), 'value'))->description('Garmin FIT exercise category ID. Mapping: 0 = Bench Press, 1 = Calf Raise, 2 = Cardio, 3 = Carry, 4 = Chop, 5 = Core, 6 = Crunch, 7 = Curl, 8 = Deadlift, 9 = Flye, 10 = Hip Raise, 11 = Hip Stability, 12 = Hip Swing, 13 = Hyperextension, 14 = Lateral Raise, 15 = Leg Curl, 16 = Leg Raise, 17 = Lunge, 18 = Olympic Lift, 19 = Plank, 20 = Plyo, 21 = Pull-Up, 22 = Push-Up, 23 = Row, 24 = Shoulder Press, 25 = Shoulder Stability, 26 = Shrug, 27 = Sit-Up, 28 = Squat, 29 = Total Body, 30 = Triceps Extension, 31 = Warm Up, 32 = Run, 65534 = Unknown. Must be provided together with garmin_exercise_name.')->nullable(),
             'garmin_exercise_name' => $schema->integer()->description('Garmin FIT exercise name ID within the category. See garmin_exercises.json for valid IDs per category. Must be provided together with garmin_exercise_category.')->nullable(),
         ];
     }

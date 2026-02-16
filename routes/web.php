@@ -46,7 +46,11 @@ Route::get('workouts/{workout}/export-fit', \App\Http\Controllers\ExportWorkoutF
 Route::middleware(['auth'])->group(function () {
     Route::get('exercises/{exercise}', ExerciseShow::class)->name('exercises.show');
 
-    Route::view('workload-guide', 'workload-guide')->name('workload-guide');
+    Route::redirect('workload-guide', '/docs/workload-guide');
+
+    Route::view('docs', 'docs.index')->name('docs.index');
+    Route::view('docs/workload-guide', 'docs.workload-guide')->name('docs.workload-guide');
+    Route::view('docs/garmin-export', 'docs.garmin-export')->name('docs.garmin-export');
 
     Route::redirect('settings', 'settings/profile');
 

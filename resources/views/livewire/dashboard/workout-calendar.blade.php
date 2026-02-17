@@ -34,110 +34,17 @@
                     @if($day['workouts']->count() > 0)
                         <div class="space-y-0.5 sm:space-y-1">
                             @foreach($day['workouts']->take(3) as $workout)
-                                <flux:dropdown hover position="bottom" align="start">
-                                    <button
-                                        type="button"
-                                        class="
-                                            block w-full text-left text-[0.625rem] sm:text-xs px-1 sm:px-1.5 py-0.5 rounded truncate cursor-pointer transition-all
-                                            {{ $workout->completed_at ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ($day['isPast'] ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400') }}
-                                            hover:ring-1 sm:hover:ring-2 {{ $workout->completed_at ? 'hover:ring-green-500' : ($day['isPast'] ? 'hover:ring-red-500' : 'hover:ring-blue-500') }}
-                                        "
-                                    >
-                                        {{ $workout->name }}
-                                    </button>
-
-                                    <flux:popover class="w-56 md:w-64 space-y-2">
-                                        <div>
-                                            <flux:heading size="sm" class="font-semibold">
-                                                {{ $workout->name }}
-                                            </flux:heading>
-                                        </div>
-
-                                        <div class="space-y-1 text-sm">
-                                            <div class="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
-                                                <flux:icon.clock class="size-4" />
-                                                <span>{{ $workout->scheduled_at->format('g:i A') }}</span>
-                                            </div>
-
-                                            @if($workout->completed_at)
-                                                <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
-                                                    <flux:icon.check-circle class="size-4" />
-                                                    <span>Completed {{ $workout->completed_at->format('g:i A') }}</span>
-                                                </div>
-                                            @elseif($day['isPast'])
-                                                <div class="flex items-center gap-2 text-red-600 dark:text-red-400">
-                                                    <flux:icon.exclamation-circle class="size-4" />
-                                                    <span>Overdue</span>
-                                                </div>
-                                            @else
-                                                <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                                                    <flux:icon.calendar class="size-4" />
-                                                    <span>{{ $workout->scheduled_at->diffForHumans() }}</span>
-                                                </div>
-                                            @endif
-                                        </div>
-
-                                        @if(!$workout->completed_at && ($day['isToday'] || $day['isPast']))
-                                            <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                                                <flux:button
-                                                    wire:click="$dispatch('mark-workout-complete', { workoutId: {{ $workout->id }} })"
-                                                    variant="primary"
-                                                    size="xs"
-                                                    class="w-full"
-                                                >
-                                                    Mark Complete
-                                                </flux:button>
-                                            </div>
-                                        @endif
-
-                                        <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                                            <flux:button
-                                                href="{{ route('workouts.show', $workout) }}"
-                                                variant="ghost"
-                                                size="xs"
-                                                class="w-full"
-                                            >
-                                                View Details
-                                            </flux:button>
-                                        </div>
-
-                                        <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                                                <flux:button
-                                                    href="{{ route('workouts.edit', $workout) }}"
-                                                    variant="ghost"
-                                                    size="xs"
-                                                    class="w-full"
-                                                >
-                                                    Edit Workout
-                                                </flux:button>
-                                            </div>
-
-                                        <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                                            <flux:button
-                                                wire:click="$dispatch('duplicate-workout', { workoutId: {{ $workout->id }} })"
-                                                variant="ghost"
-                                                size="xs"
-                                                class="w-full"
-                                            >
-                                                Duplicate
-                                            </flux:button>
-                                        </div>
-
-                                        @if(!$day['isPast'] || $day['isToday'])
-                                            <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                                                <flux:button
-                                                    wire:click="deleteWorkout({{ $workout->id }})"
-                                                    wire:confirm="Are you sure you want to delete this workout?"
-                                                    variant="danger"
-                                                    size="xs"
-                                                    class="w-full"
-                                                >
-                                                    Delete Workout
-                                                </flux:button>
-                                            </div>
-                                        @endif
-                                    </flux:popover>
-                                </flux:dropdown>
+                                <button
+                                    type="button"
+                                    wire:click="$dispatch('show-workout-preview', { workoutId: {{ $workout->id }} })"
+                                    class="
+                                        block w-full text-left text-[0.625rem] sm:text-xs px-1 sm:px-1.5 py-0.5 rounded truncate cursor-pointer transition-all
+                                        {{ $workout->completed_at ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ($day['isPast'] ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400') }}
+                                        hover:ring-1 sm:hover:ring-2 {{ $workout->completed_at ? 'hover:ring-green-500' : ($day['isPast'] ? 'hover:ring-red-500' : 'hover:ring-blue-500') }}
+                                    "
+                                >
+                                    {{ $workout->name }}
+                                </button>
                             @endforeach
                         </div>
 

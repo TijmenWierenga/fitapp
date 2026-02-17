@@ -23,6 +23,15 @@ test('pages include twitter card meta tags', function () {
     $response->assertSee('<meta name="twitter:image" content="', false);
 });
 
+test('dark mode is the default appearance', function () {
+    $response = $this->get('/');
+
+    $response->assertSee(
+        "localStorage.getItem('flux.appearance') || localStorage.setItem('flux.appearance', 'dark')",
+        escape: false,
+    );
+});
+
 test('pages include primary meta description', function () {
     $response = $this->get('/');
 

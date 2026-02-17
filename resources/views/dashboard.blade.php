@@ -16,4 +16,6 @@
     </div>
 
     <livewire:workout.duplicate />
+    <livewire:workout.preview />
+    <livewire:exercise.detail />
 </x-layouts.app>

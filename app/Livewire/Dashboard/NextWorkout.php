@@ -25,6 +25,21 @@ class NextWorkout extends Component
         unset($this->nextWorkout);
     }
 
+    #[On('workout-duplicated')]
+    public function refreshAfterDuplicate(): void
+    {
+        unset($this->nextWorkout);
+    }
+
+    public function deleteWorkout(int $workoutId): void
+    {
+        $workout = auth()->user()->workouts()->findOrFail($workoutId);
+
+        $workout->deleteIfAllowed();
+
+        unset($this->nextWorkout);
+    }
+
     public function render(): \Illuminate\View\View
     {
         return view('livewire.dashboard.next-workout');

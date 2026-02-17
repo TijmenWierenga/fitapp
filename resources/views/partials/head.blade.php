@@ -34,4 +34,5 @@
 <link href="https://fonts.bunny.net/css?family=bebas-neue:400|instrument-sans:400,500,600" rel="stylesheet" />
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+<script>localStorage.getItem('flux.appearance') || localStorage.setItem('flux.appearance', 'dark')</script>
 @fluxAppearance

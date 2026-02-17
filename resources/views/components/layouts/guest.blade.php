@@ -2,6 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head', ['title' => $title ?? null])
+        <link href="https://fonts.bunny.net/css?family=bebas-neue:400" rel="stylesheet" />
     </head>
     <body class="min-h-screen bg-white antialiased dark:bg-zinc-950">
         {{-- Navigation --}}

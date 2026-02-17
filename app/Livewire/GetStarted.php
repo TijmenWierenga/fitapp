@@ -20,8 +20,23 @@ class GetStarted extends Component
 
     public function selectMethod(string $method): void
     {
+        if (! in_array($method, ['desktop', 'cli', 'chatgpt', 'vscode', 'other'])) {
+            return;
+        }
+
         $this->setupMethod = $method;
         $this->goToStep(2);
+    }
+
+    public function getMethodLabel(): string
+    {
+        return match ($this->setupMethod) {
+            'desktop' => 'Claude Desktop',
+            'cli' => 'Claude Code CLI',
+            'chatgpt' => 'ChatGPT Desktop',
+            'vscode' => 'VS Code / Copilot',
+            'other' => 'Other MCP Client',
+        };
     }
 
     public function getMcpEndpoint(): string

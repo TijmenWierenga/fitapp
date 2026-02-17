@@ -3,7 +3,7 @@
 <head>
     @include('partials.head', [
         'title' => config('app.name') . ' — Train Smarter, Not Harder',
-        'description' => 'AI-powered fitness coaching by Claude. Personalized, adaptive training plans through natural conversation.',
+        'description' => 'Your AI assistant becomes your personal trainer. Adaptive training plans, injury-safe programming, and Garmin-ready workouts — all through conversation.',
     ])
     <link href="https://fonts.bunny.net/css?family=outfit:400,500,600" rel="stylesheet" />
 </head>
@@ -51,14 +51,14 @@
                 </h1>
 
                 <p class="mt-8 text-lg md:text-xl text-zinc-400 max-w-xl leading-relaxed font-['Outfit'] traiq-fade-in-delay-2">
-                    {{ config('app.name') }} connects Claude to your fitness journey. Get personalized, adaptive training plans through natural conversation.
+                    Your AI assistant becomes your personal trainer. Adaptive training plans, injury-safe programming, and Garmin-ready workouts &mdash; all through conversation.
                 </p>
 
                 <div class="mt-10 flex flex-col sm:flex-row items-start gap-4 traiq-fade-in-delay-3">
                     <a href="{{ route('register') }}" class="traiq-cta px-8 py-4 rounded-lg text-base">
                         Get Started Free
                     </a>
-                    <span class="text-sm text-zinc-500 self-center">Free during early access</span>
+                    <span class="text-sm text-zinc-500 self-center">Free to get started. No credit card required.</span>
                 </div>
             </div>
         </div>
@@ -77,18 +77,18 @@
         <div class="max-w-7xl mx-auto px-6 py-6">
             <div class="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-16">
                 <div class="flex items-center gap-3">
-                    <span class="text-brand-lime font-['Bebas_Neue'] text-2xl">AI</span>
-                    <span class="text-xs uppercase tracking-widest text-zinc-400">Powered by Claude</span>
+                    <span class="text-brand-lime font-['Bebas_Neue'] text-2xl">2,025</span>
+                    <span class="text-xs uppercase tracking-widest text-zinc-400">Exercises in the Library</span>
                 </div>
                 <div class="hidden sm:block w-px h-6 bg-zinc-800"></div>
                 <div class="flex items-center gap-3">
-                    <span class="text-brand-lime font-['Bebas_Neue'] text-2xl">100%</span>
-                    <span class="text-xs uppercase tracking-widest text-zinc-400">Adapts Every Session</span>
+                    <span class="text-brand-lime font-['Bebas_Neue'] text-2xl">17</span>
+                    <span class="text-xs uppercase tracking-widest text-zinc-400">Muscle Groups Tracked</span>
                 </div>
                 <div class="hidden sm:block w-px h-6 bg-zinc-800"></div>
                 <div class="flex items-center gap-3">
-                    <span class="text-brand-lime font-['Bebas_Neue'] text-2xl">0</span>
-                    <span class="text-xs uppercase tracking-widest text-zinc-400">Config Required</span>
+                    <span class="text-brand-lime font-['Bebas_Neue'] text-2xl">79</span>
+                    <span class="text-xs uppercase tracking-widest text-zinc-400">Activity Types Supported</span>
                 </div>
             </div>
         </div>
@@ -111,27 +111,27 @@
                 {{-- Step 1 --}}
                 <div class="relative traiq-reveal">
                     <span class="font-['Bebas_Neue'] text-6xl text-brand-lime/20 leading-none">01</span>
-                    <h3 class="mt-4 text-xl font-semibold text-white">Connect Claude</h3>
+                    <h3 class="mt-4 text-xl font-semibold text-white">Connect Your AI</h3>
                     <p class="mt-3 text-zinc-400 leading-relaxed">
-                        Add {{ config('app.name') }} as an MCP server in Claude. It takes less than 5 minutes.
+                        Add {{ config('app.name') }} to Claude Desktop, ChatGPT, Cursor, or any MCP-compatible client. It takes less than 5 minutes.
                     </p>
                 </div>
 
                 {{-- Step 2 --}}
                 <div class="relative traiq-reveal" style="transition-delay: 0.1s">
                     <span class="font-['Bebas_Neue'] text-6xl text-brand-lime/20 leading-none">02</span>
-                    <h3 class="mt-4 text-xl font-semibold text-white">Tell Claude your goals</h3>
+                    <h3 class="mt-4 text-xl font-semibold text-white">Describe Your Goals</h3>
                     <p class="mt-3 text-zinc-400 leading-relaxed">
-                        Describe your fitness goals, schedule, and limitations. Claude creates your personalized plan.
+                        Tell your AI about your fitness goals, schedule, and limitations. Get structured, periodized plans from a 2,025-exercise library.
                     </p>
                 </div>
 
                 {{-- Step 3 --}}
                 <div class="relative traiq-reveal" style="transition-delay: 0.2s">
                     <span class="font-['Bebas_Neue'] text-6xl text-brand-lime/20 leading-none">03</span>
-                    <h3 class="mt-4 text-xl font-semibold text-white">Train & adapt</h3>
+                    <h3 class="mt-4 text-xl font-semibold text-white">Train, Track, Adapt</h3>
                     <p class="mt-3 text-zinc-400 leading-relaxed">
-                        Track progress through Claude. Your plan evolves based on feedback and performance.
+                        Track progress through conversation. Muscle group workload monitoring and overtraining prevention keep you progressing safely.
                     </p>
                 </div>
             </div>
@@ -157,90 +157,119 @@
                 </h2>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {{-- AI That Understands You --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
+                {{-- Injury-Aware --}}
                 <div class="bg-white border-l-4 border-l-brand-lime rounded-lg p-8 traiq-reveal">
-                    <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Claude-powered</span>
-                    <h3 class="mt-3 text-2xl font-bold text-black leading-tight">AI that understands you</h3>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Injury-Aware</span>
+                    <h3 class="mt-3 text-2xl font-bold text-black leading-tight">Your AI Knows Your Body</h3>
                     <p class="mt-4 text-zinc-600 leading-relaxed">
-                        Unlike rigid apps, Claude understands context. Say "I'm exhausted today" and your workout adapts instantly.
+                        Track injuries across 22 body parts with 4 injury types. Your AI references your injury history and avoids aggravating movements.
                     </p>
                     <ul class="mt-6 pt-5 space-y-2.5 border-t border-zinc-100">
                         <li class="flex items-center gap-2 text-sm text-zinc-600">
                             <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
-                            Natural language interactions
+                            22 trackable body parts
                         </li>
                         <li class="flex items-center gap-2 text-sm text-zinc-600">
                             <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
-                            Remembers your full context
+                            Daily injury status reports
                         </li>
                         <li class="flex items-center gap-2 text-sm text-zinc-600">
                             <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
-                            Explains every recommendation
+                            Smart exercise substitutions
                         </li>
                     </ul>
                 </div>
 
-                {{-- Adapts in Real-Time --}}
+                {{-- ACWR Analytics --}}
                 <div class="bg-white border-l-4 border-l-brand-lime rounded-lg p-8 traiq-reveal" style="transition-delay: 0.1s">
-                    <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Dynamic</span>
-                    <h3 class="mt-3 text-2xl font-bold text-black leading-tight">Adapts in real-time</h3>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">ACWR Analytics</span>
+                    <h3 class="mt-3 text-2xl font-bold text-black leading-tight">Sports Science, Not Guesswork</h3>
                     <p class="mt-4 text-zinc-600 leading-relaxed">
-                        Miss a workout? Schedule change? Just tell Claude. Your plan adjusts instantly while keeping you on track.
+                        Acute-to-chronic workload ratios across 17 muscle groups with 4-week rolling averages. Train in the optimal zone, every session.
                     </p>
                     <ul class="mt-6 pt-5 space-y-2.5 border-t border-zinc-100">
                         <li class="flex items-center gap-2 text-sm text-zinc-600">
                             <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
-                            Instant plan adjustments
+                            17 muscle groups monitored
                         </li>
                         <li class="flex items-center gap-2 text-sm text-zinc-600">
                             <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
-                            RPE-based intensity tuning
+                            Overtraining prevention
                         </li>
                         <li class="flex items-center gap-2 text-sm text-zinc-600">
                             <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
-                            Learns from your feedback
+                            Optimal training zones
                         </li>
                     </ul>
                 </div>
 
-                {{-- Free During Early Access --}}
+                {{-- 9 Block Types --}}
                 <div class="bg-white border-l-4 border-l-brand-lime rounded-lg p-8 traiq-reveal" style="transition-delay: 0.2s">
-                    <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Early access</span>
-                    <h3 class="mt-3 text-2xl font-bold text-black leading-tight">Free during beta</h3>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">9 Block Types</span>
+                    <h3 class="mt-3 text-2xl font-bold text-black leading-tight">Every Workout Structure</h3>
                     <p class="mt-4 text-zinc-600 leading-relaxed">
-                        We're building {{ config('app.name') }} in public. Join early, get full access for free, and help shape the future of AI fitness.
+                        Straight sets, circuits, supersets, AMRAP, EMOM, intervals, and more. Three exercise modes: strength, cardio, and duration.
                     </p>
                     <ul class="mt-6 pt-5 space-y-2.5 border-t border-zinc-100">
                         <li class="flex items-center gap-2 text-sm text-zinc-600">
                             <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
-                            All features included
+                            2,025 exercises in the library
                         </li>
                         <li class="flex items-center gap-2 text-sm text-zinc-600">
                             <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
-                            Bring your own Claude subscription
+                            RPE-based autoregulation
                         </li>
                         <li class="flex items-center gap-2 text-sm text-zinc-600">
                             <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
-                            Help shape the product
+                            Tempo prescriptions
+                        </li>
+                    </ul>
+                </div>
+
+                {{-- Garmin-Ready --}}
+                <div class="bg-white border-l-4 border-l-brand-lime rounded-lg p-8 traiq-reveal" style="transition-delay: 0.3s">
+                    <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Device Integration</span>
+                    <h3 class="mt-3 text-2xl font-bold text-black leading-tight">Garmin-Ready Workouts</h3>
+                    <p class="mt-4 text-zinc-600 leading-relaxed">
+                        Export workouts directly to your Garmin watch. 1,180 exercises mapped to Garmin exercise types with full FIT file support.
+                    </p>
+                    <ul class="mt-6 pt-5 space-y-2.5 border-t border-zinc-100">
+                        <li class="flex items-center gap-2 text-sm text-zinc-600">
+                            <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                            </svg>
+                            1,180 mapped exercises
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-zinc-600">
+                            <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                            </svg>
+                            FIT file export
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-zinc-600">
+                            <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                            </svg>
+                            Follow-along on your wrist
                         </li>
                     </ul>
                 </div>
@@ -258,30 +287,87 @@
                 </h2>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                 <div class="border border-zinc-800 rounded-lg p-6 hover:border-brand-lime/30 transition-colors traiq-reveal">
-                    <span class="text-xs font-semibold uppercase tracking-wide text-brand-lime">Recovery</span>
-                    <h3 class="mt-3 text-xl font-bold text-white">Coming back from injury</h3>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-brand-lime">Injury-Safe</span>
+                    <h3 class="mt-3 text-xl font-bold text-white">Returning from injury</h3>
                     <p class="mt-2 text-sm text-zinc-400">
-                        Tell Claude about your injury and watch your plan adapt. Smart intensity adjustments and gradual progression built in.
+                        Your AI references your injury history and avoids aggravating movements. Smart substitutions and gradual progression built in.
                     </p>
                 </div>
 
                 <div class="border border-zinc-800 rounded-lg p-6 hover:border-brand-lime/30 transition-colors traiq-reveal" style="transition-delay: 0.1s">
-                    <span class="text-xs font-semibold uppercase tracking-wide text-brand-lime">Beginners</span>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-brand-lime">Race Prep</span>
                     <h3 class="mt-3 text-xl font-bold text-white">Your first 5K</h3>
                     <p class="mt-2 text-sm text-zinc-400">
-                        Say "I want to run a 5K in 3 months" and Claude builds a complete, beginner-friendly training plan.
+                        Get a periodized training plan with pacing targets and heart rate zones. Built for beginners, backed by sports science.
                     </p>
                 </div>
 
                 <div class="border border-zinc-800 rounded-lg p-6 hover:border-brand-lime/30 transition-colors traiq-reveal" style="transition-delay: 0.2s">
-                    <span class="text-xs font-semibold uppercase tracking-wide text-brand-lime">Busy schedule</span>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-brand-lime">Time-Efficient</span>
                     <h3 class="mt-3 text-xl font-bold text-white">Limited time, maximum results</h3>
                     <p class="mt-2 text-sm text-zinc-400">
-                        Tell Claude "I only have 30 minutes on Tuesday and Thursday" and get optimized workouts that fit your life.
+                        Supersets, circuits, and compound movements optimized for your available time. Every minute counts.
                     </p>
                 </div>
+
+                <div class="border border-zinc-800 rounded-lg p-6 hover:border-brand-lime/30 transition-colors traiq-reveal" style="transition-delay: 0.3s">
+                    <span class="text-xs font-semibold uppercase tracking-wide text-brand-lime">Advanced</span>
+                    <h3 class="mt-3 text-xl font-bold text-white">Programming for serious lifters</h3>
+                    <p class="mt-2 text-sm text-zinc-400">
+                        RPE autoregulation, tempo prescriptions, periodization cycles, and deload weeks. Training that matches your experience.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- FAQ --}}
+    <section class="bg-black py-28 border-t border-zinc-800">
+        <div class="max-w-3xl mx-auto px-6">
+            <div class="mb-12 traiq-reveal">
+                <span class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-lime">FAQ</span>
+                <h2 class="mt-4 font-['Bebas_Neue'] text-5xl md:text-6xl text-white">
+                    Common questions
+                </h2>
+            </div>
+
+            <div class="traiq-reveal [&_[data-flux-accordion-heading]]:text-white [&_[data-flux-accordion-content]]:text-zinc-400 [&_[data-flux-accordion-heading]]:border-zinc-800 [&_[data-flux-accordion-item]]:border-zinc-800">
+                <flux:accordion transition>
+                    <flux:accordion.item>
+                        <flux:accordion.heading>
+                            What's the difference between using Traiq with Claude vs ChatGPT?
+                        </flux:accordion.heading>
+                        <flux:accordion.content>
+                            <p class="text-zinc-400 leading-relaxed">
+                                Functionally, they're identical. {{ config('app.name') }} uses the MCP (Model Context Protocol) standard, which means every AI client gets access to the same tools and data. Your workout library, injury tracking, and analytics work the same way regardless of which AI you use.
+                            </p>
+                        </flux:accordion.content>
+                    </flux:accordion.item>
+
+                    <flux:accordion.item>
+                        <flux:accordion.heading>
+                            Is my workout data sent to Claude or ChatGPT?
+                        </flux:accordion.heading>
+                        <flux:accordion.content>
+                            <p class="text-zinc-400 leading-relaxed">
+                                Your data stays in {{ config('app.name') }}. The AI only sees what it needs for each specific request &mdash; like your current workout plan or injury status. {{ config('app.name') }} acts as a secure bridge between you and your AI assistant using OAuth 2.1 authentication.
+                            </p>
+                        </flux:accordion.content>
+                    </flux:accordion.item>
+
+                    <flux:accordion.item>
+                        <flux:accordion.heading>
+                            Can I use Traiq without Claude or ChatGPT?
+                        </flux:accordion.heading>
+                        <flux:accordion.content>
+                            <p class="text-zinc-400 leading-relaxed">
+                                {{ config('app.name') }} requires an MCP-compatible AI client to create and manage workouts. The dashboard lets you view your schedule, track progress, and export to Garmin, but workout creation and planning happens through your AI assistant.
+                            </p>
+                        </flux:accordion.content>
+                    </flux:accordion.item>
+                </flux:accordion>
             </div>
         </div>
     </section>
@@ -296,7 +382,7 @@
                 Ready to train<br><span class="text-brand-lime">smarter?</span>
             </h2>
             <p class="mt-6 text-zinc-400 text-lg max-w-xl mx-auto traiq-reveal">
-                Join during early access and get started for free. Just bring your Claude subscription.
+                Free to get started, no credit card required. Bring your own AI assistant &mdash; Claude, ChatGPT, Cursor, or any MCP-compatible client &mdash; and get training in minutes.
             </p>
             <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 traiq-reveal">
                 <a href="{{ route('register') }}" class="traiq-cta px-8 py-4 rounded-lg text-base">

@@ -2,10 +2,10 @@
     {{-- Hero Section --}}
     <div class="text-center mb-12">
         <h1 class="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-4">
-            Get Started with {{ config('app.name') }}
+            Connect Your AI to {{ config('app.name') }}
         </h1>
         <p class="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
-            Connect your AI assistant to {{ config('app.name') }} in just a few steps. Your personal AI coach will be ready to create and manage your workouts.
+            Works with Claude, ChatGPT, Cursor, VS Code, and any MCP-compatible AI client. Set up in minutes.
         </p>
 
         {{-- Progress Pills --}}
@@ -28,7 +28,7 @@
                     <span>
                         @switch($i)
                             @case(1) Choose Method @break
-                            @case(2) Configure Claude @break
+                            @case(2) Configure Your AI @break
                             @case(3) Start Training @break
                         @endswitch
                     </span>
@@ -57,10 +57,10 @@
                 <flux:accordion.content>
                     <div class="pl-11 space-y-6">
                         <p class="text-zinc-600 dark:text-zinc-400">
-                            Select how you'd like to connect Claude to {{ config('app.name') }}. Both options use secure OAuth authentication.
+                            Select how you'd like to connect your AI assistant to {{ config('app.name') }}. All options use secure OAuth authentication.
                         </p>
 
-                        <div class="grid md:grid-cols-2 gap-4">
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {{-- Claude Desktop Option --}}
                             <button
                                 wire:click="selectMethod('desktop')"
@@ -77,7 +77,7 @@
                                     <div>
                                         <h3 class="font-semibold text-zinc-900 dark:text-white mb-1">Claude Desktop</h3>
                                         <p class="text-sm text-zinc-500 dark:text-zinc-400">
-                                            Add as MCP server in Claude Desktop settings
+                                            Add as connector in Claude Desktop settings
                                         </p>
                                     </div>
                                 </div>
@@ -101,16 +101,73 @@
                                     </div>
                                 </div>
                             </button>
+
+                            {{-- ChatGPT Desktop Option --}}
+                            <button
+                                wire:click="selectMethod('chatgpt')"
+                                class="p-6 rounded-xl border-2 text-left transition-all hover:border-brand-lime hover:bg-zinc-50 dark:hover:bg-zinc-900
+                                    {{ $setupMethod === 'chatgpt' ? 'border-brand-lime bg-zinc-50 dark:bg-zinc-900' : 'border-zinc-200 dark:border-zinc-700' }}"
+                            >
+                                <div class="flex items-start gap-4">
+                                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+                                        <flux:icon.chat-bubble-left-right class="w-6 h-6 text-zinc-600 dark:text-zinc-400" />
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-zinc-900 dark:text-white mb-1">ChatGPT Desktop</h3>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                                            Add as extension in ChatGPT settings
+                                        </p>
+                                    </div>
+                                </div>
+                            </button>
+
+                            {{-- VS Code / Copilot Option --}}
+                            <button
+                                wire:click="selectMethod('vscode')"
+                                class="p-6 rounded-xl border-2 text-left transition-all hover:border-brand-lime hover:bg-zinc-50 dark:hover:bg-zinc-900
+                                    {{ $setupMethod === 'vscode' ? 'border-brand-lime bg-zinc-50 dark:bg-zinc-900' : 'border-zinc-200 dark:border-zinc-700' }}"
+                            >
+                                <div class="flex items-start gap-4">
+                                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+                                        <flux:icon.code-bracket class="w-6 h-6 text-zinc-600 dark:text-zinc-400" />
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-zinc-900 dark:text-white mb-1">VS Code / Copilot</h3>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                                            Add MCP server to VS Code settings
+                                        </p>
+                                    </div>
+                                </div>
+                            </button>
+
+                            {{-- Other MCP Client Option --}}
+                            <button
+                                wire:click="selectMethod('other')"
+                                class="p-6 rounded-xl border-2 text-left transition-all hover:border-brand-lime hover:bg-zinc-50 dark:hover:bg-zinc-900
+                                    {{ $setupMethod === 'other' ? 'border-brand-lime bg-zinc-50 dark:bg-zinc-900' : 'border-zinc-200 dark:border-zinc-700' }}"
+                            >
+                                <div class="flex items-start gap-4">
+                                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+                                        <flux:icon.ellipsis-horizontal-circle class="w-6 h-6 text-zinc-600 dark:text-zinc-400" />
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-zinc-900 dark:text-white mb-1">Other MCP Client</h3>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                                            Cursor, Gemini CLI, Windsurf, and more
+                                        </p>
+                                    </div>
+                                </div>
+                            </button>
                         </div>
 
                         <flux:button wire:click="goToStep(2)" variant="primary">
-                            Continue with {{ $setupMethod === 'desktop' ? 'Claude Desktop' : 'Claude CLI' }}
+                            Continue with {{ $this->getMethodLabel() }}
                         </flux:button>
                     </div>
                 </flux:accordion.content>
             </flux:accordion.item>
 
-            {{-- Step 2: Configure Claude --}}
+            {{-- Step 2: Configure Your AI --}}
             <flux:accordion.item :expanded="$currentStep === 2">
                 <flux:accordion.heading>
                     <div class="flex items-center gap-3">
@@ -121,7 +178,7 @@
                                 2
                             @endif
                         </span>
-                        <span class="font-semibold text-zinc-900 dark:text-white">Configure Claude</span>
+                        <span class="font-semibold text-zinc-900 dark:text-white">Configure Your AI</span>
                     </div>
                 </flux:accordion.heading>
                 <flux:accordion.content>
@@ -129,7 +186,7 @@
                         @if ($setupMethod === 'desktop')
                             {{-- Claude Desktop Instructions --}}
                             <p class="text-zinc-600 dark:text-zinc-400">
-                                Follow these steps to add {{ config('app.name') }} as an MCP server in Claude Desktop:
+                                Follow these steps to add {{ config('app.name') }} as a connector in Claude Desktop:
                             </p>
 
                             <div class="space-y-4">
@@ -158,18 +215,7 @@
                                 </div>
                             </div>
 
-                            <div
-                                x-data="{
-                                    copied: false,
-                                    copy() {
-                                        navigator.clipboard.writeText('{{ $this->getMcpEndpoint() }}').then(() => {
-                                            this.copied = true;
-                                            setTimeout(() => this.copied = false, 2000);
-                                        });
-                                    }
-                                }"
-                                class="space-y-3"
-                            >
+                            <div class="space-y-3">
                                 <flux:field>
                                     <flux:label>MCP Server URL</flux:label>
                                     <flux:input
@@ -189,7 +235,7 @@
                                     <p class="text-sm text-zinc-500 dark:text-zinc-400">A browser window will open for you to log in and authorize the connection</p>
                                 </div>
                             </div>
-                        @else
+                        @elseif ($setupMethod === 'cli')
                             {{-- Claude CLI Instructions --}}
                             <p class="text-zinc-600 dark:text-zinc-400">
                                 Run this command in your terminal to connect Claude Code to {{ config('app.name') }}:
@@ -243,12 +289,163 @@
                                     </div>
                                 </div>
                             </div>
+                        @elseif ($setupMethod === 'chatgpt')
+                            {{-- ChatGPT Desktop Instructions --}}
+                            <p class="text-zinc-600 dark:text-zinc-400">
+                                Follow these steps to add {{ config('app.name') }} as an extension in ChatGPT Desktop:
+                            </p>
+
+                            <div class="space-y-4">
+                                <div class="flex gap-4">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">1</span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">Open ChatGPT Desktop Settings</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Click on your profile icon and select "Settings"</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-4">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">2</span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">Navigate to Extensions</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Find "Extensions" or "MCP Servers" in the settings menu</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-4">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">3</span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">Add Custom Connector</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Click "Add" and paste the MCP server URL below:</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <flux:field>
+                                    <flux:label>MCP Server URL</flux:label>
+                                    <flux:input
+                                        type="text"
+                                        readonly
+                                        copyable
+                                        :value="$this->getMcpEndpoint()"
+                                        class:input="font-mono"
+                                    />
+                                </flux:field>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">4</span>
+                                <div>
+                                    <p class="font-medium text-zinc-900 dark:text-white">Authorize when prompted</p>
+                                    <p class="text-sm text-zinc-500 dark:text-zinc-400">A browser window will open for you to log in and authorize the connection</p>
+                                </div>
+                            </div>
+                        @elseif ($setupMethod === 'vscode')
+                            {{-- VS Code / Copilot Instructions --}}
+                            <p class="text-zinc-600 dark:text-zinc-400">
+                                Add {{ config('app.name') }} as an MCP server in VS Code settings:
+                            </p>
+
+                            <div class="space-y-4">
+                                <div class="flex gap-4">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">1</span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">Open VS Code Settings</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Press <kbd>Cmd</kbd>+<kbd>,</kbd> (Mac) or <kbd>Ctrl</kbd>+<kbd>,</kbd> (Windows/Linux) to open settings</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-4">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">2</span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">Open settings.json</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Click the "Open Settings (JSON)" icon in the top right, then add:</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                x-data="{
+                                    copied: false,
+                                    snippet: JSON.stringify({ 'mcp': { 'servers': { 'traiq': { 'type': 'http', 'url': '{{ $this->getMcpEndpoint() }}' } } } }, null, 2),
+                                    copy() {
+                                        navigator.clipboard.writeText(this.snippet).then(() => {
+                                            this.copied = true;
+                                            setTimeout(() => this.copied = false, 2000);
+                                        });
+                                    }
+                                }"
+                                class="space-y-3"
+                            >
+                                <div class="p-4 bg-zinc-900 rounded-lg overflow-x-auto">
+                                    <pre class="font-mono text-sm text-zinc-100 whitespace-pre" x-text="snippet"></pre>
+                                </div>
+
+                                <flux:button @click="copy()" class="w-full">
+                                    <flux:icon.document-duplicate x-show="!copied" variant="outline" class="w-4 h-4" />
+                                    <flux:icon.check x-show="copied" class="w-4 h-4" />
+                                    <span x-text="copied ? 'Copied!' : 'Copy Configuration'"></span>
+                                </flux:button>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">3</span>
+                                <div>
+                                    <p class="font-medium text-zinc-900 dark:text-white">Authorize when prompted</p>
+                                    <p class="text-sm text-zinc-500 dark:text-zinc-400">VS Code will prompt you to authorize the connection in your browser</p>
+                                </div>
+                            </div>
+                        @else
+                            {{-- Other MCP Client Instructions --}}
+                            <p class="text-zinc-600 dark:text-zinc-400">
+                                {{ config('app.name') }} works with any MCP-compatible client. Find your client's MCP settings and add the server URL below.
+                            </p>
+
+                            <div class="space-y-4">
+                                <div class="flex gap-4">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">1</span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">Open your AI client's settings</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Look for "MCP", "Extensions", "Connectors", or "Tools" in the settings menu</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-4">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">2</span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">Add a new MCP server</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Add a new server with the URL below:</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <flux:field>
+                                    <flux:label>MCP Server URL</flux:label>
+                                    <flux:input
+                                        type="text"
+                                        readonly
+                                        copyable
+                                        :value="$this->getMcpEndpoint()"
+                                        class:input="font-mono"
+                                    />
+                                </flux:field>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">3</span>
+                                <div>
+                                    <p class="font-medium text-zinc-900 dark:text-white">Authorize via OAuth</p>
+                                    <p class="text-sm text-zinc-500 dark:text-zinc-400">When prompted, log in to {{ config('app.name') }} and authorize the connection</p>
+                                </div>
+                            </div>
                         @endif
 
-                        <flux:callout variant="info" icon="information-circle">
-                            <flux:callout.heading>Secure OAuth Authentication</flux:callout.heading>
+                        <flux:callout variant="success" icon="shield-check">
+                            <flux:callout.heading>Secure OAuth 2.1 Authentication</flux:callout.heading>
                             <flux:callout.text>
-                                {{ config('app.name') }} uses OAuth for secure authentication. You'll be redirected to log in and authorize Claude to access your workouts.
+                                {{ config('app.name') }} uses OAuth 2.1 for secure authentication. Your credentials are never shared with the AI client. You'll be redirected to log in and authorize access.
                             </flux:callout.text>
                         </flux:callout>
 
@@ -272,53 +469,53 @@
                 <flux:accordion.content>
                     <div class="pl-11 space-y-6">
                         <p class="text-zinc-600 dark:text-zinc-400">
-                            You're all set! Start a conversation with Claude to create your personalized fitness profile and first workout plan.
+                            You're all set! Start a conversation with your AI to create your personalized fitness profile and first workout plan.
                         </p>
 
+                        <flux:callout color="blue" icon="sparkles">
+                            <flux:callout.heading>What your AI can do with {{ config('app.name') }}</flux:callout.heading>
+                            <flux:callout.text>
+                                <ul class="mt-1 space-y-1.5">
+                                    <li>Create structured workout plans from 2,025 exercises</li>
+                                    <li>Track injuries and avoid aggravating movements</li>
+                                    <li>Monitor muscle group workload with ACWR analytics</li>
+                                    <li>Export workouts to your Garmin watch</li>
+                                    <li>Adapt your plan based on feedback and progress</li>
+                                </ul>
+                            </flux:callout.text>
+                        </flux:callout>
+
                         <div class="space-y-4">
-                            <h4 class="font-medium text-zinc-900 dark:text-white">Try saying something like:</h4>
+                            <h4 class="font-medium text-zinc-900 dark:text-white">Try one of these prompts to get started:</h4>
 
                             <div class="space-y-3">
-                                <div class="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                                    <p class="text-zinc-700 dark:text-zinc-300 italic">
-                                        "I want to start training for a 10K race in 3 months. I can train 4 days a week for about 45 minutes each session. Can you help me set up my fitness profile?"
-                                    </p>
+                                <div>
+                                    <span class="text-xs font-semibold uppercase tracking-wide text-brand-lime">Beginner</span>
+                                    <div class="mt-1 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                                        <p class="text-zinc-700 dark:text-zinc-300 italic">
+                                            "I want to train for a 10K race. I can train 4 days a week and I'm a complete beginner. Can you help me set up my profile and create a training plan?"
+                                        </p>
+                                    </div>
                                 </div>
 
-                                <div class="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                                    <p class="text-zinc-700 dark:text-zinc-300 italic">
-                                        "I'm recovering from a knee injury and want to get back into strength training gradually. What information do you need from me?"
-                                    </p>
+                                <div>
+                                    <span class="text-xs font-semibold uppercase tracking-wide text-brand-lime">Intermediate</span>
+                                    <div class="mt-1 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                                        <p class="text-zinc-700 dark:text-zinc-300 italic">
+                                            "I'm recovering from a knee injury and want to get back into strength training. I have a home gym with dumbbells and a bench. Help me return gradually."
+                                        </p>
+                                    </div>
                                 </div>
 
-                                <div class="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                                    <p class="text-zinc-700 dark:text-zinc-300 italic">
-                                        "Create a weekly workout schedule for me focused on building muscle. I have access to a full gym."
-                                    </p>
+                                <div>
+                                    <span class="text-xs font-semibold uppercase tracking-wide text-brand-lime">Advanced</span>
+                                    <div class="mt-1 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                                        <p class="text-zinc-700 dark:text-zinc-300 italic">
+                                            "Design a 12-week hypertrophy program with RPE autoregulation, ACWR tracking for recovery management, and scheduled deload weeks."
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="space-y-4">
-                            <h4 class="font-medium text-zinc-900 dark:text-white">What to expect:</h4>
-                            <ul class="space-y-2 text-zinc-600 dark:text-zinc-400">
-                                <li class="flex items-start gap-2">
-                                    <flux:icon.check class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                                    <span>Claude will ask about your fitness goals, available time, and any injuries</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <flux:icon.check class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                                    <span>Your profile and workouts are saved automatically to {{ config('app.name') }}</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <flux:icon.check class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                                    <span>View your schedule and track progress in your dashboard</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <flux:icon.check class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                                    <span>Claude adapts your plan based on your feedback and progress</span>
-                                </li>
-                            </ul>
                         </div>
 
                         @auth
@@ -354,8 +551,8 @@
                         </div>
 
                         <div>
-                            <h4 class="font-medium text-zinc-900 dark:text-white mb-2">Claude doesn't recognize the {{ config('app.name') }} commands</h4>
-                            <p>Restart Claude after adding the MCP configuration. The server needs to be loaded fresh.</p>
+                            <h4 class="font-medium text-zinc-900 dark:text-white mb-2">Your AI doesn't recognize the {{ config('app.name') }} commands</h4>
+                            <p>Restart your AI client after adding the MCP configuration. The server needs to be loaded fresh.</p>
                         </div>
 
                         <div>

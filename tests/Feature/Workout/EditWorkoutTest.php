@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Workout\Builder;
+use App\Livewire\Workout\Preview;
 use App\Models\User;
 use App\Models\Workout;
 use Livewire\Livewire;
@@ -18,16 +19,16 @@ it('displays edit links for uncompleted workouts on the dashboard', function () 
         ->assertSee(route('workouts.edit', $workout));
 });
 
-it('displays edit links for completed workouts in the calendar', function () {
+it('displays edit links for completed workouts in the preview modal', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create([
         'completed_at' => now(),
         'scheduled_at' => now(),
     ]);
 
-    $this->actingAs($user)
-        ->get(route('dashboard'))
-        ->assertOk()
+    Livewire::actingAs($user)
+        ->test(Preview::class)
+        ->dispatch('show-workout-preview', workoutId: $workout->id)
         ->assertSee(route('workouts.edit', $workout));
 });
 

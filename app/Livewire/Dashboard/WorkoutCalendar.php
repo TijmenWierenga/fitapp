@@ -108,12 +108,9 @@ class WorkoutCalendar extends Component
         unset($this->calendarWeeks);
     }
 
-    public function deleteWorkout(int $workoutId): void
+    #[On('workout-deleted')]
+    public function refreshAfterDelete(): void
     {
-        $workout = auth()->user()->workouts()->findOrFail($workoutId);
-
-        $workout->deleteIfAllowed();
-
         unset($this->calendarWeeks);
     }
 

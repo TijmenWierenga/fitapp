@@ -15,7 +15,7 @@
                     wire:click="goToStep({{ $i }})"
                     class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all
                         {{ $currentStep === $i
-                            ? 'bg-brand-red text-white'
+                            ? 'bg-brand-lime text-black'
                             : ($currentStep > $i
                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                 : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400') }}"
@@ -44,7 +44,7 @@
             <flux:accordion.item :expanded="$currentStep === 1">
                 <flux:accordion.heading>
                     <div class="flex items-center gap-3">
-                        <span class="flex items-center justify-center w-8 h-8 rounded-full {{ $currentStep > 1 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-brand-red text-white' }} text-sm font-bold">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-full {{ $currentStep > 1 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-brand-lime text-black' }} text-sm font-bold">
                             @if ($currentStep > 1)
                                 <flux:icon.check variant="mini" class="w-5 h-5" />
                             @else
@@ -64,8 +64,8 @@
                             {{-- Claude Desktop Option --}}
                             <button
                                 wire:click="selectMethod('desktop')"
-                                class="relative p-6 rounded-xl border-2 text-left transition-all hover:border-brand-red hover:bg-zinc-50 dark:hover:bg-zinc-900
-                                    {{ $setupMethod === 'desktop' ? 'border-brand-red bg-zinc-50 dark:bg-zinc-900' : 'border-zinc-200 dark:border-zinc-700' }}"
+                                class="relative p-6 rounded-xl border-2 text-left transition-all hover:border-brand-lime hover:bg-zinc-50 dark:hover:bg-zinc-900
+                                    {{ $setupMethod === 'desktop' ? 'border-brand-lime bg-zinc-50 dark:bg-zinc-900' : 'border-zinc-200 dark:border-zinc-700' }}"
                             >
                                 <span class="absolute top-3 right-3 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">
                                     Recommended
@@ -86,8 +86,8 @@
                             {{-- Claude CLI Option --}}
                             <button
                                 wire:click="selectMethod('cli')"
-                                class="p-6 rounded-xl border-2 text-left transition-all hover:border-brand-red hover:bg-zinc-50 dark:hover:bg-zinc-900
-                                    {{ $setupMethod === 'cli' ? 'border-brand-red bg-zinc-50 dark:bg-zinc-900' : 'border-zinc-200 dark:border-zinc-700' }}"
+                                class="p-6 rounded-xl border-2 text-left transition-all hover:border-brand-lime hover:bg-zinc-50 dark:hover:bg-zinc-900
+                                    {{ $setupMethod === 'cli' ? 'border-brand-lime bg-zinc-50 dark:bg-zinc-900' : 'border-zinc-200 dark:border-zinc-700' }}"
                             >
                                 <div class="flex items-start gap-4">
                                     <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
@@ -114,7 +114,7 @@
             <flux:accordion.item :expanded="$currentStep === 2">
                 <flux:accordion.heading>
                     <div class="flex items-center gap-3">
-                        <span class="flex items-center justify-center w-8 h-8 rounded-full {{ $currentStep > 2 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ($currentStep === 2 ? 'bg-brand-red text-white' : 'bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400') }} text-sm font-bold">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-full {{ $currentStep > 2 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ($currentStep === 2 ? 'bg-brand-lime text-black' : 'bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400') }} text-sm font-bold">
                             @if ($currentStep > 2)
                                 <flux:icon.check variant="mini" class="w-5 h-5" />
                             @else
@@ -263,7 +263,7 @@
             <flux:accordion.item :expanded="$currentStep === 3">
                 <flux:accordion.heading>
                     <div class="flex items-center gap-3">
-                        <span class="flex items-center justify-center w-8 h-8 rounded-full {{ $currentStep === 3 ? 'bg-brand-red text-white' : 'bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400' }} text-sm font-bold">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-full {{ $currentStep === 3 ? 'bg-brand-lime text-black' : 'bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400' }} text-sm font-bold">
                             3
                         </span>
                         <span class="font-semibold text-zinc-900 dark:text-white">Start Your AI Intake</span>
@@ -323,7 +323,7 @@
 
                         @auth
                             <div class="flex gap-4">
-                                <a href="{{ route('dashboard') }}" class="traiq-cta-gradient text-white font-semibold px-6 py-3 rounded-lg transition-all">
+                                <a href="{{ route('dashboard') }}" class="bg-brand-lime text-black font-semibold px-6 py-3 rounded-lg transition-all hover:opacity-90">
                                     Go to Dashboard
                                 </a>
                             </div>
@@ -360,7 +360,7 @@
 
                         <div>
                             <h4 class="font-medium text-zinc-900 dark:text-white mb-2">Need more help?</h4>
-                            <p>Contact support at <a href="mailto:support@traiq.io" class="text-brand-red hover:underline">support@traiq.io</a></p>
+                            <p>Contact support at <a href="mailto:support@traiq.io" class="text-brand-lime hover:underline">support@traiq.io</a></p>
                         </div>
                     </div>
                 </flux:accordion.content>

@@ -42,7 +42,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <flux:badge size="sm" color="zinc">{{ $report->type->label() }}</flux:badge>
-                                <flux:text class="text-xs text-zinc-500">
+                                <flux:text class="text-xs text-zinc-500 dark:text-zinc-400">
                                     {{ $report->reported_at->toDateString() }}
                                 </flux:text>
                             </div>

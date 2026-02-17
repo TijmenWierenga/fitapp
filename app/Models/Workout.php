@@ -217,4 +217,18 @@ class Workout extends Model
             default => '',
         };
     }
+
+    /**
+     * @return array<int, array{emoji: string, label: string}>
+     */
+    public static function feelingScale(): array
+    {
+        return [
+            1 => ['emoji' => "\u{1F61E}", 'label' => 'Very Bad'],
+            2 => ['emoji' => "\u{1F615}", 'label' => 'Bad'],
+            3 => ['emoji' => "\u{1F610}", 'label' => 'Okay'],
+            4 => ['emoji' => "\u{1F642}", 'label' => 'Good'],
+            5 => ['emoji' => "\u{1F60A}", 'label' => 'Great'],
+        ];
+    }
 }

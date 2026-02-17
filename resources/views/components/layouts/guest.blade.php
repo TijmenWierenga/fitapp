@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head', ['title' => $title ?? null])
     </head>
@@ -19,7 +19,7 @@
                         <a href="{{ route('login') }}" class="text-sm text-zinc-700 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
                             Log in
                         </a>
-                        <a href="{{ route('register') }}" class="text-sm traiq-cta-gradient text-white px-4 py-2 rounded-lg font-medium transition-all">
+                        <a href="{{ route('register') }}" class="text-sm bg-brand-lime text-black px-4 py-2 rounded-lg font-medium transition-all hover:opacity-90">
                             Get started
                         </a>
                     @endauth

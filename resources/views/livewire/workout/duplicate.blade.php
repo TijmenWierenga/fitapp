@@ -1,6 +1,6 @@
 <div>
     @if($workout)
-        <flux:modal name="duplicate-workout" wire:model.live="showModal" @close="closeModal">
+        <flux:modal name="duplicate-workout" wire:model.live="showModal" @close="closeModal" class="max-w-2xl">
             <form wire:submit="save" class="space-y-6">
                 <div>
                     <flux:heading size="lg">Duplicate Workout</flux:heading>

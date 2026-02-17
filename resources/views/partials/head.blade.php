@@ -5,7 +5,8 @@
 
 <!-- Primary Meta Tags -->
 <meta name="description" content="{{ $description ?? 'Track your fitness journey with Traiq - Your personal workout tracker and fitness companion.' }}">
-<meta name="theme-color" content="#18181b">
+<meta name="theme-color" content="#f5f5f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c1917" media="(prefers-color-scheme: dark)">
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
@@ -30,7 +31,8 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
 <link rel="preconnect" href="https://fonts.bunny.net">
-<link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+<link href="https://fonts.bunny.net/css?family=bebas-neue:400|instrument-sans:400,500,600" rel="stylesheet" />
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+<script>localStorage.getItem('flux.appearance') || localStorage.setItem('flux.appearance', 'dark')</script>
 @fluxAppearance

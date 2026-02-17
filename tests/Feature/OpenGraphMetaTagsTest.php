@@ -23,11 +23,21 @@ test('pages include twitter card meta tags', function () {
     $response->assertSee('<meta name="twitter:image" content="', false);
 });
 
+test('dark mode is the default appearance', function () {
+    $response = $this->get('/');
+
+    $response->assertSee(
+        "localStorage.getItem('flux.appearance') || localStorage.setItem('flux.appearance', 'dark')",
+        escape: false,
+    );
+});
+
 test('pages include primary meta description', function () {
     $response = $this->get('/');
 
     $response->assertStatus(200);
 
     $response->assertSee('<meta name="description" content="', false);
-    $response->assertSee('<meta name="theme-color" content="#18181b">', false);
+    $response->assertSee('<meta name="theme-color" content="#f5f5f4" media="(prefers-color-scheme: light)">', false);
+    $response->assertSee('<meta name="theme-color" content="#1c1917" media="(prefers-color-scheme: dark)">', false);
 });

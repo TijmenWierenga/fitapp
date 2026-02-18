@@ -9,9 +9,11 @@
     <div class="flex h-full w-full flex-1 flex-col gap-4 mt-4">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <livewire:dashboard.next-workout />
-            <livewire:dashboard.workload-overview />
+            <livewire:dashboard.session-load-overview />
         </div>
 
+        <livewire:dashboard.muscle-group-volume />
+        <livewire:dashboard.strength-progression />
         <livewire:dashboard.workout-calendar />
     </div>
 

@@ -1,12 +1,11 @@
 <?php
 
 use App\Actions\CalculateWorkload;
+use App\Domain\Workload\Enums\Trend;
 use App\Enums\BodyPart;
-use App\Enums\WorkloadZone;
 use App\Models\Block;
 use App\Models\BlockExercise;
 use App\Models\CardioExercise;
-use App\Models\DurationExercise;
 use App\Models\Exercise;
 use App\Models\Injury;
 use App\Models\MuscleGroup;
@@ -22,14 +21,26 @@ beforeEach(function (): void {
     $this->now = CarbonImmutable::parse('2026-02-14 12:00:00');
 });
 
-function createCompletedWorkout(User $user, CarbonImmutable $completedAt): Workout
+function createCompletedWorkout(User $user, CarbonImmutable $completedAt, int $rpe = 7): Workout
 {
     return Workout::factory()->create([
         'user_id' => $user->id,
         'completed_at' => $completedAt,
         'scheduled_at' => $completedAt->subHour(),
-        'rpe' => 7,
+        'rpe' => $rpe,
         'feeling' => 4,
+    ]);
+}
+
+function addCardioBlock(Workout $workout, int $targetDuration): void
+{
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->distanceDuration()->create(['section_id' => $section->id]);
+    $cardio = CardioExercise::factory()->create(['target_duration' => $targetDuration]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exerciseable_type' => $cardio->getMorphClass(),
+        'exerciseable_id' => $cardio->id,
     ]);
 }
 
@@ -38,11 +49,13 @@ function createLinkedStrengthExercise(
     Exercise $exercise,
     int $sets = 3,
     int $reps = 10,
-    float $rpe = 7.0,
+    ?float $weight = null,
+    ?float $rpe = 7.0,
 ): BlockExercise {
     $strength = StrengthExercise::factory()->create([
         'target_sets' => $sets,
         'target_reps_max' => $reps,
+        'target_weight' => $weight,
         'target_rpe' => $rpe,
     ]);
 
@@ -54,28 +67,69 @@ function createLinkedStrengthExercise(
     ]);
 }
 
-it('calculates strength exercise load correctly', function (): void {
-    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
+// --- Session Load ---
+
+it('calculates session load from workouts with estimatable duration', function (): void {
+    // 45 min cardio block at RPE 7 → sRPE = 45 * 7 = 315
+    $w1 = createCompletedWorkout($this->user, $this->now->subDays(2), rpe: 7);
+    addCardioBlock($w1, targetDuration: 2700);
+
+    // 60 min cardio block at RPE 8 → sRPE = 60 * 8 = 480
+    $w2 = createCompletedWorkout($this->user, $this->now->subDays(4), rpe: 8);
+    addCardioBlock($w2, targetDuration: 3600);
+
+    $result = $this->action->execute($this->user, $this->now);
+
+    expect($result->sessionLoad)->not->toBeNull();
+    expect($result->sessionLoad->currentWeeklyTotal)->toBe(315 + 480);
+    expect($result->sessionLoad->currentSessionCount)->toBe(2);
+});
+
+it('skips workouts without estimatable duration in session load', function (): void {
+    // Workout with only strength exercises (no target_duration) → not estimatable
+    $workout = createCompletedWorkout($this->user, $this->now->subDays(2), rpe: 7);
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->create(['section_id' => $section->id]);
+    $strength = StrengthExercise::factory()->create();
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exerciseable_type' => $strength->getMorphClass(),
+        'exerciseable_id' => $strength->id,
+    ]);
+
+    $result = $this->action->execute($this->user, $this->now);
+
+    expect($result->sessionLoad)->toBeNull();
+});
+
+it('returns null session load when no sessions qualify', function (): void {
+    $result = $this->action->execute($this->user, $this->now);
+
+    expect($result->sessionLoad)->toBeNull();
+});
+
+// --- Muscle Group Volume ---
+
+it('counts strength exercise sets per muscle group', function (): void {
+    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);
     $exercise = Exercise::factory()->create();
     $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
 
     $workout = createCompletedWorkout($this->user, $this->now->subDays(2));
     $section = Section::factory()->create(['workout_id' => $workout->id]);
     $block = Block::factory()->create(['section_id' => $section->id]);
-
-    // 3 sets x 10 reps x (7/10) RPE x 1.0 load_factor = 21.0
-    createLinkedStrengthExercise($block, $exercise, sets: 3, reps: 10, rpe: 7.0);
+    createLinkedStrengthExercise($block, $exercise, sets: 4, reps: 10);
 
     $result = $this->action->execute($this->user, $this->now);
 
-    $chestWorkload = $result->muscleGroups->firstWhere('muscleGroupName', 'chest');
-    expect($chestWorkload)->not->toBeNull();
-    expect($chestWorkload->acuteLoad)->toBe(21.0);
+    $chestVolume = $result->muscleGroupVolume->firstWhere('name', 'chest');
+    expect($chestVolume)->not->toBeNull();
+    expect($chestVolume->currentWeekSets)->toBe(4.0);
 });
 
-it('applies primary and secondary load factors', function (): void {
-    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
-    $triceps = MuscleGroup::factory()->create(['name' => 'triceps', 'body_part' => BodyPart::Triceps]);
+it('applies load factors to muscle group volume', function (): void {
+    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);
+    $triceps = MuscleGroup::factory()->create(['name' => 'triceps', 'label' => 'Triceps', 'body_part' => BodyPart::Triceps]);
 
     $exercise = Exercise::factory()->create();
     $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
@@ -84,99 +138,92 @@ it('applies primary and secondary load factors', function (): void {
     $workout = createCompletedWorkout($this->user, $this->now->subDays(2));
     $section = Section::factory()->create(['workout_id' => $workout->id]);
     $block = Block::factory()->create(['section_id' => $section->id]);
-
-    // volume = 3 x 10 x (7/10) = 21.0
-    createLinkedStrengthExercise($block, $exercise, sets: 3, reps: 10, rpe: 7.0);
+    createLinkedStrengthExercise($block, $exercise, sets: 4, reps: 10);
 
     $result = $this->action->execute($this->user, $this->now);
 
-    $chestWorkload = $result->muscleGroups->firstWhere('muscleGroupName', 'chest');
-    $tricepsWorkload = $result->muscleGroups->firstWhere('muscleGroupName', 'triceps');
+    $chestVolume = $result->muscleGroupVolume->firstWhere('name', 'chest');
+    $tricepsVolume = $result->muscleGroupVolume->firstWhere('name', 'triceps');
 
-    expect($chestWorkload->acuteLoad)->toBe(21.0);    // 21.0 * 1.0
-    expect($tricepsWorkload->acuteLoad)->toBe(10.5);   // 21.0 * 0.5
+    expect($chestVolume->currentWeekSets)->toBe(4.0);
+    expect($tricepsVolume->currentWeekSets)->toBe(2.0);
 });
 
-it('only counts completed workouts', function (): void {
-    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
+it('detects volume trend across weeks', function (): void {
+    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);
     $exercise = Exercise::factory()->create();
     $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
 
-    // Uncompleted workout - should be excluded
-    $workout = Workout::factory()->create([
-        'user_id' => $this->user->id,
-        'scheduled_at' => $this->now->subDays(2),
-        'completed_at' => null,
-    ]);
-    $section = Section::factory()->create(['workout_id' => $workout->id]);
-    $block = Block::factory()->create(['section_id' => $section->id]);
-    createLinkedStrengthExercise($block, $exercise);
+    // Current week: 10 sets (high)
+    $w1 = createCompletedWorkout($this->user, $this->now->subDays(2));
+    $s1 = Section::factory()->create(['workout_id' => $w1->id]);
+    $b1 = Block::factory()->create(['section_id' => $s1->id]);
+    createLinkedStrengthExercise($b1, $exercise, sets: 10, reps: 10);
 
-    $result = $this->action->execute($this->user, $this->now);
-
-    expect($result->muscleGroups)->toBeEmpty();
-});
-
-it('separates acute and chronic windows', function (): void {
-    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
-    $exercise = Exercise::factory()->create();
-    $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
-
-    // Acute window workout (within 7 days)
-    $acuteWorkout = createCompletedWorkout($this->user, $this->now->subDays(3));
-    $section1 = Section::factory()->create(['workout_id' => $acuteWorkout->id]);
-    $block1 = Block::factory()->create(['section_id' => $section1->id]);
-    createLinkedStrengthExercise($block1, $exercise, sets: 3, reps: 10, rpe: 10.0);
-    // volume = 3 * 10 * 1.0 = 30
-
-    // Chronic-only workout (older than 7 days but within 28)
-    $chronicWorkout = createCompletedWorkout($this->user, $this->now->subDays(14));
-    $section2 = Section::factory()->create(['workout_id' => $chronicWorkout->id]);
-    $block2 = Block::factory()->create(['section_id' => $section2->id]);
-    createLinkedStrengthExercise($block2, $exercise, sets: 2, reps: 10, rpe: 10.0);
-    // volume = 2 * 10 * 1.0 = 20
-
-    $result = $this->action->execute($this->user, $this->now);
-
-    $chestWorkload = $result->muscleGroups->firstWhere('muscleGroupName', 'chest');
-    expect($chestWorkload->acuteLoad)->toBe(30.0);
-    // chronic = (30 + 20) / 4 weeks = 12.5
-    expect($chestWorkload->chronicLoad)->toBe(12.5);
-});
-
-it('calculates ACWR and determines zones', function (): void {
-    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
-    $exercise = Exercise::factory()->create();
-    $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
-
-    // Create workouts across 4 weeks (even distribution)
-    foreach ([3, 10, 17, 24] as $daysAgo) {
-        $workout = createCompletedWorkout($this->user, $this->now->subDays($daysAgo));
-        $section = Section::factory()->create(['workout_id' => $workout->id]);
-        $block = Block::factory()->create(['section_id' => $section->id]);
-        createLinkedStrengthExercise($block, $exercise, sets: 3, reps: 10, rpe: 10.0);
-        // volume per workout = 3 * 10 * 1.0 = 30
+    // Previous weeks: 4 sets each
+    foreach ([9, 16, 23] as $daysAgo) {
+        $w = createCompletedWorkout($this->user, $this->now->subDays($daysAgo));
+        $s = Section::factory()->create(['workout_id' => $w->id]);
+        $b = Block::factory()->create(['section_id' => $s->id]);
+        createLinkedStrengthExercise($b, $exercise, sets: 4, reps: 10);
     }
 
     $result = $this->action->execute($this->user, $this->now);
 
-    $chestWorkload = $result->muscleGroups->firstWhere('muscleGroupName', 'chest');
-    // acute = 30 (one workout in last 7 days)
-    // chronic = 120 / 4 weeks = 30
-    // ACWR = 30 / 30 = 1.0
-    expect($chestWorkload->acwr)->toBe(1.0);
-    expect($chestWorkload->zone)->toBe(WorkloadZone::SweetSpot);
-    expect($result->dataSpanDays)->toBe(24);
+    $chestVolume = $result->muscleGroupVolume->firstWhere('name', 'chest');
+    expect($chestVolume->trend)->toBe(Trend::Increasing);
 });
 
-it('excludes unlinked exercises and counts them', function (): void {
-    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
+// --- Strength Progression ---
 
+it('calculates e1RM progression', function (): void {
+    $exercise = Exercise::factory()->create(['name' => 'Bench Press']);
+    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
+    $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
+
+    // Current period: 100kg x 5 → e1RM = 116.67
+    $w1 = createCompletedWorkout($this->user, $this->now->subDays(5));
+    $s1 = Section::factory()->create(['workout_id' => $w1->id]);
+    $b1 = Block::factory()->create(['section_id' => $s1->id]);
+    createLinkedStrengthExercise($b1, $exercise, sets: 3, reps: 5, weight: 100.0);
+
+    // Previous period: 90kg x 5 → e1RM = 105.0
+    $w2 = createCompletedWorkout($this->user, $this->now->subDays(35));
+    $s2 = Section::factory()->create(['workout_id' => $w2->id]);
+    $b2 = Block::factory()->create(['section_id' => $s2->id]);
+    createLinkedStrengthExercise($b2, $exercise, sets: 3, reps: 5, weight: 90.0);
+
+    $result = $this->action->execute($this->user, $this->now);
+
+    expect($result->strengthProgression)->not->toBeEmpty();
+    $bench = collect($result->strengthProgression)->firstWhere('exerciseName', 'Bench Press');
+    expect($bench->currentE1RM)->toEqualWithDelta(116.7, 0.1);
+    expect($bench->previousE1RM)->toEqualWithDelta(105.0, 0.1);
+    expect($bench->changePct)->toBeGreaterThan(0);
+});
+
+it('excludes exercises without weight from strength progression', function (): void {
+    $exercise = Exercise::factory()->create(['name' => 'Push Up']);
+    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
+    $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
+
+    $w = createCompletedWorkout($this->user, $this->now->subDays(2));
+    $s = Section::factory()->create(['workout_id' => $w->id]);
+    $b = Block::factory()->create(['section_id' => $s->id]);
+    createLinkedStrengthExercise($b, $exercise, sets: 3, reps: 10, weight: null);
+
+    $result = $this->action->execute($this->user, $this->now);
+
+    expect($result->strengthProgression)->toBeEmpty();
+});
+
+// --- Cross-cutting ---
+
+it('excludes unlinked exercises and counts them', function (): void {
     $workout = createCompletedWorkout($this->user, $this->now->subDays(2));
     $section = Section::factory()->create(['workout_id' => $workout->id]);
     $block = Block::factory()->create(['section_id' => $section->id]);
 
-    // Unlinked exercise (no exercise_id)
     $strength = StrengthExercise::factory()->create();
     BlockExercise::factory()->create([
         'block_id' => $block->id,
@@ -187,104 +234,17 @@ it('excludes unlinked exercises and counts them', function (): void {
 
     $result = $this->action->execute($this->user, $this->now);
 
-    expect($result->muscleGroups)->toBeEmpty();
     expect($result->unlinkedExerciseCount)->toBe(1);
 });
 
 it('returns empty results for empty history', function (): void {
     $result = $this->action->execute($this->user, $this->now);
 
-    expect($result->muscleGroups)->toBeEmpty();
+    expect($result->sessionLoad)->toBeNull();
+    expect($result->muscleGroupVolume)->toBeEmpty();
+    expect($result->strengthProgression)->toBeEmpty();
     expect($result->unlinkedExerciseCount)->toBe(0);
     expect($result->dataSpanDays)->toBe(0);
-});
-
-it('uses block rounds as fallback when target_sets is null', function (): void {
-    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
-    $exercise = Exercise::factory()->create();
-    $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
-
-    $workout = createCompletedWorkout($this->user, $this->now->subDays(2));
-    $section = Section::factory()->create(['workout_id' => $workout->id]);
-    $block = Block::factory()->circuit()->create([
-        'section_id' => $section->id,
-        'rounds' => 4,
-    ]);
-
-    $strength = StrengthExercise::factory()->create([
-        'target_sets' => null,
-        'target_reps_max' => 10,
-        'target_rpe' => 8.0,
-    ]);
-
-    BlockExercise::factory()->create([
-        'block_id' => $block->id,
-        'exercise_id' => $exercise->id,
-        'exerciseable_type' => $strength->getMorphClass(),
-        'exerciseable_id' => $strength->id,
-    ]);
-
-    $result = $this->action->execute($this->user, $this->now);
-
-    $chestWorkload = $result->muscleGroups->firstWhere('muscleGroupName', 'chest');
-    // 4 rounds x 10 reps x (8/10) RPE = 32.0
-    expect($chestWorkload->acuteLoad)->toBe(32.0);
-});
-
-it('calculates cardio exercise load', function (): void {
-    $quads = MuscleGroup::factory()->create(['name' => 'quadriceps', 'body_part' => BodyPart::Quadriceps]);
-    $exercise = Exercise::factory()->create();
-    $exercise->muscleGroups()->attach($quads, ['load_factor' => 1.0]);
-
-    $workout = createCompletedWorkout($this->user, $this->now->subDays(2));
-    $section = Section::factory()->create(['workout_id' => $workout->id]);
-    $block = Block::factory()->create(['section_id' => $section->id]);
-
-    $cardio = CardioExercise::factory()->create([
-        'target_duration' => 1800, // 30 minutes
-        'target_heart_rate_zone' => 4,
-    ]);
-
-    BlockExercise::factory()->create([
-        'block_id' => $block->id,
-        'exercise_id' => $exercise->id,
-        'exerciseable_type' => $cardio->getMorphClass(),
-        'exerciseable_id' => $cardio->id,
-    ]);
-
-    $result = $this->action->execute($this->user, $this->now);
-
-    $quadsWorkload = $result->muscleGroups->firstWhere('muscleGroupName', 'quadriceps');
-    // (30min / 10) * (4 / 5) * 1.0 = 2.4
-    expect($quadsWorkload->acuteLoad)->toEqualWithDelta(2.4, 0.001);
-});
-
-it('calculates duration exercise load', function (): void {
-    $core = MuscleGroup::factory()->create(['name' => 'abdominals', 'body_part' => BodyPart::Core]);
-    $exercise = Exercise::factory()->create();
-    $exercise->muscleGroups()->attach($core, ['load_factor' => 1.0]);
-
-    $workout = createCompletedWorkout($this->user, $this->now->subDays(2));
-    $section = Section::factory()->create(['workout_id' => $workout->id]);
-    $block = Block::factory()->create(['section_id' => $section->id]);
-
-    $duration = DurationExercise::factory()->create([
-        'target_duration' => 300, // 5 minutes
-        'target_rpe' => 6.0,
-    ]);
-
-    BlockExercise::factory()->create([
-        'block_id' => $block->id,
-        'exercise_id' => $exercise->id,
-        'exerciseable_type' => $duration->getMorphClass(),
-        'exerciseable_id' => $duration->id,
-    ]);
-
-    $result = $this->action->execute($this->user, $this->now);
-
-    $coreWorkload = $result->muscleGroups->firstWhere('muscleGroupName', 'abdominals');
-    // 5min * (6/10) * 1.0 = 3.0
-    expect($coreWorkload->acuteLoad)->toBe(3.0);
 });
 
 it('includes active injuries in summary', function (): void {
@@ -299,41 +259,11 @@ it('includes active injuries in summary', function (): void {
     expect($result->activeInjuries->first()['body_part'])->toBe('knee');
 });
 
-it('uses default RPE when not specified for strength', function (): void {
-    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
-    $exercise = Exercise::factory()->create();
-    $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
-
-    $workout = createCompletedWorkout($this->user, $this->now->subDays(2));
-    $section = Section::factory()->create(['workout_id' => $workout->id]);
-    $block = Block::factory()->create(['section_id' => $section->id]);
-
-    $strength = StrengthExercise::factory()->create([
-        'target_sets' => 3,
-        'target_reps_max' => 10,
-        'target_rpe' => null,
-    ]);
-
-    BlockExercise::factory()->create([
-        'block_id' => $block->id,
-        'exercise_id' => $exercise->id,
-        'exerciseable_type' => $strength->getMorphClass(),
-        'exerciseable_id' => $strength->id,
-    ]);
-
-    $result = $this->action->execute($this->user, $this->now);
-
-    $chestWorkload = $result->muscleGroups->firstWhere('muscleGroupName', 'chest');
-    // 3 x 10 x (5/10) = 15.0 (default RPE = 5)
-    expect($chestWorkload->acuteLoad)->toBe(15.0);
-});
-
 it('calculates data span days from earliest workout', function (): void {
     $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
     $exercise = Exercise::factory()->create();
     $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
 
-    // Earliest workout 5 days ago
     $workout = createCompletedWorkout($this->user, $this->now->subDays(5));
     $section = Section::factory()->create(['workout_id' => $workout->id]);
     $block = Block::factory()->create(['section_id' => $section->id]);
@@ -344,18 +274,21 @@ it('calculates data span days from earliest workout', function (): void {
     expect($result->dataSpanDays)->toBe(5);
 });
 
-it('caps data span days at 28', function (): void {
+it('only counts completed workouts', function (): void {
     $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);
     $exercise = Exercise::factory()->create();
     $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
 
-    // Workout exactly 28 days ago (the query window boundary)
-    $workout = createCompletedWorkout($this->user, $this->now->subDays(27));
+    $workout = Workout::factory()->create([
+        'user_id' => $this->user->id,
+        'scheduled_at' => $this->now->subDays(2),
+        'completed_at' => null,
+    ]);
     $section = Section::factory()->create(['workout_id' => $workout->id]);
     $block = Block::factory()->create(['section_id' => $section->id]);
     createLinkedStrengthExercise($block, $exercise);
 
     $result = $this->action->execute($this->user, $this->now);
 
-    expect($result->dataSpanDays)->toBe(27);
+    expect($result->muscleGroupVolume)->toBeEmpty();
 });

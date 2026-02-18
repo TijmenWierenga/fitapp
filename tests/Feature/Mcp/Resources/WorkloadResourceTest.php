@@ -6,6 +6,7 @@ use App\Mcp\Resources\WorkloadResource;
 use App\Mcp\Servers\WorkoutServer;
 use App\Models\Block;
 use App\Models\BlockExercise;
+use App\Models\CardioExercise;
 use App\Models\Exercise;
 use App\Models\Injury;
 use App\Models\MuscleGroup;
@@ -54,7 +55,7 @@ it('shows empty state for user with no workload data', function (): void {
         ->assertSee('No workload data available');
 });
 
-it('includes zone information', function (): void {
+it('includes muscle group volume section', function (): void {
     $user = User::factory()->withTimezone('UTC')->create();
     $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);
     $exercise = Exercise::factory()->create();
@@ -80,13 +81,41 @@ it('includes zone information', function (): void {
     $response = WorkoutServer::actingAs($user)->resource(WorkloadResource::class, []);
 
     $response->assertOk()
-        ->assertSee('Acute Load')
-        ->assertSee('Chronic Load')
-        ->assertSee('ACWR')
-        ->assertSee('Zone');
+        ->assertSee('Muscle Group Volume')
+        ->assertSee('Current Sets')
+        ->assertSee('4-Week Avg')
+        ->assertSee('Trend');
 });
 
-it('shows data reliability warning for incomplete history', function (): void {
+it('includes session load section when duration available', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $workout = Workout::factory()->create([
+        'user_id' => $user->id,
+        'completed_at' => now()->subDays(2),
+        'scheduled_at' => now()->subDays(2),
+        'rpe' => 7,
+        'feeling' => 4,
+    ]);
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->distanceDuration()->create(['section_id' => $section->id]);
+    $cardio = CardioExercise::factory()->create(['target_duration' => 3600]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exerciseable_type' => $cardio->getMorphClass(),
+        'exerciseable_id' => $cardio->id,
+    ]);
+
+    $response = WorkoutServer::actingAs($user)->resource(WorkloadResource::class, []);
+
+    $response->assertOk()
+        ->assertSee('Session Load')
+        ->assertSee('Weekly Total')
+        ->assertSee('Monotony')
+        ->assertSee('Strain');
+});
+
+it('shows session load empty state when no duration', function (): void {
     $user = User::factory()->withTimezone('UTC')->create();
     $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);
     $exercise = Exercise::factory()->create();
@@ -94,8 +123,8 @@ it('shows data reliability warning for incomplete history', function (): void {
 
     $workout = Workout::factory()->create([
         'user_id' => $user->id,
-        'completed_at' => now()->subDays(5),
-        'scheduled_at' => now()->subDays(5),
+        'completed_at' => now()->subDays(2),
+        'scheduled_at' => now()->subDays(2),
         'rpe' => 7,
         'feeling' => 4,
     ]);
@@ -112,17 +141,7 @@ it('shows data reliability warning for incomplete history', function (): void {
     $response = WorkoutServer::actingAs($user)->resource(WorkloadResource::class, []);
 
     $response->assertOk()
-        ->assertSee('Warning')
-        ->assertSee('ACWR values may not be reliable yet');
-});
-
-it('does not show data reliability warning for empty state', function (): void {
-    $user = User::factory()->withTimezone('UTC')->create();
-
-    $response = WorkoutServer::actingAs($user)->resource(WorkloadResource::class, []);
-
-    $response->assertOk()
-        ->assertDontSee('ACWR values may not be reliable yet');
+        ->assertSee('No session load data');
 });
 
 it('includes active injuries', function (): void {

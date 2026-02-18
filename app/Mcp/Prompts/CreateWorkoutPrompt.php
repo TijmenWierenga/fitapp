@@ -3,11 +3,11 @@
 namespace App\Mcp\Prompts;
 
 use App\Actions\CalculateWorkload;
-use App\DataTransferObjects\Workload\MuscleGroupWorkload;
 use App\DataTransferObjects\Workload\WorkloadSummary;
+use App\Domain\Workload\Enums\Trend;
+use App\Domain\Workload\Results\MuscleGroupVolumeResult;
 use App\Enums\BodyPart;
 use App\Enums\FitnessGoal;
-use App\Enums\WorkloadZone;
 use App\Enums\Workout\Activity;
 use App\Models\Injury;
 use App\Models\User;
@@ -182,43 +182,43 @@ class CreateWorkoutPrompt extends Prompt
 
         // Workload summary
         $workload = $context['workload'];
-        if ($workload->muscleGroups->isNotEmpty()) {
+        if ($workload->muscleGroupVolume->isNotEmpty()) {
             $greeting .= "## Current Workload\n\n";
 
-            $cautionGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Caution);
-            $dangerGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Danger);
-            $undertrainingGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Undertraining);
+            $increasing = $workload->muscleGroupVolume->filter(fn (MuscleGroupVolumeResult $v): bool => $v->trend === Trend::Increasing);
+            $decreasing = $workload->muscleGroupVolume->filter(fn (MuscleGroupVolumeResult $v): bool => $v->trend === Trend::Decreasing);
 
-            if ($dangerGroups->isNotEmpty()) {
-                $names = $dangerGroups->map(fn (MuscleGroupWorkload $w): string => "{$w->muscleGroupLabel} (ACWR {$w->acwr})")->implode(', ');
-                $greeting .= "- **DANGER:** {$names} — strongly recommend reducing load\n";
+            if ($increasing->isNotEmpty()) {
+                $names = $increasing->map(fn (MuscleGroupVolumeResult $v): string => "{$v->label} ({$v->currentWeekSets} sets)")->implode(', ');
+                $greeting .= "- **Increasing volume:** {$names}\n";
             }
 
-            if ($cautionGroups->isNotEmpty()) {
-                $names = $cautionGroups->map(fn (MuscleGroupWorkload $w): string => "{$w->muscleGroupLabel} (ACWR {$w->acwr})")->implode(', ');
-                $greeting .= "- **CAUTION:** {$names} — consider reducing load\n";
+            if ($decreasing->isNotEmpty()) {
+                $names = $decreasing->map(fn (MuscleGroupVolumeResult $v): string => "{$v->label} ({$v->currentWeekSets} sets)")->implode(', ');
+                $greeting .= "- **Decreasing volume:** {$names} — could use more stimulus\n";
             }
 
-            if ($undertrainingGroups->isNotEmpty()) {
-                $names = $undertrainingGroups->map(fn (MuscleGroupWorkload $w): string => $w->muscleGroupLabel)->implode(', ');
-                $greeting .= "- **Undertrained:** {$names} — could use more stimulus\n";
+            $stableCount = $workload->muscleGroupVolume->filter(fn (MuscleGroupVolumeResult $v): bool => $v->trend === Trend::Stable)->count();
+            if ($stableCount > 0) {
+                $greeting .= "- **Stable:** {$stableCount} muscle group(s) at consistent volume\n";
             }
 
-            $sweetSpotCount = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::SweetSpot)->count();
-            if ($sweetSpotCount > 0) {
-                $greeting .= "- **Sweet Spot:** {$sweetSpotCount} muscle group(s) in optimal training zone\n";
-            }
-
-            // Cross-reference injuries with workload
-            if ($activeInjuries->isNotEmpty() && ($cautionGroups->isNotEmpty() || $dangerGroups->isNotEmpty())) {
-                $warningGroups = $cautionGroups->merge($dangerGroups);
+            // Cross-reference injuries with high-volume muscle groups
+            if ($activeInjuries->isNotEmpty() && $increasing->isNotEmpty()) {
                 $injuredBodyParts = $activeInjuries->pluck('body_part')->unique();
 
-                foreach ($warningGroups as $workloadItem) {
-                    if ($injuredBodyParts->contains(fn (BodyPart $bp): bool => $bp->value === $workloadItem->bodyPart)) {
-                        $greeting .= "- **WARNING:** {$workloadItem->muscleGroupLabel} is in {$workloadItem->zone->value} zone AND near an active injury\n";
+                foreach ($increasing as $volumeItem) {
+                    if ($injuredBodyParts->contains(fn (BodyPart $bp): bool => $bp->value === $volumeItem->bodyPart)) {
+                        $greeting .= "- **WARNING:** {$volumeItem->label} volume is increasing AND near an active injury\n";
                     }
                 }
+            }
+
+            // Session load warning
+            if ($workload->sessionLoad?->weekOverWeekWarning) {
+                $change = $workload->sessionLoad->weekOverWeekChangePct;
+                $direction = $change > 0 ? 'increased' : 'decreased';
+                $greeting .= "- **Session load:** {$direction} by ".abs($change)."% week-over-week\n";
             }
 
             $greeting .= "\n";
@@ -528,36 +528,31 @@ class CreateWorkoutPrompt extends Prompt
 
     protected function buildWorkloadGuidance(WorkloadSummary $workload): ?string
     {
-        $cautionGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Caution);
-        $dangerGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Danger);
-        $undertrainingGroups = $workload->muscleGroups->filter(fn (MuscleGroupWorkload $w): bool => $w->zone === WorkloadZone::Undertraining);
+        $increasing = $workload->muscleGroupVolume->filter(fn (MuscleGroupVolumeResult $v): bool => $v->trend === Trend::Increasing);
+        $decreasing = $workload->muscleGroupVolume->filter(fn (MuscleGroupVolumeResult $v): bool => $v->trend === Trend::Decreasing);
 
-        if ($cautionGroups->isEmpty() && $dangerGroups->isEmpty() && $undertrainingGroups->isEmpty()) {
+        if ($increasing->isEmpty() && $decreasing->isEmpty() && ! $workload->sessionLoad?->weekOverWeekWarning) {
             return null;
         }
 
         $guidance = "## Workload-Aware Constraints\n\n";
 
-        if ($dangerGroups->isNotEmpty()) {
-            $guidance .= "**AVOID** exercises targeting these muscle groups (danger zone):\n";
-            foreach ($dangerGroups as $w) {
-                $guidance .= "- {$w->muscleGroupLabel} — ACWR {$w->acwr}, strongly recommend no additional load\n";
+        if ($workload->sessionLoad?->weekOverWeekWarning && $workload->sessionLoad->weekOverWeekChangePct > 0) {
+            $guidance .= "**CAUTION:** Session load increased by {$workload->sessionLoad->weekOverWeekChangePct}% — consider a lighter session.\n\n";
+        }
+
+        if ($increasing->isNotEmpty()) {
+            $guidance .= "**MODERATE** volume for these muscle groups (already increasing):\n";
+            foreach ($increasing as $v) {
+                $guidance .= "- {$v->label} — {$v->currentWeekSets} sets this week (avg {$v->fourWeekAverageSets})\n";
             }
             $guidance .= "\n";
         }
 
-        if ($cautionGroups->isNotEmpty()) {
-            $guidance .= "**REDUCE** volume for these muscle groups (caution zone):\n";
-            foreach ($cautionGroups as $w) {
-                $guidance .= "- {$w->muscleGroupLabel} — ACWR {$w->acwr}, reduce sets/reps or use lighter intensity\n";
-            }
-            $guidance .= "\n";
-        }
-
-        if ($undertrainingGroups->isNotEmpty()) {
-            $guidance .= "**PRIORITIZE** these undertrained muscle groups when possible:\n";
-            foreach ($undertrainingGroups as $w) {
-                $guidance .= "- {$w->muscleGroupLabel} — ACWR {$w->acwr}, could benefit from more stimulus\n";
+        if ($decreasing->isNotEmpty()) {
+            $guidance .= "**PRIORITIZE** these muscle groups (volume decreasing):\n";
+            foreach ($decreasing as $v) {
+                $guidance .= "- {$v->label} — {$v->currentWeekSets} sets this week (avg {$v->fourWeekAverageSets})\n";
             }
             $guidance .= "\n";
         }

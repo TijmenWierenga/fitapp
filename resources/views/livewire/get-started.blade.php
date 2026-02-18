@@ -478,7 +478,7 @@
                                 <ul class="mt-1 space-y-1.5">
                                     <li>Create structured workout plans from 2,025 exercises</li>
                                     <li>Track injuries and avoid aggravating movements</li>
-                                    <li>Monitor muscle group workload with ACWR analytics</li>
+                                    <li>Monitor training load, muscle group volume, and strength progression</li>
                                     <li>Export workouts to your Garmin watch</li>
                                     <li>Adapt your plan based on feedback and progress</li>
                                 </ul>
@@ -511,7 +511,7 @@
                                     <span class="text-xs font-semibold uppercase tracking-wide text-brand-lime">Advanced</span>
                                     <div class="mt-1 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
                                         <p class="text-zinc-700 dark:text-zinc-300 italic">
-                                            "Design a 12-week hypertrophy program with RPE autoregulation, ACWR tracking for recovery management, and scheduled deload weeks."
+                                            "Design a 12-week hypertrophy program with RPE autoregulation, session load monitoring for recovery management, and scheduled deload weeks."
                                         </p>
                                     </div>
                                 </div>

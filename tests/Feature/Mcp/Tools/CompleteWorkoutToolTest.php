@@ -7,12 +7,13 @@ use App\Models\Workout;
 
 use function Pest\Laravel\assertDatabaseHas;
 
-it('completes workout successfully', function () {
+it('completes workout successfully with duration', function () {
     $user = User::factory()->withTimezone('Europe/Amsterdam')->create();
     $workout = Workout::factory()->for($user)->upcoming()->create();
 
     $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
         'workout_id' => $workout->id,
+        'duration' => 3600,
         'rpe' => 7,
         'feeling' => 4,
     ]);
@@ -23,12 +24,14 @@ it('completes workout successfully', function () {
 
     assertDatabaseHas('workouts', [
         'id' => $workout->id,
+        'duration' => 3600,
         'rpe' => 7,
         'feeling' => 4,
     ]);
 
     $workout->refresh();
     expect($workout->isCompleted())->toBeTrue();
+    expect($workout->duration)->toBe(3600);
 });
 
 it('includes rpe label in response', function () {
@@ -37,6 +40,7 @@ it('includes rpe label in response', function () {
 
     $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
         'workout_id' => $workout->id,
+        'duration' => 1800,
         'rpe' => 2,
         'feeling' => 5,
     ]);
@@ -51,6 +55,7 @@ it('fails to complete already completed workout', function () {
 
     $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
         'workout_id' => $workout->id,
+        'duration' => 3600,
         'rpe' => 5,
         'feeling' => 3,
     ]);
@@ -65,6 +70,7 @@ it('fails with RPE out of range', function (int $invalidRpe) {
 
     $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
         'workout_id' => $workout->id,
+        'duration' => 3600,
         'rpe' => $invalidRpe,
         'feeling' => 3,
     ]);
@@ -79,6 +85,7 @@ it('fails with feeling out of range', function (int $invalidFeeling) {
 
     $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
         'workout_id' => $workout->id,
+        'duration' => 3600,
         'rpe' => 5,
         'feeling' => $invalidFeeling,
     ]);
@@ -94,10 +101,39 @@ it('fails to complete workout owned by different user', function () {
 
     $response = WorkoutServer::actingAs($user2)->tool(CompleteWorkoutTool::class, [
         'workout_id' => $workout->id,
+        'duration' => 3600,
         'rpe' => 5,
         'feeling' => 3,
     ]);
 
     $response->assertHasErrors()
         ->assertSee('Workout not found or access denied.');
+});
+
+it('requires duration parameter', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
+        'workout_id' => $workout->id,
+        'rpe' => 5,
+        'feeling' => 3,
+    ]);
+
+    $response->assertHasErrors();
+});
+
+it('fails with duration below minimum', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
+        'workout_id' => $workout->id,
+        'duration' => 30,
+        'rpe' => 5,
+        'feeling' => 3,
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('Duration must be at least 60 seconds');
 });

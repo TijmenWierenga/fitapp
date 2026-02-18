@@ -8,7 +8,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-class WorkloadOverview extends Component
+class StrengthProgression extends Component
 {
     #[Computed]
     public function workloadSummary(): WorkloadSummary
@@ -24,6 +24,6 @@ class WorkloadOverview extends Component
 
     public function render(): \Illuminate\View\View
     {
-        return view('livewire.dashboard.workload-overview');
+        return view('livewire.dashboard.strength-progression');
     }
 }

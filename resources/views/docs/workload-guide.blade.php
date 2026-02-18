@@ -15,13 +15,18 @@
                 <flux:accordion.content>
                     <div class="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
                         <p>
-                            Workload tracking measures how much training stress you're placing on each muscle group over time. By comparing your recent training to your longer-term average, it helps you spot when you're doing too much (injury risk) or too little (detraining).
+                            Workload tracking gives you an evidence-based view of your training by measuring three pillars:
+                        </p>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong class="text-zinc-900 dark:text-white">Session Load (sRPE)</strong> — overall training stress per workout, combining duration and effort.</li>
+                            <li><strong class="text-zinc-900 dark:text-white">Muscle Group Volume</strong> — weekly effective sets per muscle group from strength exercises.</li>
+                            <li><strong class="text-zinc-900 dark:text-white">Strength Progression</strong> — estimated one-rep max trends for your lifts over time.</li>
+                        </ul>
+                        <p>
+                            Together, these metrics help you balance training stress, spot muscle group imbalances, and track strength gains. Data is based on up to <strong class="text-zinc-900 dark:text-white">8 weeks (56 days)</strong> of completed workouts.
                         </p>
                         <p>
-                            The dashboard widget shows your <strong class="text-zinc-900 dark:text-white">acute load</strong> (last 7 days) for each muscle group and uses the <strong class="text-zinc-900 dark:text-white">Acute:Chronic Workload Ratio (ACWR)</strong> to colour-code your training zones.
-                        </p>
-                        <p>
-                            Only completed workouts with exercises linked to the exercise library are included. Unlinked exercises are counted but excluded from load calculations.
+                            Only completed workouts with exercises linked to the exercise library are included. Unlinked exercises are counted but excluded from volume and progression calculations.
                         </p>
                     </div>
                 </flux:accordion.content>
@@ -29,65 +34,32 @@
 
             <flux:accordion.item>
                 <flux:accordion.heading>
-                    How is training volume calculated?
+                    Session Load (sRPE)
                 </flux:accordion.heading>
                 <flux:accordion.content>
                     <div class="space-y-4 text-sm text-zinc-600 dark:text-zinc-400">
-                        <p>Volume is calculated differently for each exercise type:</p>
-
-                        <div class="space-y-3">
-                            <div>
-                                <h4 class="font-medium text-zinc-900 dark:text-white mb-1">Strength exercises</h4>
-                                <div class="px-3 py-2 bg-zinc-50 dark:bg-zinc-900 rounded-lg font-mono text-xs">
-                                    volume = sets &times; reps &times; (RPE / 10)
-                                </div>
-                                <p class="mt-1">Sets default to the block's round count if not set. RPE defaults to 5 when not specified.</p>
-                            </div>
-
-                            <div>
-                                <h4 class="font-medium text-zinc-900 dark:text-white mb-1">Cardio exercises</h4>
-                                <div class="px-3 py-2 bg-zinc-50 dark:bg-zinc-900 rounded-lg font-mono text-xs">
-                                    volume = (duration in min / 10) &times; (HR zone / 5)
-                                </div>
-                                <p class="mt-1">Heart rate zone defaults to 3 when not specified.</p>
-                            </div>
-
-                            <div>
-                                <h4 class="font-medium text-zinc-900 dark:text-white mb-1">Duration exercises</h4>
-                                <div class="px-3 py-2 bg-zinc-50 dark:bg-zinc-900 rounded-lg font-mono text-xs">
-                                    volume = duration in min &times; (RPE / 10)
-                                </div>
-                                <p class="mt-1">RPE defaults to 5 when not specified.</p>
-                            </div>
-                        </div>
-                    </div>
-                </flux:accordion.content>
-            </flux:accordion.item>
-
-            <flux:accordion.item>
-                <flux:accordion.heading>
-                    What is ACWR?
-                </flux:accordion.heading>
-                <flux:accordion.content>
-                    <div class="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
                         <p>
-                            The <strong class="text-zinc-900 dark:text-white">Acute:Chronic Workload Ratio (ACWR)</strong> compares your short-term training load to your longer-term average.
+                            Session Load measures overall training stress for a single workout by combining how long you trained with how hard it felt. It uses the <strong class="text-zinc-900 dark:text-white">session RPE (sRPE)</strong> method.
                         </p>
-
-                        <ul class="list-disc list-inside space-y-1">
-                            <li><strong class="text-zinc-900 dark:text-white">Acute load</strong> — total volume for a muscle group in the last <strong class="text-zinc-900 dark:text-white">7 days</strong>.</li>
-                            <li><strong class="text-zinc-900 dark:text-white">Chronic load</strong> — average weekly volume over the last <strong class="text-zinc-900 dark:text-white">28 days</strong> (4 weeks).</li>
-                        </ul>
 
                         <div class="px-3 py-2 bg-zinc-50 dark:bg-zinc-900 rounded-lg font-mono text-xs">
-                            ACWR = acute load / chronic load
+                            Session Load = Duration (minutes) &times; RPE
+                        </div>
+
+                        <div class="space-y-2">
+                            <h4 class="font-medium text-zinc-900 dark:text-white">Example</h4>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Monday: 60 min at RPE 7 = <strong class="text-zinc-900 dark:text-white">420</strong></li>
+                                <li>Wednesday: 45 min at RPE 8 = <strong class="text-zinc-900 dark:text-white">360</strong></li>
+                                <li>Weekly total = <strong class="text-zinc-900 dark:text-white">780</strong></li>
+                            </ul>
                         </div>
 
                         <p>
-                            An ACWR of 1.0 means your recent week matches your average. Values above 1.0 mean you're training harder than usual; values below 1.0 mean you're training less.
+                            The dashboard shows your <strong class="text-zinc-900 dark:text-white">weekly sRPE total</strong>, <strong class="text-zinc-900 dark:text-white">session count</strong>, and a <strong class="text-zinc-900 dark:text-white">4-week trend chart</strong>.
                         </p>
                         <p>
-                            When there is no chronic load data (e.g., your first week of training), the ACWR is displayed as 0 and the zone is shown as inactive.
+                            To be included, workouts need both a <strong class="text-zinc-900 dark:text-white">duration</strong> and an <strong class="text-zinc-900 dark:text-white">RPE</strong> when marked as complete.
                         </p>
                     </div>
                 </flux:accordion.content>
@@ -95,81 +67,198 @@
 
             <flux:accordion.item>
                 <flux:accordion.heading>
-                    Training zones
+                    Monotony & Strain
+                </flux:accordion.heading>
+                <flux:accordion.content>
+                    <div class="space-y-4 text-sm text-zinc-600 dark:text-zinc-400">
+                        <div class="space-y-3">
+                            <h4 class="font-medium text-zinc-900 dark:text-white">Monotony</h4>
+                            <p>
+                                Monotony measures how varied your daily training load is across the week. Rest days count as zero load. A low monotony score means good variation between hard and easy days.
+                            </p>
+
+                            <div class="px-3 py-2 bg-zinc-50 dark:bg-zinc-900 rounded-lg font-mono text-xs">
+                                Monotony = Average daily load / Standard deviation of daily loads
+                            </div>
+
+                            <p>
+                                <strong class="text-zinc-900 dark:text-white">Warning:</strong> monotony above <strong class="text-zinc-900 dark:text-white">2.0</strong> means your training is too uniform. Vary your session intensity to bring it down.
+                            </p>
+
+                            <div class="space-y-2">
+                                <h4 class="font-medium text-zinc-900 dark:text-white">Example</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Training 60 min at RPE 7 every single day → monotony is very high</li>
+                                    <li>Mixing a 90 min RPE 8 session with a 30 min RPE 5 session and rest days → much lower monotony</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <h4 class="font-medium text-zinc-900 dark:text-white">Strain</h4>
+                            <p>
+                                Strain combines your total weekly volume with monotony to flag overtraining risk. High strain means both high volume <em>and</em> high monotony.
+                            </p>
+
+                            <div class="px-3 py-2 bg-zinc-50 dark:bg-zinc-900 rounded-lg font-mono text-xs">
+                                Strain = Weekly Total &times; Monotony
+                            </div>
+                        </div>
+                    </div>
+                </flux:accordion.content>
+            </flux:accordion.item>
+
+            <flux:accordion.item>
+                <flux:accordion.heading>
+                    Week-over-Week Change
+                </flux:accordion.heading>
+                <flux:accordion.content>
+                    <div class="space-y-4 text-sm text-zinc-600 dark:text-zinc-400">
+                        <p>
+                            This metric compares your current week's total sRPE to the previous week, expressed as a percentage change.
+                        </p>
+
+                        <div class="px-3 py-2 bg-zinc-50 dark:bg-zinc-900 rounded-lg font-mono text-xs">
+                            Change % = ((Current Week - Previous Week) / Previous Week) &times; 100
+                        </div>
+
+                        <div class="space-y-2">
+                            <h4 class="font-medium text-zinc-900 dark:text-white">Example</h4>
+                            <p>Previous week total: 500. This week total: 600. Change: <strong class="text-zinc-900 dark:text-white">+20%</strong> → warning shown.</p>
+                        </div>
+
+                        <p>
+                            <strong class="text-zinc-900 dark:text-white">Warning:</strong> a change exceeding <strong class="text-zinc-900 dark:text-white">&plusmn;15%</strong> triggers an alert. Aim for gradual progressions of <strong class="text-zinc-900 dark:text-white">10&ndash;15%</strong> per week.
+                        </p>
+
+                        <p>
+                            When no previous week data exists (e.g., your first week of training), no comparison is shown.
+                        </p>
+                    </div>
+                </flux:accordion.content>
+            </flux:accordion.item>
+
+            <flux:accordion.item>
+                <flux:accordion.heading>
+                    Muscle Group Volume
+                </flux:accordion.heading>
+                <flux:accordion.content>
+                    <div class="space-y-4 text-sm text-zinc-600 dark:text-zinc-400">
+                        <p>
+                            Muscle group volume tracks the number of <strong class="text-zinc-900 dark:text-white">effective weekly sets</strong> per muscle group, from strength exercises only.
+                        </p>
+
+                        <div class="space-y-3">
+                            <h4 class="font-medium text-zinc-900 dark:text-white">How sets are counted</h4>
+                            <p>
+                                The exercise's <strong class="text-zinc-900 dark:text-white">target sets</strong> are used first. If not set, the block's <strong class="text-zinc-900 dark:text-white">round count</strong> is used. If neither is available, <strong class="text-zinc-900 dark:text-white">1 set</strong> is assumed.
+                            </p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <h4 class="font-medium text-zinc-900 dark:text-white">Load factors</h4>
+                            <p>
+                                Exercises can target multiple muscle groups. Each muscle group receives a fraction of the exercise's sets based on its load factor:
+                            </p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong class="text-zinc-900 dark:text-white">Primary muscles (1.0)</strong> — receive the full number of sets.</li>
+                                <li><strong class="text-zinc-900 dark:text-white">Secondary muscles (0.5)</strong> — receive half the sets.</li>
+                            </ul>
+                            <p>
+                                <strong class="text-zinc-900 dark:text-white">Example:</strong> 3 sets of bench press → 3 sets for chest (primary, 1.0) + 1.5 sets for triceps (secondary, 0.5).
+                            </p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <h4 class="font-medium text-zinc-900 dark:text-white">4-week average & trends</h4>
+                            <p>The current week's volume is compared to the 4-week average:</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong class="text-zinc-900 dark:text-white">Increasing (↑)</strong> — current week exceeds average by more than 10%</li>
+                                <li><strong class="text-zinc-900 dark:text-white">Stable (→)</strong> — within &plusmn;10% of the average</li>
+                                <li><strong class="text-zinc-900 dark:text-white">Decreasing (↓)</strong> — current week is more than 10% below average</li>
+                            </ul>
+                        </div>
+
+                        <p>
+                            The dashboard shows horizontal bars with a 4-week average marker, trend arrows, and injury badges for affected body parts.
+                        </p>
+                    </div>
+                </flux:accordion.content>
+            </flux:accordion.item>
+
+            <flux:accordion.item>
+                <flux:accordion.heading>
+                    Strength Progression (Estimated 1RM)
+                </flux:accordion.heading>
+                <flux:accordion.content>
+                    <div class="space-y-4 text-sm text-zinc-600 dark:text-zinc-400">
+                        <p>
+                            Strength progression tracks your <strong class="text-zinc-900 dark:text-white">estimated one-rep max (e1RM)</strong> for strength exercises over time, using the Epley formula.
+                        </p>
+
+                        <div class="px-3 py-2 bg-zinc-50 dark:bg-zinc-900 rounded-lg font-mono text-xs">
+                            e1RM = Weight &times; (1 + Reps / 30)
+                        </div>
+
+                        <p>
+                            For single-rep lifts, the actual weight lifted is used directly.
+                        </p>
+
+                        <div class="space-y-2">
+                            <h4 class="font-medium text-zinc-900 dark:text-white">How it works</h4>
+                            <p>
+                                Your best e1RM from the <strong class="text-zinc-900 dark:text-white">last 4 weeks</strong> is compared to the best e1RM from the <strong class="text-zinc-900 dark:text-white">4 weeks before that</strong>. The change is shown as a percentage.
+                            </p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <h4 class="font-medium text-zinc-900 dark:text-white">Example</h4>
+                            <p>Bench press: 80 kg &times; 8 reps → e1RM &asymp; 101.3 kg. Previous best was 96 kg → <strong class="text-zinc-900 dark:text-white">+5.5%</strong> progression.</p>
+                        </div>
+
+                        <p>
+                            The dashboard shows a table with each exercise's current e1RM, previous e1RM, and change percentage. <strong class="text-green-600 dark:text-green-400">Green</strong> indicates progression, <strong class="text-red-600 dark:text-red-400">red</strong> indicates regression.
+                        </p>
+                    </div>
+                </flux:accordion.content>
+            </flux:accordion.item>
+
+            <flux:accordion.item>
+                <flux:accordion.heading>
+                    Warnings & Alerts
                 </flux:accordion.heading>
                 <flux:accordion.content>
                     <div class="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
-                        <p>Each muscle group is placed into a training zone based on its ACWR value:</p>
+                        <p>The dashboard highlights potential issues with your training:</p>
 
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm">
                                 <thead>
                                     <tr class="border-b border-zinc-200 dark:border-zinc-700">
-                                        <th class="py-2 pr-4 font-medium text-zinc-900 dark:text-white">Zone</th>
-                                        <th class="py-2 pr-4 font-medium text-zinc-900 dark:text-white">ACWR</th>
-                                        <th class="py-2 font-medium text-zinc-900 dark:text-white">Guidance</th>
+                                        <th class="py-2 pr-4 font-medium text-zinc-900 dark:text-white">Warning</th>
+                                        <th class="py-2 pr-4 font-medium text-zinc-900 dark:text-white">Trigger</th>
+                                        <th class="py-2 font-medium text-zinc-900 dark:text-white">What to do</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
                                     <tr>
-                                        <td class="py-2 pr-4">
-                                            <div class="flex items-center gap-2">
-                                                <span class="inline-block w-2 h-2 rounded-full bg-zinc-400"></span> Undertraining
-                                            </div>
-                                        </td>
-                                        <td class="py-2 pr-4">Below 0.8</td>
-                                        <td class="py-2">You may be losing fitness. Gradually increase your training volume.</td>
+                                        <td class="py-2 pr-4">Rapid load change</td>
+                                        <td class="py-2 pr-4">Week-over-week change exceeds &plusmn;15%</td>
+                                        <td class="py-2">Moderate increases to 10&ndash;15% per week</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-2 pr-4">
-                                            <div class="flex items-center gap-2">
-                                                <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span> Sweet Spot
-                                            </div>
-                                        </td>
-                                        <td class="py-2 pr-4">0.8 – 1.3</td>
-                                        <td class="py-2">Optimal training zone. You're progressing safely.</td>
+                                        <td class="py-2 pr-4">High monotony</td>
+                                        <td class="py-2 pr-4">Monotony above 2.0</td>
+                                        <td class="py-2">Vary session intensity &mdash; mix hard and easy days</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-2 pr-4">
-                                            <div class="flex items-center gap-2">
-                                                <span class="inline-block w-2 h-2 rounded-full bg-yellow-500"></span> Caution
-                                            </div>
-                                        </td>
-                                        <td class="py-2 pr-4">1.3 – 1.5</td>
-                                        <td class="py-2">Elevated injury risk. Monitor recovery closely and avoid further spikes.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 pr-4">
-                                            <div class="flex items-center gap-2">
-                                                <span class="inline-block w-2 h-2 rounded-full bg-red-500"></span> Danger
-                                            </div>
-                                        </td>
-                                        <td class="py-2 pr-4">Above 1.5</td>
-                                        <td class="py-2">High injury risk. Consider reducing load or adding rest days.</td>
+                                        <td class="py-2 pr-4">Unlinked exercises</td>
+                                        <td class="py-2 pr-4">Exercises not linked to the library</td>
+                                        <td class="py-2">Link them via the AI assistant for accurate tracking</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                </flux:accordion.content>
-            </flux:accordion.item>
-
-            <flux:accordion.item>
-                <flux:accordion.heading>
-                    Muscle group load factors
-                </flux:accordion.heading>
-                <flux:accordion.content>
-                    <div class="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
-                        <p>
-                            Exercises can target multiple muscle groups. Each muscle group is assigned a <strong class="text-zinc-900 dark:text-white">load factor</strong> that determines how much of the exercise volume counts toward that muscle group.
-                        </p>
-                        <ul class="list-disc list-inside space-y-1">
-                            <li><strong class="text-zinc-900 dark:text-white">Primary muscles (1.0)</strong> — receive the full training volume. For example, chest on a bench press.</li>
-                            <li><strong class="text-zinc-900 dark:text-white">Secondary muscles (0.5)</strong> — receive half the training volume. For example, triceps on a bench press.</li>
-                        </ul>
-                        <p>
-                            Load factors are defined per exercise in the exercise library. This means a single exercise can contribute different amounts of load to different muscle groups.
-                        </p>
                     </div>
                 </flux:accordion.content>
             </flux:accordion.item>
@@ -181,10 +270,10 @@
                 <flux:accordion.content>
                     <div class="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
                         <p>
-                            Workload tracking relies on the exercise library to know which muscle groups an exercise targets. When a workout contains exercises that aren't linked to a library entry, they can't be assigned to any muscle group.
+                            Workload tracking relies on the exercise library to know which muscle groups an exercise targets and to calculate strength progression. When a workout contains exercises that aren't linked to a library entry, they can't be assigned to any muscle group or included in e1RM calculations.
                         </p>
                         <p>
-                            The number of unlinked exercises is shown at the bottom of the workload widget. To include them in your workload data, link them to the exercise library through your AI assistant.
+                            The dashboard shows the number of unlinked exercises when applicable. To include them in your volume and progression data, link them to the exercise library through your AI assistant.
                         </p>
                     </div>
                 </flux:accordion.content>

@@ -19,13 +19,35 @@ it('returns empty workload for user with no completed workouts', function (): vo
     $response = WorkoutServer::actingAs($user)->tool(GetWorkloadTool::class);
 
     $response->assertOk()
-        ->assertSee('"muscle_groups": []')
-        ->assertSee('"warnings": []')
+        ->assertSee('"session_load": null')
+        ->assertSee('"muscle_group_volume": []')
+        ->assertSee('"strength_progression": []')
         ->assertSee('"unlinked_exercise_count": 0')
         ->assertSee('"data_span_days": 0');
 });
 
-it('returns workload data with muscle group loads', function (): void {
+it('returns session load data for workouts with duration', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    Workout::factory()->create([
+        'user_id' => $user->id,
+        'completed_at' => now()->subDays(2),
+        'scheduled_at' => now()->subDays(2),
+        'duration' => 3600,
+        'rpe' => 7,
+        'feeling' => 4,
+    ]);
+
+    $response = WorkoutServer::actingAs($user)->tool(GetWorkloadTool::class);
+
+    $response->assertOk()
+        ->assertSee('"current_weekly_total":')
+        ->assertSee('"current_session_count":')
+        ->assertSee('"monotony":')
+        ->assertSee('"strain":');
+});
+
+it('returns muscle group volume data', function (): void {
     $user = User::factory()->withTimezone('UTC')->create();
     $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);
     $exercise = Exercise::factory()->create();
@@ -52,8 +74,8 @@ it('returns workload data with muscle group loads', function (): void {
 
     $response->assertOk()
         ->assertSee('"muscle_group": "chest"')
-        ->assertSee('"acute_load": 21')
-        ->assertSee('"data_span_days":');
+        ->assertSee('"current_week_sets":')
+        ->assertSee('"trend":');
 });
 
 it('includes active injuries', function (): void {
@@ -94,42 +116,4 @@ it('counts unlinked exercises', function (): void {
     $response->assertOk()
         ->assertSee('"unlinked_exercise_count": 1')
         ->assertSee('not linked to the exercise library');
-});
-
-it('includes data reliability warning when data span is less than 28 days', function (): void {
-    $user = User::factory()->withTimezone('UTC')->create();
-    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);
-    $exercise = Exercise::factory()->create();
-    $exercise->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
-
-    $workout = Workout::factory()->create([
-        'user_id' => $user->id,
-        'completed_at' => now()->subDays(5),
-        'scheduled_at' => now()->subDays(5),
-        'rpe' => 7,
-        'feeling' => 4,
-    ]);
-    $section = Section::factory()->create(['workout_id' => $workout->id]);
-    $block = Block::factory()->create(['section_id' => $section->id]);
-    $strength = StrengthExercise::factory()->create(['target_sets' => 3, 'target_reps_max' => 10, 'target_rpe' => 7.0]);
-    BlockExercise::factory()->create([
-        'block_id' => $block->id,
-        'exercise_id' => $exercise->id,
-        'exerciseable_type' => $strength->getMorphClass(),
-        'exerciseable_id' => $strength->id,
-    ]);
-
-    $response = WorkoutServer::actingAs($user)->tool(GetWorkloadTool::class);
-
-    $response->assertOk()
-        ->assertSee('ACWR values may not be reliable yet');
-});
-
-it('does not include data reliability warning when no muscle groups', function (): void {
-    $user = User::factory()->withTimezone('UTC')->create();
-
-    $response = WorkoutServer::actingAs($user)->tool(GetWorkloadTool::class);
-
-    $response->assertOk()
-        ->assertDontSee('ACWR values may not be reliable yet');
 });

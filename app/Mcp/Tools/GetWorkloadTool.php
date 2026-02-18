@@ -20,20 +20,27 @@ class GetWorkloadTool extends Tool
      * The tool's description.
      */
     protected string $description = <<<'MARKDOWN'
-        Get the authenticated user's muscle group workload data based on completed workouts from the last 28 days.
+        Get the authenticated user's training workload data based on completed workouts from up to 56 days.
 
-        Returns per-muscle-group load with ACWR (Acute:Chronic Workload Ratio) and zone indicators:
-        - **undertraining** (ACWR < 0.8): Not enough stimulus for adaptation
-        - **sweet_spot** (0.8–1.3): Optimal training zone for progress
-        - **caution** (1.3–1.5): Elevated injury risk, consider reducing load
-        - **danger** (> 1.5): High injury risk, strongly recommend reducing load
+        Returns three evidence-based metrics:
 
-        The response includes a `data_span_days` field (0–28) indicating how many days of workout history are available. When `data_span_days` is below 28, ACWR values may be unreliable because the chronic load is calculated over a fixed 4-week window regardless of actual data coverage. Treat zone classifications with caution when data is incomplete.
+        **Session Load (sRPE):** Weekly training load calculated as duration x RPE for each session.
+        - Includes monotony (variation) and strain indicators
+        - Week-over-week change percentage with >15% warning threshold
+        - Requires workouts to have duration recorded
+
+        **Muscle Group Volume:** Weekly set counts per muscle group from strength exercises.
+        - Distributed via load factors (primary 1.0, secondary 0.5)
+        - 4-week average and trend (increasing/stable/decreasing)
+
+        **Strength Progression:** Estimated 1RM changes over 4-week periods.
+        - Uses Epley formula: weight x (1 + reps/30)
+        - Compares current 28-day period vs previous 28-day period
 
         Use this data to:
-        - Balance workouts across muscle groups
-        - Avoid overloading muscles in caution/danger zones
-        - Identify undertrained muscle groups to prioritize
+        - Monitor overall training load and avoid rapid increases
+        - Balance volume across muscle groups
+        - Track strength progression over time
         - Consider active injuries when planning exercises near affected areas
     MARKDOWN;
 

@@ -14,7 +14,7 @@
                 </div>
                 <flux:heading size="lg">Workload Guide</flux:heading>
                 <flux:text class="mt-1">
-                    Understand how training load tracking works, ACWR zones, and muscle group load factors.
+                    Understand how session load, muscle group volume, and strength progression tracking works.
                 </flux:text>
             </a>
 

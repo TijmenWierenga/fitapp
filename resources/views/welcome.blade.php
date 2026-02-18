@@ -131,7 +131,7 @@
                     <span class="font-['Bebas_Neue'] text-6xl text-brand-lime/20 leading-none">03</span>
                     <h3 class="mt-4 text-xl font-semibold text-white">Train, Track, Adapt</h3>
                     <p class="mt-3 text-zinc-400 leading-relaxed">
-                        Track progress through conversation. Muscle group workload monitoring and overtraining prevention keep you progressing safely.
+                        Track progress through conversation. Session load alerts, muscle group volume trends, and strength progression metrics keep you training safely.
                     </p>
                 </div>
             </div>
@@ -187,31 +187,31 @@
                     </ul>
                 </div>
 
-                {{-- ACWR Analytics --}}
+                {{-- Smart Analytics --}}
                 <div class="bg-white border-l-4 border-l-brand-lime rounded-lg p-8 traiq-reveal" style="transition-delay: 0.1s">
-                    <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">ACWR Analytics</span>
-                    <h3 class="mt-3 text-2xl font-bold text-black leading-tight">Sports Science, Not Guesswork</h3>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Smart Analytics</span>
+                    <h3 class="mt-3 text-2xl font-bold text-black leading-tight">Evidence-Based Progression</h3>
                     <p class="mt-4 text-zinc-600 leading-relaxed">
-                        Acute-to-chronic workload ratios across 17 muscle groups with 4-week rolling averages. Train in the optimal zone, every session.
+                        Three pillars of training intelligence: session load tracking with monotony and strain alerts, per-muscle-group volume with 4-week trends, and estimated 1RM progression via the Epley formula.
                     </p>
                     <ul class="mt-6 pt-5 space-y-2.5 border-t border-zinc-100">
                         <li class="flex items-center gap-2 text-sm text-zinc-600">
                             <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
-                            17 muscle groups monitored
+                            sRPE load tracking with spike alerts
                         </li>
                         <li class="flex items-center gap-2 text-sm text-zinc-600">
                             <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
-                            Overtraining prevention
+                            17 muscle groups with volume trends
                         </li>
                         <li class="flex items-center gap-2 text-sm text-zinc-600">
                             <svg class="w-4 h-4 text-brand-lime flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
-                            Optimal training zones
+                            Estimated 1RM strength tracking
                         </li>
                     </ul>
                 </div>

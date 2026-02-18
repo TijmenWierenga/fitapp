@@ -6,6 +6,7 @@ use App\Livewire\Dashboard\SessionLoadOverview;
 use App\Livewire\Dashboard\StrengthProgression;
 use App\Models\Block;
 use App\Models\BlockExercise;
+use App\Models\CardioExercise;
 use App\Models\Exercise;
 use App\Models\Injury;
 use App\Models\MuscleGroup;
@@ -25,16 +26,23 @@ it('renders session load empty state when no duration data', function (): void {
         ->assertSee('No session load data yet');
 });
 
-it('renders session load stats when duration available', function (): void {
+it('renders session load stats when estimatable duration available', function (): void {
     $user = User::factory()->withTimezone('UTC')->create();
 
-    Workout::factory()->create([
+    $workout = Workout::factory()->create([
         'user_id' => $user->id,
         'completed_at' => now()->subDays(2),
         'scheduled_at' => now()->subDays(2),
-        'duration' => 3600,
         'rpe' => 7,
         'feeling' => 4,
+    ]);
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->distanceDuration()->create(['section_id' => $section->id]);
+    $cardio = CardioExercise::factory()->create(['target_duration' => 3600]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exerciseable_type' => $cardio->getMorphClass(),
+        'exerciseable_id' => $cardio->id,
     ]);
 
     Livewire::actingAs($user)

@@ -5,6 +5,7 @@ use App\Mcp\Servers\WorkoutServer;
 use App\Mcp\Tools\GetWorkloadTool;
 use App\Models\Block;
 use App\Models\BlockExercise;
+use App\Models\CardioExercise;
 use App\Models\Exercise;
 use App\Models\Injury;
 use App\Models\MuscleGroup;
@@ -29,13 +30,20 @@ it('returns empty workload for user with no completed workouts', function (): vo
 it('returns session load data for workouts with duration', function (): void {
     $user = User::factory()->withTimezone('UTC')->create();
 
-    Workout::factory()->create([
+    $workout = Workout::factory()->create([
         'user_id' => $user->id,
         'completed_at' => now()->subDays(2),
         'scheduled_at' => now()->subDays(2),
-        'duration' => 3600,
         'rpe' => 7,
         'feeling' => 4,
+    ]);
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->distanceDuration()->create(['section_id' => $section->id]);
+    $cardio = CardioExercise::factory()->create(['target_duration' => 3600]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exerciseable_type' => $cardio->getMorphClass(),
+        'exerciseable_id' => $cardio->id,
     ]);
 
     $response = WorkoutServer::actingAs($user)->tool(GetWorkloadTool::class);

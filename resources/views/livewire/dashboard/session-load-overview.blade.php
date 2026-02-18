@@ -54,11 +54,26 @@
         </div>
 
         @if(count($this->chartData) > 1)
-            <flux:chart :value="$this->chartData" class="h-24">
-                <flux:chart.svg gutter="0 0 0 0">
+            <flux:chart :value="$this->chartData" class="h-48">
+                <flux:chart.svg>
                     <flux:chart.line field="load" class="text-blue-500 dark:text-blue-400" />
                     <flux:chart.area field="load" class="text-blue-100 dark:text-blue-400/20" />
+                    <flux:chart.point field="load" class="text-blue-500 dark:text-blue-400" />
+                    <flux:chart.axis axis="x" field="week">
+                        <flux:chart.axis.tick />
+                        <flux:chart.axis.line />
+                    </flux:chart.axis>
+                    <flux:chart.axis axis="y">
+                        <flux:chart.axis.grid />
+                        <flux:chart.axis.tick />
+                    </flux:chart.axis>
+                    <flux:chart.cursor class="text-zinc-300 dark:text-zinc-600" />
                 </flux:chart.svg>
+                <flux:chart.tooltip>
+                    <flux:chart.tooltip.heading field="week" />
+                    <flux:chart.tooltip.value field="load" label="sRPE" />
+                    <flux:chart.tooltip.value field="sessions" label="Sessions" />
+                </flux:chart.tooltip>
             </flux:chart>
         @endif
 

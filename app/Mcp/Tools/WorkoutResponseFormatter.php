@@ -2,6 +2,8 @@
 
 namespace App\Mcp\Tools;
 
+use App\Domain\Workload\Calculators\DurationEstimator;
+use App\Domain\Workload\PlannedBlockMapper;
 use App\Models\Block;
 use App\Models\BlockExercise;
 use App\Models\CardioExercise;
@@ -20,21 +22,22 @@ class WorkoutResponseFormatter
     {
         $workout->loadMissing('sections.blocks.exercises.exerciseable');
 
-        $data = [
+        $estimatedDuration = (new DurationEstimator)->estimate(PlannedBlockMapper::fromWorkout($workout));
+
+        return [
             'id' => $workout->id,
             'name' => $workout->name,
             'activity' => $workout->activity->value,
             'scheduled_at' => $user->toUserTimezone($workout->scheduled_at)->toIso8601String(),
             'completed' => $workout->isCompleted(),
             'completed_at' => $workout->completed_at ? $user->toUserTimezone($workout->completed_at)->toIso8601String() : null,
+            'estimated_duration' => $estimatedDuration,
             'rpe' => $workout->rpe,
             'rpe_label' => Workout::getRpeLabel($workout->rpe),
             'feeling' => $workout->feeling,
             'notes' => $workout->notes,
             'sections' => $workout->sections->map(fn (Section $section): array => self::formatSection($section))->toArray(),
         ];
-
-        return $data;
     }
 
     /**

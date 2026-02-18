@@ -5,6 +5,7 @@ use App\Domain\Workload\Enums\Trend;
 use App\Enums\BodyPart;
 use App\Models\Block;
 use App\Models\BlockExercise;
+use App\Models\CardioExercise;
 use App\Models\Exercise;
 use App\Models\Injury;
 use App\Models\MuscleGroup;
@@ -20,15 +21,26 @@ beforeEach(function (): void {
     $this->now = CarbonImmutable::parse('2026-02-14 12:00:00');
 });
 
-function createCompletedWorkout(User $user, CarbonImmutable $completedAt, ?int $duration = null, int $rpe = 7): Workout
+function createCompletedWorkout(User $user, CarbonImmutable $completedAt, int $rpe = 7): Workout
 {
     return Workout::factory()->create([
         'user_id' => $user->id,
         'completed_at' => $completedAt,
         'scheduled_at' => $completedAt->subHour(),
-        'duration' => $duration,
         'rpe' => $rpe,
         'feeling' => 4,
+    ]);
+}
+
+function addCardioBlock(Workout $workout, int $targetDuration): void
+{
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->distanceDuration()->create(['section_id' => $section->id]);
+    $cardio = CardioExercise::factory()->create(['target_duration' => $targetDuration]);
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exerciseable_type' => $cardio->getMorphClass(),
+        'exerciseable_id' => $cardio->id,
     ]);
 }
 
@@ -57,11 +69,14 @@ function createLinkedStrengthExercise(
 
 // --- Session Load ---
 
-it('calculates session load from workouts with duration', function (): void {
-    // 45 min at RPE 7 → sRPE = 45 * 7 = 315
-    createCompletedWorkout($this->user, $this->now->subDays(2), duration: 2700, rpe: 7);
-    // 60 min at RPE 8 → sRPE = 60 * 8 = 480
-    createCompletedWorkout($this->user, $this->now->subDays(4), duration: 3600, rpe: 8);
+it('calculates session load from workouts with estimatable duration', function (): void {
+    // 45 min cardio block at RPE 7 → sRPE = 45 * 7 = 315
+    $w1 = createCompletedWorkout($this->user, $this->now->subDays(2), rpe: 7);
+    addCardioBlock($w1, targetDuration: 2700);
+
+    // 60 min cardio block at RPE 8 → sRPE = 60 * 8 = 480
+    $w2 = createCompletedWorkout($this->user, $this->now->subDays(4), rpe: 8);
+    addCardioBlock($w2, targetDuration: 3600);
 
     $result = $this->action->execute($this->user, $this->now);
 
@@ -70,8 +85,17 @@ it('calculates session load from workouts with duration', function (): void {
     expect($result->sessionLoad->currentSessionCount)->toBe(2);
 });
 
-it('skips workouts without duration in session load', function (): void {
-    createCompletedWorkout($this->user, $this->now->subDays(2), duration: null, rpe: 7);
+it('skips workouts without estimatable duration in session load', function (): void {
+    // Workout with only strength exercises (no target_duration) → not estimatable
+    $workout = createCompletedWorkout($this->user, $this->now->subDays(2), rpe: 7);
+    $section = Section::factory()->create(['workout_id' => $workout->id]);
+    $block = Block::factory()->create(['section_id' => $section->id]);
+    $strength = StrengthExercise::factory()->create();
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exerciseable_type' => $strength->getMorphClass(),
+        'exerciseable_id' => $strength->id,
+    ]);
 
     $result = $this->action->execute($this->user, $this->now);
 

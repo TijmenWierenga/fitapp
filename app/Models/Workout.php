@@ -41,7 +41,6 @@ class Workout extends Model
         'notes',
         'scheduled_at',
         'completed_at',
-        'duration',
         'rpe',
         'feeling',
     ];
@@ -50,7 +49,6 @@ class Workout extends Model
         'activity' => Activity::class,
         'scheduled_at' => 'datetime',
         'completed_at' => 'datetime',
-        'duration' => 'integer',
         'rpe' => 'integer',
         'feeling' => 'integer',
     ];
@@ -133,11 +131,10 @@ class Workout extends Model
         return $this->completed_at !== null;
     }
 
-    public function markAsCompleted(int $rpe, int $feeling, ?int $duration = null): void
+    public function markAsCompleted(int $rpe, int $feeling): void
     {
         $this->update([
             'completed_at' => now(),
-            'duration' => $duration,
             'rpe' => $rpe,
             'feeling' => $feeling,
         ]);

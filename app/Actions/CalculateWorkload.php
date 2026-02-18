@@ -3,9 +3,11 @@
 namespace App\Actions;
 
 use App\DataTransferObjects\Workload\WorkloadSummary;
+use App\Domain\Workload\Calculators\DurationEstimator;
 use App\Domain\Workload\Calculators\MuscleGroupVolumeCalculator;
 use App\Domain\Workload\Calculators\SessionLoadCalculator;
 use App\Domain\Workload\Calculators\StrengthProgressionCalculator;
+use App\Domain\Workload\PlannedBlockMapper;
 use App\Domain\Workload\ValueObjects\CompletedSession;
 use App\Domain\Workload\ValueObjects\DateRange;
 use App\Domain\Workload\ValueObjects\MuscleGroupMapping;
@@ -29,6 +31,7 @@ class CalculateWorkload
         private SessionLoadCalculator $sessionLoadCalculator,
         private MuscleGroupVolumeCalculator $muscleGroupVolumeCalculator,
         private StrengthProgressionCalculator $strengthProgressionCalculator,
+        private DurationEstimator $durationEstimator,
     ) {}
 
     public function execute(User $user, ?CarbonImmutable $asOf = null): WorkloadSummary
@@ -115,13 +118,19 @@ class CalculateWorkload
         $sessions = [];
 
         foreach ($workouts as $workout) {
-            if ($workout->duration === null || $workout->rpe === null) {
+            if ($workout->rpe === null) {
+                continue;
+            }
+
+            $duration = $this->durationEstimator->estimate(PlannedBlockMapper::fromWorkout($workout));
+
+            if ($duration === null) {
                 continue;
             }
 
             $sessions[] = new CompletedSession(
                 completedAt: new DateTimeImmutable($workout->completed_at->toDateTimeString()),
-                durationMinutes: (int) ceil($workout->duration / 60),
+                durationMinutes: (int) ceil($duration / 60),
                 rpe: $workout->rpe,
             );
         }

@@ -17,7 +17,7 @@ class SessionLoadOverview extends Component
     }
 
     /**
-     * @return array<int, array{week: string, load: int}>
+     * @return array<int, array{week: string, load: int, sessions: int}>
      */
     #[Computed]
     public function chartData(): array
@@ -27,10 +27,10 @@ class SessionLoadOverview extends Component
 
         if ($summary->sessionLoad !== null) {
             foreach (array_reverse($summary->sessionLoad->previousWeeks) as $week) {
-                $data[] = ['week' => "Week {$week->weekOffset}", 'load' => $week->totalLoad];
+                $data[] = ['week' => "Week {$week->weekOffset}", 'load' => $week->totalLoad, 'sessions' => $week->sessionCount];
             }
 
-            $data[] = ['week' => 'This week', 'load' => $summary->sessionLoad->currentWeeklyTotal];
+            $data[] = ['week' => 'This week', 'load' => $summary->sessionLoad->currentWeeklyTotal, 'sessions' => $summary->sessionLoad->currentSessionCount];
         }
 
         return $data;

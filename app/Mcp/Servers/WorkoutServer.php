@@ -2,7 +2,10 @@
 
 namespace App\Mcp\Servers;
 
-use App\Mcp\Prompts\CreateWorkoutPrompt;
+use App\Mcp\Prompts\AssessInjuryPrompt;
+use App\Mcp\Prompts\PlanTrainingProgramPrompt;
+use App\Mcp\Prompts\PlanWorkoutPrompt;
+use App\Mcp\Prompts\ReviewProgressPrompt;
 use App\Mcp\Resources\MuscleGroupsResource;
 use App\Mcp\Resources\UserFitnessProfileResource;
 use App\Mcp\Resources\UserInjuriesResource;
@@ -240,6 +243,9 @@ class WorkoutServer extends Server
      * @var array<int, class-string<\Laravel\Mcp\Server\Prompt>>
      */
     protected array $prompts = [
-        CreateWorkoutPrompt::class,
+        PlanWorkoutPrompt::class,
+        PlanTrainingProgramPrompt::class,
+        AssessInjuryPrompt::class,
+        ReviewProgressPrompt::class,
     ];
 }

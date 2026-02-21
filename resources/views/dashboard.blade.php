@@ -1,8 +1,10 @@
 <x-layouts.app :title="__('Dashboard')">
-    <div class="flex justify-end mb-4 sm:mb-0">
+    <div class="flex justify-end gap-2 mb-4 sm:mb-0">
+        <flux:button href="{{ route('coach') }}" variant="ghost" class="w-full sm:w-auto" icon="chat-bubble-left-right" wire:navigate>
+            {{ __('Chat with Coach') }}
+        </flux:button>
         <flux:button href="{{ route('workouts.create') }}" variant="primary" class="w-full sm:w-auto">
-            <span class="sm:inline">Create Workout</span>
-            <span class="hidden sm:inline"></span>
+            {{ __('Create Workout') }}
         </flux:button>
     </div>
 

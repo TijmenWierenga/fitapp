@@ -1,11 +1,9 @@
 <div class="flex flex-col h-full">
     {{-- Header --}}
-    <div class="p-3 space-y-3">
-        <flux:button href="{{ route('coach') }}" variant="primary" class="w-full" icon="plus" wire:navigate>
-            {{ __('New Chat') }}
-        </flux:button>
+    <div class="p-3 flex items-center gap-2">
+        <flux:input wire:model.live.debounce.300ms="search" placeholder="{{ __('Search conversations...') }}" icon="magnifying-glass" size="sm" class="flex-1" />
 
-        <flux:input wire:model.live.debounce.300ms="search" placeholder="{{ __('Search conversations...') }}" icon="magnifying-glass" size="sm" />
+        <flux:button href="{{ route('coach') }}" variant="primary" icon="plus" size="sm" square wire:navigate />
     </div>
 
     {{-- Conversation items --}}

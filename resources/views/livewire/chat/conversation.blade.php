@@ -1,11 +1,18 @@
 <div class="flex flex-col h-full">
     {{-- Top bar --}}
     <div class="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">
-        <div class="flex items-center gap-2">
-            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-lime-600">
-                <flux:icon.sparkles class="size-4 text-white" />
+        <div class="flex items-center gap-2.5">
+            <x-coach-avatar size="sm" />
+            <div>
+                <flux:heading size="sm">{{ __('Fitness Coach') }}</flux:heading>
+                <div class="flex items-center gap-1.5">
+                    <span class="relative flex size-2">
+                        <span class="absolute inline-flex size-full animate-ping rounded-full bg-lime-400 opacity-75"></span>
+                        <span class="relative inline-flex size-2 rounded-full bg-lime-500"></span>
+                    </span>
+                    <span class="text-xs text-lime-600 dark:text-lime-400">{{ __('Online') }}</span>
+                </div>
             </div>
-            <flux:heading size="sm">{{ __('Fitness Coach') }}</flux:heading>
         </div>
 
         @if ($this->remainingMessages <= 10)
@@ -27,18 +34,16 @@
             {{-- Empty state with suggestions --}}
             @if ($this->conversationMessages->isEmpty() && ! $isStreaming && ! $pendingMessage)
                 <div class="flex flex-col items-center justify-center py-12">
-                    <div class="flex items-center justify-center w-16 h-16 rounded-full bg-lime-600/10 mb-6">
-                        <flux:icon.sparkles class="size-8 text-lime-600" />
-                    </div>
-                    <flux:heading size="lg" class="mb-2">{{ __('Hi! I\'m your fitness coach.') }}</flux:heading>
-                    <flux:text class="mb-8 text-center max-w-md">{{ __('I can help you plan workouts, track progress, manage injuries, and reach your fitness goals.') }}</flux:text>
+                    <x-coach-avatar size="lg" class="mb-6" />
+                    <flux:heading size="lg" class="mb-2">{{ __('Ready to crush your goals?') }}</flux:heading>
+                    <flux:text class="mb-8 text-center max-w-md">{{ __('Start a conversation to plan your next workout, track progress, or get recovery advice.') }}</flux:text>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
                         <button wire:click="useSuggestion('Help me build a workout for today')" class="flex items-center gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 p-4 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
                             <flux:icon.fire class="size-5 text-orange-500 flex-none" />
                             <div>
                                 <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ __('Build a workout') }}</div>
-                                <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('Plan a session for today') }}</div>
+                                <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('Create a custom routine for today\'s session') }}</div>
                             </div>
                         </button>
 
@@ -46,7 +51,7 @@
                             <flux:icon.chart-bar class="size-5 text-blue-500 flex-none" />
                             <div>
                                 <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ __('Track my progress') }}</div>
-                                <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('Review your training week') }}</div>
+                                <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('Review PRs, streaks, and weekly stats') }}</div>
                             </div>
                         </button>
 
@@ -54,7 +59,7 @@
                             <flux:icon.heart class="size-5 text-red-500 flex-none" />
                             <div>
                                 <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ __('Recovery tips') }}</div>
-                                <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('Get recovery advice') }}</div>
+                                <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('Stretching, rest days, and injury prevention') }}</div>
                             </div>
                         </button>
 
@@ -62,7 +67,7 @@
                             <flux:icon.bolt class="size-5 text-yellow-500 flex-none" />
                             <div>
                                 <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ __('Check my workload') }}</div>
-                                <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('Review training load') }}</div>
+                                <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('Review your training load and readiness') }}</div>
                             </div>
                         </button>
                     </div>
@@ -80,9 +85,7 @@
                 @elseif ($msg->role === 'assistant' && $msg->content)
                     <div class="flex gap-3">
                         <div class="flex-none flex items-start">
-                            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-lime-600">
-                                <flux:icon.sparkles class="size-4 text-white" />
-                            </div>
+                            <x-coach-avatar size="sm" />
                         </div>
                         <div class="flex-1 min-w-0 space-y-2">
                             {{-- Stored tool calls --}}
@@ -161,9 +164,7 @@
             @if ($pendingMessage || $isStreaming || $streamedResponse)
                 <div class="flex gap-3">
                     <div class="flex-none flex items-start">
-                        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-lime-600">
-                            <flux:icon.sparkles class="size-4 text-white" />
-                        </div>
+                        <x-coach-avatar size="sm" />
                     </div>
                     <div
                         class="flex-1 min-w-0 space-y-2"

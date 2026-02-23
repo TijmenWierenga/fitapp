@@ -22,7 +22,7 @@ it('shows empty state suggestions when no conversation', function () {
 
     Livewire::actingAs($user)
         ->test(Conversation::class)
-        ->assertSee('I\'m your fitness coach')
+        ->assertSee('Ready to crush your goals?')
         ->assertSee('Build a workout')
         ->assertSee('Track my progress')
         ->assertSee('Recovery tips')

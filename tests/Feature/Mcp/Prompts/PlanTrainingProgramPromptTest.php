@@ -48,15 +48,17 @@ it('includes active injuries with program awareness', function (): void {
 
 it('shows existing workouts in program timeframe', function (): void {
     $user = User::factory()->withTimezone('UTC')->create();
+    $startDate = now()->next('Monday');
+
     Workout::factory()->for($user)->create([
         'name' => 'Existing Yoga',
-        'scheduled_at' => now()->next('Wednesday'),
+        'scheduled_at' => $startDate->copy()->next('Wednesday'),
     ]);
 
     $response = WorkoutServer::actingAs($user)->prompt(PlanTrainingProgramPrompt::class, [
         'program_type' => 'general fitness',
         'duration_weeks' => '2',
-        'start_date' => now()->next('Monday')->format('Y-m-d'),
+        'start_date' => $startDate->format('Y-m-d'),
     ]);
 
     $response->assertOk()

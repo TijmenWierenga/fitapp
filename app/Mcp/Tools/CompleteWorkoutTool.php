@@ -2,6 +2,8 @@
 
 namespace App\Mcp\Tools;
 
+use App\Tools\Handlers\CompleteWorkoutHandler;
+use App\Tools\Input\CompleteWorkoutInput;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -12,6 +14,10 @@ use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
 #[IsDestructive]
 class CompleteWorkoutTool extends Tool
 {
+    public function __construct(
+        private CompleteWorkoutHandler $handler,
+    ) {}
+
     /**
      * The tool's description.
      */
@@ -49,25 +55,14 @@ class CompleteWorkoutTool extends Tool
             'feeling.max' => 'Feeling must be between 1 and 5',
         ]);
 
-        $user = $request->user();
+        $result = $this->handler->execute(
+            $request->user(),
+            CompleteWorkoutInput::fromArray($validated),
+        );
 
-        $workout = $user->workouts()->find($validated['workout_id']);
-
-        if (! $workout) {
-            return Response::error('Workout not found or access denied.');
-        }
-
-        if ($user->cannot('complete', $workout)) {
-            return Response::error('Cannot complete an already completed workout.');
-        }
-
-        $workout->markAsCompleted($validated['rpe'], $validated['feeling']);
-
-        return Response::structured([
-            'success' => true,
-            'workout' => WorkoutResponseFormatter::format($workout->fresh(), $user),
-            'message' => 'Workout completed successfully',
-        ]);
+        return $result->failed()
+            ? Response::error($result->errorMessage())
+            : Response::structured($result->toArray());
     }
 
     /**
@@ -75,10 +70,6 @@ class CompleteWorkoutTool extends Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'workout_id' => $schema->integer()->description('The ID of the workout to complete'),
-            'rpe' => $schema->integer()->description('Rate of Perceived Exertion (1-10): 1-2=Very Easy, 3-4=Easy, 5-6=Moderate, 7-8=Hard, 9-10=Maximum'),
-            'feeling' => $schema->integer()->description('Post-workout feeling (1-5): 1=Terrible, 2=Poor, 3=Average, 4=Good, 5=Great'),
-        ];
+        return $this->handler->schema($schema);
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Mcp\Tools;
 
-use App\Models\Exercise;
+use App\Tools\Handlers\SearchExercisesHandler;
+use App\Tools\Input\SearchExercisesInput;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Database\Eloquent\Builder;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\ResponseFactory;
@@ -14,6 +14,10 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsReadOnly]
 class SearchExercisesTool extends Tool
 {
+    public function __construct(
+        private SearchExercisesHandler $handler,
+    ) {}
+
     /**
      * The tool's description.
      */
@@ -45,62 +49,13 @@ class SearchExercisesTool extends Tool
             'limit' => 'nullable|integer|min:1|max:50',
         ]);
 
-        $query = $validated['query'] ?? null;
-        $muscleGroup = $validated['muscle_group'] ?? null;
+        $result = $this->handler->execute(
+            SearchExercisesInput::fromArray($validated),
+        );
 
-        if ($query === null && $muscleGroup === null) {
-            return Response::error('At least one of `query` or `muscle_group` is required.');
-        }
-
-        $limit = $validated['limit'] ?? 20;
-
-        $garminCompatible = $validated['garmin_compatible'] ?? null;
-
-        $searchQuery = Exercise::search($query ?? '')
-            ->when(isset($validated['category']), fn ($search) => $search->where('category', $validated['category']))
-            ->when(isset($validated['equipment']), fn ($search) => $search->where('equipment', $validated['equipment']))
-            ->when(isset($validated['level']), fn ($search) => $search->where('level', $validated['level']))
-            ->query(fn (Builder $builder) => $builder
-                ->when($muscleGroup, fn (Builder $q) => $q->whereHas(
-                    'muscleGroups',
-                    fn (Builder $mg) => $mg->where('name', $muscleGroup),
-                ))
-                ->when($garminCompatible === true, fn (Builder $q) => $q->whereNotNull('garmin_exercise_category'))
-                ->when($garminCompatible === false, fn (Builder $q) => $q->whereNull('garmin_exercise_category'))
-                ->with('muscleGroups')
-            );
-
-        $exercises = $searchQuery->take($limit)->get();
-
-        $exerciseData = $exercises->map(fn (Exercise $exercise): array => [
-            'id' => $exercise->id,
-            'name' => $exercise->name,
-            'category' => $exercise->category,
-            'equipment' => $exercise->equipment,
-            'level' => $exercise->level,
-            'force' => $exercise->force,
-            'mechanic' => $exercise->mechanic,
-            'garmin_compatible' => $exercise->has_garmin_mapping,
-            'primary_muscles' => $exercise->muscleGroups
-                ->where('pivot.load_factor', 1.0)
-                ->map(fn ($mg): array => [
-                    'name' => $mg->name,
-                    'label' => $mg->label,
-                    'load_factor' => (float) $mg->pivot->load_factor,
-                ])->values()->toArray(),
-            'secondary_muscles' => $exercise->muscleGroups
-                ->where('pivot.load_factor', 0.5)
-                ->map(fn ($mg): array => [
-                    'name' => $mg->name,
-                    'label' => $mg->label,
-                    'load_factor' => (float) $mg->pivot->load_factor,
-                ])->values()->toArray(),
-        ]);
-
-        return Response::structured([
-            'count' => $exerciseData->count(),
-            'exercises' => $exerciseData->toArray(),
-        ]);
+        return $result->failed()
+            ? Response::error($result->errorMessage())
+            : Response::structured($result->toArray());
     }
 
     /**
@@ -108,21 +63,6 @@ class SearchExercisesTool extends Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'query' => $schema->string()->description('Text search on exercise name (e.g., "bench press", "squat")')->nullable(),
-            'muscle_group' => $schema->string()->enum([
-                'abdominals', 'abductors', 'adductors', 'biceps', 'calves', 'chest',
-                'forearms', 'glutes', 'hamstrings', 'lats', 'lower back', 'middle back',
-                'neck', 'quadriceps', 'shoulders', 'traps', 'triceps',
-            ])->description('Filter by muscle group name.')->nullable(),
-            'category' => $schema->string()->enum(['strength', 'stretching', 'plyometrics', 'cardio'])->description('Filter by category.')->nullable(),
-            'equipment' => $schema->string()->enum([
-                'bands', 'barbell', 'body only', 'cable', 'dumbbell', 'e-z curl bar',
-                'exercise ball', 'foam roll', 'kettlebells', 'machine', 'medicine ball', 'other',
-            ])->description('Filter by equipment type.')->nullable(),
-            'level' => $schema->string()->enum(['beginner', 'intermediate', 'expert'])->description('Filter by difficulty.')->nullable(),
-            'garmin_compatible' => $schema->boolean()->description('Filter by Garmin FIT exercise mapping availability. When true, only exercises that can be exported with Garmin exercise IDs are returned.')->nullable(),
-            'limit' => $schema->integer()->description('Maximum number of results to return (default: 20, max: 50)')->nullable(),
-        ];
+        return $this->handler->schema($schema);
     }
 }

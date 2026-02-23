@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mcp\Tools;
+namespace App\Tools;
 
 use App\Domain\Workload\Calculators\DurationEstimator;
 use App\Domain\Workload\PlannedBlockMapper;

@@ -2,10 +2,9 @@
 
 namespace App\Mcp\Tools;
 
-use App\Actions\CreateStructuredWorkout;
-use App\DataTransferObjects\Workout\SectionData;
-use App\Enums\Workout\Activity;
-use Carbon\CarbonImmutable;
+use App\Tools\Handlers\CreateWorkoutHandler;
+use App\Tools\Input\CreateWorkoutInput;
+use App\Tools\WorkoutSchemaBuilder;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
@@ -16,8 +15,7 @@ use Laravel\Mcp\Server\Tool;
 class CreateWorkoutTool extends Tool
 {
     public function __construct(
-        private WorkoutSchemaBuilder $schemaBuilder,
-        private CreateStructuredWorkout $createStructuredWorkout,
+        private CreateWorkoutHandler $handler,
     ) {}
 
     /**
@@ -42,7 +40,7 @@ class CreateWorkoutTool extends Tool
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'activity' => ['required', Rule::enum(Activity::class)],
+            'activity' => ['required', Rule::enum(\App\Enums\Workout\Activity::class)],
             'scheduled_at' => 'required|date',
             'notes' => 'nullable|string|max:5000',
             ...WorkoutSchemaBuilder::sectionValidationRules(),
@@ -54,26 +52,12 @@ class CreateWorkoutTool extends Tool
             'scheduled_at.date' => 'Please provide a valid date and time.',
         ]);
 
-        $user = $request->user();
-        $scheduledAt = CarbonImmutable::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
-
-        $sections = collect($validated['sections'])
-            ->map(fn (array $section): SectionData => SectionData::fromArray($section));
-
-        $workout = $this->createStructuredWorkout->execute(
-            user: $user,
-            name: $validated['name'],
-            activity: Activity::from($validated['activity']),
-            scheduledAt: $scheduledAt,
-            notes: $validated['notes'] ?? null,
-            sections: $sections,
+        $result = $this->handler->execute(
+            $request->user(),
+            CreateWorkoutInput::fromArray($validated),
         );
 
-        return Response::structured([
-            'success' => true,
-            'workout' => WorkoutResponseFormatter::format($workout, $user),
-            'message' => 'Workout created successfully',
-        ]);
+        return Response::structured($result->toArray());
     }
 
     /**
@@ -81,12 +65,6 @@ class CreateWorkoutTool extends Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'name' => $schema->string()->description('The name/title of the workout (e.g., "Morning Run", "Leg Day")'),
-            'activity' => $schema->string()->enum(Activity::class)->description('The activity type.'),
-            'scheduled_at' => $schema->string()->description('The date and time when the workout is scheduled (in user\'s timezone)'),
-            'notes' => $schema->string()->description('Optional Markdown notes for the workout.')->nullable(),
-            'sections' => $schema->array()->items($this->schemaBuilder->section())->description('Required structured workout sections with blocks and exercises.'),
-        ];
+        return $this->handler->schema($schema);
     }
 }

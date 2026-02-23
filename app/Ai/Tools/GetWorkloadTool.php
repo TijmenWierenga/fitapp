@@ -2,7 +2,7 @@
 
 namespace App\Ai\Tools;
 
-use App\Actions\CalculateWorkload;
+use App\Tools\Handlers\GetWorkloadHandler;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
@@ -10,7 +10,7 @@ use Laravel\Ai\Tools\Request;
 class GetWorkloadTool implements Tool
 {
     public function __construct(
-        private CalculateWorkload $calculateWorkload,
+        private GetWorkloadHandler $handler,
     ) {}
 
     public function description(): string
@@ -31,9 +31,8 @@ class GetWorkloadTool implements Tool
 
     public function handle(Request $request): string
     {
-        $user = auth()->user();
-        $summary = $this->calculateWorkload->execute($user);
+        $result = $this->handler->execute(auth()->user());
 
-        return json_encode($summary->toArray());
+        return json_encode($result->toArray());
     }
 }

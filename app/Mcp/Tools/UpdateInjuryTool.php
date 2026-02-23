@@ -2,9 +2,8 @@
 
 namespace App\Mcp\Tools;
 
-use App\Enums\BodyPart;
-use App\Enums\InjuryType;
-use Carbon\CarbonImmutable;
+use App\Tools\Handlers\UpdateInjuryHandler;
+use App\Tools\Input\UpdateInjuryInput;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
@@ -16,6 +15,10 @@ use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
 #[IsIdempotent]
 class UpdateInjuryTool extends Tool
 {
+    public function __construct(
+        private UpdateInjuryHandler $handler,
+    ) {}
+
     /**
      * The tool's description.
      */
@@ -45,8 +48,8 @@ class UpdateInjuryTool extends Tool
     {
         $validated = $request->validate([
             'injury_id' => 'required|integer',
-            'injury_type' => ['sometimes', Rule::enum(InjuryType::class)],
-            'body_part' => ['sometimes', Rule::enum(BodyPart::class)],
+            'injury_type' => ['sometimes', Rule::enum(\App\Enums\InjuryType::class)],
+            'body_part' => ['sometimes', Rule::enum(\App\Enums\BodyPart::class)],
             'started_at' => 'sometimes|date',
             'ended_at' => 'sometimes|nullable|date',
             'notes' => 'sometimes|nullable|string|max:5000',
@@ -55,64 +58,14 @@ class UpdateInjuryTool extends Tool
             'body_part.enum' => 'Invalid body part.',
         ]);
 
-        $user = $request->user();
+        $result = $this->handler->execute(
+            $request->user(),
+            UpdateInjuryInput::fromArray($validated),
+        );
 
-        $injury = $user->injuries()->find($validated['injury_id']);
-
-        if (! $injury) {
-            return Response::error('Injury not found or access denied.');
-        }
-
-        $updateData = [];
-
-        if (isset($validated['injury_type'])) {
-            $updateData['injury_type'] = InjuryType::from($validated['injury_type']);
-        }
-
-        if (isset($validated['body_part'])) {
-            $updateData['body_part'] = BodyPart::from($validated['body_part']);
-        }
-
-        if (isset($validated['started_at'])) {
-            $updateData['started_at'] = CarbonImmutable::parse($validated['started_at']);
-        }
-
-        if (array_key_exists('ended_at', $validated)) {
-            $updateData['ended_at'] = isset($validated['ended_at'])
-                ? CarbonImmutable::parse($validated['ended_at'])
-                : null;
-        }
-
-        if (array_key_exists('notes', $validated)) {
-            $updateData['notes'] = $validated['notes'];
-        }
-
-        // Cross-field date validation
-        $effectiveStartedAt = $updateData['started_at'] ?? $injury->started_at;
-        $effectiveEndedAt = array_key_exists('ended_at', $updateData) ? $updateData['ended_at'] : $injury->ended_at;
-
-        if ($effectiveEndedAt !== null && $effectiveEndedAt < $effectiveStartedAt) {
-            return Response::error('End date must be on or after the start date.');
-        }
-
-        $injury->update($updateData);
-
-        return Response::structured([
-            'success' => true,
-            'injury' => [
-                'id' => $injury->id,
-                'injury_type' => $injury->injury_type->value,
-                'injury_type_label' => $injury->injury_type->label(),
-                'body_part' => $injury->body_part->value,
-                'body_part_label' => $injury->body_part->label(),
-                'body_part_region' => $injury->body_part->region(),
-                'started_at' => $injury->started_at->toDateString(),
-                'ended_at' => $injury->ended_at?->toDateString(),
-                'is_active' => $injury->is_active,
-                'notes' => $injury->notes,
-            ],
-            'message' => 'Injury updated successfully',
-        ]);
+        return $result->failed()
+            ? Response::error($result->errorMessage())
+            : Response::structured($result->toArray());
     }
 
     /**
@@ -120,13 +73,6 @@ class UpdateInjuryTool extends Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'injury_id' => $schema->integer()->description('The ID of the injury to update'),
-            'injury_type' => $schema->string()->enum(InjuryType::class)->description('Type of injury.')->nullable(),
-            'body_part' => $schema->string()->enum(BodyPart::class)->description('Affected body part.')->nullable(),
-            'started_at' => $schema->string()->description('Date when the injury started (YYYY-MM-DD)')->nullable(),
-            'ended_at' => $schema->string()->description('Date when the injury was resolved (YYYY-MM-DD). Set to null to reopen.')->nullable(),
-            'notes' => $schema->string()->description('Notes about the injury. Set to null to clear.')->nullable(),
-        ];
+        return $this->handler->schema($schema);
     }
 }

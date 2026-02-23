@@ -2,7 +2,8 @@
 
 namespace App\Mcp\Tools;
 
-use App\Enums\FitnessGoal;
+use App\Tools\Handlers\UpdateFitnessProfileHandler;
+use App\Tools\Input\UpdateFitnessProfileInput;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
@@ -14,6 +15,10 @@ use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
 #[IsIdempotent]
 class UpdateFitnessProfileTool extends Tool
 {
+    public function __construct(
+        private UpdateFitnessProfileHandler $handler,
+    ) {}
+
     /**
      * The tool's description.
      */
@@ -34,7 +39,7 @@ class UpdateFitnessProfileTool extends Tool
     public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
-            'primary_goal' => ['required', Rule::enum(FitnessGoal::class)],
+            'primary_goal' => ['required', Rule::enum(\App\Enums\FitnessGoal::class)],
             'goal_details' => 'nullable|string|max:5000',
             'available_days_per_week' => 'required|integer|min:1|max:7',
             'minutes_per_session' => 'required|integer|min:15|max:180',
@@ -47,36 +52,12 @@ class UpdateFitnessProfileTool extends Tool
             'minutes_per_session.max' => 'Session duration cannot exceed 180 minutes.',
         ]);
 
-        $user = $request->user();
-
-        $profile = $user->fitnessProfile()->updateOrCreate(
-            [
-                'user_id' => $user->getKey(),
-            ],
-            [
-                'primary_goal' => FitnessGoal::from($validated['primary_goal']),
-                'goal_details' => $validated['goal_details'] ?? null,
-                'available_days_per_week' => $validated['available_days_per_week'],
-                'minutes_per_session' => $validated['minutes_per_session'],
-                ...array_key_exists('prefer_garmin_exercises', $validated)
-                    ? ['prefer_garmin_exercises' => $validated['prefer_garmin_exercises'] ?? false]
-                    : [],
-            ]
+        $result = $this->handler->execute(
+            $request->user(),
+            UpdateFitnessProfileInput::fromArray($validated),
         );
 
-        return Response::structured([
-            'success' => true,
-            'profile' => [
-                'id' => $profile->id,
-                'primary_goal' => $profile->primary_goal->value,
-                'primary_goal_label' => $profile->primary_goal->label(),
-                'goal_details' => $profile->goal_details,
-                'available_days_per_week' => $profile->available_days_per_week,
-                'minutes_per_session' => $profile->minutes_per_session,
-                'prefer_garmin_exercises' => $profile->prefer_garmin_exercises,
-            ],
-            'message' => 'Fitness profile updated successfully',
-        ]);
+        return Response::structured($result->toArray());
     }
 
     /**
@@ -84,12 +65,6 @@ class UpdateFitnessProfileTool extends Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'primary_goal' => $schema->string()->enum(FitnessGoal::class)->description('Primary fitness goal.'),
-            'goal_details' => $schema->string()->description('Optional detailed description of specific goals (e.g., "Run a sub-4hr marathon by October")')->nullable(),
-            'available_days_per_week' => $schema->integer()->description('Number of days available for training per week (1-7)'),
-            'minutes_per_session' => $schema->integer()->description('Typical workout session duration in minutes (15-180)'),
-            'prefer_garmin_exercises' => $schema->boolean()->description('When true, prefer exercises with Garmin FIT mapping for device compatibility. Use `garmin_compatible` filter in search-exercises tool.')->nullable(),
-        ];
+        return $this->handler->schema($schema);
     }
 }

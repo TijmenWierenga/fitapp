@@ -2,9 +2,8 @@
 
 namespace App\Mcp\Tools;
 
-use App\Enums\BodyPart;
-use App\Enums\InjuryType;
-use Carbon\CarbonImmutable;
+use App\Tools\Handlers\AddInjuryHandler;
+use App\Tools\Input\AddInjuryInput;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
@@ -14,6 +13,10 @@ use Laravel\Mcp\Server\Tool;
 
 class AddInjuryTool extends Tool
 {
+    public function __construct(
+        private AddInjuryHandler $handler,
+    ) {}
+
     /**
      * The tool's description.
      */
@@ -40,8 +43,8 @@ class AddInjuryTool extends Tool
     public function handle(Request $request): Response|ResponseFactory
     {
         $validated = $request->validate([
-            'injury_type' => ['required', Rule::enum(InjuryType::class)],
-            'body_part' => ['required', Rule::enum(BodyPart::class)],
+            'injury_type' => ['required', Rule::enum(\App\Enums\InjuryType::class)],
+            'body_part' => ['required', Rule::enum(\App\Enums\BodyPart::class)],
             'started_at' => 'required|date',
             'ended_at' => 'nullable|date|after_or_equal:started_at',
             'notes' => 'nullable|string|max:5000',
@@ -51,32 +54,12 @@ class AddInjuryTool extends Tool
             'ended_at.after_or_equal' => 'End date must be on or after the start date.',
         ]);
 
-        $user = $request->user();
+        $result = $this->handler->execute(
+            $request->user(),
+            AddInjuryInput::fromArray($validated),
+        );
 
-        $injury = $user->injuries()->create([
-            'injury_type' => InjuryType::from($validated['injury_type']),
-            'body_part' => BodyPart::from($validated['body_part']),
-            'started_at' => CarbonImmutable::parse($validated['started_at']),
-            'ended_at' => isset($validated['ended_at']) ? CarbonImmutable::parse($validated['ended_at']) : null,
-            'notes' => $validated['notes'] ?? null,
-        ]);
-
-        return Response::structured([
-            'success' => true,
-            'injury' => [
-                'id' => $injury->id,
-                'injury_type' => $injury->injury_type->value,
-                'injury_type_label' => $injury->injury_type->label(),
-                'body_part' => $injury->body_part->value,
-                'body_part_label' => $injury->body_part->label(),
-                'body_part_region' => $injury->body_part->region(),
-                'started_at' => $injury->started_at->toDateString(),
-                'ended_at' => $injury->ended_at?->toDateString(),
-                'is_active' => $injury->is_active,
-                'notes' => $injury->notes,
-            ],
-            'message' => 'Injury added successfully',
-        ]);
+        return Response::structured($result->toArray());
     }
 
     /**
@@ -84,12 +67,6 @@ class AddInjuryTool extends Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'injury_type' => $schema->string()->enum(InjuryType::class)->description('Type of injury.'),
-            'body_part' => $schema->string()->enum(BodyPart::class)->description('Affected body part.'),
-            'started_at' => $schema->string()->description('Date when the injury started (YYYY-MM-DD)'),
-            'ended_at' => $schema->string()->description('Date when the injury was resolved (YYYY-MM-DD). Leave null if ongoing.')->nullable(),
-            'notes' => $schema->string()->description('Optional notes about the injury')->nullable(),
-        ];
+        return $this->handler->schema($schema);
     }
 }

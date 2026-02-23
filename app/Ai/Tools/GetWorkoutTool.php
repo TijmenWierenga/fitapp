@@ -2,13 +2,18 @@
 
 namespace App\Ai\Tools;
 
-use App\Mcp\Tools\WorkoutResponseFormatter;
+use App\Tools\Handlers\GetWorkoutHandler;
+use App\Tools\Input\GetWorkoutInput;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
 class GetWorkoutTool implements Tool
 {
+    public function __construct(
+        private GetWorkoutHandler $handler,
+    ) {}
+
     public function description(): string
     {
         return 'Fetch a single workout by ID. Returns full workout details including sections, blocks, exercises, RPE and feeling if completed.';
@@ -16,23 +21,16 @@ class GetWorkoutTool implements Tool
 
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'workout_id' => $schema->integer()->description('The ID of the workout to fetch'),
-        ];
+        return $this->handler->schema($schema);
     }
 
     public function handle(Request $request): string
     {
-        $user = auth()->user();
-        $workout = $user->workouts()->find($request['workout_id']);
+        $result = $this->handler->execute(
+            auth()->user(),
+            GetWorkoutInput::fromArray($request->toArray()),
+        );
 
-        if (! $workout) {
-            return json_encode(['error' => 'Workout not found or access denied.']);
-        }
-
-        return json_encode([
-            'success' => true,
-            'workout' => WorkoutResponseFormatter::format($workout, $user),
-        ]);
+        return json_encode($result->toArray());
     }
 }

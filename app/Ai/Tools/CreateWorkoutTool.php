@@ -2,12 +2,8 @@
 
 namespace App\Ai\Tools;
 
-use App\Actions\CreateStructuredWorkout;
-use App\DataTransferObjects\Workout\SectionData;
-use App\Enums\Workout\Activity;
-use App\Mcp\Tools\WorkoutResponseFormatter;
-use App\Mcp\Tools\WorkoutSchemaBuilder;
-use Carbon\CarbonImmutable;
+use App\Tools\Handlers\CreateWorkoutHandler;
+use App\Tools\Input\CreateWorkoutInput;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
@@ -15,8 +11,7 @@ use Laravel\Ai\Tools\Request;
 class CreateWorkoutTool implements Tool
 {
     public function __construct(
-        private WorkoutSchemaBuilder $schemaBuilder,
-        private CreateStructuredWorkout $createStructuredWorkout,
+        private CreateWorkoutHandler $handler,
     ) {}
 
     public function description(): string
@@ -34,36 +29,16 @@ class CreateWorkoutTool implements Tool
 
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'name' => $schema->string()->description('The name/title of the workout'),
-            'activity' => $schema->string()->enum(Activity::class)->description('The activity type.'),
-            'scheduled_at' => $schema->string()->description('The date and time when the workout is scheduled (in user\'s timezone)'),
-            'notes' => $schema->string()->description('Optional Markdown notes for the workout.')->nullable(),
-            'sections' => $schema->array()->items($this->schemaBuilder->section())->description('Required structured workout sections with blocks and exercises.'),
-        ];
+        return $this->handler->schema($schema);
     }
 
     public function handle(Request $request): string
     {
-        $user = auth()->user();
-        $scheduledAt = CarbonImmutable::parse($request['scheduled_at'], $user->getTimezoneObject())->utc();
-
-        $sections = collect($request['sections'])
-            ->map(fn (array $section): SectionData => SectionData::fromArray($section));
-
-        $workout = $this->createStructuredWorkout->execute(
-            user: $user,
-            name: $request['name'],
-            activity: Activity::from($request['activity']),
-            scheduledAt: $scheduledAt,
-            notes: $request['notes'] ?? null,
-            sections: $sections,
+        $result = $this->handler->execute(
+            auth()->user(),
+            CreateWorkoutInput::fromArray($request->toArray()),
         );
 
-        return json_encode([
-            'success' => true,
-            'workout' => WorkoutResponseFormatter::format($workout, $user),
-            'message' => 'Workout created successfully',
-        ]);
+        return json_encode($result->toArray());
     }
 }

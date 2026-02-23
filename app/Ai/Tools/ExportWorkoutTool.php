@@ -2,16 +2,16 @@
 
 namespace App\Ai\Tools;
 
-use App\Actions\ExportWorkoutFit;
+use App\Tools\Handlers\ExportWorkoutHandler;
+use App\Tools\Input\ExportWorkoutInput;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Support\Str;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
 class ExportWorkoutTool implements Tool
 {
     public function __construct(
-        private ExportWorkoutFit $export,
+        private ExportWorkoutHandler $handler,
     ) {}
 
     public function description(): string
@@ -21,30 +21,16 @@ class ExportWorkoutTool implements Tool
 
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'workout_id' => $schema->integer()->description('The ID of the workout to export as a FIT file'),
-        ];
+        return $this->handler->schema($schema);
     }
 
     public function handle(Request $request): string
     {
-        $user = auth()->user();
-        $workout = $user->workouts()->find($request['workout_id']);
+        $result = $this->handler->execute(
+            auth()->user(),
+            ExportWorkoutInput::fromArray($request->toArray()),
+        );
 
-        if (! $workout) {
-            return json_encode(['error' => 'Workout not found or access denied.']);
-        }
-
-        $fitData = $this->export->execute($workout);
-
-        $date = $workout->scheduled_at?->format('Y-m-d') ?? now()->format('Y-m-d');
-        $slug = Str::slug($workout->name);
-
-        return json_encode([
-            'success' => true,
-            'filename' => "{$date}-{$slug}.fit",
-            'data' => base64_encode($fitData),
-            'content_type' => 'application/octet-stream',
-        ]);
+        return json_encode($result->toArray());
     }
 }

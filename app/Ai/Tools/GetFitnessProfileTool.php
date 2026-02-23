@@ -2,12 +2,17 @@
 
 namespace App\Ai\Tools;
 
+use App\Tools\Handlers\GetFitnessProfileHandler;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
 class GetFitnessProfileTool implements Tool
 {
+    public function __construct(
+        private GetFitnessProfileHandler $handler,
+    ) {}
+
     public function description(): string
     {
         return 'Get the user\'s fitness profile including primary goal, goal details, available training days, and session duration preferences.';
@@ -20,20 +25,8 @@ class GetFitnessProfileTool implements Tool
 
     public function handle(Request $request): string
     {
-        $user = auth()->user();
-        $profile = $user->fitnessProfile;
+        $result = $this->handler->execute(auth()->user());
 
-        if (! $profile) {
-            return json_encode(['message' => 'No fitness profile configured yet. Ask the user about their goals and preferences.']);
-        }
-
-        return json_encode([
-            'primary_goal' => $profile->primary_goal->value,
-            'primary_goal_label' => $profile->primary_goal->label(),
-            'goal_details' => $profile->goal_details,
-            'available_days_per_week' => $profile->available_days_per_week,
-            'minutes_per_session' => $profile->minutes_per_session,
-            'prefer_garmin_exercises' => $profile->prefer_garmin_exercises,
-        ]);
+        return json_encode($result->toArray());
     }
 }

@@ -2,6 +2,9 @@
 
 namespace App\Mcp\Tools;
 
+use App\Tools\Handlers\GetWorkoutHandler;
+use App\Tools\Input\GetWorkoutInput;
+use App\Tools\WorkoutSchemaBuilder;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -12,6 +15,11 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsReadOnly]
 class GetWorkoutTool extends Tool
 {
+    public function __construct(
+        private GetWorkoutHandler $handler,
+        private WorkoutSchemaBuilder $schemaBuilder,
+    ) {}
+
     /**
      * The tool's description.
      */
@@ -28,31 +36,21 @@ class GetWorkoutTool extends Tool
             'workout_id' => 'required|integer',
         ]);
 
-        $user = $request->user();
+        $result = $this->handler->execute(
+            $request->user(),
+            GetWorkoutInput::fromArray($validated),
+        );
 
-        $workout = $user->workouts()->find($validated['workout_id']);
-
-        if (! $workout) {
-            return Response::error('Workout not found or access denied.');
-        }
-
-        return Response::structured([
-            'success' => true,
-            'workout' => WorkoutResponseFormatter::format($workout, $user),
-        ]);
+        return $result->failed()
+            ? Response::error($result->errorMessage())
+            : Response::structured($result->toArray());
     }
-
-    public function __construct(
-        private WorkoutSchemaBuilder $schemaBuilder,
-    ) {}
 
     /**
      * Get the tool's input schema.
      */
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'workout_id' => $schema->integer()->description('The ID of the workout to fetch'),
-        ];
+        return $this->handler->schema($schema);
     }
 }

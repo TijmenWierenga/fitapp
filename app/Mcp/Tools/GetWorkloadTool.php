@@ -2,7 +2,7 @@
 
 namespace App\Mcp\Tools;
 
-use App\Actions\CalculateWorkload;
+use App\Tools\Handlers\GetWorkloadHandler;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\ResponseFactory;
@@ -13,7 +13,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 class GetWorkloadTool extends Tool
 {
     public function __construct(
-        private CalculateWorkload $calculateWorkload,
+        private GetWorkloadHandler $handler,
     ) {}
 
     /**
@@ -49,9 +49,8 @@ class GetWorkloadTool extends Tool
      */
     public function handle(Request $request): Response|ResponseFactory
     {
-        $user = $request->user();
-        $summary = $this->calculateWorkload->execute($user);
+        $result = $this->handler->execute($request->user());
 
-        return Response::structured($summary->toArray());
+        return Response::structured($result->toArray());
     }
 }

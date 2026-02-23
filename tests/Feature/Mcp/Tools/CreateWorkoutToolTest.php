@@ -14,6 +14,26 @@ it('creates a workout successfully', function () {
         'activity' => 'run',
         'scheduled_at' => '2026-01-26 07:00:00',
         'notes' => 'Easy pace',
+        'sections' => [
+            [
+                'name' => 'Main',
+                'order' => 0,
+                'blocks' => [
+                    [
+                        'block_type' => 'distance_duration',
+                        'order' => 0,
+                        'exercises' => [
+                            [
+                                'name' => 'Easy Run',
+                                'order' => 0,
+                                'type' => 'cardio',
+                                'target_duration' => 1800,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ]);
 
     $response->assertOk()
@@ -36,6 +56,27 @@ it('creates a workout without notes', function () {
         'name' => 'Strength Training',
         'activity' => 'strength',
         'scheduled_at' => '2026-01-27 18:00:00',
+        'sections' => [
+            [
+                'name' => 'Main',
+                'order' => 0,
+                'blocks' => [
+                    [
+                        'block_type' => 'straight_sets',
+                        'order' => 0,
+                        'exercises' => [
+                            [
+                                'name' => 'Bench Press',
+                                'order' => 0,
+                                'type' => 'strength',
+                                'target_sets' => 3,
+                                'target_reps_max' => 10,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ]);
 
     $response->assertOk()
@@ -55,6 +96,27 @@ it('converts user timezone to UTC for storage', function () {
         'name' => 'Evening HIIT',
         'activity' => 'hiit',
         'scheduled_at' => '2026-01-26 19:00:00',
+        'sections' => [
+            [
+                'name' => 'Main',
+                'order' => 0,
+                'blocks' => [
+                    [
+                        'block_type' => 'circuit',
+                        'order' => 0,
+                        'rounds' => 3,
+                        'exercises' => [
+                            [
+                                'name' => 'Burpees',
+                                'order' => 0,
+                                'type' => 'strength',
+                                'target_reps_max' => 10,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ]);
 
     $response->assertOk();
@@ -110,6 +172,26 @@ it('trims empty notes to null', function () {
         'activity' => 'run',
         'scheduled_at' => '2026-01-26 07:00:00',
         'notes' => '   ',
+        'sections' => [
+            [
+                'name' => 'Main',
+                'order' => 0,
+                'blocks' => [
+                    [
+                        'block_type' => 'distance_duration',
+                        'order' => 0,
+                        'exercises' => [
+                            [
+                                'name' => 'Easy Run',
+                                'order' => 0,
+                                'type' => 'cardio',
+                                'target_duration' => 1200,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ]);
 
     $response->assertOk();
@@ -412,4 +494,77 @@ it('allows target_duration on a duration exercise', function () {
 
     $response->assertOk();
     assertDatabaseHas('duration_exercises', ['target_duration' => 60]);
+});
+
+it('fails when sections are missing', function () {
+    $user = User::factory()->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
+        'name' => 'Empty Workout',
+        'activity' => 'run',
+        'scheduled_at' => '2026-02-10 08:00:00',
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('sections');
+});
+
+it('fails when sections array is empty', function () {
+    $user = User::factory()->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
+        'name' => 'Empty Workout',
+        'activity' => 'run',
+        'scheduled_at' => '2026-02-10 08:00:00',
+        'sections' => [],
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('sections');
+});
+
+it('fails when a section has no blocks', function () {
+    $user = User::factory()->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
+        'name' => 'No Blocks',
+        'activity' => 'run',
+        'scheduled_at' => '2026-02-10 08:00:00',
+        'sections' => [
+            [
+                'name' => 'Main',
+                'order' => 0,
+                'blocks' => [],
+            ],
+        ],
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('blocks');
+});
+
+it('fails when a block has no exercises', function () {
+    $user = User::factory()->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CreateWorkoutTool::class, [
+        'name' => 'No Exercises',
+        'activity' => 'run',
+        'scheduled_at' => '2026-02-10 08:00:00',
+        'sections' => [
+            [
+                'name' => 'Main',
+                'order' => 0,
+                'blocks' => [
+                    [
+                        'block_type' => 'straight_sets',
+                        'order' => 0,
+                        'exercises' => [],
+                    ],
+                ],
+            ],
+        ],
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('exercises');
 });

@@ -7,7 +7,6 @@ use App\DataTransferObjects\Workout\SectionData;
 use App\Enums\Workout\Activity;
 use App\Mcp\Tools\WorkoutResponseFormatter;
 use App\Mcp\Tools\WorkoutSchemaBuilder;
-use App\Models\Workout;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
@@ -23,11 +22,13 @@ class CreateWorkoutTool implements Tool
     public function description(): string
     {
         return <<<'TEXT'
-        Create a new workout with a scheduled date and time. Optionally include structured sections with blocks and exercises.
+        Create a new workout with a scheduled date and time. You MUST include structured sections with blocks and exercises — every workout needs at least one section, each section needs at least one block, and each block needs at least one exercise.
 
         Activity types include: run, strength, cardio, hiit, bike, pool_swim, hike, yoga, and many more Garmin-compatible activities.
 
-        Dates/times should be in the user's local timezone. You can optionally provide a `sections` array to create a fully structured workout with warm-up, main work, and cool-down sections.
+        Dates/times should be in the user's local timezone. The `sections` array defines the workout structure with warm-up, main work, and cool-down sections.
+
+        IMPORTANT: Before creating a workout, use `SearchExercisesTool` to find exercises in the catalog and include their `exercise_id` in each block exercise. This links exercises to the catalog for muscle group tracking and Garmin compatibility.
         TEXT;
     }
 
@@ -38,7 +39,7 @@ class CreateWorkoutTool implements Tool
             'activity' => $schema->string()->enum(Activity::class)->description('The activity type.'),
             'scheduled_at' => $schema->string()->description('The date and time when the workout is scheduled (in user\'s timezone)'),
             'notes' => $schema->string()->description('Optional Markdown notes for the workout.')->nullable(),
-            'sections' => $schema->array()->items($this->schemaBuilder->section())->description('Optional structured workout sections with blocks and exercises.')->nullable(),
+            'sections' => $schema->array()->items($this->schemaBuilder->section())->description('Required structured workout sections with blocks and exercises.'),
         ];
     }
 
@@ -47,27 +48,17 @@ class CreateWorkoutTool implements Tool
         $user = auth()->user();
         $scheduledAt = CarbonImmutable::parse($request['scheduled_at'], $user->getTimezoneObject())->utc();
 
-        if (! empty($request['sections'])) {
-            $sections = collect($request['sections'])
-                ->map(fn (array $section): SectionData => SectionData::fromArray($section));
+        $sections = collect($request['sections'])
+            ->map(fn (array $section): SectionData => SectionData::fromArray($section));
 
-            $workout = $this->createStructuredWorkout->execute(
-                user: $user,
-                name: $request['name'],
-                activity: Activity::from($request['activity']),
-                scheduledAt: $scheduledAt,
-                notes: $request['notes'] ?? null,
-                sections: $sections,
-            );
-        } else {
-            $workout = Workout::create([
-                'user_id' => $user->getKey(),
-                'name' => $request['name'],
-                'activity' => Activity::from($request['activity']),
-                'scheduled_at' => $scheduledAt,
-                'notes' => $request['notes'] ?? null,
-            ]);
-        }
+        $workout = $this->createStructuredWorkout->execute(
+            user: $user,
+            name: $request['name'],
+            activity: Activity::from($request['activity']),
+            scheduledAt: $scheduledAt,
+            notes: $request['notes'] ?? null,
+            sections: $sections,
+        );
 
         return json_encode([
             'success' => true,

@@ -19,7 +19,7 @@ it('registers all 15 tools', function () {
     $agent = FitnessCoach::make();
     $tools = $agent->tools();
 
-    expect($tools)->toHaveCount(15);
+    expect($tools)->toHaveCount(16);
 
     $toolClasses = array_map(fn (object $tool): string => $tool::class, $tools);
 

@@ -4,8 +4,6 @@ use App\Ai\Agents\FitnessCoach;
 use App\Ai\Tools\CreateWorkoutTool;
 use App\Ai\Tools\GetWorkloadTool;
 use App\Ai\Tools\SearchExercisesTool;
-use App\Models\FitnessProfile;
-use App\Models\User;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -29,27 +27,13 @@ it('registers all 15 tools', function () {
         ->toContain(GetWorkloadTool::class);
 });
 
-it('includes user context in instructions when authenticated', function () {
-    $user = User::factory()->withTimezone('UTC')->create();
-    FitnessProfile::factory()->muscleGain()->for($user)->create();
-
-    $this->actingAs($user);
-
+it('provides static instructions without dynamic user context', function () {
     $agent = FitnessCoach::make();
     $instructions = $agent->instructions();
 
     expect($instructions)
         ->toContain('fitness coach')
-        ->toContain('Current User Context')
-        ->toContain('Muscle Gain');
-});
-
-it('provides base instructions without user when not authenticated', function () {
-    $agent = FitnessCoach::make();
-    $instructions = $agent->instructions();
-
-    expect($instructions)
-        ->toContain('fitness coach')
+        ->toContain('Core Behaviors')
         ->not->toContain('Current User Context');
 });
 

@@ -2,7 +2,6 @@
 
 namespace App\Ai\Agents;
 
-use App\Actions\BuildCoachContext;
 use App\Ai\Tools\AddInjuryTool;
 use App\Ai\Tools\CompleteWorkoutTool;
 use App\Ai\Tools\CreateWorkoutTool;
@@ -38,13 +37,9 @@ class FitnessCoach implements Agent, Conversational, HasTools
 {
     use Promptable, RemembersConversations;
 
-    public function __construct(
-        private BuildCoachContext $buildCoachContext,
-    ) {}
-
     public function instructions(): string
     {
-        $baseInstructions = <<<'INSTRUCTIONS'
+        return <<<'INSTRUCTIONS'
         You are a friendly, knowledgeable fitness coach. Your role is to help users plan workouts, track their training, manage injuries, and reach their fitness goals.
 
         ## Personality
@@ -70,16 +65,6 @@ class FitnessCoach implements Agent, Conversational, HasTools
         - Keep workouts within the user's preferred session duration
         - Search for exercises to find appropriate movements with proper muscle targeting
         INSTRUCTIONS;
-
-        $user = auth()->user();
-
-        if (! $user) {
-            return $baseInstructions;
-        }
-
-        $context = $this->buildCoachContext->execute($user);
-
-        return "{$baseInstructions}\n\n---\n\n# Current User Context\n\n{$context}";
     }
 
     public function tools(): array

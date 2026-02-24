@@ -3,6 +3,7 @@
 namespace App\Mcp\Tools;
 
 use App\Mcp\Resources\WorkoutScheduleResource;
+use App\Tools\Handlers\GetWorkoutScheduleHandler;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -14,6 +15,7 @@ class GetWorkoutScheduleTool extends Tool
 {
     public function __construct(
         private WorkoutScheduleResource $resource,
+        private GetWorkoutScheduleHandler $handler,
     ) {}
 
     /**
@@ -30,10 +32,7 @@ class GetWorkoutScheduleTool extends Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'upcoming_limit' => $schema->integer()->description('Number of upcoming workouts to return (default: 20, max: 50)'),
-            'completed_limit' => $schema->integer()->description('Number of completed workouts to return (default: 10, max: 50)'),
-        ];
+        return $this->handler->schema($schema);
     }
 
     /**

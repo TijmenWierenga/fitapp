@@ -19,7 +19,7 @@ it('completes workout successfully', function () {
 
     $response->assertOk()
         ->assertSee('Workout completed successfully')
-        ->assertSee('Hard');
+        ->assertSee('"rpe": 7');
 
     assertDatabaseHas('workouts', [
         'id' => $workout->id,
@@ -31,7 +31,7 @@ it('completes workout successfully', function () {
     expect($workout->isCompleted())->toBeTrue();
 });
 
-it('includes rpe label in response', function () {
+it('includes rpe in response', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create();
 
@@ -42,7 +42,7 @@ it('includes rpe label in response', function () {
     ]);
 
     $response->assertOk()
-        ->assertSee('Very Easy');
+        ->assertSee('"rpe": 2');
 });
 
 it('fails to complete already completed workout', function () {

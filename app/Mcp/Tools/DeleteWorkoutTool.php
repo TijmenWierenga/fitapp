@@ -2,6 +2,8 @@
 
 namespace App\Mcp\Tools;
 
+use App\Tools\Handlers\DeleteWorkoutHandler;
+use App\Tools\Input\DeleteWorkoutInput;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -12,6 +14,10 @@ use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
 #[IsDestructive]
 class DeleteWorkoutTool extends Tool
 {
+    public function __construct(
+        private DeleteWorkoutHandler $handler,
+    ) {}
+
     /**
      * The tool's description.
      */
@@ -28,24 +34,14 @@ class DeleteWorkoutTool extends Tool
             'workout_id' => 'required|integer',
         ]);
 
-        $user = $request->user();
+        $result = $this->handler->execute(
+            $request->user(),
+            DeleteWorkoutInput::fromArray($validated),
+        );
 
-        $workout = $user->workouts()->find($validated['workout_id']);
-
-        if (! $workout) {
-            return Response::error('Workout not found or access denied.');
-        }
-
-        if ($user->cannot('delete', $workout)) {
-            return Response::error('You do not have permission to delete this workout.');
-        }
-
-        $workout->delete();
-
-        return Response::structured([
-            'success' => true,
-            'message' => 'Workout deleted successfully',
-        ]);
+        return $result->failed()
+            ? Response::error($result->errorMessage())
+            : Response::structured($result->toArray());
     }
 
     /**
@@ -53,8 +49,6 @@ class DeleteWorkoutTool extends Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'workout_id' => $schema->integer()->description('The ID of the workout to delete'),
-        ];
+        return $this->handler->schema($schema);
     }
 }

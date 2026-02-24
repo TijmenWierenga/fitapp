@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Body -->
+  <circle cx="100" cy="110" r="72" fill="#65A30D"/>
+  <circle cx="100" cy="110" r="72" fill="url(#bodyGrad)"/>
+
+  <!-- Belly highlight -->
+  <ellipse cx="100" cy="125" rx="45" ry="40" fill="#84CC16" opacity="0.5"/>
+
+  <!-- Left eye white -->
+  <ellipse cx="76" cy="92" rx="20" ry="22" fill="white"/>
+  <!-- Right eye white -->
+  <ellipse cx="124" cy="92" rx="20" ry="22" fill="white"/>
+
+  <!-- Left pupil -->
+  <circle cx="80" cy="92" r="10" fill="#1a1a2e"/>
+  <!-- Right pupil -->
+  <circle cx="128" cy="92" r="10" fill="#1a1a2e"/>
+
+  <!-- Left eye shine -->
+  <circle cx="84" cy="87" r="4" fill="white"/>
+  <!-- Right eye shine -->
+  <circle cx="132" cy="87" r="4" fill="white"/>
+
+  <!-- Smile -->
+  <path d="M78 118 Q100 140 122 118" stroke="#3d6b0a" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+
+  <!-- Left cheek blush -->
+  <ellipse cx="64" cy="115" rx="10" ry="6" fill="#F87171" opacity="0.25"/>
+  <!-- Right cheek blush -->
+  <ellipse cx="136" cy="115" rx="10" ry="6" fill="#F87171" opacity="0.25"/>
+
+  <!-- Left arm -->
+  <path d="M38 130 Q20 115 28 95" stroke="#65A30D" stroke-width="12" stroke-linecap="round" fill="none"/>
+  <!-- Left hand wave -->
+  <circle cx="26" cy="93" r="8" fill="#65A30D"/>
+
+  <!-- Right arm -->
+  <path d="M162 130 Q175 140 170 155" stroke="#65A30D" stroke-width="12" stroke-linecap="round" fill="none"/>
+  <circle cx="170" cy="157" r="8" fill="#65A30D"/>
+
+  <!-- Left foot -->
+  <ellipse cx="78" cy="178" rx="16" ry="10" fill="#4d7c0f"/>
+  <!-- Right foot -->
+  <ellipse cx="122" cy="178" rx="16" ry="10" fill="#4d7c0f"/>
+
+  <!-- Headband -->
+  <path d="M40 78 Q100 58 160 78" stroke="#F97316" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <!-- Headband knot -->
+  <circle cx="160" cy="78" r="6" fill="#F97316"/>
+  <path d="M163 74 Q175 65 172 78" stroke="#F97316" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M163 82 Q175 90 170 80" stroke="#F97316" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+  <defs>
+    <radialGradient id="bodyGrad" cx="0.4" cy="0.35" r="0.65">
+      <stop offset="0%" stop-color="#84CC16" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#65A30D" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>

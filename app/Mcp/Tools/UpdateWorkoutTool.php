@@ -2,10 +2,9 @@
 
 namespace App\Mcp\Tools;
 
-use App\Actions\UpdateStructuredWorkout;
-use App\DataTransferObjects\Workout\SectionData;
-use App\Enums\Workout\Activity;
-use Carbon\CarbonImmutable;
+use App\Tools\Handlers\UpdateWorkoutHandler;
+use App\Tools\Input\UpdateWorkoutInput;
+use App\Tools\WorkoutSchemaBuilder;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
@@ -18,8 +17,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
 class UpdateWorkoutTool extends Tool
 {
     public function __construct(
-        private WorkoutSchemaBuilder $schemaBuilder,
-        private UpdateStructuredWorkout $updateStructuredWorkout,
+        private UpdateWorkoutHandler $handler,
     ) {}
 
     /**
@@ -41,7 +39,7 @@ class UpdateWorkoutTool extends Tool
         $validated = $request->validate([
             'workout_id' => 'required|integer',
             'name' => 'sometimes|string|max:255',
-            'activity' => ['sometimes', Rule::enum(Activity::class)],
+            'activity' => ['sometimes', Rule::enum(\App\Enums\Workout\Activity::class)],
             'scheduled_at' => 'sometimes|date',
             'notes' => 'nullable|string|max:5000',
             ...WorkoutSchemaBuilder::sectionValidationRules(),
@@ -50,50 +48,14 @@ class UpdateWorkoutTool extends Tool
             'scheduled_at.date' => 'Please provide a valid date and time.',
         ]);
 
-        $user = $request->user();
+        $result = $this->handler->execute(
+            $request->user(),
+            UpdateWorkoutInput::fromArray($validated),
+        );
 
-        $workout = $user->workouts()->find($validated['workout_id']);
-
-        if (! $workout) {
-            return Response::error('Workout not found or access denied.');
-        }
-
-        if ($user->cannot('update', $workout)) {
-            return Response::error('You do not have permission to update this workout.');
-        }
-
-        $updateData = [];
-
-        if (isset($validated['name'])) {
-            $updateData['name'] = $validated['name'];
-        }
-
-        if (isset($validated['activity'])) {
-            $updateData['activity'] = Activity::from($validated['activity']);
-        }
-
-        if (isset($validated['scheduled_at'])) {
-            $updateData['scheduled_at'] = CarbonImmutable::parse($validated['scheduled_at'], $user->getTimezoneObject())->utc();
-        }
-
-        if (array_key_exists('notes', $validated)) {
-            $updateData['notes'] = $validated['notes'];
-        }
-
-        $workout->update($updateData);
-
-        if (isset($validated['sections'])) {
-            $sections = collect($validated['sections'])
-                ->map(fn (array $section): SectionData => SectionData::fromArray($section));
-
-            $this->updateStructuredWorkout->execute($workout, $sections);
-        }
-
-        return Response::structured([
-            'success' => true,
-            'workout' => WorkoutResponseFormatter::format($workout->fresh(), $user),
-            'message' => 'Workout updated successfully',
-        ]);
+        return $result->failed()
+            ? Response::error($result->errorMessage())
+            : Response::structured($result->toArray());
     }
 
     /**
@@ -101,13 +63,6 @@ class UpdateWorkoutTool extends Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'workout_id' => $schema->integer()->description('The ID of the workout to update'),
-            'name' => $schema->string()->description('The new name for the workout')->nullable(),
-            'activity' => $schema->string()->enum(Activity::class)->description('The new activity type.')->nullable(),
-            'scheduled_at' => $schema->string()->description('The new scheduled date and time (in user\'s timezone)')->nullable(),
-            'notes' => $schema->string()->description('The new notes for the workout')->nullable(),
-            'sections' => $schema->array()->items($this->schemaBuilder->section())->description('Replace entire workout structure with new sections/blocks/exercises. If provided, existing structure is deleted and replaced.')->nullable(),
-        ];
+        return $this->handler->schema($schema);
     }
 }

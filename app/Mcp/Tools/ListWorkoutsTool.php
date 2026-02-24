@@ -2,7 +2,8 @@
 
 namespace App\Mcp\Tools;
 
-use App\Models\Workout;
+use App\Tools\Handlers\ListWorkoutsHandler;
+use App\Tools\Input\ListWorkoutsInput;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -13,6 +14,10 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsReadOnly]
 class ListWorkoutsTool extends Tool
 {
+    public function __construct(
+        private ListWorkoutsHandler $handler,
+    ) {}
+
     /**
      * The tool's description.
      */
@@ -38,39 +43,12 @@ class ListWorkoutsTool extends Tool
             'limit' => 'nullable|integer|min:1|max:100',
         ]);
 
-        $user = $request->user();
+        $result = $this->handler->execute(
+            $request->user(),
+            ListWorkoutsInput::fromArray($validated),
+        );
 
-        $filter = $validated['filter'] ?? 'all';
-        $limit = $validated['limit'] ?? 20;
-
-        $query = $user->workouts()->withCount('sections');
-
-        match ($filter) {
-            'upcoming' => $query->upcoming(),
-            'completed' => $query->completed(),
-            'overdue' => $query->overdue(),
-            default => $query->orderBy('scheduled_at', 'desc'),
-        };
-
-        $workouts = $query->limit($limit)->get();
-
-        $workoutData = $workouts->map(fn (Workout $workout): array => [
-            'id' => $workout->id,
-            'name' => $workout->name,
-            'activity' => $workout->activity->value,
-            'scheduled_at' => $user->toUserTimezone($workout->scheduled_at)->toIso8601String(),
-            'completed' => $workout->isCompleted(),
-            'completed_at' => $workout->completed_at ? $user->toUserTimezone($workout->completed_at)->toIso8601String() : null,
-            'notes' => $workout->notes,
-            'sections_count' => $workout->sections_count,
-        ]);
-
-        return Response::structured([
-            'success' => true,
-            'filter' => $filter,
-            'count' => $workoutData->count(),
-            'workouts' => $workoutData->toArray(),
-        ]);
+        return Response::structured($result->toArray());
     }
 
     /**
@@ -78,9 +56,6 @@ class ListWorkoutsTool extends Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'filter' => $schema->string()->enum(['upcoming', 'completed', 'overdue', 'all'])->description('Filter workouts (default: all).')->nullable(),
-            'limit' => $schema->integer()->description('Maximum number of workouts to return (default: 20, max: 100)')->nullable(),
-        ];
+        return $this->handler->schema($schema);
     }
 }

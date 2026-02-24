@@ -43,7 +43,7 @@ it('respects custom limits', function () {
     ]);
 
     $response = WorkoutServer::actingAs($user)->tool(GetWorkoutScheduleTool::class, [
-        'upcoming_limit' => 2,
+        'upcoming_days' => 2,
     ]);
 
     $response->assertOk();

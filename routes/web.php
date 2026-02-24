@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Chat\Coach;
 use App\Livewire\Exercise\Show as ExerciseShow;
 use App\Livewire\GetStarted;
 use App\Livewire\Injury\Reports as InjuryReports;
@@ -44,6 +45,9 @@ Route::get('workouts/{workout}/export-fit', \App\Http\Controllers\ExportWorkoutF
     ->name('workouts.export-fit');
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('coach', Coach::class)->name('coach');
+    Route::get('coach/{conversation}', Coach::class)->name('coach.conversation');
+
     Route::get('exercises/{exercise}', ExerciseShow::class)->name('exercises.show');
 
     Route::redirect('workload-guide', '/docs/workload-guide');

@@ -27,8 +27,8 @@ class WorkoutScheduleResource extends Resource
         Use URI: workout://schedule
 
         Optional parameters:
-        - `upcoming_limit`: Number of upcoming workouts to return (default: 20, max: 50)
-        - `completed_limit`: Number of completed workouts to return (default: 10, max: 50)
+        - `upcoming_days`: Number of days ahead to look for upcoming workouts (default: 14, max: 90)
+        - `completed_days`: Number of days back to look for completed workouts (default: 7, max: 90)
     MARKDOWN;
 
     /**
@@ -38,11 +38,20 @@ class WorkoutScheduleResource extends Resource
     {
         $user = $request->user();
 
-        $upcomingLimit = min((int) ($request->get('upcoming_limit') ?? 20), 50);
-        $completedLimit = min((int) ($request->get('completed_limit') ?? 10), 50);
+        $upcomingDays = min((int) ($request->get('upcoming_days') ?? 14), 90);
+        $completedDays = min((int) ($request->get('completed_days') ?? 7), 90);
 
-        $upcomingWorkouts = $user->workouts()->upcoming()->withCount('sections')->limit($upcomingLimit)->get();
-        $completedWorkouts = $user->workouts()->completed()->withCount('sections')->limit($completedLimit)->get();
+        $upcomingWorkouts = $user->workouts()->upcoming()
+            ->where('scheduled_at', '<=', now()->addDays($upcomingDays))
+            ->withCount('sections')
+            ->limit(50)
+            ->get();
+
+        $completedWorkouts = $user->workouts()->completed()
+            ->where('completed_at', '>=', now()->subDays($completedDays))
+            ->withCount('sections')
+            ->limit(50)
+            ->get();
 
         $content = "# Workout Schedule for {$user->name}\n\n";
 

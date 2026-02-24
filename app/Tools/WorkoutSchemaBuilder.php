@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mcp\Tools;
+namespace App\Tools;
 
 use App\Enums\Workout\BlockType;
 use Illuminate\JsonSchema\JsonSchemaTypeFactory;

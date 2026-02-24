@@ -76,7 +76,7 @@ return [
     'home' => '/dashboard',
 
     'redirects' => [
-        'register' => '/get-started',
+        'register' => '/coach?intake=1',
     ],
 
     /*

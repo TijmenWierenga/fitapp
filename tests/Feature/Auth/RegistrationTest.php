@@ -15,7 +15,7 @@ test('new users can register', function () {
     ]);
 
     $response->assertSessionHasNoErrors()
-        ->assertRedirect(route('get-started', absolute: false));
+        ->assertRedirect('/coach?intake=1');
 
     $this->assertAuthenticated();
 });

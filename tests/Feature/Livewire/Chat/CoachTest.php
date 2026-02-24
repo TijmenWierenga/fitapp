@@ -45,6 +45,24 @@ it('denies access to other users conversations', function () {
         ->assertForbidden();
 });
 
+it('accepts intake query parameter', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Coach::class, ['intake' => true])
+        ->assertSet('intake', true)
+        ->assertOk();
+});
+
+it('defaults intake to false', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Coach::class)
+        ->assertSet('intake', false)
+        ->assertOk();
+});
+
 it('requires authentication', function () {
     $this->get(route('coach'))
         ->assertRedirect(route('login'));

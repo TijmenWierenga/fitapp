@@ -51,7 +51,7 @@
                 </h1>
 
                 <p class="mt-8 text-lg md:text-xl text-zinc-400 max-w-xl leading-relaxed font-['Outfit'] traiq-fade-in-delay-2">
-                    Your AI assistant becomes your personal trainer. Adaptive training plans, injury-safe programming, and Garmin-ready workouts &mdash; all through conversation.
+                    Chat with your AI coach, get personalized workouts, and track every rep. Injury-safe programming, smart analytics, and Garmin-ready exports &mdash; no setup required.
                 </p>
 
                 <div class="mt-10 flex flex-col sm:flex-row items-start gap-4 traiq-fade-in-delay-3">
@@ -100,7 +100,7 @@
             <div class="mb-16 traiq-reveal">
                 <span class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-lime">How it works</span>
                 <h2 class="mt-4 font-['Bebas_Neue'] text-5xl md:text-6xl text-white">
-                    Three steps to smarter training
+                    Two steps to smarter training
                 </h2>
             </div>
 
@@ -111,18 +111,18 @@
                 {{-- Step 1 --}}
                 <div class="relative traiq-reveal">
                     <span class="font-['Bebas_Neue'] text-6xl text-brand-lime/20 leading-none">01</span>
-                    <h3 class="mt-4 text-xl font-semibold text-white">Connect Your AI</h3>
+                    <h3 class="mt-4 text-xl font-semibold text-white">Sign Up</h3>
                     <p class="mt-3 text-zinc-400 leading-relaxed">
-                        Add {{ config('app.name') }} to Claude Desktop, ChatGPT, Cursor, or any MCP-compatible client. It takes less than 5 minutes.
+                        Create your free account in under 60 seconds. Set your fitness profile, track active injuries, and tell your coach about your equipment and schedule.
                     </p>
                 </div>
 
                 {{-- Step 2 --}}
                 <div class="relative traiq-reveal" style="transition-delay: 0.1s">
                     <span class="font-['Bebas_Neue'] text-6xl text-brand-lime/20 leading-none">02</span>
-                    <h3 class="mt-4 text-xl font-semibold text-white">Describe Your Goals</h3>
+                    <h3 class="mt-4 text-xl font-semibold text-white">Chat with Your Coach</h3>
                     <p class="mt-3 text-zinc-400 leading-relaxed">
-                        Tell your AI about your fitness goals, schedule, and limitations. Get structured, periodized plans from a 2,025-exercise library.
+                        Open the built-in AI coach and describe your goals. Whether it's injury rehab, race prep, or strength gains &mdash; get structured workouts from a 2,025-exercise library.
                     </p>
                 </div>
 
@@ -131,18 +131,21 @@
                     <span class="font-['Bebas_Neue'] text-6xl text-brand-lime/20 leading-none">03</span>
                     <h3 class="mt-4 text-xl font-semibold text-white">Train, Track, Adapt</h3>
                     <p class="mt-3 text-zinc-400 leading-relaxed">
-                        Track progress through conversation. Session load alerts, muscle group volume trends, and strength progression metrics keep you training safely.
+                        Follow your workouts, log performance, and get real-time feedback. Session load alerts, muscle group volume trends, and 1RM progression keep you training safely.
                     </p>
                 </div>
             </div>
 
-            <div class="mt-12 traiq-reveal">
-                <a href="{{ route('get-started') }}" class="inline-flex items-center gap-2 text-brand-lime hover:text-brand-lime/80 font-medium transition-colors">
-                    See full setup guide
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                    </svg>
-                </a>
+            <div class="mt-12 p-6 rounded-lg border border-zinc-800 traiq-reveal">
+                <p class="text-zinc-400">
+                    <span class="text-brand-lime font-semibold">Power users:</span> Connect your own AI via MCP for Claude Desktop, ChatGPT, Cursor, or any MCP-compatible client.
+                    <a href="{{ route('get-started') }}" class="inline-flex items-center gap-1 text-brand-lime hover:text-brand-lime/80 font-medium transition-colors ml-1">
+                        See setup guide
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                        </svg>
+                    </a>
+                </p>
             </div>
         </div>
     </section>
@@ -363,7 +366,7 @@
                         </flux:accordion.heading>
                         <flux:accordion.content>
                             <p class="text-zinc-400 leading-relaxed">
-                                {{ config('app.name') }} requires an MCP-compatible AI client to create and manage workouts. The dashboard lets you view your schedule, track progress, and export to Garmin, but workout creation and planning happens through your AI assistant.
+                                Yes. {{ config('app.name') }} includes a built-in AI coach that handles workout creation, progress tracking, and training advice. You don't need Claude, ChatGPT, or any external AI. Power users who prefer their own AI tools can optionally connect via MCP (Model Context Protocol) for advanced workflows.
                             </p>
                         </flux:accordion.content>
                     </flux:accordion.item>
@@ -382,7 +385,7 @@
                 Ready to train<br><span class="text-brand-lime">smarter?</span>
             </h2>
             <p class="mt-6 text-zinc-400 text-lg max-w-xl mx-auto traiq-reveal">
-                Free to get started, no credit card required. Bring your own AI assistant &mdash; Claude, ChatGPT, Cursor, or any MCP-compatible client &mdash; and get training in minutes.
+                Free to get started, no credit card required. Chat with your built-in AI coach, or connect your own AI via MCP &mdash; and get training in minutes.
             </p>
             <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 traiq-reveal">
                 <a href="{{ route('register') }}" class="traiq-cta px-8 py-4 rounded-lg text-base">

@@ -6,6 +6,6 @@
 
     {{-- Chat area --}}
     <div class="flex-1 flex flex-col min-w-0 min-h-0">
-        <livewire:chat.conversation :conversationId="$conversationId" />
+        <livewire:chat.conversation :conversationId="$conversationId" :intake="$intake" />
     </div>
 </div>

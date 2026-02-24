@@ -4,6 +4,7 @@ namespace App\Livewire\Chat;
 
 use App\Ai\Agents\FitnessCoach;
 use App\Livewire\Chat\Concerns\HasMessageLimits;
+use App\Models\AgentConversation;
 use App\Models\AgentConversationMessage;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -29,6 +30,25 @@ class Conversation extends Component
     public string $streamedResponse = '';
 
     public bool $isStreaming = false;
+
+    public bool $intake = false;
+
+    public function mount(): void
+    {
+        if (! $this->intake || $this->conversationId) {
+            return;
+        }
+
+        $hasConversations = AgentConversation::query()
+            ->where('user_id', auth()->id())
+            ->exists();
+
+        if ($hasConversations) {
+            return;
+        }
+
+        $this->pendingMessage = 'I just signed up! Help me set up my fitness profile and plan my first workout.';
+    }
 
     /**
      * @return Collection<int, AgentConversationMessage>

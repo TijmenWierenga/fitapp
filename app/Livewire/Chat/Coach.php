@@ -5,12 +5,16 @@ namespace App\Livewire\Chat;
 use App\Models\AgentConversation;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 #[Layout('components.layouts.app-full')]
 class Coach extends Component
 {
     public ?string $conversationId = null;
+
+    #[Url]
+    public bool $intake = false;
 
     public function mount(?AgentConversation $conversation = null): void
     {

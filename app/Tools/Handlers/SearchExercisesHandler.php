@@ -19,7 +19,7 @@ class SearchExercisesHandler
     {
         return [
             'query' => $schema->string()->description('Text search on exercise name (e.g., "bench press", "squat")')->nullable(),
-            'queries' => $schema->array($schema->string())->description('Multiple text searches to run in one call (e.g., ["chest press", "tricep extension"]). Results are deduplicated. Use instead of query when searching for exercises across multiple muscle groups or names.')->nullable(),
+            'queries' => $schema->array()->items($schema->string())->description('Multiple text searches to run in one call (e.g., ["chest press", "tricep extension"]). Results are deduplicated. Use instead of query when searching for exercises across multiple muscle groups or names.')->nullable(),
             'muscle_group' => $schema->string()->enum([
                 'abdominals', 'abductors', 'adductors', 'biceps', 'calves', 'chest',
                 'forearms', 'glutes', 'hamstrings', 'lats', 'lower back', 'middle back',

@@ -73,6 +73,8 @@ class Conversation extends Component
 
     public function ask(): void
     {
+        set_time_limit(120);
+
         $this->isStreaming = true;
 
         $agent = FitnessCoach::make();

@@ -7,10 +7,12 @@ namespace App\Tools\Input;
 readonly class SearchExercisesInput
 {
     /**
+     * @param  array<string>|null  $queries
      * @param  array<string>  $providedFields
      */
     public function __construct(
         public ?string $query,
+        public ?array $queries,
         public ?string $muscleGroup,
         public ?string $category,
         public ?string $equipment,
@@ -32,6 +34,7 @@ readonly class SearchExercisesInput
     {
         return new self(
             query: $data['query'] ?? null,
+            queries: $data['queries'] ?? null,
             muscleGroup: $data['muscle_group'] ?? null,
             category: $data['category'] ?? null,
             equipment: $data['equipment'] ?? null,

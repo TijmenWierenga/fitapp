@@ -39,8 +39,7 @@ it('includes rpe and feeling for completed workouts', function () {
     $response->assertOk()
         ->assertSee('"completed": true')
         ->assertSee('"rpe": 7')
-        ->assertSee('"feeling": 4')
-        ->assertSee('"rpe_label": "Hard"');
+        ->assertSee('"feeling": 4');
 });
 
 it('returns error for non-existent workout', function () {
@@ -106,7 +105,6 @@ it('returns full nested structure with sections blocks and exercises', function 
         ->assertSee('Main')
         ->assertSee('straight_sets')
         ->assertSee('Bench Press')
-        ->assertSee('strength_exercise')
         ->assertSee('"target_sets": 3')
         ->assertSee('"target_reps_max": 10');
 });

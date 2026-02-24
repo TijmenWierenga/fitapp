@@ -174,13 +174,10 @@ class Conversation extends Component
             'CompleteWorkoutTool' => 'Completing workout',
             'ExportWorkoutTool' => 'Exporting workout',
             'SearchExercisesTool' => 'Searching exercises',
-            'GetWorkloadTool' => 'Checking your workload',
-            'GetFitnessProfileTool' => 'Loading your profile',
             'UpdateFitnessProfileTool' => 'Updating your profile',
-            'GetInjuriesTool' => 'Checking injuries',
             'AddInjuryTool' => 'Adding injury record',
             'UpdateInjuryTool' => 'Updating injury',
-            'GetWorkoutScheduleTool' => 'Checking your schedule',
+            'RefreshUserContextTool' => 'Refreshing your data',
             default => 'Working',
         };
     }
@@ -188,19 +185,16 @@ class Conversation extends Component
     private function toolIcon(string $name): string
     {
         return match ($name) {
-            'GetWorkoutScheduleTool' => 'calendar',
-            'GetWorkloadTool' => 'chart-bar',
             'SearchExercisesTool' => 'magnifying-glass',
             'CreateWorkoutTool' => 'plus-circle',
             'GetWorkoutTool' => 'document-text',
             'ListWorkoutsTool' => 'list-bullet',
             'CompleteWorkoutTool' => 'check-circle',
             'ExportWorkoutTool' => 'arrow-down-tray',
-            'GetFitnessProfileTool' => 'user',
             'UpdateFitnessProfileTool' => 'pencil-square',
-            'GetInjuriesTool' => 'heart',
             'AddInjuryTool' => 'plus',
             'UpdateInjuryTool' => 'pencil',
+            'RefreshUserContextTool' => 'arrow-path',
             default => 'cog-6-tooth',
         };
     }

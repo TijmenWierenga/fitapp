@@ -2,7 +2,7 @@
 
 use App\Ai\Agents\FitnessCoach;
 use App\Ai\Tools\CreateWorkoutTool;
-use App\Ai\Tools\GetWorkloadTool;
+use App\Ai\Tools\RefreshUserContextTool;
 use App\Ai\Tools\SearchExercisesTool;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
@@ -13,28 +13,28 @@ it('can be instantiated', function () {
     expect($agent)->toBeInstanceOf(FitnessCoach::class);
 });
 
-it('registers all 15 tools', function () {
+it('registers 12 tools', function () {
     $agent = FitnessCoach::make();
     $tools = $agent->tools();
 
-    expect($tools)->toHaveCount(16);
+    expect($tools)->toHaveCount(12);
 
     $toolClasses = array_map(fn (object $tool): string => $tool::class, $tools);
 
     expect($toolClasses)
         ->toContain(CreateWorkoutTool::class)
         ->toContain(SearchExercisesTool::class)
-        ->toContain(GetWorkloadTool::class);
+        ->toContain(RefreshUserContextTool::class);
 });
 
-it('provides static instructions without dynamic user context', function () {
+it('provides static instructions that reference refresh-user-context', function () {
     $agent = FitnessCoach::make();
     $instructions = $agent->instructions();
 
     expect($instructions)
         ->toContain('fitness coach')
         ->toContain('Core Behaviors')
-        ->not->toContain('Current User Context');
+        ->toContain('refresh-user-context');
 });
 
 it('responds when faked', function () {

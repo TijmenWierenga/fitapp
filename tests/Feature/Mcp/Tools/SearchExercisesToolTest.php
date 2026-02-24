@@ -232,3 +232,42 @@ it('includes garmin_compatible flag in results', function (): void {
     $response->assertOk()
         ->assertSee('"garmin_compatible": true');
 });
+
+it('supports multi-query search with deduplication', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);
+    $triceps = MuscleGroup::factory()->create(['name' => 'triceps', 'label' => 'Triceps', 'body_part' => BodyPart::Shoulder]);
+
+    $benchPress = Exercise::factory()->create(['name' => 'Bench Press']);
+    $benchPress->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
+    $benchPress->muscleGroups()->attach($triceps, ['load_factor' => 0.5]);
+
+    $tricepDip = Exercise::factory()->create(['name' => 'Tricep Dip']);
+    $tricepDip->muscleGroups()->attach($triceps, ['load_factor' => 1.0]);
+
+    $chestFly = Exercise::factory()->create(['name' => 'Chest Fly']);
+    $chestFly->muscleGroups()->attach($chest, ['load_factor' => 1.0]);
+
+    $response = WorkoutServer::actingAs($user)->tool(SearchExercisesTool::class, [
+        'queries' => ['Bench Press', 'Tricep Dip', 'Chest Fly'],
+    ]);
+
+    $response->assertOk()
+        ->assertSee('Bench Press')
+        ->assertSee('Tricep Dip')
+        ->assertSee('Chest Fly');
+});
+
+it('deduplicates results across multi-query searches', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    Exercise::factory()->create(['name' => 'Bench Press']);
+
+    $response = WorkoutServer::actingAs($user)->tool(SearchExercisesTool::class, [
+        'queries' => ['Bench Press', 'Bench Press'],
+    ]);
+
+    $response->assertOk()
+        ->assertSee('"count": 1');
+});

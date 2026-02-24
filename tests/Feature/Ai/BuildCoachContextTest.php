@@ -93,3 +93,13 @@ it('shows empty schedule message when no workouts', function () {
 
     expect($context)->toContain('No upcoming or recently completed workouts');
 });
+
+it('includes current date and time section', function () {
+    $user = User::factory()->withTimezone('Europe/Amsterdam')->create();
+
+    $context = app(BuildCoachContext::class)->execute($user);
+
+    expect($context)
+        ->toContain('Current Date/Time')
+        ->toContain('Timezone:** Europe/Amsterdam');
+});

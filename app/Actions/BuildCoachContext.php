@@ -18,6 +18,7 @@ class BuildCoachContext
 
         $sections = [];
 
+        $sections[] = $this->buildDateTimeSection($user);
         $sections[] = $this->buildProfileSection($user);
         $sections[] = $this->buildWorkloadSection($user);
         $sections[] = $this->buildInjurySection($user);
@@ -28,6 +29,16 @@ class BuildCoachContext
         }
 
         return implode("\n\n", array_filter($sections));
+    }
+
+    public function buildDateTimeSection(User $user): string
+    {
+        $now = $user->currentTimeInTimezone();
+
+        return "## Current Date/Time\n\n"
+            ."- **Date:** {$now->format('Y-m-d')} ({$now->format('l')})\n"
+            ."- **Time:** {$now->format('H:i')}\n"
+            ."- **Timezone:** {$now->timezone->getName()}";
     }
 
     public function buildProfileSection(User $user): string

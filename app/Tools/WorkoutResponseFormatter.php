@@ -24,7 +24,7 @@ class WorkoutResponseFormatter
 
         $estimatedDuration = (new DurationEstimator)->estimate(PlannedBlockMapper::fromWorkout($workout));
 
-        return [
+        return self::filterNulls([
             'id' => $workout->id,
             'name' => $workout->name,
             'activity' => $workout->activity->value,
@@ -33,11 +33,10 @@ class WorkoutResponseFormatter
             'completed_at' => $workout->completed_at ? $user->toUserTimezone($workout->completed_at)->toIso8601String() : null,
             'estimated_duration' => $estimatedDuration,
             'rpe' => $workout->rpe,
-            'rpe_label' => Workout::getRpeLabel($workout->rpe),
             'feeling' => $workout->feeling,
             'notes' => $workout->notes,
             'sections' => $workout->sections->map(fn (Section $section): array => self::formatSection($section))->toArray(),
-        ];
+        ]);
     }
 
     /**
@@ -45,13 +44,11 @@ class WorkoutResponseFormatter
      */
     protected static function formatSection(Section $section): array
     {
-        return [
-            'id' => $section->id,
+        return self::filterNulls([
             'name' => $section->name,
-            'order' => $section->order,
             'notes' => $section->notes,
             'blocks' => $section->blocks->map(fn (Block $block): array => self::formatBlock($block))->toArray(),
-        ];
+        ]);
     }
 
     /**
@@ -59,10 +56,8 @@ class WorkoutResponseFormatter
      */
     protected static function formatBlock(Block $block): array
     {
-        return [
-            'id' => $block->id,
+        return self::filterNulls([
             'block_type' => $block->block_type->value,
-            'order' => $block->order,
             'rounds' => $block->rounds,
             'rest_between_exercises' => $block->rest_between_exercises,
             'rest_between_rounds' => $block->rest_between_rounds,
@@ -71,7 +66,7 @@ class WorkoutResponseFormatter
             'rest_interval' => $block->rest_interval,
             'notes' => $block->notes,
             'exercises' => $block->exercises->map(fn (BlockExercise $exercise): array => self::formatExercise($exercise))->toArray(),
-        ];
+        ]);
     }
 
     /**
@@ -80,10 +75,7 @@ class WorkoutResponseFormatter
     protected static function formatExercise(BlockExercise $exercise): array
     {
         $data = [
-            'id' => $exercise->id,
             'name' => $exercise->name,
-            'order' => $exercise->order,
-            'type' => $exercise->exerciseable_type,
             'exercise_id' => $exercise->exercise_id,
             'notes' => $exercise->notes,
         ];
@@ -112,6 +104,15 @@ class WorkoutResponseFormatter
             $data['target_rpe'] = $exerciseable->target_rpe;
         }
 
-        return $data;
+        return self::filterNulls($data);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected static function filterNulls(array $data): array
+    {
+        return array_filter($data, fn (mixed $value): bool => $value !== null);
     }
 }

@@ -256,9 +256,7 @@ it('creates a structured workout with sections, blocks, and exercises', function
         ->assertSee('Warm-up')
         ->assertSee('Main')
         ->assertSee('Light Jog')
-        ->assertSee('Squat')
-        ->assertSee('strength_exercise')
-        ->assertSee('cardio_exercise');
+        ->assertSee('Squat');
 
     assertDatabaseHas('sections', ['name' => 'Warm-up']);
     assertDatabaseHas('sections', ['name' => 'Main']);

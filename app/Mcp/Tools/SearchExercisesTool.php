@@ -41,6 +41,8 @@ class SearchExercisesTool extends Tool
     {
         $validated = $request->validate([
             'query' => 'nullable|string|max:255',
+            'queries' => 'nullable|array|max:10',
+            'queries.*' => 'string|max:255',
             'muscle_group' => 'nullable|string|max:255',
             'category' => 'nullable|string|in:strength,stretching,plyometrics,cardio',
             'equipment' => 'nullable|string|max:255',

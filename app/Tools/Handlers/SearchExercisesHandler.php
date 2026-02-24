@@ -19,6 +19,7 @@ class SearchExercisesHandler
     {
         return [
             'query' => $schema->string()->description('Text search on exercise name (e.g., "bench press", "squat")')->nullable(),
+            'queries' => $schema->array($schema->string())->description('Multiple text searches to run in one call (e.g., ["chest press", "tricep extension"]). Results are deduplicated. Use instead of query when searching for exercises across multiple muscle groups or names.')->nullable(),
             'muscle_group' => $schema->string()->enum([
                 'abdominals', 'abductors', 'adductors', 'biceps', 'calves', 'chest',
                 'forearms', 'glutes', 'hamstrings', 'lats', 'lower back', 'middle back',
@@ -37,11 +38,39 @@ class SearchExercisesHandler
 
     public function execute(SearchExercisesInput $input): ToolResult
     {
-        if ($input->query === null && $input->muscleGroup === null) {
-            return ToolResult::error('At least one of `query` or `muscle_group` is required.');
+        if ($input->queries !== null) {
+            return $this->executeMultiQuery($input);
         }
 
-        $searchQuery = Exercise::search($input->query ?? '')
+        if ($input->query === null && $input->muscleGroup === null) {
+            return ToolResult::error('At least one of `query`, `queries`, or `muscle_group` is required.');
+        }
+
+        $exercises = $this->search($input->query ?? '', $input);
+
+        return $this->formatResults($exercises);
+    }
+
+    private function executeMultiQuery(SearchExercisesInput $input): ToolResult
+    {
+        $allExercises = collect();
+
+        foreach ($input->queries as $query) {
+            $results = $this->search($query, $input);
+            $allExercises = $allExercises->merge($results);
+        }
+
+        $deduplicated = $allExercises->unique('id')->take($input->limit)->values();
+
+        return $this->formatResults($deduplicated);
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, Exercise>
+     */
+    private function search(string $query, SearchExercisesInput $input): \Illuminate\Support\Collection
+    {
+        return Exercise::search($query)
             ->when($input->has('category'), fn ($search) => $search->where('category', $input->category))
             ->when($input->has('equipment'), fn ($search) => $search->where('equipment', $input->equipment))
             ->when($input->has('level'), fn ($search) => $search->where('level', $input->level))
@@ -53,10 +82,16 @@ class SearchExercisesHandler
                 ->when($input->garminCompatible === true, fn (Builder $q) => $q->whereNotNull('garmin_exercise_category'))
                 ->when($input->garminCompatible === false, fn (Builder $q) => $q->whereNull('garmin_exercise_category'))
                 ->with('muscleGroups')
-            );
+            )
+            ->take($input->limit)
+            ->get();
+    }
 
-        $exercises = $searchQuery->take($input->limit)->get();
-
+    /**
+     * @param  \Illuminate\Support\Collection<int, Exercise>  $exercises
+     */
+    private function formatResults(\Illuminate\Support\Collection $exercises): ToolResult
+    {
         $exerciseData = $exercises->map(fn (Exercise $exercise): array => [
             'id' => $exercise->id,
             'name' => $exercise->name,

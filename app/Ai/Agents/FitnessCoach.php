@@ -7,13 +7,9 @@ use App\Ai\Tools\CompleteWorkoutTool;
 use App\Ai\Tools\CreateWorkoutTool;
 use App\Ai\Tools\DeleteWorkoutTool;
 use App\Ai\Tools\ExportWorkoutTool;
-use App\Ai\Tools\GetCurrentDateTimeTool;
-use App\Ai\Tools\GetFitnessProfileTool;
-use App\Ai\Tools\GetInjuriesTool;
-use App\Ai\Tools\GetWorkloadTool;
-use App\Ai\Tools\GetWorkoutScheduleTool;
 use App\Ai\Tools\GetWorkoutTool;
 use App\Ai\Tools\ListWorkoutsTool;
+use App\Ai\Tools\RefreshUserContextTool;
 use App\Ai\Tools\SearchExercisesTool;
 use App\Ai\Tools\UpdateFitnessProfileTool;
 use App\Ai\Tools\UpdateInjuryTool;
@@ -46,15 +42,14 @@ class FitnessCoach implements Agent, Conversational, HasTools
         - Encouraging and supportive, but honest about realistic expectations
         - Use clear, concise language — avoid jargon unless the user is advanced
         - Celebrate progress and completed workouts
-        - Proactively check workload before creating workouts to avoid overtraining
 
         ## Core Behaviors
-        1. **Before planning or scheduling workouts**, use the get-current-date-time tool to check the current date and time
-        2. **Before creating workouts**, always check the user's workload and fitness profile
-        3. **Every structured workout** must have three sections: Warm-Up, Main Work, Cool-Down
-        4. **Link exercises** to the exercise library via exercise_id for workload tracking
-        5. **Respect injuries** — never program exercises that aggravate active injuries
-        6. **Use metric units** exclusively (kg, meters, seconds)
+        1. **Always start by calling refresh-user-context** to get the current date/time, fitness profile, workload, injuries, and schedule
+        2. **Every structured workout** must have three sections: Warm-Up, Main Work, Cool-Down
+        3. **Link exercises** to the exercise library via exercise_id for workload tracking
+        4. **Respect injuries** — never program exercises that aggravate active injuries
+        5. **Use metric units** exclusively (kg, meters, seconds)
+        6. **Check workload** before creating workouts to avoid overloading muscle groups in caution/danger zones
 
         ## Injury Assessment
         Before adding an injury, gather: location, duration, progression, pain type, and whether they've seen a professional. If symptoms suggest something serious (severe pain, numbness, deformity, trauma), strongly recommend medical attention instead.
@@ -78,14 +73,10 @@ class FitnessCoach implements Agent, Conversational, HasTools
             app(CompleteWorkoutTool::class),
             app(ExportWorkoutTool::class),
             app(SearchExercisesTool::class),
-            app(GetWorkloadTool::class),
-            app(GetFitnessProfileTool::class),
             app(UpdateFitnessProfileTool::class),
-            app(GetInjuriesTool::class),
             app(AddInjuryTool::class),
             app(UpdateInjuryTool::class),
-            app(GetWorkoutScheduleTool::class),
-            new GetCurrentDateTimeTool,
+            app(RefreshUserContextTool::class),
         ];
     }
 }

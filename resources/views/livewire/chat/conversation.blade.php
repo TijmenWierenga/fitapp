@@ -15,11 +15,6 @@
             </div>
         </div>
 
-        @if ($this->remainingMessages <= 10)
-            <flux:badge size="sm" color="zinc">
-                {{ trans_choice(':count message remaining|:count messages remaining', $this->remainingMessages, ['count' => $this->remainingMessages]) }}
-            </flux:badge>
-        @endif
     </div>
 
     {{-- Messages area --}}
@@ -275,17 +270,51 @@
         </div>
     </div>
 
+    @php
+        $remaining = $this->remainingMessages;
+        $limitExhausted = $remaining <= 0;
+        $runningLow = $remaining > 0 && $remaining <= 10;
+    @endphp
+
+    {{-- Warning/error banner --}}
+    @if ($limitExhausted)
+        <div class="px-4 py-2">
+            <div class="max-w-3xl mx-auto flex items-center gap-2.5 rounded-lg bg-red-950/30 px-3.5 py-2.5">
+                <flux:icon.x-circle class="size-4 text-red-500 flex-none" />
+                <span class="text-xs text-zinc-400">
+                    @if ($this->remainingMonthlyMessages <= 0)
+                        {{ __("Monthly message limit reached. You've used all :limit messages for this period.", ['limit' => $this->monthlyMessageLimit]) }}
+                    @else
+                        {{ __("Daily message limit reached. You've used all :limit messages for today.", ['limit' => $this->dailyMessageLimit]) }}
+                    @endif
+                </span>
+            </div>
+        </div>
+    @elseif ($runningLow)
+        <div class="px-4 py-2">
+            <div class="max-w-3xl mx-auto flex items-center gap-2.5 rounded-lg bg-amber-950/30 px-3.5 py-2.5">
+                <flux:icon.exclamation-triangle class="size-4 text-amber-500 flex-none" />
+                <span class="text-xs text-zinc-400">
+                    {{ trans_choice(':count daily message remaining.|:count daily messages remaining.', $this->remainingDailyMessages, ['count' => $this->remainingDailyMessages]) }}
+                    @if ($this->dailyResetIn)
+                        {{ __('Limit resets in :time.', ['time' => $this->dailyResetIn]) }}
+                    @endif
+                </span>
+            </div>
+        </div>
+    @endif
+
     {{-- Input area --}}
     <div class="border-t border-zinc-200 dark:border-zinc-700 px-4 py-3">
-        <div class="max-w-3xl mx-auto">
+        <div class="max-w-3xl mx-auto {{ $limitExhausted ? 'opacity-40' : '' }}">
             <form wire:submit="submitPrompt">
                 <flux:composer
                     wire:model="message"
-                    placeholder="{{ __('Ask your coach anything...') }}"
+                    placeholder="{{ $limitExhausted ? ($this->remainingMonthlyMessages <= 0 ? __('Monthly limit reached') : __('Daily limit reached')) : __('Ask your coach anything...') }}"
                     submit="enter"
                     rows="1"
                     max-rows="4"
-                    :disabled="$isStreaming || $this->remainingMessages <= 0"
+                    :disabled="$isStreaming || $limitExhausted"
                 >
                     <x-slot name="actionsTrailing">
                         <flux:button
@@ -293,17 +322,11 @@
                             size="sm"
                             variant="primary"
                             icon="paper-airplane"
-                            :disabled="! $message || $isStreaming"
+                            :disabled="! $message || $isStreaming || $limitExhausted"
                         />
                     </x-slot>
                 </flux:composer>
             </form>
-
-            @if ($this->remainingMessages <= 0)
-                <flux:text size="xs" class="mt-2 text-center text-zinc-400">
-                    {{ __('Daily message limit reached. Come back tomorrow!') }}
-                </flux:text>
-            @endif
         </div>
     </div>
 

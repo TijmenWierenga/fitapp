@@ -31,6 +31,11 @@ return [
     |
     */
 
+    'coach' => [
+        'daily_message_limit' => env('COACH_DAILY_MESSAGE_LIMIT', 25),
+        'monthly_message_limit' => env('COACH_MONTHLY_MESSAGE_LIMIT', 100),
+    ],
+
     'caching' => [
         'embeddings' => [
             'cache' => false,

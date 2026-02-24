@@ -3,6 +3,7 @@
 namespace App\Livewire\Chat;
 
 use App\Ai\Agents\FitnessCoach;
+use App\Livewire\Chat\Concerns\HasMessageLimits;
 use App\Models\AgentConversationMessage;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -15,6 +16,8 @@ use Livewire\Component;
 
 class Conversation extends Component
 {
+    use HasMessageLimits;
+
     #[Locked]
     public ?string $conversationId = null;
 
@@ -42,18 +45,6 @@ class Conversation extends Component
             ->whereIn('role', ['user', 'assistant'])
             ->orderBy('created_at')
             ->get();
-    }
-
-    #[Computed]
-    public function remainingMessages(): int
-    {
-        $used = AgentConversationMessage::query()
-            ->where('user_id', auth()->id())
-            ->where('role', 'user')
-            ->where('created_at', '>=', now()->startOfDay())
-            ->count();
-
-        return max(0, 50 - $used);
     }
 
     public function submitPrompt(): void
@@ -153,7 +144,7 @@ class Conversation extends Component
                 $this->streamedResponse = '';
 
                 unset($this->conversationMessages);
-                unset($this->remainingMessages);
+                $this->clearMessageLimitCache();
 
                 $this->dispatch('conversation-updated');
             });

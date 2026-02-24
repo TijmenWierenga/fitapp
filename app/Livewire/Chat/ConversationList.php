@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Chat;
 
+use App\Livewire\Chat\Concerns\HasMessageLimits;
 use App\Models\AgentConversation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -11,6 +12,8 @@ use Livewire\Component;
 
 class ConversationList extends Component
 {
+    use HasMessageLimits;
+
     public string $search = '';
 
     public ?string $activeConversationId = null;
@@ -33,6 +36,12 @@ class ConversationList extends Component
             ->where('user_id', auth()->id())
             ->orderByDesc('updated_at')
             ->get();
+    }
+
+    #[On('conversation-updated')]
+    public function refreshUsage(): void
+    {
+        $this->clearMessageLimitCache();
     }
 
     public function deleteConversation(string $id): void

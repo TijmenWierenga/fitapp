@@ -49,4 +49,53 @@
             </div>
         @endforelse
     </div>
+
+    {{-- Usage panel --}}
+    @php
+        $dailyLimit = $this->dailyMessageLimit;
+        $monthlyLimit = $this->monthlyMessageLimit;
+        $usedDaily = $this->usedDailyMessages;
+        $usedMonthly = $this->usedMonthlyMessages;
+        $dailyExhausted = $this->remainingDailyMessages <= 0;
+        $monthlyExhausted = $this->remainingMonthlyMessages <= 0;
+        $dailyPct = $dailyLimit > 0 ? min(($usedDaily / $dailyLimit) * 100, 100) : 0;
+        $monthlyPct = $monthlyLimit > 0 ? min(($usedMonthly / $monthlyLimit) * 100, 100) : 0;
+    @endphp
+    <div class="border-t border-zinc-700 px-3.5 py-3 space-y-3">
+        {{-- Daily --}}
+        <div class="space-y-1.5">
+            <div class="flex justify-between items-baseline">
+                <span class="text-xs text-zinc-400">{{ __('Daily messages') }}</span>
+                <span @class(['text-xs font-medium', 'text-red-400' => $dailyExhausted, 'text-white' => ! $dailyExhausted])>{{ $usedDaily }} / {{ $dailyLimit }}</span>
+            </div>
+            <div class="h-1.5 rounded-full bg-zinc-700 overflow-hidden">
+                <div
+                    @class(['h-full rounded-full transition-all duration-300', 'bg-red-500' => $dailyExhausted, 'bg-lime-500' => ! $dailyExhausted])
+                    style="width: {{ $dailyPct }}%"
+                ></div>
+            </div>
+        </div>
+
+        {{-- Monthly --}}
+        <div class="space-y-1.5">
+            <div class="flex justify-between items-baseline">
+                <span class="text-xs text-zinc-400">{{ __('Monthly messages') }}</span>
+                <span @class(['text-xs font-medium', 'text-red-400' => $monthlyExhausted, 'text-white' => ! $monthlyExhausted])>{{ $usedMonthly }} / {{ $monthlyLimit }}</span>
+            </div>
+            <div class="h-1.5 rounded-full bg-zinc-700 overflow-hidden">
+                <div
+                    @class(['h-full rounded-full transition-all duration-300', 'bg-red-500' => $monthlyExhausted, 'bg-lime-500' => ! $monthlyExhausted])
+                    style="width: {{ $monthlyPct }}%"
+                ></div>
+            </div>
+        </div>
+
+        {{-- Reset info --}}
+        @if ($this->dailyResetIn)
+            <div class="flex items-center gap-1.5">
+                <flux:icon.clock class="size-3 text-zinc-500" />
+                <span class="text-[11px] text-zinc-500">{{ __('Daily limit resets in :time', ['time' => $this->dailyResetIn]) }}</span>
+            </div>
+        @endif
+    </div>
 </div>

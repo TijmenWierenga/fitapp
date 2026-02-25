@@ -64,7 +64,7 @@ it('renders volume empty state when no data', function (): void {
         ->assertSee('No volume data yet');
 });
 
-it('renders muscle group bars with volume data', function (): void {
+it('renders muscle group volume table with data', function (): void {
     $user = User::factory()->withTimezone('UTC')->create();
     $chest = MuscleGroup::factory()->create(['name' => 'chest', 'label' => 'Chest', 'body_part' => BodyPart::Chest]);
     $exercise = Exercise::factory()->create();
@@ -90,7 +90,7 @@ it('renders muscle group bars with volume data', function (): void {
     Livewire::actingAs($user)
         ->test(MuscleGroupVolume::class)
         ->assertSee('Chest')
-        ->assertSee('sets')
+        ->assertSee('Weekly Sets')
         ->assertDontSee('No volume data yet');
 });
 

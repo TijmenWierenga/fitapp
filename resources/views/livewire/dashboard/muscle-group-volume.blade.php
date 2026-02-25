@@ -74,7 +74,7 @@
                         <div class="h-full rounded-full transition-all duration-300 {{ $barColor }}"
                              style="width: {{ max($barWidth, 2) }}%"></div>
                         @if($avgMarker > 0 && $avgMarker <= 100)
-                            <div class="absolute top-0 h-full w-0.5 bg-zinc-400 dark:bg-zinc-300 opacity-60"
+                            <div class="absolute top-0 h-full w-0.5 bg-zinc-900 dark:bg-white"
                                  style="left: {{ min($avgMarker, 100) }}%"></div>
                         @endif
                     </div>
@@ -93,7 +93,7 @@
                 <flux:icon icon="arrow-down" class="size-3 text-red-600 dark:text-red-400" /> Decreasing
             </div>
             <div class="flex items-center gap-1">
-                <span class="inline-block w-0.5 h-3 bg-zinc-400 dark:bg-zinc-300 opacity-60"></span> 4-week avg
+                <span class="inline-block w-0.5 h-3 bg-zinc-900 dark:bg-white"></span> 4-week avg
             </div>
         </div>
     @endif

@@ -27,7 +27,6 @@ it('renders the workout structure card when sections exist', function () {
 
     Livewire::actingAs($user)
         ->test(Show::class, ['workout' => $workout])
-        ->assertSee('Workout Structure')
         ->assertSee('Warm-up')
         ->assertSee('Bench Press');
 });
@@ -38,7 +37,7 @@ it('does not render the structure card when no sections exist', function () {
 
     Livewire::actingAs($user)
         ->test(Show::class, ['workout' => $workout])
-        ->assertDontSee('Workout Structure');
+        ->assertDontSee('Warm-up');
 });
 
 it('renders strength exercise with labeled details', function () {
@@ -64,7 +63,6 @@ it('renders strength exercise with labeled details', function () {
     Livewire::actingAs($user)
         ->test(Show::class, ['workout' => $workout])
         ->assertSee('Squat')
-        ->assertSee('Strength')
         ->assertSee('3 sets of 8-12 reps')
         ->assertSee('80 kg')
         ->assertSee('RPE 7.5 (Hard)')
@@ -91,7 +89,6 @@ it('renders cardio exercise with labeled details', function () {
     Livewire::actingAs($user)
         ->test(Show::class, ['workout' => $workout])
         ->assertSee('Easy Run')
-        ->assertSee('Cardio')
         ->assertSee('30min')
         ->assertSee('5 km')
         ->assertSee('Zone 3');
@@ -116,7 +113,6 @@ it('renders duration exercise with labeled details', function () {
     Livewire::actingAs($user)
         ->test(Show::class, ['workout' => $workout])
         ->assertSee('Static Stretch')
-        ->assertSee('Duration')
         ->assertSee('5min')
         ->assertSee('RPE 3 (Easy)');
 });
@@ -136,8 +132,8 @@ it('renders block type badge and metadata tokens', function () {
         ->test(Show::class, ['workout' => $workout])
         ->assertSee('Circuit')
         ->assertSee('3 rounds')
-        ->assertSee('1min rest between rounds')
-        ->assertSee('30s rest between exercises');
+        ->assertSee('1min between rounds')
+        ->assertSee('30s between exercises');
 });
 
 it('renders rest blocks without exercises', function () {
@@ -193,7 +189,7 @@ it('renders amrap block with time cap', function () {
         ->assertSee('Time cap: 15min');
 });
 
-it('shows exercise Do and Effort labels', function () {
+it('shows exercise details inline', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->create(['user_id' => $user->id]);
     $section = Section::factory()->create(['workout_id' => $workout->id]);
@@ -212,8 +208,9 @@ it('shows exercise Do and Effort labels', function () {
 
     Livewire::actingAs($user)
         ->test(Show::class, ['workout' => $workout])
-        ->assertSeeInOrder(['Do', '4 sets of 6 reps'])
-        ->assertSeeInOrder(['Effort', 'RPE 8 (Hard)']);
+        ->assertSee('Deadlift')
+        ->assertSee('4 sets of 6 reps')
+        ->assertSee('RPE 8 (Hard)');
 });
 
 it('renders exercise name as clickable when linked to exercise library', function () {

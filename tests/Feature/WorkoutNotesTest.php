@@ -154,9 +154,9 @@ it('escapes raw HTML in notes to prevent XSS', function () {
         ->assertSeeHtml('&lt;script&gt;');
 });
 
-it('renders markdown in next workout dashboard card', function () {
+it('shows workout in schedule card when it has notes', function () {
     $user = User::factory()->create();
-    Workout::factory()->for($user)->create([
+    $workout = Workout::factory()->for($user)->create([
         'notes' => 'Remember to **warm up** properly',
         'scheduled_at' => now()->addDay(),
         'completed_at' => null,
@@ -164,5 +164,5 @@ it('renders markdown in next workout dashboard card', function () {
 
     Livewire::actingAs($user)
         ->test(NextWorkout::class)
-        ->assertSeeHtml('<strong>warm up</strong>');
+        ->assertSee($workout->name);
 });

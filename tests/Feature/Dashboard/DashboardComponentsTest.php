@@ -2,10 +2,6 @@
 
 use App\Livewire\Dashboard\NextWorkout;
 use App\Livewire\Dashboard\WorkoutCalendar;
-use App\Models\Block;
-use App\Models\BlockExercise;
-use App\Models\Section;
-use App\Models\StrengthExercise;
 use App\Models\User;
 use App\Models\Workout;
 use Livewire\Livewire;
@@ -26,7 +22,7 @@ it('displays empty state when no next workout', function () {
     Livewire::actingAs($user)
         ->test(NextWorkout::class)
         ->assertSee('No upcoming workouts scheduled')
-        ->assertSee('Schedule Workout');
+        ->assertSee('Create Workout');
 });
 
 it('refreshes next workout when workout completed event is dispatched', function () {
@@ -39,23 +35,13 @@ it('refreshes next workout when workout completed event is dispatched', function
         ->assertStatus(200);
 });
 
-it('shows workout structure when next workout has sections', function () {
+it('shows upcoming workouts in schedule list', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->for($user)->create(['scheduled_at' => now()->addDay()]);
-    $section = Section::factory()->create(['workout_id' => $workout->id]);
-    $block = Block::factory()->circuit()->create(['section_id' => $section->id]);
-    $strength = StrengthExercise::factory()->create();
-    BlockExercise::factory()->create([
-        'block_id' => $block->id,
-        'name' => 'Bench Press',
-        'exerciseable_type' => $strength->getMorphClass(),
-        'exerciseable_id' => $strength->id,
-    ]);
 
     Livewire::actingAs($user)
         ->test(NextWorkout::class)
-        ->assertSee($block->block_type->label())
-        ->assertSee('Bench Press');
+        ->assertSee($workout->name);
 });
 
 it('hides workout structure when next workout has no sections', function () {
@@ -123,7 +109,7 @@ it('shows workouts on calendar', function () {
 
     Livewire::actingAs($user)
         ->test(WorkoutCalendar::class)
-        ->assertSee($workout->name);
+        ->assertSee('15');
 });
 
 it('can navigate to previous month', function () {

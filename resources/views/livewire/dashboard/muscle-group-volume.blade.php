@@ -1,4 +1,4 @@
-<flux:card>
+<div class="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6">
     <div class="mb-4">
         <flux:heading size="lg" class="flex items-center gap-2">
             Muscle Group Volume
@@ -9,7 +9,7 @@
                 </flux:tooltip.content>
             </flux:tooltip>
         </flux:heading>
-        <flux:text class="mt-1 text-sm">
+        <flux:text class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
             Your weekly training volume per muscle group.
         </flux:text>
     </div>
@@ -103,4 +103,4 @@
             {{ $summary->unlinkedExerciseCount }} {{ Str::plural('exercise', $summary->unlinkedExerciseCount) }} not linked to the exercise library and excluded from workload tracking.
         </flux:text>
     @endif
-</flux:card>
+</div>

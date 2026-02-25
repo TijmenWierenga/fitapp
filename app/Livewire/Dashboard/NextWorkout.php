@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Dashboard;
 
-use App\Models\Workout;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -10,25 +9,32 @@ use Livewire\Component;
 class NextWorkout extends Component
 {
     #[Computed]
-    public function nextWorkout(): ?Workout
+    public function upcomingWorkouts(): \Illuminate\Database\Eloquent\Collection
     {
         return auth()->user()
             ->workouts()
             ->upcoming()
             ->with(['sections.blocks.exercises.exerciseable'])
-            ->first();
+            ->limit(3)
+            ->get();
     }
 
     #[On('workout-completed')]
-    public function refreshNextWorkout(): void
+    public function refreshUpcomingWorkouts(): void
     {
-        unset($this->nextWorkout);
+        unset($this->upcomingWorkouts);
     }
 
     #[On('workout-duplicated')]
     public function refreshAfterDuplicate(): void
     {
-        unset($this->nextWorkout);
+        unset($this->upcomingWorkouts);
+    }
+
+    #[On('workout-deleted')]
+    public function refreshAfterDelete(): void
+    {
+        unset($this->upcomingWorkouts);
     }
 
     public function deleteWorkout(int $workoutId): void
@@ -37,7 +43,7 @@ class NextWorkout extends Component
 
         $workout->deleteIfAllowed();
 
-        unset($this->nextWorkout);
+        unset($this->upcomingWorkouts);
     }
 
     public function render(): \Illuminate\View\View

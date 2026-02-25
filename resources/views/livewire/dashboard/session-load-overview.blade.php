@@ -1,4 +1,4 @@
-<flux:card>
+<div class="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6">
     <div class="mb-4">
         <flux:heading size="lg" class="flex items-center gap-2">
             Session Load
@@ -9,7 +9,7 @@
                 </flux:tooltip.content>
             </flux:tooltip>
         </flux:heading>
-        <flux:text class="mt-1 text-sm">
+        <flux:text class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
             Your weekly training load based on session duration and effort.
         </flux:text>
     </div>
@@ -25,29 +25,29 @@
         </flux:text>
     @else
         <div class="grid grid-cols-2 gap-3 mb-4">
-            <div class="rounded-lg bg-zinc-50 dark:bg-zinc-800 p-3">
-                <flux:text class="text-xs text-zinc-500 dark:text-zinc-400">Weekly sRPE</flux:text>
-                <div class="text-lg font-semibold tabular-nums">{{ number_format($sessionLoad->currentWeeklyTotal) }}</div>
+            <div class="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-4">
+                <flux:text class="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500 mb-1">Weekly sRPE</flux:text>
+                <div class="text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">{{ number_format($sessionLoad->currentWeeklyTotal) }}</div>
             </div>
-            <div class="rounded-lg bg-zinc-50 dark:bg-zinc-800 p-3">
-                <flux:text class="text-xs text-zinc-500 dark:text-zinc-400">Sessions</flux:text>
-                <div class="text-lg font-semibold tabular-nums">{{ $sessionLoad->currentSessionCount }}</div>
+            <div class="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-4">
+                <flux:text class="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500 mb-1">Sessions</flux:text>
+                <div class="text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">{{ $sessionLoad->currentSessionCount }}</div>
             </div>
-            <div class="rounded-lg bg-zinc-50 dark:bg-zinc-800 p-3">
+            <div class="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-4">
                 <flux:tooltip content="Training variation — values above 2.0 suggest insufficient variation in session intensity.">
                     <div class="cursor-help">
-                        <flux:text class="text-xs text-zinc-500 dark:text-zinc-400">Monotony</flux:text>
-                        <div class="text-lg font-semibold tabular-nums {{ $sessionLoad->monotonyWarning ? 'text-amber-600 dark:text-amber-400' : '' }}">
+                        <flux:text class="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500 mb-1">Monotony</flux:text>
+                        <div class="text-2xl font-bold tabular-nums {{ $sessionLoad->monotonyWarning ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-900 dark:text-white' }}">
                             {{ number_format($sessionLoad->monotony, 1) }}
                         </div>
                     </div>
                 </flux:tooltip>
             </div>
-            <div class="rounded-lg bg-zinc-50 dark:bg-zinc-800 p-3">
+            <div class="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-4">
                 <flux:tooltip content="Overall training stress — weekly load multiplied by monotony.">
                     <div class="cursor-help">
-                        <flux:text class="text-xs text-zinc-500 dark:text-zinc-400">Strain</flux:text>
-                        <div class="text-lg font-semibold tabular-nums">{{ number_format($sessionLoad->strain, 0) }}</div>
+                        <flux:text class="text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-500 mb-1">Strain</flux:text>
+                        <div class="text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">{{ number_format($sessionLoad->strain, 0) }}</div>
                     </div>
                 </flux:tooltip>
             </div>
@@ -56,9 +56,9 @@
         @if(count($this->chartData) > 1)
             <flux:chart :value="$this->chartData" class="h-48">
                 <flux:chart.svg>
-                    <flux:chart.line field="load" class="text-blue-500 dark:text-blue-400" />
-                    <flux:chart.area field="load" class="text-blue-100 dark:text-blue-400/20" />
-                    <flux:chart.point field="load" class="text-blue-500 dark:text-blue-400" />
+                    <flux:chart.line field="load" class="text-accent" />
+                    <flux:chart.area field="load" class="text-accent/20 dark:text-accent/10" />
+                    <flux:chart.point field="load" class="text-accent" />
                     <flux:chart.axis axis="x" field="week">
                         <flux:chart.axis.tick />
                         <flux:chart.axis.line />
@@ -93,4 +93,4 @@
             </flux:callout>
         @endif
     @endif
-</flux:card>
+</div>

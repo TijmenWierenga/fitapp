@@ -78,3 +78,32 @@ it('shows exercise properties as badges', function () {
         ->assertSee('Expert')
         ->assertSee('Barbell');
 });
+
+it('shows exercise aliases with aka label', function () {
+    $user = User::factory()->create();
+    $exercise = Exercise::factory()->create([
+        'name' => 'Romanian Deadlift',
+        'aliases' => ['RDL', 'Stiff-Leg Deadlift'],
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Detail::class)
+        ->dispatch('show-exercise-detail', exerciseId: $exercise->id)
+        ->assertSee('Romanian Deadlift')
+        ->assertSee('aka')
+        ->assertSee('RDL')
+        ->assertSee('Stiff-Leg Deadlift');
+});
+
+it('shows tips with lightbulb icon section', function () {
+    $user = User::factory()->create();
+    $exercise = Exercise::factory()->create([
+        'tips' => ['Keep your back straight', 'Engage your core'],
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Detail::class)
+        ->dispatch('show-exercise-detail', exerciseId: $exercise->id)
+        ->assertSee('Keep your back straight')
+        ->assertSee('Engage your core');
+});

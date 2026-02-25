@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto p-6">
+<div class="max-w-2xl mx-auto py-6">
     @include('partials.workout-detail', ['showBackButton' => true])
 
     @include('partials.workout-evaluation-modal', ['modalName' => 'evaluation-modal'])

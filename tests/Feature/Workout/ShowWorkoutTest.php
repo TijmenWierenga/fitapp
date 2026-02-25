@@ -43,7 +43,7 @@ it('displays workout details', function () {
     Livewire::actingAs($user)
         ->test(Show::class, ['workout' => $workout])
         ->assertSee('Morning Run')
-        ->assertSee($workout->scheduled_at->format('l, F j, Y'));
+        ->assertSee($workout->scheduled_at->format('D, M j'));
 });
 
 // Status badge tests

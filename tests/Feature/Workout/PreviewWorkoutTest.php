@@ -39,7 +39,7 @@ it('displays workout name and date', function () {
         ->test(Preview::class)
         ->dispatch('show-workout-preview', workoutId: $workout->id)
         ->assertSee('Evening Strength')
-        ->assertSee($workout->scheduled_at->format('l, F j, Y'));
+        ->assertSee($workout->scheduled_at->format('D, M j'));
 });
 
 it('shows View Full Page link', function () {

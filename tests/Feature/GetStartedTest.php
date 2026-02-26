@@ -10,7 +10,7 @@ it('can access get started page as guest', function () {
     get(route('get-started'))
         ->assertOk()
         ->assertSeeLivewire(GetStarted::class)
-        ->assertSee('Connect Your AI to');
+        ->assertSee('Get Started with');
 });
 
 it('can access get started page as authenticated user', function () {
@@ -25,7 +25,7 @@ it('can access get started page as authenticated user', function () {
 
 it('shows setup method selection on step 1', function () {
     Livewire::test(GetStarted::class)
-        ->assertSee('Choose Your Setup Method')
+        ->assertSee('In-App Chat')
         ->assertSee('Claude Desktop')
         ->assertSee('Claude Code CLI')
         ->assertSee('ChatGPT Desktop')
@@ -44,7 +44,7 @@ it('can navigate between steps', function () {
 
 it('can select desktop setup method', function () {
     Livewire::test(GetStarted::class)
-        ->assertSet('setupMethod', 'desktop')
+        ->assertSet('setupMethod', 'chat')
         ->call('selectMethod', 'cli')
         ->assertSet('setupMethod', 'cli')
         ->assertSet('currentStep', 2);
@@ -81,7 +81,7 @@ it('can select other setup method', function () {
 it('rejects invalid setup method', function () {
     Livewire::test(GetStarted::class)
         ->call('selectMethod', 'invalid')
-        ->assertSet('setupMethod', 'desktop')
+        ->assertSet('setupMethod', 'chat')
         ->assertSet('currentStep', 1);
 });
 
@@ -153,6 +153,9 @@ it('generates CLI command without auth header', function () {
 it('returns correct method label', function () {
     $component = new GetStarted;
 
+    expect($component->getMethodLabel())->toBe('In-App Chat');
+
+    $component->setupMethod = 'desktop';
     expect($component->getMethodLabel())->toBe('Claude Desktop');
 
     $component->setupMethod = 'cli';
@@ -181,4 +184,28 @@ it('does not show dashboard link for guests on step 3', function () {
     Livewire::test(GetStarted::class)
         ->call('goToStep', 3)
         ->assertDontSee('Go to Dashboard');
+});
+
+it('chat method redirects authenticated users to coach', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(GetStarted::class)
+        ->call('selectMethod', 'chat')
+        ->assertRedirect(route('coach', ['intake' => 1]));
+});
+
+it('chat method redirects guests to register', function () {
+    Livewire::test(GetStarted::class)
+        ->call('selectMethod', 'chat')
+        ->assertRedirect(route('register'));
+});
+
+it('shows in-app coach button for authenticated users on step 3', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(GetStarted::class)
+        ->call('goToStep', 3)
+        ->assertSee('Try the In-App Coach');
 });

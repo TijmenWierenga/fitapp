@@ -1,4 +1,9 @@
-<div class="flex flex-col h-full">
+<div
+    class="flex flex-col h-full"
+    @if ($pendingMessage && ! $conversationId)
+        x-init="$wire.ask()"
+    @endif
+>
     {{-- Top bar --}}
     <div class="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">
         <div class="flex items-center gap-2.5">

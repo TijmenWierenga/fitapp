@@ -11,7 +11,7 @@ class GetStarted extends Component
 {
     public int $currentStep = 1;
 
-    public string $setupMethod = 'desktop';
+    public string $setupMethod = 'chat';
 
     public function goToStep(int $step): void
     {
@@ -20,7 +20,17 @@ class GetStarted extends Component
 
     public function selectMethod(string $method): void
     {
-        if (! in_array($method, ['desktop', 'cli', 'chatgpt', 'vscode', 'other'])) {
+        if (! in_array($method, ['chat', 'desktop', 'cli', 'chatgpt', 'vscode', 'other'])) {
+            return;
+        }
+
+        if ($method === 'chat') {
+            if (auth()->check()) {
+                $this->redirect(route('coach', ['intake' => 1]));
+            } else {
+                $this->redirect(route('register'));
+            }
+
             return;
         }
 
@@ -31,6 +41,7 @@ class GetStarted extends Component
     public function getMethodLabel(): string
     {
         return match ($this->setupMethod) {
+            'chat' => 'In-App Chat',
             'desktop' => 'Claude Desktop',
             'cli' => 'Claude Code CLI',
             'chatgpt' => 'ChatGPT Desktop',

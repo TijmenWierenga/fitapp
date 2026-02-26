@@ -2,10 +2,10 @@
     {{-- Hero Section --}}
     <div class="text-center mb-12">
         <h1 class="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-4">
-            Connect Your AI to {{ config('app.name') }}
+            Get Started with {{ config('app.name') }}
         </h1>
         <p class="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
-            Works with Claude, ChatGPT, Cursor, VS Code, and any MCP-compatible AI client. Set up in minutes.
+            Start training in minutes with the built-in AI coach, or connect your own AI via MCP.
         </p>
 
         {{-- Progress Pills --}}
@@ -57,8 +57,36 @@
                 <flux:accordion.content>
                     <div class="pl-11 space-y-6">
                         <p class="text-zinc-600 dark:text-zinc-400">
-                            Select how you'd like to connect your AI assistant to {{ config('app.name') }}. All options use secure OAuth authentication.
+                            Choose how you'd like to get started with {{ config('app.name') }}.
                         </p>
+
+                        {{-- In-App Chat Card — Primary Option --}}
+                        <button
+                            wire:click="selectMethod('chat')"
+                            class="relative w-full p-6 rounded-xl border-2 text-left transition-all hover:border-brand-lime hover:bg-lime-50 dark:hover:bg-lime-950/20
+                                {{ $setupMethod === 'chat' ? 'border-brand-lime bg-lime-50 dark:bg-lime-950/20' : 'border-zinc-200 dark:border-zinc-700' }}"
+                        >
+                            <span class="absolute top-3 right-3 px-2 py-0.5 text-xs font-medium bg-brand-lime text-black rounded-full">
+                                Easiest
+                            </span>
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-lg bg-brand-lime/20">
+                                    <flux:icon.chat-bubble-bottom-center-text class="w-6 h-6 text-lime-700 dark:text-lime-400" />
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-zinc-900 dark:text-white mb-1">In-App Chat</h3>
+                                    <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                                        Start chatting with your AI coach right away &mdash; no external tools needed
+                                    </p>
+                                </div>
+                            </div>
+                        </button>
+
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1 h-px bg-zinc-200 dark:bg-zinc-700"></div>
+                            <span class="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wide">Or connect your own AI</span>
+                            <div class="flex-1 h-px bg-zinc-200 dark:bg-zinc-700"></div>
+                        </div>
 
                         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {{-- Claude Desktop Option --}}
@@ -160,9 +188,11 @@
                             </button>
                         </div>
 
-                        <flux:button wire:click="goToStep(2)" variant="primary">
-                            Continue with {{ $this->getMethodLabel() }}
-                        </flux:button>
+                        @if ($setupMethod !== 'chat')
+                            <flux:button wire:click="goToStep(2)" variant="primary">
+                                Continue with {{ $this->getMethodLabel() }}
+                            </flux:button>
+                        @endif
                     </div>
                 </flux:accordion.content>
             </flux:accordion.item>
@@ -519,8 +549,11 @@
                         </div>
 
                         @auth
-                            <div class="flex gap-4">
-                                <a href="{{ route('dashboard') }}" class="bg-brand-lime text-black font-semibold px-6 py-3 rounded-lg transition-all hover:opacity-90">
+                            <div class="flex flex-wrap gap-4">
+                                <a href="{{ route('coach', ['intake' => 1]) }}" class="bg-brand-lime text-black font-semibold px-6 py-3 rounded-lg transition-all hover:opacity-90">
+                                    Try the In-App Coach
+                                </a>
+                                <a href="{{ route('dashboard') }}" class="border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 font-semibold px-6 py-3 rounded-lg transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800">
                                     Go to Dashboard
                                 </a>
                             </div>

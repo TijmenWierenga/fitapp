@@ -40,6 +40,54 @@ function createUserMessages(User $user, int $count, ?string $conversationId = nu
     return $conversationId;
 }
 
+it('auto-sends intake message when intake is true and user has no conversations', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Conversation::class, ['intake' => true])
+        ->assertSet('pendingMessage', 'I just signed up! Help me set up my fitness profile and plan my first workout.');
+});
+
+it('does not auto-send intake when intake is false', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Conversation::class, ['intake' => false])
+        ->assertSet('pendingMessage', '')
+        ->assertSet('message', '');
+});
+
+it('does not auto-send intake when user has existing conversations', function () {
+    $user = User::factory()->create();
+
+    AgentConversation::create([
+        'id' => (string) \Illuminate\Support\Str::uuid(),
+        'user_id' => $user->id,
+        'title' => 'Previous chat',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Conversation::class, ['intake' => true])
+        ->assertSet('pendingMessage', '')
+        ->assertSet('message', '');
+});
+
+it('does not auto-send intake when conversationId is set', function () {
+    $user = User::factory()->create();
+    $conversationId = (string) \Illuminate\Support\Str::uuid();
+
+    AgentConversation::create([
+        'id' => $conversationId,
+        'user_id' => $user->id,
+        'title' => 'Existing conversation',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Conversation::class, ['intake' => true, 'conversationId' => $conversationId])
+        ->assertSet('pendingMessage', '')
+        ->assertSet('message', '');
+});
+
 it('renders the conversation component', function () {
     $user = User::factory()->create();
 

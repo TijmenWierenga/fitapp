@@ -1,7 +1,7 @@
 <div class="max-w-4xl mx-auto p-6">
     {{-- Header --}}
     <div class="flex items-center gap-4 mb-6">
-        <flux:button href="{{ route('fitness-profile.edit') }}" variant="ghost" icon="arrow-left" />
+        <flux:button href="{{ route('injuries.index') }}" variant="ghost" icon="arrow-left" wire:navigate />
         <div class="flex-1">
             <flux:heading size="xl">{{ $injury->body_part->label() }}</flux:heading>
             <flux:subheading>

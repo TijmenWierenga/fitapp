@@ -2,7 +2,10 @@
 
 namespace App\Livewire\Workout;
 
+use App\Actions\RecordPainScores;
+use App\Models\Injury;
 use App\Models\Workout;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -18,6 +21,12 @@ class Preview extends Component
     public ?int $rpe = null;
 
     public ?int $feeling = null;
+
+    /** @var array<int, int|null> */
+    public array $painScores = [];
+
+    /** @var Collection<int, Injury>|null */
+    public ?Collection $activeInjuries = null;
 
     #[On('show-workout-preview')]
     public function loadWorkout(int $workoutId): void
@@ -52,6 +61,11 @@ class Preview extends Component
 
     public function openEvaluationModal(): void
     {
+        $this->activeInjuries = auth()->user()->injuries()->active()->get();
+        $this->painScores = $this->activeInjuries
+            ->mapWithKeys(fn (Injury $injury): array => [$injury->id => null])
+            ->all();
+
         $this->showEvaluationModal = true;
     }
 
@@ -60,6 +74,7 @@ class Preview extends Component
         $this->validate([
             'rpe' => ['required', 'integer', 'min:1', 'max:10'],
             'feeling' => ['required', 'integer', 'min:1', 'max:5'],
+            'painScores.*' => ['nullable', 'integer', 'min:1', 'max:10'],
         ], [
             'rpe.required' => 'Please rate how hard this workout felt.',
             'rpe.min' => 'RPE must be between 1 and 10.',
@@ -70,8 +85,17 @@ class Preview extends Component
         ]);
 
         $this->workout->markAsCompleted($this->rpe, $this->feeling);
+
+        $scores = collect($this->painScores)
+            ->filter(fn (?int $score): bool => $score !== null)
+            ->all();
+
+        if ($scores !== []) {
+            app(RecordPainScores::class)->execute($this->workout, $scores);
+        }
+
         $this->showEvaluationModal = false;
-        $this->reset(['rpe', 'feeling']);
+        $this->reset(['rpe', 'feeling', 'painScores', 'activeInjuries']);
         $this->workout->refresh();
         $this->dispatch('workout-completed');
     }
@@ -79,7 +103,7 @@ class Preview extends Component
     public function cancelEvaluation(): void
     {
         $this->showEvaluationModal = false;
-        $this->reset(['rpe', 'feeling']);
+        $this->reset(['rpe', 'feeling', 'painScores', 'activeInjuries']);
         $this->resetValidation();
     }
 

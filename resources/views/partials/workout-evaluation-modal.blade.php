@@ -63,6 +63,47 @@
             <flux:error name="feeling" />
         </flux:field>
 
+        {{-- Pain Check Section (only if user has active injuries) --}}
+        @if(isset($activeInjuries) && $activeInjuries && $activeInjuries->isNotEmpty())
+            <flux:separator />
+
+            <flux:field>
+                <flux:label>Pain Check</flux:label>
+                <flux:description>Optionally rate any pain from your active injuries during this workout.</flux:description>
+
+                <div class="mt-3 space-y-4">
+                    @foreach($activeInjuries as $injury)
+                        <div wire:key="pain-{{ $injury->id }}">
+                            <div class="flex items-center gap-2 mb-2">
+                                <flux:text class="text-sm font-medium">{{ $injury->body_part->label() }}</flux:text>
+                                @if($injury->severity)
+                                    <flux:badge :color="$injury->severity->color()" size="sm">{{ $injury->severity->label() }}</flux:badge>
+                                @endif
+                                @if($injury->side && $injury->side !== \App\Enums\Side::NotApplicable)
+                                    <flux:text class="text-xs text-zinc-500">({{ $injury->side->label() }})</flux:text>
+                                @endif
+                            </div>
+                            <div class="flex justify-between gap-1">
+                                @foreach(range(1, 10) as $value)
+                                    <button
+                                        type="button"
+                                        wire:click="$set('painScores.{{ $injury->id }}', {{ $painScores[$injury->id] === $value ? 'null' : $value }})"
+                                        class="flex-1 py-1.5 text-xs font-medium rounded-md transition-colors {{ ($painScores[$injury->id] ?? null) === $value ? 'bg-accent text-accent-foreground' : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600' }}"
+                                    >
+                                        {{ $value }}
+                                    </button>
+                                @endforeach
+                            </div>
+                            <div class="flex justify-between mt-1 text-[10px] text-zinc-500 dark:text-zinc-400">
+                                <span>No Pain</span>
+                                <span>Worst Pain</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </flux:field>
+        @endif
+
         <div class="flex gap-2 justify-between">
             <flux:button type="button" wire:click="cancelEvaluation" variant="ghost">
                 Cancel

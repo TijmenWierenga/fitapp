@@ -4,6 +4,8 @@ namespace Database\Factories;
 
 use App\Enums\BodyPart;
 use App\Enums\InjuryType;
+use App\Enums\Severity;
+use App\Enums\Side;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -23,9 +25,13 @@ class InjuryFactory extends Factory
             'user_id' => User::factory(),
             'injury_type' => fake()->randomElement(InjuryType::cases()),
             'body_part' => fake()->randomElement(BodyPart::cases()),
+            'severity' => fake()->randomElement(Severity::cases()),
+            'side' => fake()->randomElement(Side::cases()),
             'started_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'ended_at' => null,
             'notes' => fake()->boolean(50) ? fake()->sentence() : null,
+            'how_it_happened' => fake()->boolean(30) ? fake()->sentence() : null,
+            'current_symptoms' => fake()->boolean(30) ? fake()->sentence() : null,
         ];
     }
 
@@ -75,6 +81,27 @@ class InjuryFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'injury_type' => InjuryType::PostSurgery,
+        ]);
+    }
+
+    public function mild(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'severity' => Severity::Mild,
+        ]);
+    }
+
+    public function moderate(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'severity' => Severity::Moderate,
+        ]);
+    }
+
+    public function severe(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'severity' => Severity::Severe,
         ]);
     }
 }

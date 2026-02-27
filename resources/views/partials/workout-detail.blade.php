@@ -99,6 +99,23 @@
         </div>
     @endif
 
+    {{-- Pain scores for completed workouts --}}
+    @if($workout->isCompleted() && $workout->painScores->isNotEmpty())
+        <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 space-y-2">
+            <div class="flex items-center gap-1.5">
+                <flux:icon.heart class="size-3.5 text-zinc-400 dark:text-zinc-500" />
+                <span class="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">Pain Check</span>
+            </div>
+            <div class="flex items-center gap-4 flex-wrap text-sm text-zinc-600 dark:text-zinc-400">
+                @foreach($workout->painScores as $painScore)
+                    <span class="flex items-center gap-1.5">
+                        {{ $painScore->injury->body_part->label() }}: {{ $painScore->pain_score }}/10
+                    </span>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     {{-- Mark as Completed CTA --}}
     @if(!$workout->isCompleted() && ($workout->scheduled_at->isPast() || $workout->scheduled_at->isToday()))
         <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700">

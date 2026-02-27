@@ -3,7 +3,10 @@
 use App\Livewire\Chat\Coach;
 use App\Livewire\Exercise\Show as ExerciseShow;
 use App\Livewire\GetStarted;
+use App\Livewire\Injury\Impact as InjuryImpact;
+use App\Livewire\Injury\Index as InjuryIndex;
 use App\Livewire\Injury\Reports as InjuryReports;
+use App\Livewire\Injury\Show as InjuryShow;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\FitnessProfile;
 use App\Livewire\Settings\Password;
@@ -75,6 +78,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/fitness-profile', FitnessProfile::class)->name('fitness-profile.edit');
 
+    Route::get('injuries', InjuryIndex::class)->name('injuries.index');
+    Route::get('injuries/impact', InjuryImpact::class)->name('injuries.impact');
+    Route::get('injuries/{injury}', InjuryShow::class)->name('injuries.show');
     Route::get('injuries/{injury}/reports', InjuryReports::class)->name('injuries.reports');
 });
 

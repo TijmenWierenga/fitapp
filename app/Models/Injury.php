@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\BodyPart;
 use App\Enums\InjuryType;
+use App\Enums\Severity;
+use App\Enums\Side;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,14 +19,20 @@ class Injury extends Model
         'user_id',
         'injury_type',
         'body_part',
+        'severity',
+        'side',
         'started_at',
         'ended_at',
         'notes',
+        'how_it_happened',
+        'current_symptoms',
     ];
 
     protected $casts = [
         'injury_type' => InjuryType::class,
         'body_part' => BodyPart::class,
+        'severity' => Severity::class,
+        'side' => Side::class,
         'started_at' => 'date',
         'ended_at' => 'date',
     ];
@@ -33,6 +41,42 @@ class Injury extends Model
      * @return Attribute<string|null, string|null>
      */
     protected function notes(): Attribute
+    {
+        return Attribute::make(
+            set: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+
+                $trimmed = trim($value);
+
+                return $trimmed === '' ? null : $trimmed;
+            },
+        );
+    }
+
+    /**
+     * @return Attribute<string|null, string|null>
+     */
+    protected function howItHappened(): Attribute
+    {
+        return Attribute::make(
+            set: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+
+                $trimmed = trim($value);
+
+                return $trimmed === '' ? null : $trimmed;
+            },
+        );
+    }
+
+    /**
+     * @return Attribute<string|null, string|null>
+     */
+    protected function currentSymptoms(): Attribute
     {
         return Attribute::make(
             set: function (?string $value): ?string {
@@ -71,6 +115,14 @@ class Injury extends Model
     public function injuryReports(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(InjuryReport::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<WorkoutInjuryPainScore, $this>
+     */
+    public function painScores(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(WorkoutInjuryPainScore::class);
     }
 
     /**

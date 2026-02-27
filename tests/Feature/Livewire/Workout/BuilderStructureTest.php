@@ -3,6 +3,7 @@
 use App\Livewire\Workout\Builder;
 use App\Models\Block;
 use App\Models\BlockExercise;
+use App\Models\Exercise;
 use App\Models\Section;
 use App\Models\StrengthExercise;
 use App\Models\User;
@@ -14,9 +15,9 @@ it('adds a section', function () {
 
     Livewire::actingAs($user)
         ->test(Builder::class)
-        ->assertSet('sections', [])
+        ->assertCount('sections', 3)
         ->call('addSection')
-        ->assertCount('sections', 1);
+        ->assertCount('sections', 4);
 });
 
 it('removes a section', function () {
@@ -24,11 +25,9 @@ it('removes a section', function () {
 
     Livewire::actingAs($user)
         ->test(Builder::class)
-        ->call('addSection')
-        ->call('addSection')
-        ->assertCount('sections', 2)
+        ->assertCount('sections', 3)
         ->call('removeSection', 0)
-        ->assertCount('sections', 1);
+        ->assertCount('sections', 2);
 });
 
 it('adds a block to a section', function () {
@@ -141,8 +140,6 @@ it('creates a workout with structure', function () {
         ->set('name', 'Test Workout')
         ->set('scheduled_date', '2026-03-01')
         ->set('scheduled_time', '08:00')
-        ->call('addSection')
-        ->set('sections.0.name', 'Warm-up')
         ->call('addBlock', 0)
         ->set('sections.0.blocks.0.block_type', 'straight_sets')
         ->call('addExercise', 0, 0)
@@ -167,6 +164,9 @@ it('creates a workout without structure', function () {
         ->set('name', 'Simple Run')
         ->set('scheduled_date', '2026-03-01')
         ->set('scheduled_time', '07:00')
+        ->call('removeSection', 2)
+        ->call('removeSection', 1)
+        ->call('removeSection', 0)
         ->call('saveWorkout')
         ->assertRedirect();
 
@@ -239,7 +239,7 @@ it('validates required section name', function () {
         ->set('name', 'Test')
         ->set('scheduled_date', '2026-03-01')
         ->set('scheduled_time', '08:00')
-        ->call('addSection')
+        ->set('sections.0.name', '')
         ->call('saveWorkout')
         ->assertHasErrors('sections.0.name');
 });
@@ -280,4 +280,151 @@ it('redirects to workout show page after save', function () {
         ->set('scheduled_time', '08:00')
         ->call('saveWorkout')
         ->assertRedirectToRoute('workouts.show', Workout::latest()->first());
+});
+
+it('populates exercise from exercise-selected event with all params', function () {
+    $user = User::factory()->create();
+    $exercise = Exercise::factory()->create(['name' => 'Bench Press']);
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->call('addSection')
+        ->set('sections.0.name', 'Main')
+        ->call('addBlock', 0)
+        ->dispatch('exercise-selected', [
+            'sectionIndex' => 0,
+            'blockIndex' => 0,
+            'exerciseId' => $exercise->id,
+            'name' => 'Bench Press',
+            'type' => 'strength',
+            'targetSets' => 4,
+            'targetRepsMax' => 8,
+            'targetWeight' => 80.0,
+            'targetRpe' => 8.0,
+            'restAfter' => 90,
+            'exerciseNotes' => 'Pause at bottom',
+            'targetRepsMin' => null,
+            'targetTempo' => null,
+            'targetDuration' => null,
+            'targetDistance' => null,
+            'targetPaceMin' => null,
+            'targetPaceMax' => null,
+            'targetHeartRateZone' => null,
+            'targetHeartRateMin' => null,
+            'targetHeartRateMax' => null,
+            'targetPower' => null,
+        ])
+        ->assertSet('sections.0.blocks.0.exercises.0.exercise_id', $exercise->id)
+        ->assertSet('sections.0.blocks.0.exercises.0.name', 'Bench Press')
+        ->assertSet('sections.0.blocks.0.exercises.0.type', 'strength')
+        ->assertSet('sections.0.blocks.0.exercises.0.target_sets', 4)
+        ->assertSet('sections.0.blocks.0.exercises.0.target_reps_max', 8)
+        ->assertSet('sections.0.blocks.0.exercises.0.target_weight', 80.0)
+        ->assertSet('sections.0.blocks.0.exercises.0.target_rpe', 8.0)
+        ->assertSet('sections.0.blocks.0.exercises.0.rest_after', 90)
+        ->assertSet('sections.0.blocks.0.exercises.0.notes', 'Pause at bottom');
+});
+
+it('saves exercise_id to database through workout save', function () {
+    $user = User::factory()->create();
+    $exercise = Exercise::factory()->create(['name' => 'Squat']);
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->set('name', 'Test Workout')
+        ->set('scheduled_date', '2026-03-01')
+        ->set('scheduled_time', '08:00')
+        ->call('addBlock', 0)
+        ->dispatch('exercise-selected', [
+            'sectionIndex' => 0,
+            'blockIndex' => 0,
+            'exerciseId' => $exercise->id,
+            'name' => 'Squat',
+            'type' => 'strength',
+            'targetSets' => 5,
+            'targetRepsMax' => 5,
+            'targetWeight' => null,
+            'targetRpe' => null,
+            'targetRepsMin' => null,
+            'targetTempo' => null,
+            'restAfter' => null,
+            'targetDuration' => null,
+            'targetDistance' => null,
+            'targetPaceMin' => null,
+            'targetPaceMax' => null,
+            'targetHeartRateZone' => null,
+            'targetHeartRateMin' => null,
+            'targetHeartRateMax' => null,
+            'targetPower' => null,
+            'exerciseNotes' => null,
+        ])
+        ->call('saveWorkout')
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('block_exercises', [
+        'name' => 'Squat',
+        'exercise_id' => $exercise->id,
+    ]);
+});
+
+it('hydrates exercise_id when editing existing workout', function () {
+    $user = User::factory()->create();
+    $exercise = Exercise::factory()->create(['name' => 'Deadlift']);
+    $workout = Workout::factory()->for($user)->create();
+    $section = Section::factory()->for($workout)->create(['name' => 'Main']);
+    $block = Block::factory()->for($section)->create();
+    $strength = StrengthExercise::factory()->create();
+    BlockExercise::factory()->create([
+        'block_id' => $block->id,
+        'exercise_id' => $exercise->id,
+        'name' => 'Deadlift',
+        'exerciseable_type' => 'strength_exercise',
+        'exerciseable_id' => $strength->id,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Builder::class, ['workout' => $workout])
+        ->assertSet('sections.0.blocks.0.exercises.0.exercise_id', $exercise->id)
+        ->assertSet('sections.0.blocks.0.exercises.0.name', 'Deadlift');
+});
+
+it('saves free-form exercise without exercise_id', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Builder::class)
+        ->set('name', 'Test Workout')
+        ->set('scheduled_date', '2026-03-01')
+        ->set('scheduled_time', '08:00')
+        ->call('addBlock', 0)
+        ->dispatch('exercise-selected', [
+            'sectionIndex' => 0,
+            'blockIndex' => 0,
+            'exerciseId' => null,
+            'name' => 'Custom Press',
+            'type' => 'strength',
+            'targetSets' => 3,
+            'targetRepsMax' => 12,
+            'targetWeight' => null,
+            'targetRpe' => null,
+            'targetRepsMin' => null,
+            'targetTempo' => null,
+            'restAfter' => null,
+            'targetDuration' => null,
+            'targetDistance' => null,
+            'targetPaceMin' => null,
+            'targetPaceMax' => null,
+            'targetHeartRateZone' => null,
+            'targetHeartRateMin' => null,
+            'targetHeartRateMax' => null,
+            'targetPower' => null,
+            'exerciseNotes' => null,
+        ])
+        ->call('saveWorkout')
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('block_exercises', [
+        'name' => 'Custom Press',
+        'exercise_id' => null,
+    ]);
 });

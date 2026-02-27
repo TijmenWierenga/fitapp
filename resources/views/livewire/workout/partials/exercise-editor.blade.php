@@ -19,12 +19,24 @@
             <flux:icon.chevron-right class="size-3 transition-transform" x-bind:class="expanded && 'rotate-90'" />
         </button>
 
-        <flux:input
-            wire:model="{{ $prefix }}.name"
-            placeholder="Exercise name"
-            size="xs"
-            class="flex-1"
-        />
+        @if($exercise['exercise_id'])
+            <div class="flex items-center gap-1.5 flex-1 min-w-0">
+                <flux:icon.book-open class="size-3 text-lime-500 shrink-0" />
+                <span class="text-xs font-medium text-white truncate">{{ $exercise['name'] }}</span>
+            </div>
+        @else
+            <div class="flex items-center gap-1.5 flex-1 min-w-0">
+                @if($exercise['name'])
+                    <span class="shrink-0 px-1 py-0.5 text-[9px] font-medium text-zinc-500 bg-zinc-700/50 rounded">Custom</span>
+                @endif
+                <flux:input
+                    wire:model="{{ $prefix }}.name"
+                    placeholder="Exercise name"
+                    size="xs"
+                    class="flex-1"
+                />
+            </div>
+        @endif
 
         <flux:select
             wire:model.live="{{ $prefix }}.type"

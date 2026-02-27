@@ -12,6 +12,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Builder extends Component
@@ -44,6 +45,11 @@ class Builder extends Component
         } else {
             $this->scheduled_date = now()->format('Y-m-d');
             $this->scheduled_time = now()->format('H:i');
+            $this->sections = [
+                ['_key' => uniqid('sec_'), 'name' => 'Warm-up', 'notes' => null, 'blocks' => []],
+                ['_key' => uniqid('sec_'), 'name' => 'Main', 'notes' => null, 'blocks' => []],
+                ['_key' => uniqid('sec_'), 'name' => 'Cool-down', 'notes' => null, 'blocks' => []],
+            ];
         }
     }
 
@@ -92,6 +98,7 @@ class Builder extends Component
     {
         $this->sections[$sectionIndex]['blocks'][$blockIndex]['exercises'][] = [
             '_key' => uniqid('ex_'),
+            'exercise_id' => null,
             'name' => '',
             'type' => 'strength',
             'notes' => null,
@@ -116,6 +123,45 @@ class Builder extends Component
     public function removeExercise(int $sectionIndex, int $blockIndex, int $exerciseIndex): void
     {
         array_splice($this->sections[$sectionIndex]['blocks'][$blockIndex]['exercises'], $exerciseIndex, 1);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    #[On('exercise-selected')]
+    public function onExerciseSelected(array $data): void
+    {
+        $si = $data['sectionIndex'];
+        $bi = $data['blockIndex'];
+
+        $this->addExercise($si, $bi);
+
+        $ei = count($this->sections[$si]['blocks'][$bi]['exercises']) - 1;
+
+        $this->sections[$si]['blocks'][$bi]['exercises'][$ei] = array_merge(
+            $this->sections[$si]['blocks'][$bi]['exercises'][$ei],
+            [
+                'exercise_id' => $data['exerciseId'] ?? null,
+                'name' => $data['name'],
+                'type' => $data['type'],
+                'notes' => $data['exerciseNotes'] ?? null,
+                'target_sets' => $data['targetSets'] ?? null,
+                'target_reps_min' => $data['targetRepsMin'] ?? null,
+                'target_reps_max' => $data['targetRepsMax'] ?? null,
+                'target_weight' => $data['targetWeight'] ?? null,
+                'target_rpe' => $data['targetRpe'] ?? null,
+                'target_tempo' => $data['targetTempo'] ?? null,
+                'rest_after' => $data['restAfter'] ?? null,
+                'target_duration' => $data['targetDuration'] ?? null,
+                'target_distance' => $data['targetDistance'] ?? null,
+                'target_pace_min' => $data['targetPaceMin'] ?? null,
+                'target_pace_max' => $data['targetPaceMax'] ?? null,
+                'target_heart_rate_zone' => $data['targetHeartRateZone'] ?? null,
+                'target_heart_rate_min' => $data['targetHeartRateMin'] ?? null,
+                'target_heart_rate_max' => $data['targetHeartRateMax'] ?? null,
+                'target_power' => $data['targetPower'] ?? null,
+            ],
+        );
     }
 
     public function sortSections(string $key, int $position): void
@@ -230,6 +276,7 @@ class Builder extends Component
                 'notes' => $block->notes,
                 'exercises' => $block->exercises->map(fn ($exercise): array => [
                     '_key' => uniqid('ex_'),
+                    'exercise_id' => $exercise->exercise_id,
                     'name' => $exercise->name,
                     'type' => $this->morphClassToType($exercise->exerciseable->getMorphClass()),
                     'notes' => $exercise->notes,
@@ -347,6 +394,7 @@ class Builder extends Component
                                 'name' => $exercise['name'],
                                 'order' => $ei,
                                 'type' => $exercise['type'],
+                                'exercise_id' => $exercise['exercise_id'] ?? null,
                                 'notes' => $exercise['notes'],
                                 'target_sets' => $this->toNullableInt($exercise['target_sets']),
                                 'target_reps_min' => $this->toNullableInt($exercise['target_reps_min']),
@@ -393,6 +441,7 @@ class Builder extends Component
             'sections.*.blocks.*.rest_interval' => 'nullable|integer|min:0',
             'sections.*.blocks.*.notes' => 'nullable|string|max:5000',
             'sections.*.blocks.*.exercises' => 'array',
+            'sections.*.blocks.*.exercises.*.exercise_id' => 'nullable|integer|exists:exercises,id',
             'sections.*.blocks.*.exercises.*.name' => 'required|string|max:255',
             'sections.*.blocks.*.exercises.*.type' => 'required|in:strength,cardio,duration',
             'sections.*.blocks.*.exercises.*.notes' => 'nullable|string|max:5000',

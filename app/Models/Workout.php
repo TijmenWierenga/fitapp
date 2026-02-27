@@ -80,6 +80,14 @@ class Workout extends Model
     }
 
     /**
+     * @return HasMany<WorkoutInjuryPainScore, $this>
+     */
+    public function painScores(): HasMany
+    {
+        return $this->hasMany(WorkoutInjuryPainScore::class);
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo

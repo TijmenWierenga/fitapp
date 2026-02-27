@@ -45,6 +45,11 @@ class Builder extends Component
         } else {
             $this->scheduled_date = now()->format('Y-m-d');
             $this->scheduled_time = now()->format('H:i');
+            $this->sections = [
+                ['_key' => uniqid('sec_'), 'name' => 'Warm-up', 'notes' => null, 'blocks' => []],
+                ['_key' => uniqid('sec_'), 'name' => 'Main', 'notes' => null, 'blocks' => []],
+                ['_key' => uniqid('sec_'), 'name' => 'Cool-down', 'notes' => null, 'blocks' => []],
+            ];
         }
     }
 

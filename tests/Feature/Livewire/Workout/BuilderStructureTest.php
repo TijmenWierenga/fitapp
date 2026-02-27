@@ -15,9 +15,9 @@ it('adds a section', function () {
 
     Livewire::actingAs($user)
         ->test(Builder::class)
-        ->assertSet('sections', [])
+        ->assertCount('sections', 3)
         ->call('addSection')
-        ->assertCount('sections', 1);
+        ->assertCount('sections', 4);
 });
 
 it('removes a section', function () {
@@ -25,11 +25,9 @@ it('removes a section', function () {
 
     Livewire::actingAs($user)
         ->test(Builder::class)
-        ->call('addSection')
-        ->call('addSection')
-        ->assertCount('sections', 2)
+        ->assertCount('sections', 3)
         ->call('removeSection', 0)
-        ->assertCount('sections', 1);
+        ->assertCount('sections', 2);
 });
 
 it('adds a block to a section', function () {
@@ -142,8 +140,6 @@ it('creates a workout with structure', function () {
         ->set('name', 'Test Workout')
         ->set('scheduled_date', '2026-03-01')
         ->set('scheduled_time', '08:00')
-        ->call('addSection')
-        ->set('sections.0.name', 'Warm-up')
         ->call('addBlock', 0)
         ->set('sections.0.blocks.0.block_type', 'straight_sets')
         ->call('addExercise', 0, 0)
@@ -168,6 +164,9 @@ it('creates a workout without structure', function () {
         ->set('name', 'Simple Run')
         ->set('scheduled_date', '2026-03-01')
         ->set('scheduled_time', '07:00')
+        ->call('removeSection', 2)
+        ->call('removeSection', 1)
+        ->call('removeSection', 0)
         ->call('saveWorkout')
         ->assertRedirect();
 
@@ -240,7 +239,7 @@ it('validates required section name', function () {
         ->set('name', 'Test')
         ->set('scheduled_date', '2026-03-01')
         ->set('scheduled_time', '08:00')
-        ->call('addSection')
+        ->set('sections.0.name', '')
         ->call('saveWorkout')
         ->assertHasErrors('sections.0.name');
 });
@@ -335,8 +334,6 @@ it('saves exercise_id to database through workout save', function () {
         ->set('name', 'Test Workout')
         ->set('scheduled_date', '2026-03-01')
         ->set('scheduled_time', '08:00')
-        ->call('addSection')
-        ->set('sections.0.name', 'Main')
         ->call('addBlock', 0)
         ->dispatch('exercise-selected', [
             'sectionIndex' => 0,
@@ -399,8 +396,6 @@ it('saves free-form exercise without exercise_id', function () {
         ->set('name', 'Test Workout')
         ->set('scheduled_date', '2026-03-01')
         ->set('scheduled_time', '08:00')
-        ->call('addSection')
-        ->set('sections.0.name', 'Main')
         ->call('addBlock', 0)
         ->dispatch('exercise-selected', [
             'sectionIndex' => 0,

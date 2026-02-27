@@ -72,4 +72,6 @@
             </div>
         @endif
     </div>
+
+    <livewire:workout.exercise-search />
 </div>

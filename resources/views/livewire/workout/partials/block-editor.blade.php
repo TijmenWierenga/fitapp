@@ -42,7 +42,7 @@
         <div class="ml-auto flex items-center gap-1">
             @if(!$isRest)
                 <flux:button
-                    wire:click="addExercise({{ $si }}, {{ $bi }})"
+                    x-on:click="$dispatch('open-exercise-search', { sectionIndex: {{ $si }}, blockIndex: {{ $bi }} })"
                     variant="ghost"
                     size="xs"
                     icon="plus"

@@ -14,6 +14,7 @@ use App\Ai\Tools\SearchExercisesTool;
 use App\Ai\Tools\UpdateFitnessProfileTool;
 use App\Ai\Tools\UpdateInjuryTool;
 use App\Ai\Tools\UpdateWorkoutTool;
+use Carbon\CarbonImmutable;
 use Laravel\Ai\Attributes\MaxSteps;
 use Laravel\Ai\Attributes\Model;
 use Laravel\Ai\Attributes\Provider;
@@ -35,7 +36,26 @@ class FitnessCoach implements Agent, Conversational, HasTools
 
     public function instructions(): string
     {
-        return <<<'INSTRUCTIONS'
+        $now = auth()->user()->currentTimeInTimezone();
+        $date = $now->format('Y-m-d');
+        $day = $now->format('l');
+        $time = $now->format('H:i');
+        $timezone = $now->timezone->getName();
+        $tomorrow = $now->addDay()->format('Y-m-d (l)');
+        $upcomingDays = $this->buildUpcomingDaysReference($now);
+
+        return <<<INSTRUCTIONS
+        ## Current Date/Time
+        - **Today:** {$date} ({$day})
+        - **Time:** {$time}
+        - **Timezone:** {$timezone}
+        - **Tomorrow:** {$tomorrow}
+
+        ### Upcoming days
+        {$upcomingDays}
+
+        ALWAYS use this reference when resolving relative dates like "monday", "next week", "tomorrow", etc. Do NOT calculate dates yourself.
+
         You are a friendly, knowledgeable fitness coach. Your role is to help users plan workouts, track their training, manage injuries, and reach their fitness goals.
 
         ## Personality
@@ -61,6 +81,21 @@ class FitnessCoach implements Agent, Conversational, HasTools
         - Keep workouts within the user's preferred session duration
         - Search for exercises to find appropriate movements with proper muscle targeting
         INSTRUCTIONS;
+    }
+
+    /**
+     * Build a lookup table of the next 7 days so the LLM doesn't need to do date arithmetic.
+     */
+    private function buildUpcomingDaysReference(CarbonImmutable $now): string
+    {
+        $lines = [];
+
+        for ($i = 1; $i <= 7; $i++) {
+            $date = $now->addDays($i);
+            $lines[] = "- {$date->format('l')}: {$date->format('Y-m-d')}";
+        }
+
+        return implode("\n", $lines);
     }
 
     public function tools(): array

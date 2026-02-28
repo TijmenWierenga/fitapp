@@ -2,6 +2,7 @@
 
 use App\Mcp\Servers\WorkoutServer;
 use App\Mcp\Tools\CompleteWorkoutTool;
+use App\Models\Injury;
 use App\Models\User;
 use App\Models\Workout;
 
@@ -100,4 +101,65 @@ it('fails to complete workout owned by different user', function () {
 
     $response->assertHasErrors()
         ->assertSee('Workout not found or access denied.');
+});
+
+it('completes workout with pain scores', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create();
+    $injury = Injury::factory()->active()->for($user)->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
+        'workout_id' => $workout->id,
+        'rpe' => 7,
+        'feeling' => 4,
+        'pain_scores' => [
+            ['injury_id' => $injury->id, 'pain_score' => 3],
+        ],
+    ]);
+
+    $response->assertOk()
+        ->assertSee('Workout completed successfully');
+
+    assertDatabaseHas('workout_pain_scores', [
+        'workout_id' => $workout->id,
+        'injury_id' => $injury->id,
+        'pain_score' => 3,
+    ]);
+});
+
+it('validates pain score range', function () {
+    $user = User::factory()->create();
+    $workout = Workout::factory()->for($user)->create();
+    $injury = Injury::factory()->active()->for($user)->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
+        'workout_id' => $workout->id,
+        'rpe' => 7,
+        'feeling' => 4,
+        'pain_scores' => [
+            ['injury_id' => $injury->id, 'pain_score' => 11],
+        ],
+    ]);
+
+    $response->assertHasErrors()
+        ->assertSee('Pain score must be between 0 and 10');
+});
+
+it('includes pain scores in response', function () {
+    $user = User::factory()->withTimezone('Europe/Amsterdam')->create();
+    $workout = Workout::factory()->for($user)->create();
+    $injury = Injury::factory()->active()->for($user)->create();
+
+    $response = WorkoutServer::actingAs($user)->tool(CompleteWorkoutTool::class, [
+        'workout_id' => $workout->id,
+        'rpe' => 7,
+        'feeling' => 4,
+        'pain_scores' => [
+            ['injury_id' => $injury->id, 'pain_score' => 5],
+        ],
+    ]);
+
+    $response->assertOk()
+        ->assertSee('"pain_score": 5')
+        ->assertSee('"pain_label": "Moderate"');
 });

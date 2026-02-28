@@ -22,7 +22,7 @@ class CompleteWorkoutTool extends Tool
      * The tool's description.
      */
     protected string $description = <<<'MARKDOWN'
-        Mark a workout as completed with RPE and feeling ratings.
+        Mark a workout as completed with RPE and feeling ratings, and optional pain scores for active injuries.
 
         **RPE (Rate of Perceived Exertion):** 1-10 scale
         - 1-2: Very Easy
@@ -37,6 +37,12 @@ class CompleteWorkoutTool extends Tool
         - 3: Average
         - 4: Good
         - 5: Great
+
+        **Pain Scores:** 0-10 NRS scale (optional, per active injury)
+        - 0: No Pain
+        - 1-3: Mild
+        - 4-6: Moderate
+        - 7-10: Severe
     MARKDOWN;
 
     /**
@@ -48,11 +54,16 @@ class CompleteWorkoutTool extends Tool
             'workout_id' => 'required|integer',
             'rpe' => 'required|integer|min:1|max:10',
             'feeling' => 'required|integer|min:1|max:5',
+            'pain_scores' => 'nullable|array',
+            'pain_scores.*.injury_id' => 'required|integer',
+            'pain_scores.*.pain_score' => 'required|integer|min:0|max:10',
         ], [
             'rpe.min' => 'RPE must be between 1 (very easy) and 10 (maximum effort)',
             'rpe.max' => 'RPE must be between 1 (very easy) and 10 (maximum effort)',
             'feeling.min' => 'Feeling must be between 1 and 5',
             'feeling.max' => 'Feeling must be between 1 and 5',
+            'pain_scores.*.pain_score.min' => 'Pain score must be between 0 and 10',
+            'pain_scores.*.pain_score.max' => 'Pain score must be between 0 and 10',
         ]);
 
         $result = $this->handler->execute(

@@ -48,8 +48,9 @@ class FitnessCoach implements Agent, Conversational, HasTools
         2. **Every structured workout** must have three sections: Warm-Up, Main Work, Cool-Down
         3. **Link exercises** to the exercise library via exercise_id for workload tracking
         4. **Respect injuries** — never program exercises that aggravate active injuries
-        5. **Use metric units** exclusively (kg, meters, seconds)
-        6. **Check workload** before creating workouts to avoid overloading muscle groups in caution/danger zones
+        5. **Track pain after workouts** — when completing workouts for users with active injuries, always collect pain scores (0-10) per injury to track trends over time
+        6. **Use metric units** exclusively (kg, meters, seconds)
+        7. **Check workload** before creating workouts to avoid overloading muscle groups in caution/danger zones
 
         ## Injury Assessment
         Before adding an injury, gather: location, duration, progression, pain type, and whether they've seen a professional. If symptoms suggest something serious (severe pain, numbness, deformity, trauma), strongly recommend medical attention instead.

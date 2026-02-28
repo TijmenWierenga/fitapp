@@ -12,6 +12,7 @@ use App\Models\Section;
 use App\Models\StrengthExercise;
 use App\Models\User;
 use App\Models\Workout;
+use App\Models\WorkoutPainScore;
 
 class WorkoutResponseFormatter
 {
@@ -20,11 +21,11 @@ class WorkoutResponseFormatter
      */
     public static function format(Workout $workout, User $user): array
     {
-        $workout->loadMissing('sections.blocks.exercises.exerciseable');
+        $workout->loadMissing('sections.blocks.exercises.exerciseable', 'painScores.injury');
 
         $estimatedDuration = (new DurationEstimator)->estimate(PlannedBlockMapper::fromWorkout($workout));
 
-        return self::filterNulls([
+        $data = self::filterNulls([
             'id' => $workout->id,
             'name' => $workout->name,
             'activity' => $workout->activity->value,
@@ -37,6 +38,18 @@ class WorkoutResponseFormatter
             'notes' => $workout->notes,
             'sections' => $workout->sections->map(fn (Section $section): array => self::formatSection($section))->toArray(),
         ]);
+
+        if ($workout->painScores->isNotEmpty()) {
+            $data['pain_scores'] = $workout->painScores->map(fn (WorkoutPainScore $ps): array => [
+                'injury_id' => $ps->injury_id,
+                'body_part' => $ps->injury->body_part->value,
+                'injury_type' => $ps->injury->injury_type->value,
+                'pain_score' => $ps->pain_score,
+                'pain_label' => WorkoutPainScore::getPainLabel($ps->pain_score),
+            ])->toArray();
+        }
+
+        return $data;
     }
 
     /**

@@ -2,7 +2,11 @@
 
 namespace App\Livewire\Workout;
 
+use App\Actions\CompleteWorkout;
+use App\DataTransferObjects\Workout\PainScore;
+use App\Models\Injury;
 use App\Models\Workout;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -19,12 +23,15 @@ class Preview extends Component
 
     public ?int $feeling = null;
 
+    /** @var array<int, int> */
+    public array $painScores = [];
+
     #[On('show-workout-preview')]
     public function loadWorkout(int $workoutId): void
     {
         $this->workout = auth()->user()
             ->workouts()
-            ->with('sections.blocks.exercises.exerciseable')
+            ->with('sections.blocks.exercises.exerciseable', 'painScores.injury')
             ->findOrFail($workoutId);
 
         $this->showModal = true;
@@ -34,8 +41,17 @@ class Preview extends Component
     {
         $this->showModal = false;
         $this->workout = null;
-        $this->reset(['rpe', 'feeling', 'showEvaluationModal']);
+        $this->reset(['rpe', 'feeling', 'painScores', 'showEvaluationModal']);
         $this->resetValidation();
+    }
+
+    /**
+     * @return Collection<int, Injury>
+     */
+    #[Computed]
+    public function activeInjuries(): Collection
+    {
+        return auth()->user()->activeInjuries()->get();
     }
 
     #[Computed]
@@ -55,11 +71,12 @@ class Preview extends Component
         $this->showEvaluationModal = true;
     }
 
-    public function submitEvaluation(): void
+    public function submitEvaluation(CompleteWorkout $completeWorkout): void
     {
         $this->validate([
             'rpe' => ['required', 'integer', 'min:1', 'max:10'],
             'feeling' => ['required', 'integer', 'min:1', 'max:5'],
+            'painScores.*' => ['nullable', 'integer', 'min:0', 'max:10'],
         ], [
             'rpe.required' => 'Please rate how hard this workout felt.',
             'rpe.min' => 'RPE must be between 1 and 10.',
@@ -67,11 +84,21 @@ class Preview extends Component
             'feeling.required' => 'Please rate how you felt during this workout.',
             'feeling.min' => 'Feeling must be between 1 and 5.',
             'feeling.max' => 'Feeling must be between 1 and 5.',
+            'painScores.*.min' => 'Pain score must be between 0 and 10.',
+            'painScores.*.max' => 'Pain score must be between 0 and 10.',
         ]);
 
-        $this->workout->markAsCompleted($this->rpe, $this->feeling);
+        $painScoreDtos = collect($this->painScores)
+            ->filter(fn (?int $score): bool => $score !== null)
+            ->map(fn (int $score, int $injuryId): PainScore => new PainScore($injuryId, $score))
+            ->values()
+            ->all();
+
+        $completeWorkout->execute(auth()->user(), $this->workout, $this->rpe, $this->feeling, ...$painScoreDtos);
+
         $this->showEvaluationModal = false;
-        $this->reset(['rpe', 'feeling']);
+        $this->reset(['rpe', 'feeling', 'painScores']);
+        $this->workout->load('painScores.injury');
         $this->workout->refresh();
         $this->dispatch('workout-completed');
     }
@@ -79,7 +106,7 @@ class Preview extends Component
     public function cancelEvaluation(): void
     {
         $this->showEvaluationModal = false;
-        $this->reset(['rpe', 'feeling']);
+        $this->reset(['rpe', 'feeling', 'painScores']);
         $this->resetValidation();
     }
 

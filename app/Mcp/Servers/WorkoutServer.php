@@ -77,7 +77,7 @@ class WorkoutServer extends Server
 
         1. **Create** workout with activity, name, and schedule
         2. **Update** — modify name, activity, schedule, notes, or structure
-        3. **Complete** with RPE and feeling ratings
+        3. **Complete** with RPE, feeling ratings, and optional pain scores for active injuries
         4. **Delete** when no longer needed
 
         ## Creating Workout Plans
@@ -135,6 +135,16 @@ class WorkoutServer extends Server
 
         - Workouts can only be completed once
         - All dates/times are handled in the user's timezone
+
+        ## Pain Score Tracking
+
+        When completing a workout, if the user has active injuries, collect pain scores (0-10 NRS) for each relevant injury:
+        - 0: No Pain
+        - 1-3: Mild
+        - 4-6: Moderate
+        - 7-10: Severe
+
+        Pain scores are optional but encouraged for users with active injuries to enable pain trend tracking over time. Only active (not resolved) injuries can receive pain scores.
 
         ## Injury Assessment Protocol
 

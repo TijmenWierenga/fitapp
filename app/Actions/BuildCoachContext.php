@@ -99,7 +99,9 @@ class BuildCoachContext
 
     public function buildInjurySection(User $user): string
     {
-        $injuries = $user->injuries()->active()->get();
+        $injuries = $user->injuries()->active()->with([
+            'painScores' => fn ($query) => $query->latest()->limit(5),
+        ])->get();
 
         if ($injuries->isEmpty()) {
             return '';
@@ -111,6 +113,11 @@ class BuildCoachContext
 
             if ($injury->notes) {
                 $content .= " — {$injury->notes}";
+            }
+
+            if ($injury->painScores->isNotEmpty()) {
+                $scores = $injury->painScores->pluck('pain_score')->implode(', ');
+                $content .= " — recent pain scores: [{$scores}]";
             }
 
             $content .= "\n";

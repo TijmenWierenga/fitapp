@@ -12,17 +12,7 @@
             <flux:label>Rate of Perceived Exertion (RPE)</flux:label>
             <flux:description>How hard did this workout feel?</flux:description>
             <div class="mt-3">
-                <div class="flex justify-between gap-1">
-                    @foreach(range(1, 10) as $value)
-                        <button
-                            type="button"
-                            wire:click="$set('rpe', {{ $value }})"
-                            class="flex-1 py-2 text-sm font-medium rounded-md transition-colors {{ $rpe === $value ? 'bg-accent text-accent-foreground' : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600' }}"
-                        >
-                            {{ $value }}
-                        </button>
-                    @endforeach
-                </div>
+                <x-numeric-scale :min="1" :max="10" wire="rpe" :selected="$rpe" />
                 <div class="flex justify-between mt-2 text-xs text-zinc-500 dark:text-zinc-400">
                     <span>Very Easy</span>
                     <span>Easy</span>
@@ -62,6 +52,31 @@
             </div>
             <flux:error name="feeling" />
         </flux:field>
+
+        {{-- Pain Assessment Section --}}
+        @if($this->activeInjuries->isNotEmpty())
+            <flux:field>
+                <flux:label>Pain Assessment</flux:label>
+                <flux:description>Rate pain for each active injury during this workout.</flux:description>
+                <div class="mt-3 space-y-4">
+                    @foreach($this->activeInjuries as $injury)
+                        <div>
+                            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                                {{ $injury->body_part->label() }}
+                                <span class="text-zinc-400 dark:text-zinc-500 font-normal">({{ $injury->injury_type->label() }})</span>
+                            </div>
+                            <x-numeric-scale :min="0" :max="10" wire="painScores.{{ $injury->id }}" :selected="$painScores[$injury->id] ?? null" size="xs" />
+                            <div class="flex justify-between mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">
+                                <span>No Pain</span>
+                                <span>Mild</span>
+                                <span>Moderate</span>
+                                <span>Severe</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </flux:field>
+        @endif
 
         <div class="flex gap-2 justify-between">
             <flux:button type="button" wire:click="cancelEvaluation" variant="ghost">

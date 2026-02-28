@@ -25,10 +25,20 @@
     {{-- Messages area --}}
     <div
         class="flex-1 overflow-y-auto px-4 py-6 space-y-6"
-        x-data="{ shouldAutoScroll: true }"
+        x-data="{
+            shouldAutoScroll: true,
+            scrollToBottom() {
+                this.$refs.messageContainer.scrollTo({ top: this.$refs.messageContainer.scrollHeight });
+            },
+            init() {
+                this.scrollToBottom();
+                new MutationObserver(() => {
+                    if (this.shouldAutoScroll) this.scrollToBottom();
+                }).observe(this.$refs.messageContainer, { childList: true, subtree: true, characterData: true });
+            }
+        }"
         x-ref="messageContainer"
         @scroll="shouldAutoScroll = ($refs.messageContainer.scrollTop + $refs.messageContainer.clientHeight) >= ($refs.messageContainer.scrollHeight - 100)"
-        x-effect="if (shouldAutoScroll) $refs.messageContainer.scrollTop = $refs.messageContainer.scrollHeight"
     >
         <div class="max-w-3xl mx-auto space-y-6">
             {{-- Empty state with suggestions --}}

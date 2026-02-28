@@ -28,56 +28,107 @@
         </div>
     @else
         <div class="px-6 pb-4">
-            {{-- Header --}}
-            <div class="flex items-center border-y border-zinc-200 dark:border-zinc-700 py-2">
-                <div class="flex-1 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Exercise</div>
-                <div class="w-[120px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Current e1RM</div>
-                <div class="w-[120px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Previous e1RM</div>
-                <div class="w-[80px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Change</div>
+            {{-- Mobile list --}}
+            <div class="divide-y divide-zinc-200 dark:divide-zinc-700 md:hidden">
+                @foreach($progressions as $progression)
+                    @php
+                        $changeColor = match (true) {
+                            $progression->changePct === null => 'text-zinc-400 dark:text-zinc-500',
+                            $progression->changePct > 0 => 'text-green-600 dark:text-green-400',
+                            $progression->changePct < 0 => 'text-red-600 dark:text-red-400',
+                            default => 'text-zinc-500 dark:text-zinc-400',
+                        };
+                        $changePrefix = $progression->changePct !== null && $progression->changePct > 0 ? '+' : '';
+                        $changeIcon = match (true) {
+                            $progression->changePct === null => null,
+                            $progression->changePct > 0 => 'arrow-trending-up',
+                            $progression->changePct < 0 => 'arrow-trending-down',
+                            default => null,
+                        };
+                    @endphp
+                    <div class="flex items-center justify-between gap-4 py-3.5 px-4">
+                        <div class="min-w-0">
+                            <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{{ $progression->exerciseName }}</div>
+                            <div class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                                @if($progression->previousE1RM !== null)
+                                    prev: {{ number_format($progression->previousE1RM, 1) }} kg
+                                @else
+                                    prev: &mdash;
+                                @endif
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <div class="text-sm font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{{ number_format($progression->currentE1RM, 1) }} kg</div>
+                            <div class="text-xs tabular-nums {{ $changeColor }} mt-0.5">
+                                @if($progression->changePct !== null)
+                                    <span class="inline-flex items-center justify-end gap-0.5">
+                                        @if($changeIcon)
+                                            <flux:icon :icon="$changeIcon" class="size-3" />
+                                        @endif
+                                        <span>{{ $changePrefix }}{{ number_format($progression->changePct, 1) }}%</span>
+                                    </span>
+                                @else
+                                    &mdash;
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
 
-            {{-- Rows --}}
-            @foreach($progressions as $progression)
-                @php
-                    $changeColor = match (true) {
-                        $progression->changePct === null => 'text-zinc-400 dark:text-zinc-500',
-                        $progression->changePct > 0 => 'text-green-600 dark:text-green-400',
-                        $progression->changePct < 0 => 'text-red-600 dark:text-red-400',
-                        default => 'text-zinc-500 dark:text-zinc-400',
-                    };
-                    $changePrefix = $progression->changePct !== null && $progression->changePct > 0 ? '+' : '';
-                    $changeIcon = match (true) {
-                        $progression->changePct === null => null,
-                        $progression->changePct > 0 => 'arrow-trending-up',
-                        $progression->changePct < 0 => 'arrow-trending-down',
-                        default => null,
-                    };
-                    $isLast = $loop->last;
-                @endphp
-                <div @class(['flex items-center py-2.5', 'border-b border-zinc-100 dark:border-zinc-800' => ! $isLast])>
-                    <div class="flex-1 text-xs text-zinc-900 dark:text-zinc-100 truncate pr-2">{{ $progression->exerciseName }}</div>
-                    <div class="w-[120px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">{{ number_format($progression->currentE1RM, 1) }} kg</div>
-                    <div class="w-[120px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
-                        @if($progression->previousE1RM !== null)
-                            {{ number_format($progression->previousE1RM, 1) }} kg
-                        @else
-                            <span class="text-zinc-400 dark:text-zinc-500">&mdash;</span>
-                        @endif
-                    </div>
-                    <div class="w-[80px] text-right text-xs tabular-nums {{ $changeColor }}">
-                        @if($progression->changePct !== null)
-                            <span class="inline-flex items-center justify-end gap-0.5">
-                                @if($changeIcon)
-                                    <flux:icon :icon="$changeIcon" class="size-3.5" />
-                                @endif
-                                <span class="font-semibold">{{ $changePrefix }}{{ number_format($progression->changePct, 1) }}%</span>
-                            </span>
-                        @else
-                            <span class="text-zinc-400 dark:text-zinc-500">&mdash;</span>
-                        @endif
-                    </div>
+            {{-- Desktop table --}}
+            <div class="hidden md:block">
+                {{-- Header --}}
+                <div class="flex items-center border-y border-zinc-200 dark:border-zinc-700 py-2">
+                    <div class="flex-1 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Exercise</div>
+                    <div class="w-[120px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Current e1RM</div>
+                    <div class="w-[120px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Previous e1RM</div>
+                    <div class="w-[80px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Change</div>
                 </div>
-            @endforeach
+
+                {{-- Rows --}}
+                @foreach($progressions as $progression)
+                    @php
+                        $changeColor = match (true) {
+                            $progression->changePct === null => 'text-zinc-400 dark:text-zinc-500',
+                            $progression->changePct > 0 => 'text-green-600 dark:text-green-400',
+                            $progression->changePct < 0 => 'text-red-600 dark:text-red-400',
+                            default => 'text-zinc-500 dark:text-zinc-400',
+                        };
+                        $changePrefix = $progression->changePct !== null && $progression->changePct > 0 ? '+' : '';
+                        $changeIcon = match (true) {
+                            $progression->changePct === null => null,
+                            $progression->changePct > 0 => 'arrow-trending-up',
+                            $progression->changePct < 0 => 'arrow-trending-down',
+                            default => null,
+                        };
+                        $isLast = $loop->last;
+                    @endphp
+                    <div @class(['flex items-center py-2.5', 'border-b border-zinc-100 dark:border-zinc-800' => ! $isLast])>
+                        <div class="flex-1 text-xs text-zinc-900 dark:text-zinc-100 truncate pr-2">{{ $progression->exerciseName }}</div>
+                        <div class="w-[120px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">{{ number_format($progression->currentE1RM, 1) }} kg</div>
+                        <div class="w-[120px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
+                            @if($progression->previousE1RM !== null)
+                                {{ number_format($progression->previousE1RM, 1) }} kg
+                            @else
+                                <span class="text-zinc-400 dark:text-zinc-500">&mdash;</span>
+                            @endif
+                        </div>
+                        <div class="w-[80px] text-right text-xs tabular-nums {{ $changeColor }}">
+                            @if($progression->changePct !== null)
+                                <span class="inline-flex items-center justify-end gap-0.5">
+                                    @if($changeIcon)
+                                        <flux:icon :icon="$changeIcon" class="size-3.5" />
+                                    @endif
+                                    <span class="font-semibold">{{ $changePrefix }}{{ number_format($progression->changePct, 1) }}%</span>
+                                </span>
+                            @else
+                                <span class="text-zinc-400 dark:text-zinc-500">&mdash;</span>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         </div>
     @endif
 </div>

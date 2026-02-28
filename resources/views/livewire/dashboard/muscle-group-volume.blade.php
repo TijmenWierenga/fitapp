@@ -28,52 +28,96 @@
         </div>
     @else
         <div class="px-6 pb-4">
-            {{-- Header --}}
-            <div class="flex items-center border-y border-zinc-200 dark:border-zinc-700 py-2">
-                <div class="flex-1 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Muscle Group</div>
-                <div class="w-[100px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Weekly Sets</div>
-                <div class="w-[100px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">4-Wk Avg</div>
-                <div class="w-[100px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Trend</div>
+            {{-- Mobile cards --}}
+            <div class="space-y-2 md:hidden">
+                @foreach($volumes as $volume)
+                    @php
+                        $trendIcon = match ($volume->trend) {
+                            \App\Domain\Workload\Enums\Trend::Increasing => 'arrow-trending-up',
+                            \App\Domain\Workload\Enums\Trend::Decreasing => 'arrow-trending-down',
+                            \App\Domain\Workload\Enums\Trend::Stable => 'minus',
+                        };
+                        $trendColor = match ($volume->trend) {
+                            \App\Domain\Workload\Enums\Trend::Increasing => 'text-green-600 dark:text-green-400',
+                            \App\Domain\Workload\Enums\Trend::Decreasing => 'text-red-600 dark:text-red-400',
+                            \App\Domain\Workload\Enums\Trend::Stable => 'text-zinc-400 dark:text-zinc-500',
+                        };
+                        $trendLabel = match ($volume->trend) {
+                            \App\Domain\Workload\Enums\Trend::Increasing => 'Increasing',
+                            \App\Domain\Workload\Enums\Trend::Decreasing => 'Decreasing',
+                            \App\Domain\Workload\Enums\Trend::Stable => 'Stable',
+                        };
+                        $hasInjury = in_array($volume->bodyPart, $injuredBodyParts);
+                    @endphp
+                    <div class="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 p-4">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                                {{ $volume->label }}
+                                @if($hasInjury)
+                                    <flux:badge size="sm" variant="danger" icon="exclamation-triangle">Injured</flux:badge>
+                                @endif
+                            </div>
+                            <div class="flex items-center gap-0.5 {{ $trendColor }} shrink-0">
+                                <flux:icon :icon="$trendIcon" class="size-3.5" />
+                                <span class="text-xs font-semibold">{{ $trendLabel }}</span>
+                            </div>
+                        </div>
+                        <div class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                            {{ number_format($volume->currentWeekSets, 1) }} sets this week · {{ number_format($volume->fourWeekAverageSets, 1) }} avg
+                        </div>
+                    </div>
+                @endforeach
             </div>
 
-            {{-- Rows --}}
-            @foreach($volumes as $volume)
-                @php
-                    $trendIcon = match ($volume->trend) {
-                        \App\Domain\Workload\Enums\Trend::Increasing => 'arrow-trending-up',
-                        \App\Domain\Workload\Enums\Trend::Decreasing => 'arrow-trending-down',
-                        \App\Domain\Workload\Enums\Trend::Stable => 'minus',
-                    };
-                    $trendColor = match ($volume->trend) {
-                        \App\Domain\Workload\Enums\Trend::Increasing => 'text-green-600 dark:text-green-400',
-                        \App\Domain\Workload\Enums\Trend::Decreasing => 'text-red-600 dark:text-red-400',
-                        \App\Domain\Workload\Enums\Trend::Stable => 'text-zinc-400 dark:text-zinc-500',
-                    };
-                    $trendLabel = match ($volume->trend) {
-                        \App\Domain\Workload\Enums\Trend::Increasing => 'Increasing',
-                        \App\Domain\Workload\Enums\Trend::Decreasing => 'Decreasing',
-                        \App\Domain\Workload\Enums\Trend::Stable => 'Stable',
-                    };
-                    $hasInjury = in_array($volume->bodyPart, $injuredBodyParts);
-                    $isLast = $loop->last;
-                @endphp
-                <div @class(['flex items-center py-2.5', 'border-b border-zinc-100 dark:border-zinc-800' => ! $isLast])>
-                    <div class="flex-1 flex items-center gap-2 text-xs text-zinc-900 dark:text-zinc-100 truncate pr-2">
-                        {{ $volume->label }}
-                        @if($hasInjury)
-                            <flux:badge size="sm" variant="danger" icon="exclamation-triangle">Injured</flux:badge>
-                        @endif
-                    </div>
-                    <div class="w-[100px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">{{ number_format($volume->currentWeekSets, 1) }}</div>
-                    <div class="w-[100px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">{{ number_format($volume->fourWeekAverageSets, 1) }}</div>
-                    <div class="w-[100px] text-right text-xs {{ $trendColor }}">
-                        <span class="inline-flex items-center justify-end gap-0.5">
-                            <flux:icon :icon="$trendIcon" class="size-3.5" />
-                            <span class="font-semibold">{{ $trendLabel }}</span>
-                        </span>
-                    </div>
+            {{-- Desktop table --}}
+            <div class="hidden md:block">
+                {{-- Header --}}
+                <div class="flex items-center border-y border-zinc-200 dark:border-zinc-700 py-2">
+                    <div class="flex-1 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Muscle Group</div>
+                    <div class="w-[100px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Weekly Sets</div>
+                    <div class="w-[100px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">4-Wk Avg</div>
+                    <div class="w-[100px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Trend</div>
                 </div>
-            @endforeach
+
+                {{-- Rows --}}
+                @foreach($volumes as $volume)
+                    @php
+                        $trendIcon = match ($volume->trend) {
+                            \App\Domain\Workload\Enums\Trend::Increasing => 'arrow-trending-up',
+                            \App\Domain\Workload\Enums\Trend::Decreasing => 'arrow-trending-down',
+                            \App\Domain\Workload\Enums\Trend::Stable => 'minus',
+                        };
+                        $trendColor = match ($volume->trend) {
+                            \App\Domain\Workload\Enums\Trend::Increasing => 'text-green-600 dark:text-green-400',
+                            \App\Domain\Workload\Enums\Trend::Decreasing => 'text-red-600 dark:text-red-400',
+                            \App\Domain\Workload\Enums\Trend::Stable => 'text-zinc-400 dark:text-zinc-500',
+                        };
+                        $trendLabel = match ($volume->trend) {
+                            \App\Domain\Workload\Enums\Trend::Increasing => 'Increasing',
+                            \App\Domain\Workload\Enums\Trend::Decreasing => 'Decreasing',
+                            \App\Domain\Workload\Enums\Trend::Stable => 'Stable',
+                        };
+                        $hasInjury = in_array($volume->bodyPart, $injuredBodyParts);
+                        $isLast = $loop->last;
+                    @endphp
+                    <div @class(['flex items-center py-2.5', 'border-b border-zinc-100 dark:border-zinc-800' => ! $isLast])>
+                        <div class="flex-1 flex items-center gap-2 text-xs text-zinc-900 dark:text-zinc-100 truncate pr-2">
+                            {{ $volume->label }}
+                            @if($hasInjury)
+                                <flux:badge size="sm" variant="danger" icon="exclamation-triangle">Injured</flux:badge>
+                            @endif
+                        </div>
+                        <div class="w-[100px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">{{ number_format($volume->currentWeekSets, 1) }}</div>
+                        <div class="w-[100px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">{{ number_format($volume->fourWeekAverageSets, 1) }}</div>
+                        <div class="w-[100px] text-right text-xs {{ $trendColor }}">
+                            <span class="inline-flex items-center justify-end gap-0.5">
+                                <flux:icon :icon="$trendIcon" class="size-3.5" />
+                                <span class="font-semibold">{{ $trendLabel }}</span>
+                            </span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         </div>
     @endif
 

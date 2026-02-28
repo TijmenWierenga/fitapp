@@ -37,6 +37,9 @@ class WorkoutSeeder extends Seeder
         ['name' => 'Long Run', 'activity' => Activity::Run, 'day' => 5, 'hour' => 8],
     ];
 
+    /** @var array<string, ?Exercise> */
+    private array $exercises = [];
+
     public function run(): void
     {
         $user = User::first();
@@ -47,6 +50,8 @@ class WorkoutSeeder extends Seeder
             return;
         }
 
+        $this->loadExercises();
+
         DB::transaction(function () use ($user): void {
             $this->seedPastWorkouts($user);
             $this->seedUpcomingWorkouts($user);
@@ -56,24 +61,44 @@ class WorkoutSeeder extends Seeder
         $this->command->info('Seeded 8 weeks of realistic workout data.');
     }
 
+    private function loadExercises(): void
+    {
+        $all = Exercise::all();
+
+        $lookup = [
+            'benchPress' => 'Barbell Bench Press - Medium Grip',
+            'overheadPress' => 'Standing Military Press',
+            'barbellRow' => 'Bent Over Barbell Row',
+            'pullUp' => 'Pullups',
+            'dbCurl' => 'Dumbbell Bicep Curl',
+            'tricepPushdown' => 'Triceps Pushdown',
+            'squat' => 'Barbell Squat',
+            'deadlift' => 'Barbell Deadlift',
+            'legPress' => 'Leg Press',
+            'legCurl' => 'Seated Leg Curl',
+            'calfRaise' => 'Standing Calf Raises',
+            'plank' => 'Plank',
+            'burpee' => 'Burpee',
+            'mountainClimber' => 'Cross Body Mountain Climber',
+            'jumpingJacks' => 'Jumping Jacks',
+            'kneeTuckJump' => 'Knee Tuck Jump',
+            'thrusters' => 'Thrusters',
+            'bodyweightSquat' => 'Bodyweight Squat',
+            'catStretch' => 'Cat Stretch',
+            'childsPose' => "Child's Pose",
+            'cobra' => 'Cobra',
+            'hamstringStretch' => 'Hamstring Stretch',
+            'groinBackStretch' => 'Groin and Back Stretch',
+        ];
+
+        foreach ($lookup as $key => $name) {
+            $this->exercises[$key] = $all->firstWhere('name', $name);
+        }
+    }
+
     private function seedPastWorkouts(User $user): void
     {
         $now = CarbonImmutable::now();
-        $exercises = Exercise::all();
-
-        // Find exercises by name for realistic linking
-        $benchPress = $exercises->firstWhere('name', 'Barbell Bench Press - Medium Grip');
-        $overheadPress = $exercises->firstWhere('name', 'Standing Military Press');
-        $barbellRow = $exercises->firstWhere('name', 'Bent Over Barbell Row');
-        $pullUp = $exercises->firstWhere('name', 'Pullups');
-        $dbCurl = $exercises->firstWhere('name', 'Dumbbell Bicep Curl');
-        $tricepPushdown = $exercises->firstWhere('name', 'Triceps Pushdown');
-        $squat = $exercises->firstWhere('name', 'Barbell Squat');
-        $deadlift = $exercises->firstWhere('name', 'Barbell Deadlift');
-        $legPress = $exercises->firstWhere('name', 'Leg Press');
-        $legCurl = $exercises->firstWhere('name', 'Seated Leg Curl');
-        $calfRaise = $exercises->firstWhere('name', 'Standing Calf Raises');
-        $plank = $exercises->firstWhere('name', 'Plank');
 
         for ($weekOffset = 7; $weekOffset >= 0; $weekOffset--) {
             $weekStart = $now->startOfWeek()->subWeeks($weekOffset);
@@ -110,19 +135,44 @@ class WorkoutSeeder extends Seeder
                     'feeling' => $feeling,
                 ]);
 
-                match ($template['activity']) {
-                    Activity::Strength => $template['name'] === 'Upper Body Strength'
-                        ? $this->buildUpperBodyStrength($workout, $weightMultiplier, $benchPress, $overheadPress, $barbellRow, $pullUp, $dbCurl, $tricepPushdown)
-                        : $this->buildLowerBodyStrength($workout, $weightMultiplier, $squat, $deadlift, $legPress, $legCurl, $calfRaise, $plank),
-                    Activity::Run => $template['name'] === 'Long Run'
-                        ? $this->buildLongRun($workout)
-                        : $this->buildEasyRun($workout),
-                    Activity::HIIT => $this->buildHiit($workout),
-                    Activity::Yoga => $this->buildYoga($workout),
-                    default => null,
-                };
+                $this->buildWorkoutStructure($workout, $template['name'], $template['activity'], $weightMultiplier);
             }
         }
+    }
+
+    private function buildWorkoutStructure(Workout $workout, string $name, Activity $activity, float $weightMultiplier): void
+    {
+        match ($activity) {
+            Activity::Strength => $name === 'Upper Body Strength'
+                ? $this->buildUpperBodyStrength(
+                    $workout, $weightMultiplier,
+                    $this->exercises['benchPress'], $this->exercises['overheadPress'],
+                    $this->exercises['barbellRow'], $this->exercises['pullUp'],
+                    $this->exercises['dbCurl'], $this->exercises['tricepPushdown'],
+                )
+                : $this->buildLowerBodyStrength(
+                    $workout, $weightMultiplier,
+                    $this->exercises['squat'], $this->exercises['deadlift'],
+                    $this->exercises['legPress'], $this->exercises['legCurl'],
+                    $this->exercises['calfRaise'], $this->exercises['plank'],
+                ),
+            Activity::Run => $name === 'Long Run'
+                ? $this->buildLongRun($workout)
+                : $this->buildEasyRun($workout),
+            Activity::HIIT => $this->buildHiit(
+                $workout,
+                $this->exercises['burpee'], $this->exercises['mountainClimber'],
+                $this->exercises['jumpingJacks'], $this->exercises['kneeTuckJump'],
+                $this->exercises['thrusters'], $this->exercises['bodyweightSquat'],
+            ),
+            Activity::Yoga => $this->buildYoga(
+                $workout,
+                $this->exercises['catStretch'], $this->exercises['cobra'],
+                $this->exercises['hamstringStretch'], $this->exercises['groinBackStretch'],
+                $this->exercises['childsPose'],
+            ),
+            default => null,
+        };
     }
 
     private function buildUpperBodyStrength(
@@ -196,9 +246,9 @@ class WorkoutSeeder extends Seeder
             'section_id' => $accessorySection->id, 'order' => 0,
             'rounds' => 3, 'rest_between_exercises' => 30, 'rest_between_rounds' => 60,
         ]);
-        $this->addDurationExercise($block2, 'Leg Press', 0, 45, $legPress);
-        $this->addDurationExercise($block2, 'Leg Curl', 1, 30, $legCurl);
-        $this->addDurationExercise($block2, 'Calf Raises', 2, 30, $calfRaise);
+        $this->addStrengthExercise($block2, 'Leg Press', 0, null, 12, round(80 * $weightMultiplier, 2), $legPress);
+        $this->addStrengthExercise($block2, 'Leg Curl', 1, null, 12, round(30 * $weightMultiplier, 2), $legCurl);
+        $this->addStrengthExercise($block2, 'Calf Raises', 2, null, 15, round(40 * $weightMultiplier, 2), $calfRaise);
 
         // Section 3: Core
         $coreSection = Section::factory()->create([
@@ -243,8 +293,15 @@ class WorkoutSeeder extends Seeder
         $this->addCardioExercise($block, 'Long Run', 0, $duration, round($distance, 2), 2);
     }
 
-    private function buildHiit(Workout $workout): void
-    {
+    private function buildHiit(
+        Workout $workout,
+        ?Exercise $burpee,
+        ?Exercise $mountainClimber,
+        ?Exercise $jumpingJacks,
+        ?Exercise $kneeTuckJump,
+        ?Exercise $thrusters,
+        ?Exercise $bodyweightSquat,
+    ): void {
         // Warm-up
         $warmup = Section::factory()->create([
             'workout_id' => $workout->id, 'name' => 'Warm-up', 'order' => 0,
@@ -262,28 +319,43 @@ class WorkoutSeeder extends Seeder
             'section_id' => $main->id, 'order' => 0,
             'rounds' => 8, 'work_interval' => 30, 'rest_interval' => 15,
         ]);
+        $this->addDurationExercise($intervalBlock, 'Burpee', 0, 30, $burpee);
+        $this->addDurationExercise($intervalBlock, 'Mountain Climber', 1, 30, $mountainClimber);
+        $this->addDurationExercise($intervalBlock, 'Jumping Jacks', 2, 30, $jumpingJacks);
+        $this->addDurationExercise($intervalBlock, 'Knee Tuck Jump', 3, 30, $kneeTuckJump);
 
         // AMRAP finisher
         $finisher = Section::factory()->create([
             'workout_id' => $workout->id, 'name' => 'Finisher', 'order' => 2,
         ]);
-        Block::factory()->amrap()->create([
+        $amrapBlock = Block::factory()->amrap()->create([
             'section_id' => $finisher->id, 'order' => 0,
             'time_cap' => 600,
         ]);
+        $this->addStrengthExercise($amrapBlock, 'Thrusters', 0, null, 10, null, $thrusters);
+        $this->addStrengthExercise($amrapBlock, 'Burpee', 1, null, 10, null, $burpee);
+        $this->addStrengthExercise($amrapBlock, 'Bodyweight Squat', 2, null, 15, null, $bodyweightSquat);
     }
 
-    private function buildYoga(Workout $workout): void
-    {
+    private function buildYoga(
+        Workout $workout,
+        ?Exercise $catStretch,
+        ?Exercise $cobra,
+        ?Exercise $hamstringStretch,
+        ?Exercise $groinBackStretch,
+        ?Exercise $childsPose,
+    ): void {
         $section = Section::factory()->create([
             'workout_id' => $workout->id, 'name' => 'Flow', 'order' => 0,
         ]);
 
-        // Single duration block for yoga
-        $block = Block::factory()->distanceDuration()->create([
-            'section_id' => $section->id, 'order' => 0,
+        $block = Block::factory()->create([
+            'section_id' => $section->id, 'block_type' => BlockType::StraightSets, 'order' => 0,
         ]);
-        $this->addDurationExercise($block, 'Yoga Flow', 0, fake()->randomElement([1800, 2400, 3600]));
+        $this->addDurationExercise($block, 'Cat Stretch', 0, 120, $catStretch);
+        $this->addDurationExercise($block, 'Cobra', 1, 120, $cobra);
+        $this->addDurationExercise($block, 'Hamstring Stretch', 2, 120, $hamstringStretch);
+        $this->addDurationExercise($block, 'Groin and Back Stretch', 3, 120, $groinBackStretch);
 
         // Rest block
         $restSection = Section::factory()->create([
@@ -292,7 +364,7 @@ class WorkoutSeeder extends Seeder
         $restBlock = Block::factory()->rest()->create([
             'section_id' => $restSection->id, 'order' => 0,
         ]);
-        $this->addDurationExercise($restBlock, 'Savasana', 0, 300);
+        $this->addDurationExercise($restBlock, "Child's Pose", 0, 300, $childsPose);
     }
 
     private function addStrengthExercise(
@@ -330,6 +402,7 @@ class WorkoutSeeder extends Seeder
         int $duration,
         float $distance,
         int $hrZone,
+        ?Exercise $exercise = null,
     ): void {
         $cardio = CardioExercise::factory()->create([
             'target_duration' => $duration,
@@ -339,6 +412,7 @@ class WorkoutSeeder extends Seeder
 
         BlockExercise::factory()->create([
             'block_id' => $block->id,
+            'exercise_id' => $exercise?->id,
             'name' => $name,
             'order' => $order,
             'exerciseable_type' => $cardio->getMorphClass(),
@@ -370,6 +444,7 @@ class WorkoutSeeder extends Seeder
     private function seedUpcomingWorkouts(User $user): void
     {
         $now = CarbonImmutable::now();
+        $weightMultiplier = 1.16; // Continuation of 8-week progression at +2%/week
 
         // Next 2 weeks of planned workouts
         for ($weekOffset = 0; $weekOffset <= 1; $weekOffset++) {
@@ -382,13 +457,15 @@ class WorkoutSeeder extends Seeder
                     continue;
                 }
 
-                Workout::factory()->create([
+                $workout = Workout::factory()->create([
                     'user_id' => $user->id,
                     'name' => $template['name'],
                     'activity' => $template['activity'],
                     'scheduled_at' => $scheduledAt,
                     'completed_at' => null,
                 ]);
+
+                $this->buildWorkoutStructure($workout, $template['name'], $template['activity'], $weightMultiplier);
             }
         }
     }

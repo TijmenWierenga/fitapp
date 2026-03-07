@@ -10,13 +10,23 @@
             <x-coach-avatar size="sm" />
             <div>
                 <flux:heading size="sm">{{ __('Fitness Coach') }}</flux:heading>
-                <div class="flex items-center gap-1.5">
-                    <span class="relative flex size-2">
-                        <span class="absolute inline-flex size-full animate-ping rounded-full bg-lime-400 opacity-75"></span>
-                        <span class="relative inline-flex size-2 rounded-full bg-lime-500"></span>
-                    </span>
-                    <span class="text-xs text-lime-600 dark:text-lime-400">{{ __('Online') }}</span>
-                </div>
+                @if ($pendingMessage)
+                    <div class="flex items-center gap-1.5">
+                        <span class="relative flex size-2">
+                            <span class="absolute inline-flex size-full animate-ping rounded-full bg-indigo-400 opacity-75"></span>
+                            <span class="relative inline-flex size-2 rounded-full bg-indigo-500"></span>
+                        </span>
+                        <span class="text-xs text-indigo-600 dark:text-indigo-400">{{ __('Thinking...') }}</span>
+                    </div>
+                @else
+                    <div class="flex items-center gap-1.5">
+                        <span class="relative flex size-2">
+                            <span class="absolute inline-flex size-full animate-ping rounded-full bg-lime-400 opacity-75"></span>
+                            <span class="relative inline-flex size-2 rounded-full bg-lime-500"></span>
+                        </span>
+                        <span class="text-xs text-lime-600 dark:text-lime-400">{{ __('Online') }}</span>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -42,7 +52,7 @@
     >
         <div class="max-w-3xl mx-auto space-y-6">
             {{-- Empty state with suggestions --}}
-            @if ($this->conversationMessages->isEmpty() && ! $isStreaming && ! $pendingMessage)
+            @if ($this->conversationMessages->isEmpty() && ! $pendingMessage)
                 <div class="flex flex-col items-center justify-center py-12">
                     <x-coach-avatar size="lg" class="mb-6" />
                     <flux:heading size="lg" class="mb-2">{{ __('Ready to crush your goals?') }}</flux:heading>
@@ -171,7 +181,7 @@
             @endif
 
             {{-- Assistant streaming response --}}
-            @if ($pendingMessage || $isStreaming || $streamedResponse)
+            @if ($pendingMessage || $streamedResponse)
                 <div class="flex gap-3">
                     <div class="flex-none flex items-start">
                         <x-coach-avatar size="sm" />
@@ -273,10 +283,13 @@
                                 class="prose prose-sm prose-zinc dark:prose-invert prose-lime max-w-none"
                                 :class="! hasResponse && 'hidden'"
                             ></div>
-                            <div x-show="! hasResponse" class="flex items-center gap-1.5 py-0.5">
-                                <span class="size-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" style="animation-delay: 0ms"></span>
-                                <span class="size-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" style="animation-delay: 150ms"></span>
-                                <span class="size-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" style="animation-delay: 300ms"></span>
+                            <div x-show="! hasResponse" class="flex items-center gap-2 py-0.5">
+                                <span class="flex items-center gap-1">
+                                    <span class="size-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" style="animation-delay: 0ms"></span>
+                                    <span class="size-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" style="animation-delay: 150ms"></span>
+                                    <span class="size-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" style="animation-delay: 300ms"></span>
+                                </span>
+                                <span class="text-xs text-zinc-400 dark:text-zinc-500">{{ __('Thinking...') }}</span>
                             </div>
                         </div>
                     </div>
@@ -329,7 +342,7 @@
                     submit="enter"
                     rows="1"
                     max-rows="4"
-                    :disabled="$isStreaming || $limitExhausted"
+                    :disabled="(bool) $pendingMessage || $limitExhausted"
                 >
                     <x-slot name="actionsTrailing">
                         <flux:button
@@ -337,7 +350,9 @@
                             size="sm"
                             variant="primary"
                             icon="paper-airplane"
-                            :disabled="! $message || $isStreaming || $limitExhausted"
+                            :disabled="! $message || (bool) $pendingMessage || $limitExhausted"
+                            wire:loading.attr="disabled"
+                            wire:target="submitPrompt"
                         />
                     </x-slot>
                 </flux:composer>

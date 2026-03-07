@@ -309,6 +309,29 @@ it('sets pending message on submit and clears input', function () {
         ->assertSet('message', '');
 });
 
+it('shows thinking status in top bar when pending message is set', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Conversation::class)
+        ->assertSee('Online')
+        ->assertDontSee('Thinking...')
+        ->set('message', 'Build me a workout')
+        ->call('submitPrompt')
+        ->assertSee('Thinking...')
+        ->assertDontSee('Online');
+});
+
+it('shows thinking text in response bubble when pending message is set', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Conversation::class)
+        ->set('message', 'Build me a workout')
+        ->call('submitPrompt')
+        ->assertSeeHtml('Thinking...');
+});
+
 it('uses suggestion to set message and submit', function () {
     FitnessCoach::fake(['Great suggestion!']);
 

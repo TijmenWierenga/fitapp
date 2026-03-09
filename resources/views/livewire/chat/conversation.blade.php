@@ -337,7 +337,7 @@
         <div class="max-w-3xl mx-auto {{ $limitExhausted ? 'opacity-40' : '' }}">
             <form wire:submit="submitPrompt">
                 <flux:composer
-                    wire:model="message"
+                    wire:model.live.debounce.250ms="message"
                     placeholder="{{ $limitExhausted ? ($this->remainingMonthlyMessages <= 0 ? __('Monthly limit reached') : __('Daily limit reached')) : __('Ask your coach anything...') }}"
                     submit="enter"
                     rows="1"

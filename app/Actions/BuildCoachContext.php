@@ -2,7 +2,9 @@
 
 namespace App\Actions;
 
+use App\Enums\Equipment;
 use App\Enums\Workout\Activity;
+use App\Models\FitnessProfile;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 
@@ -58,7 +60,55 @@ class BuildCoachContext
 
         $content .= "- **Available days/week:** {$profile->available_days_per_week}\n";
         $content .= "- **Minutes per session:** {$profile->minutes_per_session}\n";
-        $content .= '- **Prefer Garmin exercises:** '.($profile->prefer_garmin_exercises ? 'Yes' : 'No');
+        $content .= '- **Prefer Garmin exercises:** '.($profile->prefer_garmin_exercises ? 'Yes' : 'No')."\n";
+
+        $content .= $this->buildPhysicalContext($profile);
+        $content .= $this->buildEquipmentContext($profile);
+
+        return rtrim($content);
+    }
+
+    private function buildPhysicalContext(FitnessProfile $profile): string
+    {
+        $content = '';
+
+        if ($profile->experience_level) {
+            $content .= "- **Experience:** {$profile->experience_level->label()} — {$profile->experience_level->description()}\n";
+        }
+
+        if ($profile->age !== null) {
+            $content .= "- **Age:** {$profile->age}\n";
+        }
+
+        if ($profile->biological_sex) {
+            $content .= "- **Biological sex:** {$profile->biological_sex->label()}\n";
+        }
+
+        if ($profile->body_weight_kg !== null) {
+            $content .= "- **Body weight:** {$profile->body_weight_kg} kg\n";
+        }
+
+        if ($profile->height_cm !== null) {
+            $content .= "- **Height:** {$profile->height_cm} cm\n";
+        }
+
+        return $content;
+    }
+
+    private function buildEquipmentContext(FitnessProfile $profile): string
+    {
+        $content = '';
+
+        if ($profile->has_gym_access) {
+            $content .= "- **Gym access:** Yes (standard gym equipment available)\n";
+        }
+
+        if (! empty($profile->home_equipment)) {
+            $equipment = collect($profile->home_equipment)
+                ->map(fn (string $value): string => Equipment::from($value)->label())
+                ->implode(', ');
+            $content .= "- **Home equipment:** {$equipment}\n";
+        }
 
         return $content;
     }

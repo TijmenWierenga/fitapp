@@ -26,7 +26,7 @@ class GetStarted extends Component
 
         if ($method === 'chat') {
             if (auth()->check()) {
-                $this->redirect(route('coach', ['intake' => 1]));
+                $this->redirect(route('onboarding'));
             } else {
                 $this->redirect(route('register'));
             }

@@ -10,6 +10,9 @@ enum FitnessGoal: string
     case MuscleGain = 'muscle_gain';
     case Endurance = 'endurance';
     case GeneralFitness = 'general_fitness';
+    case SportsPerformance = 'sports_performance';
+    case InjuryRecovery = 'injury_recovery';
+    case Flexibility = 'flexibility';
 
     public function label(): string
     {
@@ -18,6 +21,9 @@ enum FitnessGoal: string
             self::MuscleGain => 'Muscle Gain',
             self::Endurance => 'Endurance',
             self::GeneralFitness => 'General Fitness',
+            self::SportsPerformance => 'Sports Performance',
+            self::InjuryRecovery => 'Injury Recovery',
+            self::Flexibility => 'Flexibility',
         };
     }
 
@@ -28,6 +34,9 @@ enum FitnessGoal: string
             self::MuscleGain => 'Build strength and increase muscle mass',
             self::Endurance => 'Improve cardiovascular fitness and stamina',
             self::GeneralFitness => 'Maintain overall health and well-being',
+            self::SportsPerformance => 'Improve performance in a specific sport',
+            self::InjuryRecovery => 'Rehabilitate and return to full activity',
+            self::Flexibility => 'Improve mobility, flexibility, and movement quality',
         };
     }
 }

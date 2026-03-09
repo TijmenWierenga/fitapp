@@ -186,13 +186,13 @@ it('does not show dashboard link for guests on step 3', function () {
         ->assertDontSee('Go to Dashboard');
 });
 
-it('chat method redirects authenticated users to coach', function () {
+it('chat method redirects authenticated users to onboarding', function () {
     $user = User::factory()->create();
 
     Livewire::actingAs($user)
         ->test(GetStarted::class)
         ->call('selectMethod', 'chat')
-        ->assertRedirect(route('coach', ['intake' => 1]));
+        ->assertRedirect(route('onboarding'));
 });
 
 it('chat method redirects guests to register', function () {

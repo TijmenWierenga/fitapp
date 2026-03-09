@@ -76,7 +76,7 @@ return [
     'home' => '/dashboard',
 
     'redirects' => [
-        'register' => '/coach?intake=1',
+        'register' => '/onboarding',
     ],
 
     /*

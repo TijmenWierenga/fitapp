@@ -17,9 +17,9 @@ class UpdateFitnessProfileTool implements Tool
     public function description(): string
     {
         return <<<'TEXT'
-        Update or create the user's fitness profile. Set their fitness goals, available training days, and session duration preferences.
+        Update or create the user's fitness profile. Set their fitness goals, available training days, session duration preferences, physical attributes, and equipment availability.
 
-        Primary Goals: weight_loss, muscle_gain, endurance, general_fitness.
+        Primary Goals: weight_loss, muscle_gain, endurance, general_fitness, sports_performance, injury_recovery, flexibility.
         TEXT;
     }
 

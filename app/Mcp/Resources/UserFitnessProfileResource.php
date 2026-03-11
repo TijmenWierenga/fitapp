@@ -4,6 +4,7 @@ namespace App\Mcp\Resources;
 
 use App\Models\FitnessProfile;
 use App\Models\User;
+use App\Support\Markdown\MarkdownBuilder;
 use Laravel\Mcp\Enums\Role;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -57,71 +58,33 @@ class UserFitnessProfileResource extends Resource
 
         $profile = $user->fitnessProfile;
 
-        return "# Fitness Profile\n\n"
-            .$this->buildGoalSection($profile)
-            .$this->buildPhysicalSection($profile)
-            .$this->buildEquipmentSection($profile);
-    }
-
-    private function buildGoalSection(FitnessProfile $profile): string
-    {
-        $content = "**Primary Goal:** {$profile->primary_goal->label()}\n";
-
-        if ($profile->goal_details) {
-            $content .= "**Goal Details:** {$profile->goal_details}\n";
-        }
-
-        $content .= "**Available Days Per Week:** {$profile->available_days_per_week}\n";
-        $content .= "**Minutes Per Session:** {$profile->minutes_per_session}\n";
-        $content .= '**Prefer Garmin-Compatible Exercises:** '.($profile->prefer_garmin_exercises ? 'Yes' : 'No')."\n";
-
-        return $content;
-    }
-
-    private function buildPhysicalSection(FitnessProfile $profile): string
-    {
-        $content = '';
-
-        if ($profile->experience_level) {
-            $content .= "**Experience Level:** {$profile->experience_level->label()}\n";
-        }
-
-        if ($profile->age !== null) {
-            $content .= "**Age:** {$profile->age}\n";
-        }
-
-        if ($profile->biological_sex) {
-            $content .= "**Biological Sex:** {$profile->biological_sex->label()}\n";
-        }
-
-        if ($profile->body_weight_kg !== null) {
-            $content .= "**Body Weight:** {$profile->body_weight_kg} kg\n";
-        }
-
-        if ($profile->height_cm !== null) {
-            $content .= "**Height:** {$profile->height_cm} cm\n";
-        }
-
-        return $content;
-    }
-
-    private function buildEquipmentSection(FitnessProfile $profile): string
-    {
-        $content = '';
-
-        if ($profile->has_gym_access) {
-            $content .= "**Gym Access:** Yes (standard gym equipment available)\n";
-        } else {
-            $content .= "**Gym Access:** No\n";
-        }
-
-        if ($profile->home_equipment) {
-            $equipment = collect($profile->home_equipment)
+        $equipment = $profile->home_equipment
+            ? collect($profile->home_equipment)
                 ->map(fn (string $value): string => \App\Enums\Equipment::from($value)->label())
-                ->implode(', ');
-            $content .= "**Home Equipment:** {$equipment}\n";
-        }
+                ->implode(', ')
+            : null;
 
-        return $content;
+        return MarkdownBuilder::make()
+            ->heading('Fitness Profile')
+            ->field('Primary Goal', $profile->primary_goal->label())
+            ->field('Goal Details', $profile->goal_details)
+            ->field('Available Days Per Week', $profile->available_days_per_week)
+            ->field('Minutes Per Session', $profile->minutes_per_session)
+            ->field('Prefer Garmin-Compatible Exercises', $profile->prefer_garmin_exercises)
+            ->field('Experience Level', $profile->experience_level?->label())
+            ->field('Age', $profile->age)
+            ->field('Biological Sex', $profile->biological_sex?->label())
+            ->field('Body Weight', $profile->body_weight_kg, 'kg')
+            ->field('Height', $profile->height_cm, 'cm')
+            ->field('Gym Access', $this->formatGymAccess($profile))
+            ->field('Home Equipment', $equipment)
+            ->toString();
+    }
+
+    private function formatGymAccess(FitnessProfile $profile): string
+    {
+        return $profile->has_gym_access
+            ? 'Yes (standard gym equipment available)'
+            : 'No';
     }
 }

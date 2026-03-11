@@ -4,6 +4,7 @@ namespace App\Mcp\Resources;
 
 use App\Models\Injury;
 use App\Models\User;
+use App\Support\Markdown\MarkdownBuilder;
 use Laravel\Mcp\Enums\Role;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -47,42 +48,37 @@ class UserInjuriesResource extends Resource
         $activeInjuries = $user->injuries->filter(fn (Injury $injury) => $injury->is_active);
         $resolvedInjuries = $user->injuries->filter(fn (Injury $injury) => ! $injury->is_active);
 
-        $content = "# Injuries & Limitations\n\n";
-
         if ($activeInjuries->isEmpty() && $resolvedInjuries->isEmpty()) {
-            return $content."*No injuries recorded.*\n\nUse the `add-injury` tool to track current or past injuries.\n";
+            return MarkdownBuilder::make()
+                ->heading('Injuries & Limitations')
+                ->line('*No injuries recorded.*')
+                ->blankLine()
+                ->line('Use the `add-injury` tool to track current or past injuries.')
+                ->toString();
         }
 
-        if ($activeInjuries->isNotEmpty()) {
-            $content .= "## Active Injuries\n\n";
-            foreach ($activeInjuries as $injury) {
-                $content .= $this->formatInjury($injury);
-            }
-        }
-
-        if ($resolvedInjuries->isNotEmpty()) {
-            $content .= "## Past Injuries\n\n";
-            foreach ($resolvedInjuries as $injury) {
-                $content .= $this->formatInjury($injury);
-            }
-        }
-
-        return $content;
+        return MarkdownBuilder::make()
+            ->heading('Injuries & Limitations')
+            ->when($activeInjuries->isNotEmpty(), fn (MarkdownBuilder $md) => $md
+                ->heading('Active Injuries', 2)
+                ->each($activeInjuries, fn (Injury $injury, MarkdownBuilder $md) => $this->formatInjury($injury, $md))
+            )
+            ->when($resolvedInjuries->isNotEmpty(), fn (MarkdownBuilder $md) => $md
+                ->heading('Past Injuries', 2)
+                ->each($resolvedInjuries, fn (Injury $injury, MarkdownBuilder $md) => $this->formatInjury($injury, $md))
+            )
+            ->toString();
     }
 
-    protected function formatInjury(Injury $injury): string
+    protected function formatInjury(Injury $injury, MarkdownBuilder $md): void
     {
         $endDate = $injury->ended_at ? " - {$injury->ended_at->toDateString()}" : ' - Present';
         $notes = $injury->notes ? " ({$injury->notes})" : '';
 
-        $line = "- **{$injury->body_part->label()}** [{$injury->injury_type->label()}]: {$injury->started_at->toDateString()}{$endDate}{$notes}\n";
+        $md->listItem("**{$injury->body_part->label()}** [{$injury->injury_type->label()}]: {$injury->started_at->toDateString()}{$endDate}{$notes}");
 
-        if ($injury->injuryReports->isNotEmpty()) {
-            foreach ($injury->injuryReports as $report) {
-                $line .= "  - [{$report->type->label()}] {$report->reported_at->toDateString()}: {$report->content}\n";
-            }
+        foreach ($injury->injuryReports as $report) {
+            $md->listItem("[{$report->type->label()}] {$report->reported_at->toDateString()}: {$report->content}", 1);
         }
-
-        return $line;
     }
 }

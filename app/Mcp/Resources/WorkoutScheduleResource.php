@@ -2,6 +2,8 @@
 
 namespace App\Mcp\Resources;
 
+use App\Models\Workout;
+use App\Support\Markdown\MarkdownBuilder;
 use Laravel\Mcp\Enums\Role;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -53,38 +55,35 @@ class WorkoutScheduleResource extends Resource
             ->limit(50)
             ->get();
 
-        $content = "# Workout Schedule for {$user->name}\n\n";
-
-        $content .= "## Upcoming Workouts\n\n";
-        if ($upcomingWorkouts->isEmpty()) {
-            $content .= "No upcoming workouts scheduled.\n\n";
-        } else {
-            foreach ($upcomingWorkouts as $workout) {
-                $scheduledAt = $user->toUserTimezone($workout->scheduled_at)->format('Y-m-d H:i');
-                $content .= "- **{$workout->name}** ({$workout->activity->label()})";
-                if ($workout->sections_count > 0) {
-                    $content .= " [{$workout->sections_count} sections]";
-                }
-                $content .= "\n";
-                $content .= "  Scheduled: {$scheduledAt}\n";
-                if ($workout->notes) {
-                    $content .= "  Notes: {$workout->notes}\n";
-                }
-                $content .= "\n";
-            }
-        }
-
-        $content .= "## Recently Completed Workouts\n\n";
-        if ($completedWorkouts->isEmpty()) {
-            $content .= "No completed workouts yet.\n";
-        } else {
-            foreach ($completedWorkouts as $workout) {
-                $completedAt = $user->toUserTimezone($workout->completed_at)->format('Y-m-d H:i');
-                $content .= "- **{$workout->name}** ({$workout->activity->label()})\n";
-                $content .= "  Completed: {$completedAt}\n";
-                $content .= "  RPE: {$workout->rpe}/10, Feeling: {$workout->feeling}/5\n\n";
-            }
-        }
+        $content = MarkdownBuilder::make()
+            ->heading("Workout Schedule for {$user->name}")
+            ->heading('Upcoming Workouts', 2)
+            ->when($upcomingWorkouts->isEmpty(), fn (MarkdownBuilder $md) => $md
+                ->line('No upcoming workouts scheduled.')
+                ->blankLine())
+            ->when($upcomingWorkouts->isNotEmpty(), fn (MarkdownBuilder $md) => $md
+                ->each($upcomingWorkouts, function (Workout $workout, MarkdownBuilder $md) use ($user): void {
+                    $scheduledAt = $user->toUserTimezone($workout->scheduled_at)->format('Y-m-d H:i');
+                    $sections = $workout->sections_count > 0 ? " [{$workout->sections_count} sections]" : '';
+                    $md->listItem("**{$workout->name}** ({$workout->activity->label()}){$sections}")
+                        ->listItem("Scheduled: {$scheduledAt}", 1);
+                    if ($workout->notes) {
+                        $md->listItem("Notes: {$workout->notes}", 1);
+                    }
+                    $md->blankLine();
+                }))
+            ->heading('Recently Completed Workouts', 2)
+            ->when($completedWorkouts->isEmpty(), fn (MarkdownBuilder $md) => $md
+                ->line('No completed workouts yet.'))
+            ->when($completedWorkouts->isNotEmpty(), fn (MarkdownBuilder $md) => $md
+                ->each($completedWorkouts, function (Workout $workout, MarkdownBuilder $md) use ($user): void {
+                    $completedAt = $user->toUserTimezone($workout->completed_at)->format('Y-m-d H:i');
+                    $md->listItem("**{$workout->name}** ({$workout->activity->label()})")
+                        ->listItem("Completed: {$completedAt}", 1)
+                        ->listItem("RPE: {$workout->rpe}/10, Feeling: {$workout->feeling}/5", 1)
+                        ->blankLine();
+                }))
+            ->toString();
 
         return Response::text($content);
     }

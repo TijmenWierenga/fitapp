@@ -4,6 +4,7 @@ namespace App\Mcp\Resources;
 
 use App\Actions\CalculateWorkload;
 use App\DataTransferObjects\Workload\WorkloadSummary;
+use App\Support\Markdown\MarkdownBuilder;
 use Laravel\Mcp\Enums\Role;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -48,116 +49,91 @@ class WorkloadResource extends Resource
 
     protected function buildWorkloadContent(WorkloadSummary $summary): string
     {
-        $content = "# Workload Summary\n\n";
-
         $hasData = $summary->sessionLoad !== null
             || $summary->muscleGroupVolume->isNotEmpty()
             || ! empty($summary->strengthProgression);
 
         if (! $hasData) {
-            $content .= "*No workload data available.* Complete workouts with linked exercises to start tracking.\n\n";
-
-            return $this->appendInjuries($content, $summary);
+            return MarkdownBuilder::make()
+                ->heading('Workload Summary')
+                ->line('*No workload data available.* Complete workouts with linked exercises to start tracking.')
+                ->blankLine()
+                ->when($summary->activeInjuries->isNotEmpty(), fn (MarkdownBuilder $md) => $md
+                    ->heading('Active Injuries', 2)
+                    ->each($summary->activeInjuries, fn (array $injury, MarkdownBuilder $md) => $md
+                        ->listItem("**{$injury['body_part']}** ({$injury['injury_type']}) — since {$injury['started_at']}"))
+                    ->blankLine())
+                ->toString();
         }
 
         $warnings = $summary->warnings();
-        if ($warnings->isNotEmpty()) {
-            foreach ($warnings as $warning) {
-                $content .= "> **Warning:** {$warning}\n\n";
-            }
-        }
 
-        $content .= $this->buildSessionLoadSection($summary);
-        $content .= $this->buildVolumeSection($summary);
-        $content .= $this->buildProgressionSection($summary);
-
-        return $this->appendInjuries($content, $summary);
+        return MarkdownBuilder::make()
+            ->heading('Workload Summary')
+            ->each($warnings, fn (string $warning, MarkdownBuilder $md) => $md
+                ->line("> **Warning:** {$warning}")
+                ->blankLine())
+            ->when($summary->sessionLoad !== null, fn (MarkdownBuilder $md) => $this->buildSessionLoadSection($md, $summary))
+            ->when($summary->sessionLoad === null, fn (MarkdownBuilder $md) => $md
+                ->heading('Session Load', 2)
+                ->line('*No session load data.* Complete workouts with duration to enable session load tracking.')
+                ->blankLine())
+            ->when($summary->muscleGroupVolume->isNotEmpty(), fn (MarkdownBuilder $md) => $this->buildVolumeSection($md, $summary))
+            ->when(! empty($summary->strengthProgression), fn (MarkdownBuilder $md) => $this->buildProgressionSection($md, $summary))
+            ->when($summary->activeInjuries->isNotEmpty(), fn (MarkdownBuilder $md) => $md
+                ->heading('Active Injuries', 2)
+                ->each($summary->activeInjuries, fn (array $injury, MarkdownBuilder $md) => $md
+                    ->listItem("**{$injury['body_part']}** ({$injury['injury_type']}) — since {$injury['started_at']}"))
+                ->blankLine())
+            ->toString();
     }
 
-    protected function buildSessionLoadSection(WorkloadSummary $summary): string
+    protected function buildSessionLoadSection(MarkdownBuilder $md, WorkloadSummary $summary): void
     {
-        if ($summary->sessionLoad === null) {
-            return "## Session Load\n\n*No session load data.* Complete workouts with duration to enable session load tracking.\n\n";
-        }
-
         $load = $summary->sessionLoad;
-        $content = "## Session Load\n\n";
-        $content .= "| Metric | Value |\n|---|---|\n";
-        $content .= "| Weekly Total (sRPE) | {$load->currentWeeklyTotal} |\n";
-        $content .= "| Sessions This Week | {$load->currentSessionCount} |\n";
-        $content .= "| Monotony | {$load->monotony} |\n";
-        $content .= "| Strain | {$load->strain} |\n";
-        $content .= "| Week-over-Week Change | {$load->weekOverWeekChangePct}% |\n\n";
+
+        $md->heading('Session Load', 2)
+            ->tableHeader(['Metric', 'Value'])
+            ->tableRow(['Weekly Total (sRPE)', $load->currentWeeklyTotal])
+            ->tableRow(['Sessions This Week', $load->currentSessionCount])
+            ->tableRow(['Monotony', $load->monotony])
+            ->tableRow(['Strain', $load->strain])
+            ->tableRow(['Week-over-Week Change', "{$load->weekOverWeekChangePct}%"])
+            ->blankLine();
 
         if (! empty($load->previousWeeks)) {
-            $content .= "### Previous Weeks\n\n";
-            $content .= "| Week | Total Load | Sessions |\n|---|---|---|\n";
-            foreach ($load->previousWeeks as $week) {
-                $content .= "| {$week->weekOffset} | {$week->totalLoad} | {$week->sessionCount} |\n";
-            }
-            $content .= "\n";
+            $md->heading('Previous Weeks', 3)
+                ->tableHeader(['Week', 'Total Load', 'Sessions'])
+                ->each($load->previousWeeks, fn (object $week, MarkdownBuilder $md) => $md
+                    ->tableRow([$week->weekOffset, $week->totalLoad, $week->sessionCount]))
+                ->blankLine();
         }
-
-        return $content;
     }
 
-    protected function buildVolumeSection(WorkloadSummary $summary): string
+    protected function buildVolumeSection(MarkdownBuilder $md, WorkloadSummary $summary): void
     {
-        if ($summary->muscleGroupVolume->isEmpty()) {
-            return '';
-        }
-
-        $content = "## Muscle Group Volume\n\n";
-        $content .= "| Muscle Group | Current Sets | 4-Week Avg | Trend |\n|---|---|---|---|\n";
-
-        foreach ($summary->muscleGroupVolume as $volume) {
-            $trendIcon = match ($volume->trend->value) {
-                'increasing' => "\u{2191}",
-                'decreasing' => "\u{2193}",
-                default => "\u{2192}",
-            };
-            $content .= "| {$volume->label} | {$volume->currentWeekSets} | {$volume->fourWeekAverageSets} | {$trendIcon} {$volume->trend->value} |\n";
-        }
-
-        $content .= "\n";
-
-        return $content;
+        $md->heading('Muscle Group Volume', 2)
+            ->tableHeader(['Muscle Group', 'Current Sets', '4-Week Avg', 'Trend'])
+            ->each($summary->muscleGroupVolume, function (object $volume, MarkdownBuilder $md): void {
+                $trendIcon = match ($volume->trend->value) {
+                    'increasing' => "\u{2191}",
+                    'decreasing' => "\u{2193}",
+                    default => "\u{2192}",
+                };
+                $md->tableRow([$volume->label, $volume->currentWeekSets, $volume->fourWeekAverageSets, "{$trendIcon} {$volume->trend->value}"]);
+            })
+            ->blankLine();
     }
 
-    protected function buildProgressionSection(WorkloadSummary $summary): string
+    protected function buildProgressionSection(MarkdownBuilder $md, WorkloadSummary $summary): void
     {
-        if (empty($summary->strengthProgression)) {
-            return '';
-        }
-
-        $content = "## Strength Progression\n\n";
-        $content .= "| Exercise | Current e1RM | Previous e1RM | Change |\n|---|---|---|---|\n";
-
-        foreach ($summary->strengthProgression as $progression) {
-            $previous = $progression->previousE1RM !== null ? number_format($progression->previousE1RM, 1) : '-';
-            $change = $progression->changePct !== null ? "{$progression->changePct}%" : '-';
-            $content .= "| {$progression->exerciseName} | {$progression->currentE1RM} | {$previous} | {$change} |\n";
-        }
-
-        $content .= "\n";
-
-        return $content;
-    }
-
-    protected function appendInjuries(string $content, WorkloadSummary $summary): string
-    {
-        if ($summary->activeInjuries->isEmpty()) {
-            return $content;
-        }
-
-        $content .= "## Active Injuries\n\n";
-
-        foreach ($summary->activeInjuries as $injury) {
-            $content .= "- **{$injury['body_part']}** ({$injury['injury_type']}) — since {$injury['started_at']}\n";
-        }
-
-        $content .= "\n";
-
-        return $content;
+        $md->heading('Strength Progression', 2)
+            ->tableHeader(['Exercise', 'Current e1RM', 'Previous e1RM', 'Change'])
+            ->each($summary->strengthProgression, function (object $progression, MarkdownBuilder $md): void {
+                $previous = $progression->previousE1RM !== null ? number_format($progression->previousE1RM, 1) : '-';
+                $change = $progression->changePct !== null ? "{$progression->changePct}%" : '-';
+                $md->tableRow([$progression->exerciseName, $progression->currentE1RM, $previous, $change]);
+            })
+            ->blankLine();
     }
 }

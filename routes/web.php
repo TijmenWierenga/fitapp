@@ -4,6 +4,7 @@ use App\Livewire\Chat\Coach;
 use App\Livewire\Exercise\Show as ExerciseShow;
 use App\Livewire\GetStarted;
 use App\Livewire\Injury\Reports as InjuryReports;
+use App\Livewire\Onboarding\FitnessProfileWizard;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\FitnessProfile;
 use App\Livewire\Settings\Password;
@@ -43,6 +44,10 @@ Route::get('workouts/{workout}', WorkoutShow::class)
 Route::get('workouts/{workout}/export-fit', \App\Http\Controllers\ExportWorkoutFitController::class)
     ->middleware(['auth', 'verified'])
     ->name('workouts.export-fit');
+
+Route::get('onboarding', FitnessProfileWizard::class)
+    ->middleware(['auth'])
+    ->name('onboarding');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('coach', Coach::class)->name('coach');

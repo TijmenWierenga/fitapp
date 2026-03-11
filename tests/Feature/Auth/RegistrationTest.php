@@ -15,7 +15,7 @@ test('new users can register', function () {
     ]);
 
     $response->assertSessionHasNoErrors()
-        ->assertRedirect('/coach?intake=1');
+        ->assertRedirect('/onboarding');
 
     $this->assertAuthenticated();
 });

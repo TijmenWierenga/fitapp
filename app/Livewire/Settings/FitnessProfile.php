@@ -2,12 +2,16 @@
 
 namespace App\Livewire\Settings;
 
+use App\Enums\BiologicalSex;
 use App\Enums\BodyPart;
+use App\Enums\Equipment;
+use App\Enums\ExperienceLevel;
 use App\Enums\FitnessGoal;
 use App\Enums\InjuryType;
 use App\Models\Injury;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class FitnessProfile extends Component
@@ -21,6 +25,21 @@ class FitnessProfile extends Component
     public int $minutesPerSession = 60;
 
     public bool $preferGarminExercises = false;
+
+    public ?string $experienceLevel = null;
+
+    public ?string $dateOfBirth = null;
+
+    public ?string $biologicalSex = null;
+
+    public ?string $bodyWeightKg = null;
+
+    public ?int $heightCm = null;
+
+    public bool $hasGymAccess = false;
+
+    /** @var array<string> */
+    public array $homeEquipment = [];
 
     public bool $showInjuryModal = false;
 
@@ -46,6 +65,13 @@ class FitnessProfile extends Component
             $this->availableDaysPerWeek = $profile->available_days_per_week;
             $this->minutesPerSession = $profile->minutes_per_session;
             $this->preferGarminExercises = $profile->prefer_garmin_exercises;
+            $this->experienceLevel = $profile->experience_level?->value;
+            $this->dateOfBirth = $profile->date_of_birth?->format('Y-m-d');
+            $this->biologicalSex = $profile->biological_sex?->value;
+            $this->bodyWeightKg = $profile->body_weight_kg;
+            $this->heightCm = $profile->height_cm;
+            $this->hasGymAccess = $profile->has_gym_access;
+            $this->homeEquipment = $profile->home_equipment ?? [];
         }
     }
 
@@ -57,6 +83,14 @@ class FitnessProfile extends Component
             'availableDaysPerWeek' => ['required', 'integer', 'min:1', 'max:7'],
             'minutesPerSession' => ['required', 'integer', 'min:15', 'max:180'],
             'preferGarminExercises' => ['boolean'],
+            'experienceLevel' => ['nullable', Rule::enum(ExperienceLevel::class)],
+            'dateOfBirth' => ['nullable', 'date', 'before:today'],
+            'biologicalSex' => ['nullable', Rule::enum(BiologicalSex::class)],
+            'bodyWeightKg' => ['nullable', 'numeric', 'min:20', 'max:300'],
+            'heightCm' => ['nullable', 'integer', 'min:100', 'max:250'],
+            'hasGymAccess' => ['boolean'],
+            'homeEquipment' => ['array'],
+            'homeEquipment.*' => [Rule::enum(Equipment::class)],
         ]);
 
         Auth::user()->fitnessProfile()->updateOrCreate(
@@ -67,6 +101,13 @@ class FitnessProfile extends Component
                 'available_days_per_week' => $validated['availableDaysPerWeek'],
                 'minutes_per_session' => $validated['minutesPerSession'],
                 'prefer_garmin_exercises' => $validated['preferGarminExercises'],
+                'experience_level' => $validated['experienceLevel'],
+                'date_of_birth' => $validated['dateOfBirth'],
+                'biological_sex' => $validated['biologicalSex'],
+                'body_weight_kg' => $validated['bodyWeightKg'],
+                'height_cm' => $validated['heightCm'],
+                'has_gym_access' => $validated['hasGymAccess'],
+                'home_equipment' => $validated['homeEquipment'],
             ]
         );
 
@@ -144,15 +185,44 @@ class FitnessProfile extends Component
     /**
      * @return array<FitnessGoal>
      */
-    public function getFitnessGoalsProperty(): array
+    #[Computed]
+    public function fitnessGoals(): array
     {
         return FitnessGoal::cases();
     }
 
     /**
+     * @return array<ExperienceLevel>
+     */
+    #[Computed]
+    public function experienceLevels(): array
+    {
+        return ExperienceLevel::cases();
+    }
+
+    /**
+     * @return array<BiologicalSex>
+     */
+    #[Computed]
+    public function biologicalSexOptions(): array
+    {
+        return BiologicalSex::cases();
+    }
+
+    /**
+     * @return array<Equipment>
+     */
+    #[Computed]
+    public function equipmentOptions(): array
+    {
+        return Equipment::homeEquipmentOptions();
+    }
+
+    /**
      * @return array<InjuryType>
      */
-    public function getInjuryTypesProperty(): array
+    #[Computed]
+    public function injuryTypes(): array
     {
         return InjuryType::cases();
     }
@@ -160,7 +230,8 @@ class FitnessProfile extends Component
     /**
      * @return array<string, array<BodyPart>>
      */
-    public function getBodyPartsGroupedProperty(): array
+    #[Computed]
+    public function bodyPartsGrouped(): array
     {
         return BodyPart::groupedByRegion();
     }
@@ -168,7 +239,8 @@ class FitnessProfile extends Component
     /**
      * @return \Illuminate\Database\Eloquent\Collection<int, Injury>
      */
-    public function getInjuriesProperty(): \Illuminate\Database\Eloquent\Collection
+    #[Computed]
+    public function injuries(): \Illuminate\Database\Eloquent\Collection
     {
         return Auth::user()->injuries()->orderBy('started_at', 'desc')->get();
     }

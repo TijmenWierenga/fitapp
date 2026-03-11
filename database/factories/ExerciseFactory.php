@@ -26,7 +26,7 @@ class ExerciseFactory extends Factory
             'force' => fake()->randomElement(['push', 'pull', 'static', null]),
             'level' => fake()->randomElement(['beginner', 'intermediate', 'expert']),
             'mechanic' => fake()->randomElement(['compound', 'isolation', null]),
-            'equipment' => fake()->randomElement(['barbell', 'dumbbell', 'machine', 'body only', null]),
+            'equipment' => fake()->randomElement(['barbell', 'dumbbell', 'machine', 'cable', 'kettlebells', 'pull-up bar', 'weight plate', null]),
             'category' => fake()->randomElement(['strength', 'stretching', 'plyometrics', 'cardio']),
             'instructions' => [fake()->sentence(), fake()->sentence()],
             'garmin_exercise_category' => null,

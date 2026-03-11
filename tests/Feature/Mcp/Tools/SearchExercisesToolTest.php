@@ -259,6 +259,74 @@ it('supports multi-query search with deduplication', function (): void {
         ->assertSee('Chest Fly');
 });
 
+it('includes bodyweight exercises when include_bodyweight is true', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $biceps = MuscleGroup::factory()->create(['name' => 'biceps', 'label' => 'Biceps', 'body_part' => BodyPart::Shoulder]);
+
+    $dbCurl = Exercise::factory()->create(['name' => 'Dumbbell Curl', 'equipment' => 'dumbbell']);
+    $dbCurl->muscleGroups()->attach($biceps, ['load_factor' => 1.0]);
+
+    $pushUp = Exercise::factory()->create(['name' => 'Push Up', 'equipment' => null]);
+    $pushUp->muscleGroups()->attach($biceps, ['load_factor' => 0.5]);
+
+    $bbCurl = Exercise::factory()->create(['name' => 'Barbell Curl', 'equipment' => 'barbell']);
+    $bbCurl->muscleGroups()->attach($biceps, ['load_factor' => 1.0]);
+
+    $response = WorkoutServer::actingAs($user)->tool(SearchExercisesTool::class, [
+        'muscle_group' => 'biceps',
+        'equipment' => 'dumbbell',
+        'include_bodyweight' => true,
+    ]);
+
+    $response->assertOk()
+        ->assertSee('Dumbbell Curl')
+        ->assertSee('Push Up')
+        ->assertDontSee('Barbell Curl');
+});
+
+it('excludes bodyweight exercises by default when filtering by equipment', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $biceps = MuscleGroup::factory()->create(['name' => 'biceps', 'label' => 'Biceps', 'body_part' => BodyPart::Shoulder]);
+
+    $dbCurl = Exercise::factory()->create(['name' => 'Dumbbell Curl', 'equipment' => 'dumbbell']);
+    $dbCurl->muscleGroups()->attach($biceps, ['load_factor' => 1.0]);
+
+    $pushUp = Exercise::factory()->create(['name' => 'Push Up', 'equipment' => null]);
+    $pushUp->muscleGroups()->attach($biceps, ['load_factor' => 0.5]);
+
+    $response = WorkoutServer::actingAs($user)->tool(SearchExercisesTool::class, [
+        'muscle_group' => 'biceps',
+        'equipment' => 'dumbbell',
+    ]);
+
+    $response->assertOk()
+        ->assertSee('Dumbbell Curl')
+        ->assertDontSee('Push Up');
+});
+
+it('ignores include_bodyweight when no equipment filter is set', function (): void {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $biceps = MuscleGroup::factory()->create(['name' => 'biceps', 'label' => 'Biceps', 'body_part' => BodyPart::Shoulder]);
+
+    $dbCurl = Exercise::factory()->create(['name' => 'Dumbbell Curl', 'equipment' => 'dumbbell']);
+    $dbCurl->muscleGroups()->attach($biceps, ['load_factor' => 1.0]);
+
+    $pushUp = Exercise::factory()->create(['name' => 'Push Up', 'equipment' => null]);
+    $pushUp->muscleGroups()->attach($biceps, ['load_factor' => 0.5]);
+
+    $response = WorkoutServer::actingAs($user)->tool(SearchExercisesTool::class, [
+        'muscle_group' => 'biceps',
+        'include_bodyweight' => true,
+    ]);
+
+    $response->assertOk()
+        ->assertSee('Dumbbell Curl')
+        ->assertSee('Push Up');
+});
+
 it('deduplicates results across multi-query searches', function (): void {
     $user = User::factory()->withTimezone('UTC')->create();
 

@@ -2,6 +2,7 @@
 
 namespace App\Mcp\Resources;
 
+use App\Models\FitnessProfile;
 use App\Models\User;
 use Laravel\Mcp\Enums\Role;
 use Laravel\Mcp\Request;
@@ -23,7 +24,7 @@ class UserFitnessProfileResource extends Resource
      * The resource's description.
      */
     protected string $description = <<<'MARKDOWN'
-        Read-only fitness profile including primary goal, goal details, available training days, and session duration preferences.
+        Read-only fitness profile including primary goal, goal details, available training days, session duration preferences, physical attributes, and equipment availability.
 
         Use URI: user://fitness-profile
     MARKDOWN;
@@ -55,17 +56,72 @@ class UserFitnessProfileResource extends Resource
         }
 
         $profile = $user->fitnessProfile;
-        $goalDetails = $profile->goal_details ? "\n**Goal Details:** {$profile->goal_details}" : '';
-        $garminPref = $profile->prefer_garmin_exercises ? 'Yes' : 'No';
 
-        return <<<TEXT
-        # Fitness Profile
+        return "# Fitness Profile\n\n"
+            .$this->buildGoalSection($profile)
+            .$this->buildPhysicalSection($profile)
+            .$this->buildEquipmentSection($profile);
+    }
 
-        **Primary Goal:** {$profile->primary_goal->label()}$goalDetails
-        **Available Days Per Week:** {$profile->available_days_per_week}
-        **Minutes Per Session:** {$profile->minutes_per_session}
-        **Prefer Garmin-Compatible Exercises:** {$garminPref}
+    private function buildGoalSection(FitnessProfile $profile): string
+    {
+        $content = "**Primary Goal:** {$profile->primary_goal->label()}\n";
 
-        TEXT;
+        if ($profile->goal_details) {
+            $content .= "**Goal Details:** {$profile->goal_details}\n";
+        }
+
+        $content .= "**Available Days Per Week:** {$profile->available_days_per_week}\n";
+        $content .= "**Minutes Per Session:** {$profile->minutes_per_session}\n";
+        $content .= '**Prefer Garmin-Compatible Exercises:** '.($profile->prefer_garmin_exercises ? 'Yes' : 'No')."\n";
+
+        return $content;
+    }
+
+    private function buildPhysicalSection(FitnessProfile $profile): string
+    {
+        $content = '';
+
+        if ($profile->experience_level) {
+            $content .= "**Experience Level:** {$profile->experience_level->label()}\n";
+        }
+
+        if ($profile->age !== null) {
+            $content .= "**Age:** {$profile->age}\n";
+        }
+
+        if ($profile->biological_sex) {
+            $content .= "**Biological Sex:** {$profile->biological_sex->label()}\n";
+        }
+
+        if ($profile->body_weight_kg !== null) {
+            $content .= "**Body Weight:** {$profile->body_weight_kg} kg\n";
+        }
+
+        if ($profile->height_cm !== null) {
+            $content .= "**Height:** {$profile->height_cm} cm\n";
+        }
+
+        return $content;
+    }
+
+    private function buildEquipmentSection(FitnessProfile $profile): string
+    {
+        $content = '';
+
+        if ($profile->has_gym_access) {
+            $content .= "**Gym Access:** Yes (standard gym equipment available)\n";
+        } else {
+            $content .= "**Gym Access:** No\n";
+        }
+
+        if ($profile->home_equipment) {
+            $equipment = collect($profile->home_equipment)
+                ->map(fn (string $value): string => \App\Enums\Equipment::from($value)->label())
+                ->implode(', ');
+            $content .= "**Home Equipment:** {$equipment}\n";
+        }
+
+        return $content;
     }
 }

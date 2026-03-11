@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\BiologicalSex;
+use App\Enums\ExperienceLevel;
 use App\Enums\FitnessGoal;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,14 +21,34 @@ class FitnessProfile extends Model
         'available_days_per_week',
         'minutes_per_session',
         'prefer_garmin_exercises',
+        'experience_level',
+        'date_of_birth',
+        'biological_sex',
+        'body_weight_kg',
+        'height_cm',
+        'has_gym_access',
+        'home_equipment',
     ];
 
-    protected $casts = [
-        'primary_goal' => FitnessGoal::class,
-        'available_days_per_week' => 'integer',
-        'minutes_per_session' => 'integer',
-        'prefer_garmin_exercises' => 'boolean',
-    ];
+    /**
+     * @return array<string, mixed>
+     */
+    protected function casts(): array
+    {
+        return [
+            'primary_goal' => FitnessGoal::class,
+            'available_days_per_week' => 'integer',
+            'minutes_per_session' => 'integer',
+            'prefer_garmin_exercises' => 'boolean',
+            'experience_level' => ExperienceLevel::class,
+            'date_of_birth' => 'date',
+            'biological_sex' => BiologicalSex::class,
+            'body_weight_kg' => 'decimal:2',
+            'height_cm' => 'integer',
+            'has_gym_access' => 'boolean',
+            'home_equipment' => 'array',
+        ];
+    }
 
     /**
      * @return Attribute<string|null, string|null>
@@ -43,6 +65,16 @@ class FitnessProfile extends Model
 
                 return $trimmed === '' ? null : $trimmed;
             },
+        );
+    }
+
+    /**
+     * @return Attribute<int|null, never>
+     */
+    protected function age(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): ?int => $this->date_of_birth?->age,
         );
     }
 

@@ -11,6 +11,7 @@ use App\Enums\InjuryType;
 use App\Models\Injury;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class FitnessProfile extends Component
@@ -184,7 +185,8 @@ class FitnessProfile extends Component
     /**
      * @return array<FitnessGoal>
      */
-    public function getFitnessGoalsProperty(): array
+    #[Computed]
+    public function fitnessGoals(): array
     {
         return FitnessGoal::cases();
     }
@@ -192,7 +194,8 @@ class FitnessProfile extends Component
     /**
      * @return array<ExperienceLevel>
      */
-    public function getExperienceLevelsProperty(): array
+    #[Computed]
+    public function experienceLevels(): array
     {
         return ExperienceLevel::cases();
     }
@@ -200,7 +203,8 @@ class FitnessProfile extends Component
     /**
      * @return array<BiologicalSex>
      */
-    public function getBiologicalSexOptionsProperty(): array
+    #[Computed]
+    public function biologicalSexOptions(): array
     {
         return BiologicalSex::cases();
     }
@@ -208,7 +212,8 @@ class FitnessProfile extends Component
     /**
      * @return array<Equipment>
      */
-    public function getEquipmentOptionsProperty(): array
+    #[Computed]
+    public function equipmentOptions(): array
     {
         return Equipment::homeEquipmentOptions();
     }
@@ -216,7 +221,8 @@ class FitnessProfile extends Component
     /**
      * @return array<InjuryType>
      */
-    public function getInjuryTypesProperty(): array
+    #[Computed]
+    public function injuryTypes(): array
     {
         return InjuryType::cases();
     }
@@ -224,7 +230,8 @@ class FitnessProfile extends Component
     /**
      * @return array<string, array<BodyPart>>
      */
-    public function getBodyPartsGroupedProperty(): array
+    #[Computed]
+    public function bodyPartsGrouped(): array
     {
         return BodyPart::groupedByRegion();
     }
@@ -232,7 +239,8 @@ class FitnessProfile extends Component
     /**
      * @return \Illuminate\Database\Eloquent\Collection<int, Injury>
      */
-    public function getInjuriesProperty(): \Illuminate\Database\Eloquent\Collection
+    #[Computed]
+    public function injuries(): \Illuminate\Database\Eloquent\Collection
     {
         return Auth::user()->injuries()->orderBy('started_at', 'desc')->get();
     }

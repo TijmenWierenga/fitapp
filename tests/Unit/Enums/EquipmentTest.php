@@ -36,12 +36,14 @@ it('does not contain removed body only value', function () {
     expect($values)->not->toContain('body only');
 });
 
-it('returns home equipment options excluding Other and Sled', function () {
+it('returns home equipment options excluding gym-only and generic equipment', function () {
     $options = Equipment::homeEquipmentOptions();
 
-    expect($options)->toHaveCount(17)
+    expect($options)->toHaveCount(15)
         ->not->toContain(Equipment::Other)
-        ->not->toContain(Equipment::Sled);
+        ->not->toContain(Equipment::Sled)
+        ->not->toContain(Equipment::Machine)
+        ->not->toContain(Equipment::Cable);
 });
 
 it('has labels for all cases', function () {

@@ -33,7 +33,7 @@ enum Equipment: string
     {
         return array_values(array_filter(
             self::cases(),
-            fn (self $case): bool => ! in_array($case, [self::Other, self::Sled], true),
+            fn (self $case): bool => ! in_array($case, [self::Other, self::Sled, self::Machine, self::Cable], true),
         ));
     }
 

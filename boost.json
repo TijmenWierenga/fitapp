@@ -17,7 +17,6 @@
         "fluxui-development",
         "pest-testing",
         "tailwindcss-development",
-        "developing-with-fortify",
-        "livewire-development"
+        "developing-with-fortify"
     ]
 }

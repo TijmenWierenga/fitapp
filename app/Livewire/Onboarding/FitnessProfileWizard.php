@@ -8,6 +8,7 @@ use App\Enums\ExperienceLevel;
 use App\Enums\FitnessGoal;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -103,7 +104,8 @@ class FitnessProfileWizard extends Component
     /**
      * @return array<FitnessGoal>
      */
-    public function getFitnessGoalsProperty(): array
+    #[Computed]
+    public function fitnessGoals(): array
     {
         return FitnessGoal::cases();
     }
@@ -111,7 +113,8 @@ class FitnessProfileWizard extends Component
     /**
      * @return array<ExperienceLevel>
      */
-    public function getExperienceLevelsProperty(): array
+    #[Computed]
+    public function experienceLevels(): array
     {
         return ExperienceLevel::cases();
     }
@@ -119,7 +122,8 @@ class FitnessProfileWizard extends Component
     /**
      * @return array<BiologicalSex>
      */
-    public function getBiologicalSexOptionsProperty(): array
+    #[Computed]
+    public function biologicalSexOptions(): array
     {
         return BiologicalSex::cases();
     }
@@ -127,7 +131,8 @@ class FitnessProfileWizard extends Component
     /**
      * @return array<Equipment>
      */
-    public function getEquipmentOptionsProperty(): array
+    #[Computed]
+    public function equipmentOptions(): array
     {
         return Equipment::homeEquipmentOptions();
     }

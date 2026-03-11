@@ -35,7 +35,7 @@ class FitnessProfileFactory extends Factory
             'height_cm' => fake()->numberBetween(150, 200),
             'has_gym_access' => fake()->boolean(),
             'home_equipment' => fake()->randomElements(
-                array_map(fn (Equipment $e): string => $e->value, Equipment::cases()),
+                array_map(fn (Equipment $e): string => $e->value, Equipment::homeEquipmentOptions()),
                 fake()->numberBetween(0, 4),
             ),
         ];

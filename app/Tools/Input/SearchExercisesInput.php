@@ -18,6 +18,7 @@ readonly class SearchExercisesInput
         public ?string $equipment,
         public ?string $level,
         public ?bool $garminCompatible,
+        public ?bool $includeBodyweight,
         public int $limit,
         private array $providedFields,
     ) {}
@@ -40,6 +41,7 @@ readonly class SearchExercisesInput
             equipment: $data['equipment'] ?? null,
             level: $data['level'] ?? null,
             garminCompatible: $data['garmin_compatible'] ?? null,
+            includeBodyweight: $data['include_bodyweight'] ?? null,
             limit: min($data['limit'] ?? 20, 50),
             providedFields: array_keys($data),
         );

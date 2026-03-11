@@ -27,11 +27,13 @@ class SearchExercisesHandler
             ])->description('Filter by muscle group name.')->nullable(),
             'category' => $schema->string()->enum(['strength', 'stretching', 'plyometrics', 'cardio'])->description('Filter by category.')->nullable(),
             'equipment' => $schema->string()->enum([
-                'bands', 'barbell', 'body only', 'cable', 'dumbbell', 'e-z curl bar',
+                'bands', 'barbell', 'box', 'cable', 'dip station', 'dumbbell', 'e-z curl bar',
                 'exercise ball', 'foam roll', 'kettlebells', 'machine', 'medicine ball', 'other',
-            ])->description('Filter by equipment type.')->nullable(),
+                'pull-up bar', 'rings', 'sled', 'suspension trainer', 'trap bar', 'weight plate',
+            ])->description('Filter by equipment type. Use null/omit for bodyweight exercises.')->nullable(),
             'level' => $schema->string()->enum(['beginner', 'intermediate', 'expert'])->description('Filter by difficulty.')->nullable(),
             'garmin_compatible' => $schema->boolean()->description('Filter by Garmin FIT exercise mapping availability. When true, only exercises that can be exported with Garmin exercise IDs are returned.')->nullable(),
+            'include_bodyweight' => $schema->boolean()->description('When true and equipment is specified, also include bodyweight exercises (no equipment needed). Useful for finding all exercises a user can perform.')->nullable(),
             'limit' => $schema->integer()->description('Maximum number of results to return (default: 20, max: 50)')->nullable(),
         ];
     }
@@ -72,9 +74,13 @@ class SearchExercisesHandler
     {
         return Exercise::search($query)
             ->when($input->has('category'), fn ($search) => $search->where('category', $input->category))
-            ->when($input->has('equipment'), fn ($search) => $search->where('equipment', $input->equipment))
             ->when($input->has('level'), fn ($search) => $search->where('level', $input->level))
             ->query(fn (Builder $builder) => $builder
+                ->when($input->has('equipment'), fn (Builder $q) => $input->includeBodyweight === true
+                    ? $q->where(fn (Builder $sub) => $sub
+                        ->where('equipment', $input->equipment)
+                        ->orWhereNull('equipment'))
+                    : $q->where('equipment', $input->equipment))
                 ->when($input->muscleGroup, fn (Builder $q) => $q->whereHas(
                     'muscleGroups',
                     fn (Builder $mg) => $mg->where('name', $input->muscleGroup),

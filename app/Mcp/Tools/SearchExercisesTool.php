@@ -48,6 +48,7 @@ class SearchExercisesTool extends Tool
             'equipment' => 'nullable|string|max:255',
             'level' => 'nullable|string|in:beginner,intermediate,expert',
             'garmin_compatible' => 'nullable|boolean',
+            'include_bodyweight' => 'nullable|boolean',
             'limit' => 'nullable|integer|min:1|max:50',
         ]);
 

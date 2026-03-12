@@ -21,7 +21,8 @@ class InjuryReportFactory extends Factory
             'injury_id' => Injury::factory(),
             'user_id' => User::factory(),
             'type' => fake()->randomElement(InjuryReportType::cases()),
-            'content' => fake()->paragraph(),
+            'pain_scale' => fake()->numberBetween(0, 10),
+            'content' => fake()->optional()->paragraph(),
             'reported_at' => fake()->dateTimeBetween('-1 month', 'now'),
         ];
     }

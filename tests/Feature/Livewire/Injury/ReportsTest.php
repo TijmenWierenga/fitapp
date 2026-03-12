@@ -30,6 +30,7 @@ it('forbids creating a report for another user\'s injury', function () {
     Livewire::test(Reports::class, ['injury' => $injury])
         ->call('openReportModal')
         ->set('reportType', 'self_reporting')
+        ->set('painScale', 5)
         ->set('reportContent', 'Test content')
         ->set('reportedAt', '2026-02-04')
         ->call('saveReport')
@@ -55,16 +56,18 @@ it('displays existing reports', function () {
     $user = User::factory()->create();
     $injury = Injury::factory()->for($user)->create();
     $report = InjuryReport::factory()->for($injury)->for($user)->create([
+        'pain_scale' => 7,
         'content' => 'Feeling much better today',
     ]);
 
     actingAs($user);
 
     Livewire::test(Reports::class, ['injury' => $injury])
-        ->assertSee('Feeling much better today');
+        ->assertSee('Feeling much better today')
+        ->assertSee('Pain: 7/10');
 });
 
-it('can add a report', function () {
+it('can add a report with pain scale', function () {
     $user = User::factory()->create();
     $injury = Injury::factory()->for($user)->create();
 
@@ -73,6 +76,7 @@ it('can add a report', function () {
     Livewire::test(Reports::class, ['injury' => $injury])
         ->call('openReportModal')
         ->set('reportType', 'self_reporting')
+        ->set('painScale', 4)
         ->set('reportContent', 'Pain has decreased significantly.')
         ->set('reportedAt', '2026-02-04')
         ->call('saveReport')
@@ -82,7 +86,32 @@ it('can add a report', function () {
         'injury_id' => $injury->id,
         'user_id' => $user->id,
         'type' => 'self_reporting',
+        'pain_scale' => 4,
         'content' => 'Pain has decreased significantly.',
+        'reported_at' => '2026-02-04 00:00:00',
+    ]);
+});
+
+it('can add a report without description', function () {
+    $user = User::factory()->create();
+    $injury = Injury::factory()->for($user)->create();
+
+    actingAs($user);
+
+    Livewire::test(Reports::class, ['injury' => $injury])
+        ->call('openReportModal')
+        ->set('reportType', 'self_reporting')
+        ->set('painScale', 3)
+        ->set('reportedAt', '2026-02-04')
+        ->call('saveReport')
+        ->assertSet('showReportModal', false);
+
+    assertDatabaseHas('injury_reports', [
+        'injury_id' => $injury->id,
+        'user_id' => $user->id,
+        'type' => 'self_reporting',
+        'pain_scale' => 3,
+        'content' => null,
         'reported_at' => '2026-02-04 00:00:00',
     ]);
 });
@@ -96,7 +125,22 @@ it('validates required fields when adding a report', function () {
     Livewire::test(Reports::class, ['injury' => $injury])
         ->call('openReportModal')
         ->call('saveReport')
-        ->assertHasErrors(['reportType', 'reportContent']);
+        ->assertHasErrors(['reportType', 'painScale']);
+});
+
+it('validates pain scale range', function () {
+    $user = User::factory()->create();
+    $injury = Injury::factory()->for($user)->create();
+
+    actingAs($user);
+
+    Livewire::test(Reports::class, ['injury' => $injury])
+        ->call('openReportModal')
+        ->set('reportType', 'self_reporting')
+        ->set('painScale', 11)
+        ->set('reportedAt', '2026-02-04')
+        ->call('saveReport')
+        ->assertHasErrors(['painScale']);
 });
 
 it('can delete a report', function () {

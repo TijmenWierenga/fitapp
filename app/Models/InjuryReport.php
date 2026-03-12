@@ -16,6 +16,7 @@ class InjuryReport extends Model
         'injury_id',
         'user_id',
         'type',
+        'pain_scale',
         'content',
         'reported_at',
     ];
@@ -32,15 +33,19 @@ class InjuryReport extends Model
     }
 
     /**
-     * @return Attribute<string, string>
+     * @return Attribute<string|null, string|null>
      */
     protected function content(): Attribute
     {
         return Attribute::make(
-            set: function (string $value): string {
+            set: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+
                 $trimmed = trim($value);
 
-                return $trimmed === '' ? $value : $trimmed;
+                return $trimmed === '' ? null : $trimmed;
             },
         );
     }

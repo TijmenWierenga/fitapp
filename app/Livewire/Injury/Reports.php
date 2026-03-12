@@ -19,6 +19,8 @@ class Reports extends Component
 
     public ?string $reportType = null;
 
+    public ?int $painScale = null;
+
     public ?string $reportContent = null;
 
     public ?string $reportedAt = null;
@@ -60,13 +62,15 @@ class Reports extends Component
 
         $validated = $this->validate([
             'reportType' => ['required', Rule::enum(InjuryReportType::class)],
-            'reportContent' => ['required', 'string', 'max:10000'],
+            'painScale' => ['required', 'integer', 'min:0', 'max:10'],
+            'reportContent' => ['nullable', 'string', 'max:10000'],
             'reportedAt' => ['required', 'date'],
         ]);
 
         $this->injury->injuryReports()->create([
             'user_id' => $user->id,
             'type' => $validated['reportType'],
+            'pain_scale' => $validated['painScale'],
             'content' => $validated['reportContent'],
             'reported_at' => $validated['reportedAt'],
         ]);
@@ -92,6 +96,7 @@ class Reports extends Component
     protected function resetReportForm(): void
     {
         $this->reportType = null;
+        $this->painScale = null;
         $this->reportContent = null;
         $this->reportedAt = null;
         $this->resetValidation();

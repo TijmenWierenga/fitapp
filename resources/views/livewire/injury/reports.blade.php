@@ -42,6 +42,9 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <flux:badge size="sm" color="zinc">{{ $report->type->label() }}</flux:badge>
+                                <flux:badge size="sm" :color="$report->pain_scale <= 3 ? 'green' : ($report->pain_scale <= 6 ? 'yellow' : 'red')">
+                                    {{ __('Pain: :scale/10', ['scale' => $report->pain_scale]) }}
+                                </flux:badge>
                                 <flux:text class="text-xs text-zinc-500 dark:text-zinc-400">
                                     {{ $report->reported_at->toDateString() }}
                                 </flux:text>
@@ -54,9 +57,11 @@
                                 wire:confirm="{{ __('Are you sure you want to delete this report?') }}"
                             />
                         </div>
-                        <div class="prose prose-sm prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400">
-                            {!! Str::markdown($report->content, ['html_input' => 'escape']) !!}
-                        </div>
+                        @if($report->content)
+                            <div class="prose prose-sm prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400">
+                                {!! Str::markdown($report->content, ['html_input' => 'escape']) !!}
+                            </div>
+                        @endif
                     </flux:card>
                 @endforeach
             </div>
@@ -100,7 +105,14 @@
             </flux:field>
 
             <flux:field>
-                <flux:label>{{ __('Content') }}</flux:label>
+                <flux:label>{{ __('Pain Scale') }}</flux:label>
+                <flux:input type="number" wire:model="painScale" min="0" max="10" required />
+                <flux:description>{{ __('Rate your pain from 0 (no pain) to 10 (worst pain).') }}</flux:description>
+                <flux:error name="painScale"/>
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('Description') }}</flux:label>
                 <flux:editor
                     wire:model="reportContent"
                     :placeholder="__('Describe your update, PT visit notes, or milestone...')"

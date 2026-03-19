@@ -128,11 +128,13 @@ class WorkloadResource extends Resource
     protected function buildProgressionSection(MarkdownBuilder $md, WorkloadSummary $summary): void
     {
         $md->heading('Strength Progression', 2)
-            ->tableHeader(['Exercise', 'Current e1RM', 'Previous e1RM', 'Change'])
+            ->tableHeader(['Exercise', 'Max Wt', 'Volume', 'Current e1RM', 'Previous e1RM', 'Change'])
             ->each($summary->strengthProgression, function (object $progression, MarkdownBuilder $md): void {
                 $previous = $progression->previousE1RM !== null ? number_format($progression->previousE1RM, 1) : '-';
                 $change = $progression->changePct !== null ? "{$progression->changePct}%" : '-';
-                $md->tableRow([$progression->exerciseName, $progression->currentE1RM, $previous, $change]);
+                $maxWt = number_format($progression->currentMaxWeight, 1);
+                $volume = number_format($progression->currentVolume, 0);
+                $md->tableRow([$progression->exerciseName, $maxWt, $volume, $progression->currentE1RM, $previous, $change]);
             })
             ->blankLine();
     }

@@ -31,6 +31,10 @@ it('calculates e1RM progression between periods', function (): void {
     expect($results[0]->currentE1RM)->toEqualWithDelta(116.7, 0.1);
     expect($results[0]->previousE1RM)->toEqualWithDelta(105.0, 0.1);
     expect($results[0]->changePct)->toEqualWithDelta(11.1, 0.1);
+    expect($results[0]->currentMaxWeight)->toEqualWithDelta(100.0, 0.1);
+    expect($results[0]->previousMaxWeight)->toEqualWithDelta(90.0, 0.1);
+    // sets=1 (default), reps=5, weight=100 → volume = 1*5*100 = 500
+    expect($results[0]->currentVolume)->toEqualWithDelta(500.0, 0.1);
 });
 
 it('uses best e1RM from each period', function (): void {
@@ -45,6 +49,10 @@ it('uses best e1RM from each period', function (): void {
     $results = $this->calculator->calculate($records, $this->currentPeriod, $this->previousPeriod);
 
     expect($results[0]->currentE1RM)->toEqualWithDelta(116.7, 0.1);
+    expect($results[0]->currentMaxWeight)->toEqualWithDelta(100.0, 0.1);
+    expect($results[0]->previousMaxWeight)->toEqualWithDelta(90.0, 0.1);
+    // volume = (1*10*80) + (1*5*100) = 800 + 500 = 1300
+    expect($results[0]->currentVolume)->toEqualWithDelta(1300.0, 0.1);
 });
 
 it('returns null previous when no previous period data', function (): void {
@@ -57,6 +65,9 @@ it('returns null previous when no previous period data', function (): void {
     expect($results)->toHaveCount(1);
     expect($results[0]->previousE1RM)->toBeNull();
     expect($results[0]->changePct)->toBeNull();
+    expect($results[0]->currentMaxWeight)->toEqualWithDelta(100.0, 0.1);
+    expect($results[0]->previousMaxWeight)->toBeNull();
+    expect($results[0]->currentVolume)->toEqualWithDelta(500.0, 0.1);
 });
 
 it('excludes exercises only in previous period', function (): void {
@@ -80,6 +91,14 @@ it('handles multiple exercises', function (): void {
     $results = $this->calculator->calculate($records, $this->currentPeriod, $this->previousPeriod);
 
     expect($results)->toHaveCount(2);
+
+    $bench = collect($results)->firstWhere('exerciseName', 'Bench Press');
+    expect($bench->currentMaxWeight)->toEqualWithDelta(100.0, 0.1);
+    expect($bench->currentVolume)->toEqualWithDelta(500.0, 0.1);
+
+    $squat = collect($results)->firstWhere('exerciseName', 'Squat');
+    expect($squat->currentMaxWeight)->toEqualWithDelta(140.0, 0.1);
+    expect($squat->currentVolume)->toEqualWithDelta(420.0, 0.1);
 });
 
 it('calculates negative change percentage', function (): void {
@@ -93,10 +112,29 @@ it('calculates negative change percentage', function (): void {
     $results = $this->calculator->calculate($records, $this->currentPeriod, $this->previousPeriod);
 
     expect($results[0]->changePct)->toBeLessThan(0);
+    expect($results[0]->currentMaxWeight)->toEqualWithDelta(80.0, 0.1);
+    expect($results[0]->previousMaxWeight)->toEqualWithDelta(100.0, 0.1);
 });
 
 it('handles empty records', function (): void {
     $results = $this->calculator->calculate([], $this->currentPeriod, $this->previousPeriod);
 
     expect($results)->toBeEmpty();
+});
+
+it('calculates volume with explicit sets', function (): void {
+    $records = [
+        // Current period: 3 sets × 8 reps × 80kg = 1920
+        new StrengthRecord(1, 'Bench Press', new DateTimeImmutable('2026-02-10'), 80.0, 8, sets: 3),
+        // Previous period
+        new StrengthRecord(1, 'Bench Press', new DateTimeImmutable('2026-01-05'), 75.0, 8, sets: 3),
+    ];
+
+    $results = $this->calculator->calculate($records, $this->currentPeriod, $this->previousPeriod);
+
+    expect($results)->toHaveCount(1);
+    expect($results[0]->currentMaxWeight)->toEqualWithDelta(80.0, 0.1);
+    expect($results[0]->previousMaxWeight)->toEqualWithDelta(75.0, 0.1);
+    // 3 * 8 * 80 = 1920
+    expect($results[0]->currentVolume)->toEqualWithDelta(1920.0, 0.1);
 });

@@ -128,11 +128,13 @@ class ReviewProgressPrompt extends Prompt
 
         if (! empty($summary->strengthProgression)) {
             $content .= "### Strength Progression\n";
-            $content .= "| Exercise | Current e1RM | Previous e1RM | Change |\n|---|---|---|---|\n";
+            $content .= "| Exercise | Max Wt | Volume | Current e1RM | Previous e1RM | Change |\n|---|---|---|---|---|---|\n";
             foreach ($summary->strengthProgression as $progression) {
                 $previous = $progression->previousE1RM !== null ? number_format($progression->previousE1RM, 1) : '-';
                 $change = $progression->changePct !== null ? "{$progression->changePct}%" : '-';
-                $content .= "| {$progression->exerciseName} | {$progression->currentE1RM} | {$previous} | {$change} |\n";
+                $maxWt = number_format($progression->currentMaxWeight, 1);
+                $volume = number_format($progression->currentVolume, 0);
+                $content .= "| {$progression->exerciseName} | {$maxWt} | {$volume} | {$progression->currentE1RM} | {$previous} | {$change} |\n";
             }
         }
 

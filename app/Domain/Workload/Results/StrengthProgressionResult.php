@@ -12,5 +12,8 @@ readonly class StrengthProgressionResult
         public float $currentE1RM,
         public ?float $previousE1RM,
         public ?float $changePct,
+        public float $currentMaxWeight,
+        public ?float $previousMaxWeight,
+        public float $currentVolume,
     ) {}
 }

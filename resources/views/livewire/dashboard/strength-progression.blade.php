@@ -5,7 +5,7 @@
             <flux:tooltip toggleable>
                 <flux:button icon="information-circle" size="sm" variant="ghost" />
                 <flux:tooltip.content class="max-w-[18rem]">
-                    Estimated 1RM progression using the Epley formula. Compares the last 4 weeks to the previous 4 weeks.
+                    Estimated 1RM progression using the Epley formula, max weight lifted, and total volume (sets &times; reps &times; weight). Compares the last 4 weeks to the previous 4 weeks.
                 </flux:tooltip.content>
             </flux:tooltip>
         </flux:heading>
@@ -46,9 +46,12 @@
                             default => null,
                         };
                     @endphp
-                    <div class="flex items-center justify-between gap-4 py-3.5 px-4">
+                    <div wire:click="$dispatch('show-exercise-history', { exerciseId: {{ $progression->exerciseId }} })" class="flex items-center justify-between gap-4 py-3.5 px-4 -mx-4 rounded cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
                         <div class="min-w-0">
                             <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{{ $progression->exerciseName }}</div>
+                            <div class="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+                                max: {{ number_format($progression->currentMaxWeight, 1) }} kg · vol: {{ number_format($progression->currentVolume, 0) }} kg
+                            </div>
                             <div class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
                                 @if($progression->previousE1RM !== null)
                                     prev: {{ number_format($progression->previousE1RM, 1) }} kg
@@ -81,8 +84,10 @@
                 {{-- Header --}}
                 <div class="flex items-center border-y border-zinc-200 dark:border-zinc-700 py-2">
                     <div class="flex-1 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Exercise</div>
-                    <div class="w-[120px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Current e1RM</div>
-                    <div class="w-[120px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Previous e1RM</div>
+                    <div class="w-[90px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Max Wt</div>
+                    <div class="w-[90px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Volume</div>
+                    <div class="w-[100px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Current e1RM</div>
+                    <div class="w-[100px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Previous e1RM</div>
                     <div class="w-[80px] text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Change</div>
                 </div>
 
@@ -104,10 +109,12 @@
                         };
                         $isLast = $loop->last;
                     @endphp
-                    <div @class(['flex items-center py-2.5', 'border-b border-zinc-100 dark:border-zinc-800' => ! $isLast])>
+                    <div wire:click="$dispatch('show-exercise-history', { exerciseId: {{ $progression->exerciseId }} })" @class(['flex items-center py-2.5 -mx-2 px-2 rounded cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors', 'border-b border-zinc-100 dark:border-zinc-800' => ! $isLast])>
                         <div class="flex-1 text-xs text-zinc-900 dark:text-zinc-100 truncate pr-2">{{ $progression->exerciseName }}</div>
-                        <div class="w-[120px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">{{ number_format($progression->currentE1RM, 1) }} kg</div>
-                        <div class="w-[120px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
+                        <div class="w-[90px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">{{ number_format($progression->currentMaxWeight, 1) }} kg</div>
+                        <div class="w-[90px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">{{ number_format($progression->currentVolume, 0) }} kg</div>
+                        <div class="w-[100px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">{{ number_format($progression->currentE1RM, 1) }} kg</div>
+                        <div class="w-[100px] text-right text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
                             @if($progression->previousE1RM !== null)
                                 {{ number_format($progression->previousE1RM, 1) }} kg
                             @else

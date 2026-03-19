@@ -240,6 +240,7 @@ class CalculateWorkload
                             performedAt: new DateTimeImmutable($workout->completed_at->toDateTimeString()),
                             weight: (float) $exerciseable->target_weight,
                             reps: $reps,
+                            sets: $exerciseable->target_sets ?? 1,
                         );
                     }
                 }

@@ -200,6 +200,10 @@ it('calculates e1RM progression', function (): void {
     expect($bench->currentE1RM)->toEqualWithDelta(116.7, 0.1);
     expect($bench->previousE1RM)->toEqualWithDelta(105.0, 0.1);
     expect($bench->changePct)->toBeGreaterThan(0);
+    expect($bench->currentMaxWeight)->toEqualWithDelta(100.0, 0.1);
+    expect($bench->previousMaxWeight)->toEqualWithDelta(90.0, 0.1);
+    // 3 sets * 5 reps * 100kg = 1500
+    expect($bench->currentVolume)->toEqualWithDelta(1500.0, 0.1);
 });
 
 it('excludes exercises without weight from strength progression', function (): void {

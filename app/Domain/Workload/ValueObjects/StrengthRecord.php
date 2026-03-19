@@ -14,6 +14,7 @@ readonly class StrengthRecord
         public DateTimeImmutable $performedAt,
         public float $weight,
         public int $reps,
+        public int $sets = 1,
     ) {}
 
     public function estimated1RM(): float

@@ -32,5 +32,4 @@
     <livewire:workout.duplicate />
     <livewire:workout.preview />
     <livewire:exercise.detail />
-    <livewire:dashboard.exercise-strength-history />
 </x-layouts.app>

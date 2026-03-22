@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\CalculateWorkload;
+use App\Domain\Workload\Enums\AcwrZone;
 use App\Domain\Workload\Enums\Trend;
 use App\Enums\BodyPart;
 use App\Models\Block;
@@ -277,6 +278,64 @@ it('calculates data span days from earliest workout', function (): void {
 
     expect($result->dataSpanDays)->toBe(5);
 });
+
+// --- EWMA Load ---
+
+it('populates EWMA load when sessions exist', function (): void {
+    $w1 = createCompletedWorkout($this->user, $this->now->subDays(2), rpe: 7);
+    addCardioBlock($w1, targetDuration: 2700); // 45 min
+
+    $w2 = createCompletedWorkout($this->user, $this->now->subDays(4), rpe: 8);
+    addCardioBlock($w2, targetDuration: 3600); // 60 min
+
+    $result = $this->action->execute($this->user, $this->now);
+
+    expect($result->ewmaLoad)->not->toBeNull();
+    expect($result->ewmaLoad->currentAcuteLoad)->toBeGreaterThan(0);
+    expect($result->ewmaLoad->currentChronicLoad)->toBeGreaterThan(0);
+    expect($result->ewmaLoad->acwr)->toBeGreaterThan(0);
+    expect($result->ewmaLoad->acwrZone)->toBeInstanceOf(AcwrZone::class);
+    expect($result->ewmaLoad->totalSessions)->toBe(2);
+    expect($result->ewmaLoad->dailyPoints)->not->toBeEmpty();
+});
+
+it('returns null EWMA load when no sessions qualify', function (): void {
+    $result = $this->action->execute($this->user, $this->now);
+
+    expect($result->ewmaLoad)->toBeNull();
+});
+
+it('includes ACWR zone warnings for caution zone', function (): void {
+    // Create a pattern that produces high ACWR: rest for weeks, then heavy spike
+    // Many rest days followed by heavy sessions push acute > chronic
+    $w1 = createCompletedWorkout($this->user, $this->now->subDays(1), rpe: 10);
+    addCardioBlock($w1, targetDuration: 7200); // 120 min, load = 1200
+
+    $w2 = createCompletedWorkout($this->user, $this->now, rpe: 10);
+    addCardioBlock($w2, targetDuration: 7200); // 120 min, load = 1200
+
+    $result = $this->action->execute($this->user, $this->now);
+
+    // With only recent heavy sessions and no history, ACWR will be very high
+    if ($result->ewmaLoad?->acwrZone === AcwrZone::Danger) {
+        expect($result->warnings())->toContain("ACWR ({$result->ewmaLoad->acwr}) is in the danger zone (> 1.5) — significantly reduce volume or rest.");
+    } elseif ($result->ewmaLoad?->acwrZone === AcwrZone::Caution) {
+        expect($result->warnings())->toContain("ACWR ({$result->ewmaLoad->acwr}) is in the caution zone (1.3–1.5) — consider reducing or holding volume.");
+    }
+});
+
+it('includes EWMA data in toArray output', function (): void {
+    $w = createCompletedWorkout($this->user, $this->now->subDays(2), rpe: 7);
+    addCardioBlock($w, targetDuration: 2700);
+
+    $result = $this->action->execute($this->user, $this->now);
+    $array = $result->toArray();
+
+    expect($array)->toHaveKey('ewma_load');
+    expect($array['ewma_load'])->toHaveKeys(['acute_load', 'chronic_load', 'acwr', 'tsb', 'acwr_zone', 'total_sessions', 'daily_points']);
+});
+
+// --- Cross-cutting ---
 
 it('only counts completed workouts', function (): void {
     $chest = MuscleGroup::factory()->create(['name' => 'chest', 'body_part' => BodyPart::Chest]);

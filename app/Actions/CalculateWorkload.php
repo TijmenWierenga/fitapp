@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\DataTransferObjects\Workload\WorkloadSummary;
 use App\Domain\Workload\Calculators\DurationEstimator;
+use App\Domain\Workload\Calculators\EwmaLoadCalculator;
 use App\Domain\Workload\Calculators\MuscleGroupVolumeCalculator;
 use App\Domain\Workload\Calculators\SessionLoadCalculator;
 use App\Domain\Workload\Calculators\StrengthProgressionCalculator;
@@ -23,12 +24,13 @@ use Illuminate\Support\Collection;
 
 class CalculateWorkload
 {
-    private const int DATA_WINDOW_DAYS = 56;
+    private const int DATA_WINDOW_DAYS = 70;
 
     private const int WEEKS = 4;
 
     public function __construct(
         private SessionLoadCalculator $sessionLoadCalculator,
+        private EwmaLoadCalculator $ewmaLoadCalculator,
         private MuscleGroupVolumeCalculator $muscleGroupVolumeCalculator,
         private StrengthProgressionCalculator $strengthProgressionCalculator,
         private DurationEstimator $durationEstimator,
@@ -48,6 +50,14 @@ class CalculateWorkload
         $sessions = $this->mapToSessions($workouts);
         $sessionLoad = ! empty($sessions)
             ? $this->sessionLoadCalculator->calculate($sessions, $currentWeek, $previousWeeks)
+            : null;
+
+        $ewmaLoad = ! empty($sessions)
+            ? $this->ewmaLoadCalculator->calculate(
+                $sessions,
+                new DateTimeImmutable($windowStart->toDateTimeString()),
+                new DateTimeImmutable($asOf->toDateTimeString()),
+            )
             : null;
 
         [$exercises, $unlinkedCount] = $this->mapToPerformedExercises($workouts);
@@ -70,6 +80,7 @@ class CalculateWorkload
 
         return new WorkloadSummary(
             sessionLoad: $sessionLoad,
+            ewmaLoad: $ewmaLoad,
             muscleGroupVolume: collect($muscleGroupVolume),
             strengthProgression: $strengthProgression,
             activeInjuries: $this->activeInjuries($user),

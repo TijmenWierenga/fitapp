@@ -49,8 +49,8 @@ it('renders session load stats when estimatable duration available', function ()
         ->test(SessionLoadOverview::class)
         ->assertSee('Weekly sRPE')
         ->assertSee('Sessions')
-        ->assertSee('Monotony')
-        ->assertSee('Strain')
+        ->assertSee('ACWR')
+        ->assertSee('Freshness')
         ->assertDontSee('No session load data yet');
 });
 

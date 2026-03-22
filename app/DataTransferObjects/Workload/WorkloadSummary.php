@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\DataTransferObjects\Workload;
 
+use App\Domain\Workload\Enums\AcwrZone;
+use App\Domain\Workload\Results\DailyEwmaPoint;
+use App\Domain\Workload\Results\EwmaLoadResult;
 use App\Domain\Workload\Results\MuscleGroupVolumeResult;
 use App\Domain\Workload\Results\SessionLoadResult;
 use App\Domain\Workload\Results\StrengthProgressionResult;
@@ -19,6 +22,7 @@ readonly class WorkloadSummary
      */
     public function __construct(
         public ?SessionLoadResult $sessionLoad,
+        public ?EwmaLoadResult $ewmaLoad,
         public Collection $muscleGroupVolume,
         public array $strengthProgression,
         public Collection $activeInjuries,
@@ -32,6 +36,14 @@ readonly class WorkloadSummary
     public function warnings(): Collection
     {
         $warnings = collect();
+
+        if ($this->ewmaLoad?->acwrZone === AcwrZone::Caution) {
+            $warnings->push("ACWR ({$this->ewmaLoad->acwr}) is in the caution zone (1.3–1.5) — consider reducing or holding volume.");
+        }
+
+        if ($this->ewmaLoad?->acwrZone === AcwrZone::Danger) {
+            $warnings->push("ACWR ({$this->ewmaLoad->acwr}) is in the danger zone (> 1.5) — significantly reduce volume or rest.");
+        }
 
         if ($this->sessionLoad?->weekOverWeekWarning) {
             $change = $this->sessionLoad->weekOverWeekChangePct;
@@ -67,6 +79,21 @@ readonly class WorkloadSummary
                     'total_load' => $w->totalLoad,
                     'session_count' => $w->sessionCount,
                 ], $this->sessionLoad->previousWeeks),
+            ] : null,
+            'ewma_load' => $this->ewmaLoad ? [
+                'acute_load' => $this->ewmaLoad->currentAcuteLoad,
+                'chronic_load' => $this->ewmaLoad->currentChronicLoad,
+                'acwr' => $this->ewmaLoad->acwr,
+                'tsb' => $this->ewmaLoad->tsb,
+                'acwr_zone' => $this->ewmaLoad->acwrZone->value,
+                'total_sessions' => $this->ewmaLoad->totalSessions,
+                'daily_points' => array_map(fn (DailyEwmaPoint $p): array => [
+                    'date' => $p->date,
+                    'acute_load' => $p->acuteLoad,
+                    'chronic_load' => $p->chronicLoad,
+                    'acwr' => $p->acwr,
+                    'tsb' => $p->tsb,
+                ], $this->ewmaLoad->dailyPoints),
             ] : null,
             'muscle_group_volume' => $this->muscleGroupVolume->map(fn (MuscleGroupVolumeResult $v): array => [
                 'muscle_group' => $v->name,

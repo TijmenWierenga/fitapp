@@ -27,6 +27,9 @@
                     @endif
                     <flux:menu.item icon="pencil" :href="route('workouts.edit', $workout)">Edit Workout</flux:menu.item>
                     <flux:menu.item icon="arrow-down-tray" :href="route('workouts.export-fit', $workout)">Export to Garmin</flux:menu.item>
+                    @if(!$workout->isCompleted())
+                        <flux:menu.item icon="arrow-up-tray" :href="route('workouts.import', ['workout' => $workout->id])">Import Garmin Data</flux:menu.item>
+                    @endif
                     <flux:menu.item icon="document-duplicate" wire:click="$dispatch('duplicate-workout', { workoutId: {{ $workout->id }} })">Duplicate</flux:menu.item>
                     @if($workout->canBeDeleted())
                         <flux:menu.separator />

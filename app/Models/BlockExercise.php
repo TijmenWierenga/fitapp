@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class BlockExercise extends Model
@@ -48,5 +49,13 @@ class BlockExercise extends Model
     public function exerciseable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * @return HasMany<ExerciseSet, $this>
+     */
+    public function exerciseSets(): HasMany
+    {
+        return $this->hasMany(ExerciseSet::class)->orderBy('set_number');
     }
 }

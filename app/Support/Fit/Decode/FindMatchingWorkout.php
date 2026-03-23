@@ -26,14 +26,14 @@ class FindMatchingWorkout
             ->setTimezone($user->timezone ?? 'UTC')
             ->startOfDay();
 
-        $startTimeFormatted = $activity->session->startTime->toDateTimeString();
+        $startTime = $activity->session->startTime;
 
         return Workout::query()
             ->where('user_id', $user->id)
             ->whereNull('completed_at')
             ->where('activity', $activityType)
             ->whereDate('scheduled_at', $activityDate)
-            ->orderByRaw("ABS(strftime('%s', scheduled_at) - strftime('%s', ?))", [$startTimeFormatted])
-            ->get();
+            ->get()
+            ->sortBy(fn (Workout $w) => abs($w->scheduled_at->diffInSeconds($startTime)));
     }
 }

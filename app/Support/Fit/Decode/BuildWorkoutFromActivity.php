@@ -14,6 +14,7 @@ use App\DataTransferObjects\Workout\StrengthExerciseData;
 use App\Enums\Workout\BlockType;
 use App\Enums\Workout\ExerciseType;
 use App\Models\Exercise;
+use App\Support\Fit\SportMapper;
 use Illuminate\Support\Collection;
 
 class BuildWorkoutFromActivity
@@ -109,14 +110,22 @@ class BuildWorkoutFromActivity
      */
     private function buildCardioSections(ParsedActivity $activity): Collection
     {
+        $mappedActivity = SportMapper::toActivity($activity->session->sport, $activity->session->subSport);
+        $activityLabel = $mappedActivity->label();
+
+        $exercise = Exercise::query()
+            ->where('name', $activityLabel)
+            ->first();
+
         $exerciseData = new ExerciseData(
-            name: $activity->session->workoutName ?? 'Activity',
+            name: $exercise?->name ?? $activity->session->workoutName ?? $activityLabel,
             order: 0,
             type: ExerciseType::Cardio,
             exerciseable: new CardioExerciseData(
                 targetDuration: $activity->session->totalElapsedTime,
                 targetDistance: $activity->session->totalDistance !== null ? (float) $activity->session->totalDistance : null,
             ),
+            exerciseId: $exercise?->id,
         );
 
         $block = new BlockData(

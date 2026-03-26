@@ -30,25 +30,25 @@ it('imports a new strength workout from FIT data', function () {
     $fitData = (new FitActivityFixtureBuilder)
         ->withSession(sport: 10, subSport: 20, totalElapsedTime: 3600, totalCalories: 400)
         // Bench Press 3x10@80kg
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 1, duration: 90) // rest
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 1, duration: 90)
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 0, duration: 90) // rest
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 0, duration: 90)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
         // Squat 4x8@100kg
-        ->addSet(setType: 0, repetitions: 8, weight: 100.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
-        ->addSet(setType: 1, duration: 120)
-        ->addSet(setType: 0, repetitions: 8, weight: 100.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
-        ->addSet(setType: 1, duration: 120)
-        ->addSet(setType: 0, repetitions: 8, weight: 100.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
-        ->addSet(setType: 1, duration: 120)
-        ->addSet(setType: 0, repetitions: 8, weight: 100.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 8, weight: 100.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
+        ->addSet(setType: 0, duration: 120)
+        ->addSet(setType: 1, repetitions: 8, weight: 100.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
+        ->addSet(setType: 0, duration: 120)
+        ->addSet(setType: 1, repetitions: 8, weight: 100.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
+        ->addSet(setType: 0, duration: 120)
+        ->addSet(setType: 1, repetitions: 8, weight: 100.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
         // Row 3x12@60kg
-        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
-        ->addSet(setType: 1, duration: 90)
-        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
-        ->addSet(setType: 1, duration: 90)
-        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addSet(setType: 0, duration: 90)
+        ->addSet(setType: 1, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addSet(setType: 0, duration: 90)
+        ->addSet(setType: 1, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
         ->addExerciseTitle(GarminExerciseCategory::BenchPress->value, 0, 'Bench Press')
         ->addExerciseTitle(GarminExerciseCategory::Squat->value, 0, 'Squat')
         ->addExerciseTitle(GarminExerciseCategory::Row->value, 0, 'Row')
@@ -170,11 +170,11 @@ it('merges FIT data into a planned strength workout', function () {
 
     $fitData = (new FitActivityFixtureBuilder)
         ->withSession(sport: 10, subSport: 20, totalElapsedTime: 1800, totalCalories: 200)
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 1, duration: 90)
-        ->addSet(setType: 0, repetitions: 10, weight: 82.5, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 1, duration: 90)
-        ->addSet(setType: 0, repetitions: 8, weight: 85.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 0, duration: 90)
+        ->addSet(setType: 1, repetitions: 10, weight: 82.5, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 0, duration: 90)
+        ->addSet(setType: 1, repetitions: 8, weight: 85.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
         ->addExerciseTitle(GarminExerciseCategory::BenchPress->value, 0, 'Bench Press')
         ->build();
 
@@ -234,11 +234,11 @@ it('appends extra exercises when FIT has more exercises than planned', function 
 
     $fitData = (new FitActivityFixtureBuilder)
         ->withSession(sport: 10, subSport: 20, totalElapsedTime: 2400)
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
         // Extra exercise not in plan
-        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Curl->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Curl->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Curl->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Curl->value, exerciseName: 0)
         ->addExerciseTitle(GarminExerciseCategory::BenchPress->value, 0, 'Bench Press')
         ->addExerciseTitle(GarminExerciseCategory::Curl->value, 0, 'Bicep Curl')
         ->build();
@@ -258,8 +258,8 @@ it('handles unrecognized exercises by creating them without exercise_id', functi
 
     $fitData = (new FitActivityFixtureBuilder)
         ->withSession(sport: 10, subSport: 20, totalElapsedTime: 1200)
-        ->addSet(setType: 0, repetitions: 10, weight: 50.0, exerciseCategory: 9999, exerciseName: 9999)
-        ->addSet(setType: 0, repetitions: 10, weight: 50.0, exerciseCategory: 9999, exerciseName: 9999)
+        ->addSet(setType: 1, repetitions: 10, weight: 50.0, exerciseCategory: 9999, exerciseName: 9999)
+        ->addSet(setType: 1, repetitions: 10, weight: 50.0, exerciseCategory: 9999, exerciseName: 9999)
         ->addExerciseTitle(9999, 9999, 'Mystery Exercise')
         ->build();
 
@@ -336,19 +336,19 @@ it('detects A-B-A-B pattern as a superset block', function () {
     $fitData = (new FitActivityFixtureBuilder)
         ->withSession(sport: 10, subSport: 20, totalElapsedTime: 2400)
         // Round 1
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
         // Round 2
-        ->addSet(setType: 0, repetitions: 10, weight: 82.5, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 10, weight: 82.5, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 10, weight: 82.5, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 12, weight: 62.5, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 12, weight: 62.5, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 12, weight: 62.5, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 82.5, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 82.5, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 82.5, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 12, weight: 62.5, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 12, weight: 62.5, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 12, weight: 62.5, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
         ->addExerciseTitle(GarminExerciseCategory::BenchPress->value, 0, 'Bench Press')
         ->addExerciseTitle(GarminExerciseCategory::Row->value, 0, 'Row')
         ->build();
@@ -381,10 +381,10 @@ it('keeps straight sets when exercises do not repeat', function () {
 
     $fitData = (new FitActivityFixtureBuilder)
         ->withSession(sport: 10, subSport: 20, totalElapsedTime: 1800)
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
         ->addExerciseTitle(GarminExerciseCategory::BenchPress->value, 0, 'Bench Press')
         ->addExerciseTitle(GarminExerciseCategory::Squat->value, 0, 'Squat')
         ->build();
@@ -407,8 +407,8 @@ it('imports both strength sets and cardio laps from a mixed workout', function (
     $fitData = (new FitActivityFixtureBuilder)
         ->withSession(sport: 10, subSport: 26, totalElapsedTime: 3600, totalDistance: 3000, totalCalories: 500)
         // Strength sets
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
         ->addExerciseTitle(GarminExerciseCategory::BenchPress->value, 0, 'Bench Press')
         // Cardio laps with distance
         ->addLap(totalElapsedTime: 600, totalDistance: 1000, avgHeartRate: 160)
@@ -437,7 +437,7 @@ it('ignores laps without distance in mixed workouts', function () {
 
     $fitData = (new FitActivityFixtureBuilder)
         ->withSession(sport: 10, subSport: 20, totalElapsedTime: 1800)
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
         ->addExerciseTitle(GarminExerciseCategory::BenchPress->value, 0, 'Bench Press')
         // Lap with no distance (summary lap from strength session)
         ->addLap(totalElapsedTime: 1800)

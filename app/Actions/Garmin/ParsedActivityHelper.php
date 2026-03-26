@@ -22,9 +22,13 @@ class ParsedActivityHelper
         $currentGroup = null;
 
         foreach ($sets as $set) {
+            $hasIdentification = $set->exerciseCategory !== null && $set->exerciseName !== null;
             $category = $set->exerciseCategory ?? 0;
             $name = $set->exerciseName ?? 0;
-            $key = "{$category}:{$name}";
+
+            $key = $hasIdentification
+                ? "{$category}:{$name}"
+                : 'weight:'.($set->weight ?? 0);
 
             if ($currentGroup === null || $currentGroup['key'] !== $key) {
                 if ($currentGroup !== null) {

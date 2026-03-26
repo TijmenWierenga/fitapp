@@ -4,6 +4,7 @@
     /** @var App\Models\BlockExercise $exercise */
     /** @var App\DataTransferObjects\Workout\ExercisePresentation|null $presentation */
     $presentation = $exercise->exerciseable?->present();
+    $hasActualSets = $exercise->exerciseSets->isNotEmpty();
 @endphp
 
 <div class="rounded bg-zinc-100 dark:bg-zinc-950 px-2.5 py-2 space-y-1">
@@ -25,7 +26,7 @@
             <span class="text-xs font-medium text-zinc-900 dark:text-zinc-100 flex-1 min-w-0">{{ $exercise->name }}</span>
         @endif
 
-        @if($presentation && !empty($presentation->whatLines))
+        @if(!$hasActualSets && $presentation && !empty($presentation->whatLines))
             <span class="text-accent font-semibold text-xs shrink-0">{{ implode(' · ', $presentation->whatLines) }}</span>
         @endif
 
@@ -40,8 +41,17 @@
         @endif
     </div>
 
-    {{-- Details row: effort + rest combined --}}
-    @if($presentation)
+    @if($hasActualSets)
+        {{-- Actual recorded data from import --}}
+        <div class="mt-1">
+            @if($exercise->exerciseable_type === 'strength_exercise')
+                <x-workout.strength-set-table :exerciseSets="$exercise->exerciseSets" />
+            @elseif($exercise->exerciseable_type === 'cardio_exercise')
+                <x-workout.cardio-lap-table :exerciseSets="$exercise->exerciseSets" />
+            @endif
+        </div>
+    @elseif($presentation)
+        {{-- Planned presentation (no actual data) --}}
         @php
             $detailParts = [];
             if (!empty($presentation->effortLines)) {

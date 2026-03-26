@@ -146,11 +146,11 @@ class FitActivityParser
             }
 
             $duration = $this->getFieldValue($message, 0);
-            $weight = $this->getFieldValue($message, 5);
+            $weight = $this->getFieldValue($message, 4);
 
             $sets[] = new ParsedSet(
                 index: $index,
-                setType: $this->getFieldValue($message, 4) ?? 0,
+                setType: $this->getFieldValue($message, 5) ?? 0,
                 duration: $duration !== null ? (int) round($duration / 1000) : null,
                 repetitions: $this->getFieldValue($message, 3),
                 weight: $weight !== null ? round($weight / 16, 2) : null,

@@ -11,11 +11,11 @@ it('parses a synthetic strength activity', function () {
     $builder = new FitActivityFixtureBuilder;
     $data = $builder
         ->withSession(sport: 10, subSport: 20, totalElapsedTime: 3600, totalCalories: 400)
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: 4, exerciseName: 0, duration: 45)
-        ->addSet(setType: 1, duration: 90) // rest
-        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: 4, exerciseName: 0, duration: 48)
-        ->addSet(setType: 1, duration: 90) // rest
-        ->addSet(setType: 0, repetitions: 8, weight: 85.0, exerciseCategory: 4, exerciseName: 0, duration: 42)
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: 4, exerciseName: 0, duration: 45)
+        ->addSet(setType: 0, duration: 90) // rest
+        ->addSet(setType: 1, repetitions: 10, weight: 80.0, exerciseCategory: 4, exerciseName: 0, duration: 48)
+        ->addSet(setType: 0, duration: 90) // rest
+        ->addSet(setType: 1, repetitions: 8, weight: 85.0, exerciseCategory: 4, exerciseName: 0, duration: 42)
         ->addExerciseTitle(exerciseCategory: 4, exerciseName: 0, displayName: 'Bench Press')
         ->build();
 

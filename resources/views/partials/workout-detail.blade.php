@@ -1,11 +1,14 @@
 @use('App\Domain\Workload\Calculators\DurationEstimator')
 @use('App\Domain\Workload\PlannedBlockMapper')
+@use('App\Support\Workout\TimeConverter')
 
 @props(['showBackButton' => true, 'showViewFullPage' => false, 'inModal' => false])
 
 @php
+    $hasActualDuration = $workout->total_duration !== null;
     $estimatedSeconds = (new DurationEstimator)->estimate(PlannedBlockMapper::fromWorkout($workout));
     $estimatedMinutes = $estimatedSeconds ? (int) round($estimatedSeconds / 60) : null;
+    $hasSessionData = $workout->total_duration || $workout->total_distance || $workout->total_calories || $workout->avg_heart_rate;
 @endphp
 
 <div>
@@ -52,7 +55,12 @@
         </div>
 
         {{-- Duration pill --}}
-        @if($estimatedMinutes)
+        @if($hasActualDuration)
+            <div class="rounded-xl bg-zinc-200 dark:bg-zinc-700 px-3 py-1.5 flex items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400">
+                <flux:icon.clock class="size-3.5 text-zinc-400 dark:text-zinc-500" />
+                <span>{{ TimeConverter::format($workout->total_duration) }}</span>
+            </div>
+        @elseif($estimatedMinutes)
             <div class="rounded-xl bg-zinc-200 dark:bg-zinc-700 px-3 py-1.5 flex items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400">
                 <flux:icon.clock class="size-3.5 text-zinc-400 dark:text-zinc-500" />
                 <span>~{{ $estimatedMinutes }} min</span>
@@ -81,7 +89,20 @@
                 <span>Tomorrow</span>
             </div>
         @endif
+
+        {{-- Imported badge --}}
+        @if($workout->source === 'garmin_fit')
+            <div class="rounded-xl bg-zinc-200 dark:bg-zinc-700 px-3 py-1.5 flex items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400">
+                <flux:icon.arrow-up-tray class="size-3.5 text-zinc-400 dark:text-zinc-500" />
+                <span>Imported</span>
+            </div>
+        @endif
     </div>
+
+    {{-- Session summary banner --}}
+    @if($hasSessionData)
+        <x-workout.session-summary :workout="$workout" />
+    @endif
 
     {{-- Evaluation data for completed workouts --}}
     @if($workout->isCompleted() && ($workout->rpe || $workout->feeling))

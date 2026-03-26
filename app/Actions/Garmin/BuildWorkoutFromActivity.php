@@ -10,6 +10,7 @@ use App\DataTransferObjects\Workout\CardioExerciseData;
 use App\DataTransferObjects\Workout\ExerciseData;
 use App\DataTransferObjects\Workout\SectionData;
 use App\DataTransferObjects\Workout\StrengthExerciseData;
+use App\Enums\Fit\GarminExerciseCategory;
 use App\Enums\Workout\BlockType;
 use App\Enums\Workout\ExerciseType;
 use App\Models\Exercise;
@@ -83,14 +84,28 @@ class BuildWorkoutFromActivity
 
         $blocks = collect();
         $blockOrder = $startOrder;
+        $unidentifiedCounter = 0;
 
         foreach ($detectedBlocks as $detected) {
             $exercises = collect();
             $exerciseOrder = 0;
 
             foreach ($detected['exercises'] as $key => $exerciseInfo) {
-                $displayName = $titleMap[$key] ?? "Exercise {$exerciseInfo['category']}/{$exerciseInfo['name']}";
-                $exercise = $this->matchExercise($exerciseInfo['category'], $exerciseInfo['name'], $displayName, $matched, $unmatched, $warnings);
+                $isUnidentified = str_starts_with($key, 'weight:');
+
+                if ($isUnidentified) {
+                    $unidentifiedCounter++;
+                    $displayName = 'Exercise '.$unidentifiedCounter;
+                    $exercise = null;
+                } else {
+                    $category = GarminExerciseCategory::tryFrom($exerciseInfo['category']);
+                    $categoryLabel = $category?->label();
+                    $displayName = $titleMap[$key] ?? $categoryLabel ?? "Exercise {$exerciseInfo['category']}/{$exerciseInfo['name']}";
+
+                    $exercise = ($category === GarminExerciseCategory::Unknown)
+                        ? null
+                        : $this->matchExercise($exerciseInfo['category'], $exerciseInfo['name'], $displayName, $matched, $unmatched, $warnings);
+                }
 
                 $sets = $exerciseInfo['sets'];
                 $reps = collect($sets)->pluck('repetitions')->filter()->values();

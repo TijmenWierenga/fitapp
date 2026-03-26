@@ -18,6 +18,6 @@ readonly class ParsedSet
 
     public function isActive(): bool
     {
-        return $this->setType === 0;
+        return $this->setType !== 0;
     }
 }

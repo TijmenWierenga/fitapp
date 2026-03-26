@@ -31,7 +31,7 @@ class Preview extends Component
     {
         $this->workout = auth()->user()
             ->workouts()
-            ->with('sections.blocks.exercises.exerciseable', 'painScores.injury')
+            ->with('sections.blocks.exercises.exerciseable', 'sections.blocks.exercises.exerciseSets', 'painScores.injury')
             ->findOrFail($workoutId);
 
         $this->showModal = true;

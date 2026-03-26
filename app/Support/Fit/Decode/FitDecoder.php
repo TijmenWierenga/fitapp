@@ -169,6 +169,11 @@ class FitDecoder
                 $fields[] = FitField::decode($fieldDef->fieldNumber, $fieldDef->baseType, $bytes, $definition->bigEndian);
             } elseif ($fieldDef->size === $fieldDef->baseType->size()) {
                 $fields[] = FitField::decode($fieldDef->fieldNumber, $fieldDef->baseType, $bytes, $definition->bigEndian);
+            } elseif ($fieldDef->size > $fieldDef->baseType->size()
+                && $fieldDef->size % $fieldDef->baseType->size() === 0) {
+                // Array field: decode the first element
+                $firstElementBytes = substr($bytes, 0, $fieldDef->baseType->size());
+                $fields[] = FitField::decode($fieldDef->fieldNumber, $fieldDef->baseType, $firstElementBytes, $definition->bigEndian);
             } else {
                 $fields[] = new FitField($fieldDef->fieldNumber, $fieldDef->baseType, null, $fieldDef->size);
             }

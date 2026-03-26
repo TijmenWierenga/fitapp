@@ -239,8 +239,8 @@ class FitActivityFixtureBuilder
                 new FitField(1, FitBaseType::UInt16, $set['exerciseCategory']),
                 new FitField(2, FitBaseType::UInt16, $set['exerciseName']),
                 new FitField(3, FitBaseType::UInt16, $set['repetitions']),
-                new FitField(4, FitBaseType::UInt8, $set['setType']),
-                new FitField(5, FitBaseType::UInt16, $set['weight'] !== null ? (int) ($set['weight'] * 16) : null), // weight_scale = 16
+                new FitField(4, FitBaseType::UInt16, $set['weight'] !== null ? (int) ($set['weight'] * 16) : null), // weight_scale = 16
+                new FitField(5, FitBaseType::UInt8, $set['setType']),
             ],
         );
     }

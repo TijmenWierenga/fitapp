@@ -29,7 +29,7 @@ class Show extends Component
             abort(403);
         }
 
-        $workout->load('sections.blocks.exercises.exerciseable', 'painScores.injury');
+        $workout->load('sections.blocks.exercises.exerciseable', 'sections.blocks.exercises.exerciseSets', 'painScores.injury');
 
         $this->workout = $workout;
     }

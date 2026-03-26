@@ -24,3 +24,5 @@ yarn-error.log
 .claude/settings.local.json
 /.playwright-mcp
 /.worktrees
+*.fit
+!tests/fixtures/fit/*.fit

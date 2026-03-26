@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Actions\Garmin\BuildWorkoutFromActivity;
+use App\Actions\Garmin\MergeActualsIntoWorkout;
+use App\Actions\Garmin\ParsedActivityHelper;
+use App\Actions\Garmin\SportMapper;
 use App\DataTransferObjects\Fit\ImportResult;
 use App\Models\ExerciseSet;
 use App\Models\User;
 use App\Models\Workout;
-use App\Support\Fit\Decode\BuildWorkoutFromActivity;
 use App\Support\Fit\Decode\FitActivityParser;
-use App\Support\Fit\Decode\MergeActualsIntoWorkout;
-use App\Support\Fit\SportMapper;
+use App\Support\Workout\PaceConverter;
 use Illuminate\Support\Facades\DB;
 
 class ImportGarminActivity
@@ -32,13 +34,43 @@ class ImportGarminActivity
     ): ImportResult {
         $parsed = $this->parser->parse($fitData);
 
-        return DB::transaction(function () use ($user, $parsed, $existingWorkout, $rpe, $feeling): ImportResult {
+        $duplicateWarnings = $this->checkForDuplicates($user, $parsed);
+
+        return DB::transaction(function () use ($user, $parsed, $existingWorkout, $rpe, $feeling, $duplicateWarnings): ImportResult {
             if ($existingWorkout !== null) {
-                return $this->mergeIntoExisting($existingWorkout, $parsed, $rpe, $feeling);
+                $result = $this->mergeIntoExisting($existingWorkout, $parsed, $rpe, $feeling);
+            } else {
+                $result = $this->createNew($user, $parsed, $rpe, $feeling);
             }
 
-            return $this->createNew($user, $parsed, $rpe, $feeling);
+            return new ImportResult(
+                workout: $result->workout,
+                matchedExercises: $result->matchedExercises,
+                unmatchedExercises: $result->unmatchedExercises,
+                warnings: [...$duplicateWarnings, ...$result->warnings],
+            );
         });
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function checkForDuplicates(User $user, \App\DataTransferObjects\Fit\ParsedActivity $parsed): array
+    {
+        $activity = SportMapper::toActivity($parsed->session->sport, $parsed->session->subSport);
+
+        $duplicate = Workout::query()
+            ->where('user_id', $user->id)
+            ->where('activity', $activity)
+            ->where('source', 'garmin_fit')
+            ->whereDate('scheduled_at', $parsed->session->startTime->toDateString())
+            ->first();
+
+        if ($duplicate === null) {
+            return [];
+        }
+
+        return ["Possible duplicate: workout '{$duplicate->name}' on {$duplicate->scheduled_at->format('M j, Y')} was already imported from Garmin."];
     }
 
     private function createNew(
@@ -101,14 +133,25 @@ class ImportGarminActivity
     ): void {
         $workout->loadMissing('sections.blocks.exercises');
 
-        $blockExercises = $workout->sections
-            ->flatMap(fn ($s) => $s->blocks)
-            ->flatMap(fn ($b) => $b->exercises);
+        $hasSets = count($parsed->sets) > 0;
+        $hasCardioLaps = collect($parsed->laps)->contains(fn ($lap) => ($lap->totalDistance ?? 0) > 0);
 
-        if (count($parsed->sets) > 0) {
-            $this->populateStrengthSets($blockExercises, $parsed);
-        } else {
-            $this->populateCardioSets($blockExercises, $parsed);
+        if ($hasSets) {
+            $strengthExercises = $workout->sections
+                ->flatMap(fn ($s) => $s->blocks)
+                ->filter(fn ($b) => $b->block_type !== \App\Enums\Workout\BlockType::DistanceDuration)
+                ->flatMap(fn ($b) => $b->exercises);
+
+            $this->populateStrengthSets($strengthExercises, $parsed);
+        }
+
+        if ($hasCardioLaps || ! $hasSets) {
+            $cardioExercises = $workout->sections
+                ->flatMap(fn ($s) => $s->blocks)
+                ->filter(fn ($b) => $b->block_type === \App\Enums\Workout\BlockType::DistanceDuration)
+                ->flatMap(fn ($b) => $b->exercises);
+
+            $this->populateCardioSets($cardioExercises, $parsed);
         }
     }
 
@@ -120,43 +163,32 @@ class ImportGarminActivity
         \App\DataTransferObjects\Fit\ParsedActivity $parsed,
     ): void {
         $activeSets = collect($parsed->sets)->filter->isActive();
-        $groups = [];
-        $currentGroup = null;
+        $groups = ParsedActivityHelper::groupSetsByExercise($activeSets);
+        $detectedBlocks = ParsedActivityHelper::detectBlocks($groups);
 
-        foreach ($activeSets as $set) {
-            $category = $set->exerciseCategory ?? 0;
-            $name = $set->exerciseName ?? 0;
-            $key = "{$category}:{$name}";
+        $exerciseIndex = 0;
 
-            if ($currentGroup === null || $currentGroup['key'] !== $key) {
-                if ($currentGroup !== null) {
-                    $groups[] = $currentGroup;
+        foreach ($detectedBlocks as $detected) {
+            foreach ($detected['exercises'] as $exerciseInfo) {
+                if (! isset($blockExercises[$exerciseIndex])) {
+                    $exerciseIndex++;
+
+                    continue;
                 }
-                $currentGroup = ['key' => $key, 'sets' => []];
-            }
 
-            $currentGroup['sets'][] = $set;
-        }
+                $blockExercise = $blockExercises[$exerciseIndex];
 
-        if ($currentGroup !== null) {
-            $groups[] = $currentGroup;
-        }
+                foreach ($exerciseInfo['sets'] as $setIndex => $set) {
+                    ExerciseSet::create([
+                        'block_exercise_id' => $blockExercise->id,
+                        'set_number' => $setIndex + 1,
+                        'reps' => $set->repetitions,
+                        'weight' => $set->weight,
+                        'set_duration' => $set->duration,
+                    ]);
+                }
 
-        foreach ($groups as $index => $group) {
-            if (! isset($blockExercises[$index])) {
-                continue;
-            }
-
-            $blockExercise = $blockExercises[$index];
-
-            foreach ($group['sets'] as $setIndex => $set) {
-                ExerciseSet::create([
-                    'block_exercise_id' => $blockExercise->id,
-                    'set_number' => $setIndex + 1,
-                    'reps' => $set->repetitions,
-                    'weight' => $set->weight,
-                    'set_duration' => $set->duration,
-                ]);
+                $exerciseIndex++;
             }
         }
     }
@@ -175,12 +207,6 @@ class ImportGarminActivity
         $primaryExercise = $blockExercises->first();
 
         foreach ($parsed->laps as $index => $lap) {
-            $avgPace = null;
-
-            if ($lap->avgSpeed !== null && $lap->avgSpeed > 0) {
-                $avgPace = (int) round(1_000_000 / $lap->avgSpeed);
-            }
-
             ExerciseSet::create([
                 'block_exercise_id' => $primaryExercise->id,
                 'set_number' => $index + 1,
@@ -188,7 +214,7 @@ class ImportGarminActivity
                 'duration' => $lap->totalElapsedTime,
                 'avg_heart_rate' => $lap->avgHeartRate,
                 'max_heart_rate' => $lap->maxHeartRate,
-                'avg_pace' => $avgPace,
+                'avg_pace' => PaceConverter::fromFitSpeed($lap->avgSpeed),
                 'avg_power' => $lap->avgPower,
                 'max_power' => $lap->maxPower,
                 'avg_cadence' => $lap->avgCadence,

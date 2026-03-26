@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Support\Fit;
+namespace App\Actions\Garmin;
 
 use App\Enums\Workout\Activity;
+use App\Support\Fit\FitSportMapping;
 
 class SportMapper
 {

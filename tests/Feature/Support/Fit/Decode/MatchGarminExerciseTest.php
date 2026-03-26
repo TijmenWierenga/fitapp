@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Actions\Garmin\MatchGarminExercise;
 use App\Enums\Fit\GarminExerciseCategory;
 use App\Models\Exercise;
-use App\Support\Fit\Decode\MatchGarminExercise;
 
 it('matches an exercise by garmin category and name', function () {
     $exercise = Exercise::factory()

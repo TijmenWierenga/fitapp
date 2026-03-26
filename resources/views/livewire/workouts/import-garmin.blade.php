@@ -101,6 +101,14 @@
                 </div>
             </div>
 
+            {{-- Duplicate warning --}}
+            @if($duplicateWarning)
+                <flux:callout variant="warning">
+                    <flux:callout.heading>Possible duplicate</flux:callout.heading>
+                    <flux:callout.text>{{ $duplicateWarning }}</flux:callout.text>
+                </flux:callout>
+            @endif
+
             {{-- Matching workouts --}}
             @if($matchingWorkouts && count($matchingWorkouts) > 0 && $selectedWorkoutId === null)
                 <div class="space-y-3">

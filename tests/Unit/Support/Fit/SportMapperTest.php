@@ -1,7 +1,7 @@
 <?php
 
+use App\Actions\Garmin\SportMapper;
 use App\Enums\Workout\Activity;
-use App\Support\Fit\SportMapper;
 
 it('maps running activities to sport 1', function (Activity $activity) {
     $mapping = SportMapper::fromActivity($activity);

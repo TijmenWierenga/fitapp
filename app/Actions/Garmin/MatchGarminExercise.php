@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Support\Fit\Decode;
+namespace App\Actions\Garmin;
 
 use App\Models\Exercise;
 

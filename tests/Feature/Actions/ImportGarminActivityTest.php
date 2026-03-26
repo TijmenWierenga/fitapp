@@ -296,3 +296,180 @@ it('throws FitParseException for wrong file type', function () {
     $action = app(ImportGarminActivity::class);
     $action->execute($user, $data);
 })->throws(FitParseException::class, 'not an activity');
+
+// --- Duplicate Detection ---
+
+it('warns about possible duplicate when importing same activity twice', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $fitData = (new FitActivityFixtureBuilder)
+        ->withSession(sport: 1, subSport: 0, totalElapsedTime: 1800, totalDistance: 5000)
+        ->addLap(totalElapsedTime: 900, totalDistance: 2500)
+        ->addLap(totalElapsedTime: 900, totalDistance: 2500)
+        ->build();
+
+    $action = app(ImportGarminActivity::class);
+
+    // First import
+    $result1 = $action->execute($user, $fitData);
+    expect($result1->warnings)->toBeEmpty();
+
+    // Second import — should warn
+    $result2 = $action->execute($user, $fitData);
+    expect($result2->warnings)->not->toBeEmpty()
+        ->and($result2->warnings[0])->toContain('Possible duplicate');
+});
+
+// --- Superset Detection ---
+
+it('detects A-B-A-B pattern as a superset block', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $benchPress = Exercise::factory()
+        ->withGarminMapping(GarminExerciseCategory::BenchPress, 0)
+        ->create(['name' => 'Bench Press']);
+
+    $row = Exercise::factory()
+        ->withGarminMapping(GarminExerciseCategory::Row, 0)
+        ->create(['name' => 'Row']);
+
+    $fitData = (new FitActivityFixtureBuilder)
+        ->withSession(sport: 10, subSport: 20, totalElapsedTime: 2400)
+        // Round 1
+        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        // Round 2
+        ->addSet(setType: 0, repetitions: 10, weight: 82.5, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 10, weight: 82.5, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 10, weight: 82.5, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 12, weight: 62.5, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 12, weight: 62.5, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 12, weight: 62.5, exerciseCategory: GarminExerciseCategory::Row->value, exerciseName: 0)
+        ->addExerciseTitle(GarminExerciseCategory::BenchPress->value, 0, 'Bench Press')
+        ->addExerciseTitle(GarminExerciseCategory::Row->value, 0, 'Row')
+        ->build();
+
+    $action = app(ImportGarminActivity::class);
+    $result = $action->execute($user, $fitData);
+
+    // Should create 1 superset block with 2 exercises
+    $sections = $result->workout->sections;
+    expect($sections)->toHaveCount(1);
+
+    $blocks = $sections->first()->blocks;
+    expect($blocks)->toHaveCount(1);
+    expect($blocks->first()->block_type)->toBe(\App\Enums\Workout\BlockType::Superset);
+    expect($blocks->first()->exercises)->toHaveCount(2);
+
+    // Bench Press: 6 sets total (3+3)
+    $benchExercise = $blocks->first()->exercises->first(fn ($e) => $e->exercise_id === $benchPress->id);
+    $benchSets = ExerciseSet::where('block_exercise_id', $benchExercise->id)->get();
+    expect($benchSets)->toHaveCount(6);
+
+    // Row: 6 sets total (3+3)
+    $rowExercise = $blocks->first()->exercises->first(fn ($e) => $e->exercise_id === $row->id);
+    $rowSets = ExerciseSet::where('block_exercise_id', $rowExercise->id)->get();
+    expect($rowSets)->toHaveCount(6);
+});
+
+it('keeps straight sets when exercises do not repeat', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $fitData = (new FitActivityFixtureBuilder)
+        ->withSession(sport: 10, subSport: 20, totalElapsedTime: 1800)
+        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 12, weight: 60.0, exerciseCategory: GarminExerciseCategory::Squat->value, exerciseName: 0)
+        ->addExerciseTitle(GarminExerciseCategory::BenchPress->value, 0, 'Bench Press')
+        ->addExerciseTitle(GarminExerciseCategory::Squat->value, 0, 'Squat')
+        ->build();
+
+    $action = app(ImportGarminActivity::class);
+    $result = $action->execute($user, $fitData);
+
+    // 2 straight set blocks
+    $blocks = $result->workout->sections->first()->blocks;
+    expect($blocks)->toHaveCount(2);
+    expect($blocks[0]->block_type)->toBe(\App\Enums\Workout\BlockType::StraightSets);
+    expect($blocks[1]->block_type)->toBe(\App\Enums\Workout\BlockType::StraightSets);
+});
+
+// --- Mixed Workout ---
+
+it('imports both strength sets and cardio laps from a mixed workout', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $fitData = (new FitActivityFixtureBuilder)
+        ->withSession(sport: 10, subSport: 26, totalElapsedTime: 3600, totalDistance: 3000, totalCalories: 500)
+        // Strength sets
+        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addExerciseTitle(GarminExerciseCategory::BenchPress->value, 0, 'Bench Press')
+        // Cardio laps with distance
+        ->addLap(totalElapsedTime: 600, totalDistance: 1000, avgHeartRate: 160)
+        ->addLap(totalElapsedTime: 600, totalDistance: 1000, avgHeartRate: 165)
+        ->addLap(totalElapsedTime: 600, totalDistance: 1000, avgHeartRate: 170)
+        ->build();
+
+    $action = app(ImportGarminActivity::class);
+    $result = $action->execute($user, $fitData);
+
+    // Should have both strength and cardio blocks
+    $blocks = $result->workout->sections->first()->blocks;
+
+    $strengthBlocks = $blocks->filter(fn ($b) => $b->block_type !== \App\Enums\Workout\BlockType::DistanceDuration);
+    $cardioBlocks = $blocks->filter(fn ($b) => $b->block_type === \App\Enums\Workout\BlockType::DistanceDuration);
+
+    expect($strengthBlocks)->toHaveCount(1);
+    expect($cardioBlocks)->toHaveCount(1);
+
+    // 2 strength sets + 3 cardio laps = 5 exercise sets
+    expect(ExerciseSet::count())->toBe(5);
+});
+
+it('ignores laps without distance in mixed workouts', function () {
+    $user = User::factory()->withTimezone('UTC')->create();
+
+    $fitData = (new FitActivityFixtureBuilder)
+        ->withSession(sport: 10, subSport: 20, totalElapsedTime: 1800)
+        ->addSet(setType: 0, repetitions: 10, weight: 80.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
+        ->addExerciseTitle(GarminExerciseCategory::BenchPress->value, 0, 'Bench Press')
+        // Lap with no distance (summary lap from strength session)
+        ->addLap(totalElapsedTime: 1800)
+        ->build();
+
+    $action = app(ImportGarminActivity::class);
+    $result = $action->execute($user, $fitData);
+
+    // Only strength block, no cardio block
+    $blocks = $result->workout->sections->first()->blocks;
+    $cardioBlocks = $blocks->filter(fn ($b) => $b->block_type === \App\Enums\Workout\BlockType::DistanceDuration);
+
+    expect($cardioBlocks)->toBeEmpty();
+    expect(ExerciseSet::count())->toBe(1);
+});
+
+// --- Acceptance Tests with Real FIT Files ---
+
+it('imports a real .fit activity file without errors', function (string $filename) {
+    $user = User::factory()->withTimezone('Europe/Amsterdam')->create();
+
+    $fitData = file_get_contents(base_path("tests/fixtures/fit/{$filename}"));
+
+    $action = app(ImportGarminActivity::class);
+    $result = $action->execute($user, $fitData);
+
+    expect($result->workout)->not->toBeNull()
+        ->and($result->workout->isCompleted())->toBeTrue()
+        ->and($result->workout->source)->toBe('garmin_fit')
+        ->and($result->workout->sections)->not->toBeEmpty();
+})->with([
+    '22245117138_ACTIVITY.fit',
+    '22202494444_ACTIVITY.fit',
+    '22304009849_ACTIVITY.fit',
+]);

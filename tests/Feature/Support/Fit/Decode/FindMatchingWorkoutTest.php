@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Actions\Garmin\FindMatchingWorkout;
 use App\DataTransferObjects\Fit\ParsedActivity;
 use App\DataTransferObjects\Fit\ParsedSession;
 use App\Enums\Workout\Activity;
 use App\Models\User;
 use App\Models\Workout;
-use App\Support\Fit\Decode\FindMatchingWorkout;
 use Carbon\CarbonImmutable;
 
 function makeParsedActivity(int $sport, int $subSport, CarbonImmutable $startTime): ParsedActivity

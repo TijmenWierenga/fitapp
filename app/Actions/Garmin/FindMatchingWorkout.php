@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Support\Fit\Decode;
+namespace App\Actions\Garmin;
 
 use App\DataTransferObjects\Fit\ParsedActivity;
 use App\Models\User;
 use App\Models\Workout;
-use App\Support\Fit\SportMapper;
 use Illuminate\Support\Collection;
 
 class FindMatchingWorkout

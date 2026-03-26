@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Support\Fit\Decode;
+namespace App\Actions\Garmin;
 
 use App\DataTransferObjects\Fit\ParsedActivity;
 use App\DataTransferObjects\Fit\ParsedLap;
-use App\DataTransferObjects\Fit\ParsedSet;
 use App\Models\BlockExercise;
 use App\Models\ExerciseSet;
 use App\Models\StrengthExercise;
 use App\Models\Workout;
+use App\Support\Workout\PaceConverter;
 use Illuminate\Support\Collection;
 
 class MergeActualsIntoWorkout
@@ -28,9 +28,14 @@ class MergeActualsIntoWorkout
 
         $workout->loadMissing('sections.blocks.exercises.exerciseable');
 
-        if (count($activity->sets) > 0) {
+        $hasSets = count($activity->sets) > 0;
+        $hasCardioLaps = collect($activity->laps)->contains(fn ($lap) => ($lap->totalDistance ?? 0) > 0);
+
+        if ($hasSets) {
             $this->mergeStrength($workout, $activity, $matched, $unmatched, $warnings);
-        } else {
+        }
+
+        if ($hasCardioLaps || ! $hasSets) {
             $this->mergeCardio($workout, $activity, $matched, $warnings);
         }
 
@@ -53,9 +58,9 @@ class MergeActualsIntoWorkout
         array &$unmatched,
         array &$warnings,
     ): void {
-        $titleMap = $this->buildTitleMap($activity);
+        $titleMap = ParsedActivityHelper::buildTitleMap($activity);
         $activeSets = collect($activity->sets)->filter->isActive();
-        $groups = $this->groupSetsByExercise($activeSets);
+        $groups = ParsedActivityHelper::groupSetsByExercise($activeSets);
 
         $plannedExercises = $this->getPlannedBlockExercises($workout);
 
@@ -129,12 +134,6 @@ class MergeActualsIntoWorkout
 
     private function createCardioSet(BlockExercise $blockExercise, int $setNumber, ParsedLap $lap): void
     {
-        $avgPace = null;
-
-        if ($lap->avgSpeed !== null && $lap->avgSpeed > 0) {
-            $avgPace = (int) round(1_000_000 / $lap->avgSpeed);
-        }
-
         ExerciseSet::create([
             'block_exercise_id' => $blockExercise->id,
             'set_number' => $setNumber,
@@ -142,7 +141,7 @@ class MergeActualsIntoWorkout
             'duration' => $lap->totalElapsedTime,
             'avg_heart_rate' => $lap->avgHeartRate,
             'max_heart_rate' => $lap->maxHeartRate,
-            'avg_pace' => $avgPace,
+            'avg_pace' => PaceConverter::fromFitSpeed($lap->avgSpeed),
             'avg_power' => $lap->avgPower,
             'max_power' => $lap->maxPower,
             'avg_cadence' => $lap->avgCadence,
@@ -193,53 +192,4 @@ class MergeActualsIntoWorkout
         ]);
     }
 
-    /**
-     * @return array<string, string>
-     */
-    private function buildTitleMap(ParsedActivity $activity): array
-    {
-        $map = [];
-
-        foreach ($activity->exerciseTitles as $title) {
-            $map["{$title->exerciseCategory}:{$title->exerciseName}"] = $title->displayName;
-        }
-
-        return $map;
-    }
-
-    /**
-     * @param  Collection<int, ParsedSet>  $sets
-     * @return list<array{category: int, name: int, sets: list<ParsedSet>}>
-     */
-    private function groupSetsByExercise(Collection $sets): array
-    {
-        $groups = [];
-        $currentGroup = null;
-
-        foreach ($sets as $set) {
-            $category = $set->exerciseCategory ?? 0;
-            $name = $set->exerciseName ?? 0;
-            $key = "{$category}:{$name}";
-
-            if ($currentGroup === null || $currentGroup['key'] !== $key) {
-                if ($currentGroup !== null) {
-                    $groups[] = $currentGroup;
-                }
-                $currentGroup = [
-                    'key' => $key,
-                    'category' => $category,
-                    'name' => $name,
-                    'sets' => [],
-                ];
-            }
-
-            $currentGroup['sets'][] = $set;
-        }
-
-        if ($currentGroup !== null) {
-            $groups[] = $currentGroup;
-        }
-
-        return $groups;
-    }
 }

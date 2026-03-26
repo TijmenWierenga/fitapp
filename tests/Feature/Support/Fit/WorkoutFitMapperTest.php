@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Garmin\WorkoutFitMapper;
 use App\Enums\Fit\GarminExerciseCategory;
 use App\Enums\Workout\Activity;
 use App\Models\Block;
@@ -12,7 +13,6 @@ use App\Models\StrengthExercise;
 use App\Models\User;
 use App\Models\Workout;
 use App\Support\Fit\FitMessage;
-use App\Support\Fit\WorkoutFitMapper;
 
 function createWorkout(array $attributes = []): Workout
 {

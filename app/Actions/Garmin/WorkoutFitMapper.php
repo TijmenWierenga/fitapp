@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Support\Fit;
+namespace App\Actions\Garmin;
 
 use App\Enums\Workout\BlockType;
 use App\Models\Block;
@@ -12,6 +12,8 @@ use App\Models\DurationExercise;
 use App\Models\Section;
 use App\Models\StrengthExercise;
 use App\Models\Workout;
+use App\Support\Fit\FitMessage;
+use App\Support\Fit\FitMessageFactory;
 use App\Support\Workout\WorkoutDisplayFormatter as Format;
 
 class WorkoutFitMapper

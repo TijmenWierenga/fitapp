@@ -43,6 +43,12 @@ class Workout extends Model
         'completed_at',
         'rpe',
         'feeling',
+        'total_duration',
+        'total_distance',
+        'total_calories',
+        'avg_heart_rate',
+        'max_heart_rate',
+        'source',
     ];
 
     protected $casts = [
@@ -51,6 +57,11 @@ class Workout extends Model
         'completed_at' => 'datetime',
         'rpe' => 'integer',
         'feeling' => 'integer',
+        'total_duration' => 'integer',
+        'total_distance' => 'decimal:2',
+        'total_calories' => 'integer',
+        'avg_heart_rate' => 'integer',
+        'max_heart_rate' => 'integer',
     ];
 
     /**

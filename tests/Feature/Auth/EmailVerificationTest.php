@@ -10,7 +10,15 @@ test('email verification screen can be rendered', function () {
 
     $response = $this->actingAs($user)->get(route('verification.notice'));
 
-    $response->assertStatus(200);
+    $response->assertSuccessful();
+});
+
+test('verified users can access protected routes', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->get(route('dashboard'));
+
+    $response->assertSuccessful();
 });
 
 test('email can be verified', function () {

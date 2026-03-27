@@ -157,7 +157,52 @@
         </div>
     @endif
 
-    {{-- Step 3: Evaluate --}}
+    {{-- Step 3: Map Exercises --}}
+    @if($step === 'map')
+        <div class="px-6 py-6 space-y-6">
+            <div class="space-y-1">
+                <flux:heading size="sm">Map Exercises</flux:heading>
+                <flux:text size="sm">Assign exercises from your library to enable workload tracking. You can skip any.</flux:text>
+            </div>
+
+            <div class="space-y-3">
+                @foreach($exerciseGroups as $group)
+                    <div class="rounded-lg border border-zinc-200 dark:border-zinc-700 px-4 py-3 space-y-2">
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="font-medium text-zinc-900 dark:text-white">Exercise {{ $group['index'] + 1 }}</span>
+                            <span class="text-zinc-400">&middot;</span>
+                            <span class="text-zinc-500 dark:text-zinc-400">{{ $group['sets'] }} sets &middot; {{ $group['reps'] }} &middot; {{ $group['weight'] }}</span>
+                        </div>
+
+                        <flux:select
+                            wire:model="exerciseMappings.{{ $group['index'] }}"
+                            variant="combobox"
+                            :filter="false"
+                            placeholder="Search exercise..."
+                            clearable
+                        >
+                            <x-slot name="input">
+                                <flux:select.input wire:model.live.debounce.300ms="exerciseSearch" />
+                            </x-slot>
+
+                            @foreach($this->searchResults as $exercise)
+                                <flux:select.option :value="$exercise->id" wire:key="map-{{ $group['index'] }}-{{ $exercise->id }}">
+                                    {{ $exercise->name }}
+                                </flux:select.option>
+                            @endforeach
+                        </flux:select>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="flex items-center gap-3">
+                <flux:button variant="primary" wire:click="proceedToEvaluate">Continue</flux:button>
+                <flux:button variant="ghost" wire:click="proceedToEvaluate">Skip All</flux:button>
+            </div>
+        </div>
+    @endif
+
+    {{-- Step 4: Evaluate --}}
     @if($step === 'evaluate')
         <div class="px-6 py-6 space-y-6">
             <flux:heading size="sm">How did it go?</flux:heading>
@@ -184,7 +229,7 @@
         </div>
     @endif
 
-    {{-- Step 4: Result --}}
+    {{-- Step 5: Result --}}
     @if($step === 'result' && $importResultData)
         <div class="px-6 py-6 space-y-6">
             <flux:callout variant="success">

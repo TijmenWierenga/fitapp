@@ -5,14 +5,19 @@ declare(strict_types=1);
 namespace App\Livewire\Workouts;
 
 use App\Actions\Garmin\FindMatchingWorkout;
+use App\Actions\Garmin\ParsedActivityHelper;
 use App\Actions\Garmin\SportMapper;
 use App\Actions\ImportGarminActivity;
 use App\DataTransferObjects\Fit\ParsedActivity;
 use App\Exceptions\FitParseException;
+use App\Models\Exercise;
 use App\Models\Workout;
 use App\Support\Fit\Decode\FitActivityParser;
 use App\Support\Workout\DistanceConverter;
 use App\Support\Workout\TimeConverter;
+use App\Support\Workout\WorkoutDisplayFormatter;
+use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -46,6 +51,14 @@ class ImportGarmin extends Component
 
     /** @var array<string, mixed>|null */
     public ?array $importResultData = null;
+
+    /** @var list<array{index: int, sets: int, reps: string, weight: string}> */
+    public array $exerciseGroups = [];
+
+    /** @var array<int, int|null> */
+    public array $exerciseMappings = [];
+
+    public string $exerciseSearch = '';
 
     public function mount(): void
     {
@@ -81,6 +94,7 @@ class ImportGarmin extends Component
 
             $this->preview = $this->buildPreview($parsed);
             $this->duplicateWarning = $this->checkDuplicate($parsed);
+            $this->exerciseGroups = $this->detectExerciseGroups($parsed);
 
             if ($this->selectedWorkoutId === null) {
                 $finder = app(FindMatchingWorkout::class);
@@ -114,7 +128,7 @@ class ImportGarmin extends Component
     public function createAsNew(): void
     {
         $this->selectedWorkoutId = null;
-        $this->step = 'evaluate';
+        $this->proceedToMapOrEvaluate();
     }
 
     public function mergeWithSelected(): void
@@ -123,6 +137,12 @@ class ImportGarmin extends Component
             return;
         }
 
+        $this->prepopulateMappingsFromWorkout($this->selectedWorkoutId);
+        $this->proceedToMapOrEvaluate();
+    }
+
+    public function proceedToEvaluate(): void
+    {
         $this->step = 'evaluate';
     }
 
@@ -150,6 +170,7 @@ class ImportGarmin extends Component
             existingWorkout: $existingWorkout,
             rpe: $this->rpe,
             feeling: $this->feeling,
+            exerciseMappings: array_filter($this->exerciseMappings, fn ($v) => $v !== null),
         );
 
         $this->importResultData = [
@@ -172,8 +193,100 @@ class ImportGarmin extends Component
 
     public function resetImport(): void
     {
-        $this->reset(['fitFile', 'step', 'parseError', 'selectedWorkoutId', 'preview', 'matchingWorkouts', 'importResultData', 'rpe', 'feeling', 'workout', 'duplicateWarning']);
+        $this->reset(['fitFile', 'step', 'parseError', 'selectedWorkoutId', 'preview', 'matchingWorkouts', 'importResultData', 'rpe', 'feeling', 'workout', 'duplicateWarning', 'exerciseGroups', 'exerciseMappings', 'exerciseSearch']);
         $this->step = 'upload';
+    }
+
+    /**
+     * @return Collection<int, Exercise>
+     */
+    #[Computed]
+    public function searchResults(): Collection
+    {
+        if (strlen($this->exerciseSearch) < 2) {
+            return collect();
+        }
+
+        return Exercise::search($this->exerciseSearch)
+            ->query(fn ($builder) => $builder->with('muscleGroups'))
+            ->take(10)
+            ->get();
+    }
+
+    private function proceedToMapOrEvaluate(): void
+    {
+        if (count($this->exerciseGroups) > 0) {
+            $this->step = 'map';
+        } else {
+            $this->step = 'evaluate';
+        }
+    }
+
+    private function prepopulateMappingsFromWorkout(int $workoutId): void
+    {
+        $workout = Workout::with('sections.blocks.exercises')->find($workoutId);
+
+        if (! $workout) {
+            return;
+        }
+
+        $plannedExercises = $workout->sections
+            ->flatMap(fn ($s) => $s->blocks)
+            ->flatMap(fn ($b) => $b->exercises)
+            ->values();
+
+        foreach ($this->exerciseGroups as $index => $group) {
+            $planned = $plannedExercises[$index] ?? null;
+
+            if ($planned?->exercise_id) {
+                $this->exerciseMappings[$group['index']] = $planned->exercise_id;
+            }
+        }
+    }
+
+    /**
+     * @return list<array{index: int, sets: int, reps: string, weight: string}>
+     */
+    private function detectExerciseGroups(ParsedActivity $parsed): array
+    {
+        $activeSets = collect($parsed->sets)->filter->isActive();
+
+        if ($activeSets->isEmpty()) {
+            return [];
+        }
+
+        $groups = ParsedActivityHelper::groupSetsByExercise($activeSets);
+        $blocks = ParsedActivityHelper::detectBlocks($groups);
+
+        $exerciseIndex = 0;
+        $result = [];
+
+        foreach ($blocks as $block) {
+            foreach ($block['exercises'] as $exerciseInfo) {
+                $sets = $exerciseInfo['sets'];
+                $reps = collect($sets)->pluck('repetitions')->filter();
+                $weights = collect($sets)->pluck('weight')->filter(fn ($w) => $w !== null && $w > 0);
+
+                $repsDisplay = $reps->isNotEmpty()
+                    ? ($reps->min() === $reps->max() ? "{$reps->first()} reps" : "{$reps->min()}-{$reps->max()} reps")
+                    : 'timed';
+
+                $weightDisplay = $weights->isNotEmpty()
+                    ? WorkoutDisplayFormatter::weight($weights->max())
+                    : 'BW';
+
+                $result[] = [
+                    'index' => $exerciseIndex,
+                    'sets' => count($sets),
+                    'reps' => $repsDisplay,
+                    'weight' => $weightDisplay,
+                ];
+
+                $exerciseIndex++;
+            }
+        }
+
+        return $result;
     }
 
     private function checkDuplicate(ParsedActivity $parsed): ?string

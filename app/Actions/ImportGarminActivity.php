@@ -25,22 +25,26 @@ class ImportGarminActivity
         private MergeActualsIntoWorkout $merger,
     ) {}
 
+    /**
+     * @param  array<int, int>  $exerciseMappings  Map of exercise group index → Exercise model ID
+     */
     public function execute(
         User $user,
         string $fitData,
         ?Workout $existingWorkout = null,
         ?int $rpe = null,
         ?int $feeling = null,
+        array $exerciseMappings = [],
     ): ImportResult {
         $parsed = $this->parser->parse($fitData);
 
         $duplicateWarnings = $this->checkForDuplicates($user, $parsed);
 
-        return DB::transaction(function () use ($user, $parsed, $existingWorkout, $rpe, $feeling, $duplicateWarnings): ImportResult {
+        return DB::transaction(function () use ($user, $parsed, $existingWorkout, $rpe, $feeling, $duplicateWarnings, $exerciseMappings): ImportResult {
             if ($existingWorkout !== null) {
-                $result = $this->mergeIntoExisting($existingWorkout, $parsed, $rpe, $feeling);
+                $result = $this->mergeIntoExisting($existingWorkout, $parsed, $rpe, $feeling, $exerciseMappings);
             } else {
-                $result = $this->createNew($user, $parsed, $rpe, $feeling);
+                $result = $this->createNew($user, $parsed, $rpe, $feeling, $exerciseMappings);
             }
 
             return new ImportResult(
@@ -73,14 +77,18 @@ class ImportGarminActivity
         return ["Possible duplicate: workout '{$duplicate->name}' on {$duplicate->scheduled_at->format('M j, Y')} was already imported from Garmin."];
     }
 
+    /**
+     * @param  array<int, int>  $exerciseMappings
+     */
     private function createNew(
         User $user,
         \App\DataTransferObjects\Fit\ParsedActivity $parsed,
         ?int $rpe,
         ?int $feeling,
+        array $exerciseMappings = [],
     ): ImportResult {
         $activity = SportMapper::toActivity($parsed->session->sport, $parsed->session->subSport);
-        $result = $this->builder->execute($parsed);
+        $result = $this->builder->execute($parsed, $exerciseMappings);
 
         $workoutName = $parsed->session->workoutName ?? $activity->label();
 
@@ -105,13 +113,17 @@ class ImportGarminActivity
         );
     }
 
+    /**
+     * @param  array<int, int>  $exerciseMappings
+     */
     private function mergeIntoExisting(
         Workout $workout,
         \App\DataTransferObjects\Fit\ParsedActivity $parsed,
         ?int $rpe,
         ?int $feeling,
+        array $exerciseMappings = [],
     ): ImportResult {
-        $result = $this->merger->execute($workout, $parsed);
+        $result = $this->merger->execute($workout, $parsed, $exerciseMappings);
 
         $this->setSessionSummary($workout, $parsed);
 

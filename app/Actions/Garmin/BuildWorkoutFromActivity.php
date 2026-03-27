@@ -21,9 +21,10 @@ class BuildWorkoutFromActivity
     public function __construct(private MatchGarminExercise $matcher) {}
 
     /**
+     * @param  array<int, int>  $exerciseMappings  Map of exercise group index → Exercise model ID
      * @return array{sections: Collection<int, SectionData>, matched: list<string>, unmatched: list<string>, warnings: list<string>}
      */
-    public function execute(ParsedActivity $activity): array
+    public function execute(ParsedActivity $activity, array $exerciseMappings = []): array
     {
         $matched = [];
         $unmatched = [];
@@ -35,7 +36,7 @@ class BuildWorkoutFromActivity
         $hasCardioLaps = collect($activity->laps)->contains(fn ($lap) => ($lap->totalDistance ?? 0) > 0);
 
         if ($hasSets) {
-            $strengthBlocks = $this->buildStrengthBlocks($activity, $matched, $unmatched, $warnings, $blockOrder);
+            $strengthBlocks = $this->buildStrengthBlocks($activity, $matched, $unmatched, $warnings, $blockOrder, $exerciseMappings);
             $blocks = $blocks->merge($strengthBlocks);
             $blockOrder += $strengthBlocks->count();
         }
@@ -70,12 +71,17 @@ class BuildWorkoutFromActivity
      * @param  list<string>  $warnings
      * @return Collection<int, BlockData>
      */
+    /**
+     * @param  array<int, int>  $exerciseMappings
+     * @return Collection<int, BlockData>
+     */
     private function buildStrengthBlocks(
         ParsedActivity $activity,
         array &$matched,
         array &$unmatched,
         array &$warnings,
         int $startOrder = 0,
+        array $exerciseMappings = [],
     ): Collection {
         $titleMap = ParsedActivityHelper::buildTitleMap($activity);
         $activeSets = collect($activity->sets)->filter->isActive();
@@ -84,18 +90,24 @@ class BuildWorkoutFromActivity
 
         $blocks = collect();
         $blockOrder = $startOrder;
-        $unidentifiedCounter = 0;
+        $globalExerciseIndex = 0;
 
         foreach ($detectedBlocks as $detected) {
             $exercises = collect();
             $exerciseOrder = 0;
 
             foreach ($detected['exercises'] as $key => $exerciseInfo) {
-                $isUnidentified = str_starts_with($key, 'weight:');
+                // Check for user-provided exercise mapping first
+                $mappedExercise = isset($exerciseMappings[$globalExerciseIndex])
+                    ? Exercise::find($exerciseMappings[$globalExerciseIndex])
+                    : null;
 
-                if ($isUnidentified) {
-                    $unidentifiedCounter++;
-                    $displayName = 'Exercise '.$unidentifiedCounter;
+                if ($mappedExercise) {
+                    $exercise = $mappedExercise;
+                    $displayName = $mappedExercise->name;
+                    $matched[] = $mappedExercise->name;
+                } elseif (str_starts_with($key, 'weight:')) {
+                    $displayName = 'Exercise '.($globalExerciseIndex + 1);
                     $exercise = null;
                 } else {
                     $category = GarminExerciseCategory::tryFrom($exerciseInfo['category']);
@@ -125,6 +137,7 @@ class BuildWorkoutFromActivity
                 ));
 
                 $exerciseOrder++;
+                $globalExerciseIndex++;
             }
 
             $blockType = $detected['type'] === 'superset' ? BlockType::Superset : BlockType::StraightSets;

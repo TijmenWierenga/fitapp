@@ -24,7 +24,7 @@ class BuildWorkoutFromActivity
      * @param  array<int, int>  $exerciseMappings  Map of exercise group index → Exercise model ID
      * @return array{sections: Collection<int, SectionData>, matched: list<string>, unmatched: list<string>, warnings: list<string>}
      */
-    public function execute(ParsedActivity $activity, array $exerciseMappings = []): array
+    public function execute(ParsedActivity $activity, array $exerciseMappings = [], bool $detectSupersets = true): array
     {
         $matched = [];
         $unmatched = [];
@@ -36,7 +36,7 @@ class BuildWorkoutFromActivity
         $hasCardioLaps = collect($activity->laps)->contains(fn ($lap) => ($lap->totalDistance ?? 0) > 0);
 
         if ($hasSets) {
-            $strengthBlocks = $this->buildStrengthBlocks($activity, $matched, $unmatched, $warnings, $blockOrder, $exerciseMappings);
+            $strengthBlocks = $this->buildStrengthBlocks($activity, $matched, $unmatched, $warnings, $blockOrder, $exerciseMappings, $detectSupersets);
             $blocks = $blocks->merge($strengthBlocks);
             $blockOrder += $strengthBlocks->count();
         }
@@ -82,11 +82,26 @@ class BuildWorkoutFromActivity
         array &$warnings,
         int $startOrder = 0,
         array $exerciseMappings = [],
+        bool $detectSupersets = true,
     ): Collection {
         $titleMap = ParsedActivityHelper::buildTitleMap($activity);
         $activeSets = collect($activity->sets)->filter->isActive();
         $groups = ParsedActivityHelper::groupSetsByExercise($activeSets);
-        $detectedBlocks = ParsedActivityHelper::detectBlocks($groups);
+
+        if ($detectSupersets) {
+            $detectedBlocks = ParsedActivityHelper::detectBlocks($groups);
+        } else {
+            $detectedBlocks = array_map(fn (array $group) => [
+                'type' => 'straight',
+                'exercises' => [
+                    $group['key'] => [
+                        'category' => $group['category'],
+                        'name' => $group['name'],
+                        'sets' => $group['sets'],
+                    ],
+                ],
+            ], $groups);
+        }
 
         $blocks = collect();
         $blockOrder = $startOrder;

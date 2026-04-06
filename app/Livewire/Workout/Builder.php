@@ -1,18 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire\Workout;
 
 use App\Actions\CreateStructuredWorkout;
+use App\Actions\FinalizeGarminImport;
+use App\Actions\Garmin\BuildWorkoutFromActivity;
+use App\Actions\Garmin\SportMapper;
 use App\Actions\UpdateStructuredWorkout;
+use App\DataTransferObjects\Workout\CardioExerciseData;
+use App\DataTransferObjects\Workout\DurationExerciseData;
 use App\DataTransferObjects\Workout\SectionData;
+use App\DataTransferObjects\Workout\StrengthExerciseData;
 use App\Enums\Workout\Activity;
 use App\Enums\Workout\BlockType;
 use App\Models\Workout;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class Builder extends Component
@@ -32,6 +42,13 @@ class Builder extends Component
     /** @var array<int, array<string, mixed>> */
     public array $sections = [];
 
+    #[Url(as: 'import')]
+    public ?string $importContextKey = null;
+
+    public ?int $rpe = null;
+
+    public ?int $feeling = null;
+
     public function mount(?Workout $workout = null): void
     {
         if ($workout && $workout->exists) {
@@ -42,6 +59,8 @@ class Builder extends Component
             $this->scheduled_date = $workout->scheduled_at->format('Y-m-d');
             $this->scheduled_time = $workout->scheduled_at->format('H:i');
             $this->sections = $this->hydrateFromWorkout($workout);
+        } elseif ($this->importContextKey !== null) {
+            $this->hydrateFromImportContext();
         } else {
             $this->scheduled_date = now()->format('Y-m-d');
             $this->scheduled_time = now()->format('H:i');
@@ -225,7 +244,29 @@ class Builder extends Component
         $scheduledAt = CarbonImmutable::parse("{$this->scheduled_date} {$this->scheduled_time}");
         $sectionDtos = $this->buildSectionDtos();
 
-        if ($this->workout && $this->workout->exists) {
+        if ($this->importContextKey !== null) {
+            $context = Cache::get("fit_import:{$this->importContextKey}");
+
+            if ($context === null) {
+                $this->addError('importContextKey', 'Import session expired. Please re-upload your file.');
+
+                return;
+            }
+
+            $this->workout = app(FinalizeGarminImport::class)->execute(
+                user: auth()->user(),
+                context: $context,
+                sections: $sectionDtos,
+                name: $this->name,
+                activity: $this->activity,
+                scheduledAt: $scheduledAt,
+                notes: $this->notes,
+                rpe: $this->rpe,
+                feeling: $this->feeling,
+            );
+
+            Cache::forget("fit_import:{$this->importContextKey}");
+        } elseif ($this->workout && $this->workout->exists) {
             $this->workout->update([
                 'name' => $this->name,
                 'notes' => $this->notes,
@@ -251,6 +292,129 @@ class Builder extends Component
     public function render(): View
     {
         return view('livewire.workout.builder');
+    }
+
+    private function hydrateFromImportContext(): void
+    {
+        $context = Cache::get("fit_import:{$this->importContextKey}");
+
+        if ($context === null) {
+            session()->flash('error', 'Import session expired. Please re-upload your file.');
+            $this->importContextKey = null;
+            $this->scheduled_date = now()->format('Y-m-d');
+            $this->scheduled_time = now()->format('H:i');
+            $this->sections = [
+                ['_key' => uniqid('sec_'), 'name' => 'Warm-up', 'notes' => null, 'blocks' => []],
+                ['_key' => uniqid('sec_'), 'name' => 'Main', 'notes' => null, 'blocks' => []],
+                ['_key' => uniqid('sec_'), 'name' => 'Cool-down', 'notes' => null, 'blocks' => []],
+            ];
+
+            return;
+        }
+
+        $parsed = $context->parsedActivity;
+        $this->activity = SportMapper::toActivity($parsed->session->sport, $parsed->session->subSport);
+
+        $result = app(BuildWorkoutFromActivity::class)->execute($parsed, [], false);
+        $this->sections = $this->hydrateFromSectionDtos($result['sections']);
+
+        $this->scheduled_date = $parsed->session->startTime->format('Y-m-d');
+        $this->scheduled_time = $parsed->session->startTime->format('H:i');
+
+        $this->name = $parsed->session->workoutName
+            ?? "{$this->activity->label()} - {$parsed->session->startTime->format('M j, Y')}";
+    }
+
+    /**
+     * @param  Collection<int, SectionData>  $sections
+     * @return array<int, array<string, mixed>>
+     */
+    private function hydrateFromSectionDtos(Collection $sections): array
+    {
+        return $sections->map(fn (SectionData $section): array => [
+            '_key' => uniqid('sec_'),
+            'name' => $section->name,
+            'notes' => $section->notes,
+            'blocks' => $section->blocks->map(fn (\App\DataTransferObjects\Workout\BlockData $block): array => [
+                '_key' => uniqid('blk_'),
+                'block_type' => $block->blockType->value,
+                'rounds' => $block->rounds,
+                'rest_between_exercises' => $block->restBetweenExercises,
+                'rest_between_rounds' => $block->restBetweenRounds,
+                'time_cap' => $block->timeCap,
+                'work_interval' => $block->workInterval,
+                'rest_interval' => $block->restInterval,
+                'notes' => $block->notes,
+                'exercises' => $block->exercises->map(fn (\App\DataTransferObjects\Workout\ExerciseData $exercise): array => [
+                    '_key' => uniqid('ex_'),
+                    'exercise_id' => $exercise->exerciseId,
+                    'name' => $exercise->name,
+                    'type' => $exercise->type->value,
+                    'notes' => $exercise->notes,
+                    ...$this->hydrateExerciseableFromDto($exercise->exerciseable),
+                ])->all(),
+            ])->all(),
+        ])->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function hydrateExerciseableFromDto(StrengthExerciseData|CardioExerciseData|DurationExerciseData $exerciseable): array
+    {
+        return match (true) {
+            $exerciseable instanceof StrengthExerciseData => [
+                'target_sets' => $exerciseable->targetSets,
+                'target_reps_min' => $exerciseable->targetRepsMin,
+                'target_reps_max' => $exerciseable->targetRepsMax,
+                'target_weight' => $exerciseable->targetWeight,
+                'target_rpe' => $exerciseable->targetRpe,
+                'target_tempo' => $exerciseable->targetTempo,
+                'rest_after' => $exerciseable->restAfter,
+                'target_duration' => null,
+                'target_distance' => null,
+                'target_pace_min' => null,
+                'target_pace_max' => null,
+                'target_heart_rate_zone' => null,
+                'target_heart_rate_min' => null,
+                'target_heart_rate_max' => null,
+                'target_power' => null,
+            ],
+            $exerciseable instanceof CardioExerciseData => [
+                'target_sets' => null,
+                'target_reps_min' => null,
+                'target_reps_max' => null,
+                'target_weight' => null,
+                'target_tempo' => null,
+                'rest_after' => null,
+                'target_duration' => $exerciseable->targetDuration,
+                'target_distance' => $exerciseable->targetDistance !== null ? (int) $exerciseable->targetDistance : null,
+                'target_pace_min' => $exerciseable->targetPaceMin,
+                'target_pace_max' => $exerciseable->targetPaceMax,
+                'target_heart_rate_zone' => $exerciseable->targetHeartRateZone,
+                'target_heart_rate_min' => $exerciseable->targetHeartRateMin,
+                'target_heart_rate_max' => $exerciseable->targetHeartRateMax,
+                'target_power' => $exerciseable->targetPower,
+                'target_rpe' => null,
+            ],
+            $exerciseable instanceof DurationExerciseData => [
+                'target_sets' => null,
+                'target_reps_min' => null,
+                'target_reps_max' => null,
+                'target_weight' => null,
+                'target_tempo' => null,
+                'rest_after' => null,
+                'target_duration' => $exerciseable->targetDuration,
+                'target_rpe' => $exerciseable->targetRpe,
+                'target_distance' => null,
+                'target_pace_min' => null,
+                'target_pace_max' => null,
+                'target_heart_rate_zone' => null,
+                'target_heart_rate_min' => null,
+                'target_heart_rate_max' => null,
+                'target_power' => null,
+            ],
+        };
     }
 
     /**
@@ -428,6 +592,8 @@ class Builder extends Component
             'name' => 'required|string|max:255',
             'scheduled_date' => 'required|date',
             'scheduled_time' => 'required',
+            'rpe' => 'nullable|integer|min:1|max:10',
+            'feeling' => 'nullable|integer|min:1|max:5',
             'sections' => 'array',
             'sections.*.name' => 'required|string|max:255',
             'sections.*.notes' => 'nullable|string|max:5000',

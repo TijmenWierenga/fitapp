@@ -91,6 +91,14 @@ class Workout extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<FitImport, $this>
+     */
+    public function fitImport(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(FitImport::class);
+    }
+
+    /**
      * @return HasMany<WorkoutPainScore, $this>
      */
     public function painScores(): HasMany

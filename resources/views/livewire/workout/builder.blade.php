@@ -1,11 +1,40 @@
 <div class="p-6">
+    @if($importContextKey)
+        <flux:callout variant="info" class="mb-6">
+            <flux:callout.heading>Importing from Garmin FIT</flux:callout.heading>
+            <flux:callout.text>Review the workout structure and save to complete the import.</flux:callout.text>
+        </flux:callout>
+    @endif
+
+    @if(session('error'))
+        <flux:callout variant="danger" class="mb-6">
+            <flux:callout.heading>Error</flux:callout.heading>
+            <flux:callout.text>{{ session('error') }}</flux:callout.text>
+        </flux:callout>
+    @endif
+
+    @error('importContextKey')
+        <flux:callout variant="danger" class="mb-6">
+            <flux:callout.heading>Import expired</flux:callout.heading>
+            <flux:callout.text>{{ $message }}</flux:callout.text>
+        </flux:callout>
+    @enderror
+
     <div class="flex justify-between items-center mb-6">
         <flux:heading size="xl">
-            {{ $workout && $workout->exists ? 'Edit Workout' : 'Create Workout' }}
+            @if($importContextKey)
+                Import Workout
+            @elseif($workout && $workout->exists)
+                Edit Workout
+            @else
+                Create Workout
+            @endif
         </flux:heading>
         <div class="flex gap-2">
             <flux:button href="{{ route('dashboard') }}" variant="ghost">Cancel</flux:button>
-            <flux:button variant="primary" wire:click="saveWorkout">Save Workout</flux:button>
+            <flux:button variant="primary" wire:click="saveWorkout">
+                {{ $importContextKey ? 'Save & Complete' : 'Save Workout' }}
+            </flux:button>
         </div>
     </div>
 
@@ -39,6 +68,58 @@
                 <flux:textarea wire:model="notes" label="Notes (Markdown)" placeholder="Optional workout notes..." rows="4" />
             </div>
         </flux:card>
+
+        {{-- RPE / Feeling (import mode only) --}}
+        @if($importContextKey)
+            <flux:card class="p-4">
+                <flux:heading size="sm" class="mb-3">How did it go?</flux:heading>
+
+                <div class="space-y-6">
+                    {{-- RPE --}}
+                    <flux:field>
+                        <flux:label>Rate of Perceived Exertion (RPE)</flux:label>
+                        <flux:description>How hard did this workout feel?</flux:description>
+                        <div class="mt-3">
+                            <x-numeric-scale :min="1" :max="10" wire="rpe" :selected="$rpe" />
+                            <div class="flex justify-between mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                                <span>Very Easy</span>
+                                <span>Easy</span>
+                                <span>Moderate</span>
+                                <span>Hard</span>
+                                <span>Maximum</span>
+                            </div>
+                        </div>
+                        <flux:error name="rpe" />
+                    </flux:field>
+
+                    {{-- Feeling --}}
+                    <flux:field>
+                        <flux:label>Overall Feeling</flux:label>
+                        <flux:description>How did you feel during this workout?</flux:description>
+                        <div class="mt-3">
+                            @php($feelingScale = \App\Models\Workout::feelingScale())
+                            <div class="flex justify-between gap-2">
+                                @foreach($feelingScale as $value => $data)
+                                    <button
+                                        type="button"
+                                        wire:click="$set('feeling', {{ $value }})"
+                                        class="flex-1 py-3 text-3xl rounded-md transition-colors {{ $feeling === $value ? 'bg-accent' : 'bg-zinc-100 dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-600' }}"
+                                    >
+                                        {{ $data['emoji'] }}
+                                    </button>
+                                @endforeach
+                            </div>
+                            <div class="flex justify-between mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                                @foreach($feelingScale as $data)
+                                    <span class="flex-1 text-center">{{ $data['label'] }}</span>
+                                @endforeach
+                            </div>
+                        </div>
+                        <flux:error name="feeling" />
+                    </flux:field>
+                </div>
+            </flux:card>
+        @endif
     </div>
 
     {{-- Workout Structure Editor --}}

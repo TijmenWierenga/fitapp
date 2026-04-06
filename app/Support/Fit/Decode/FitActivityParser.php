@@ -148,14 +148,28 @@ class FitActivityParser
             $duration = $this->getFieldValue($message, 0);
             $weight = $this->getFieldValue($message, 4);
 
+            // Field 1/2 = legacy exercise_category/exercise_name
+            // Field 7/8 = newer category/category_subtype (used by recent Garmin devices)
+            // 0xFFFF (65535) and 0xFF (255) are FIT "invalid" markers
+            $legacyCategory = $this->getFieldValue($message, 1);
+            $legacyName = $this->getFieldValue($message, 2);
+
+            $exerciseCategory = ($legacyCategory !== null && $legacyCategory !== 65535)
+                ? $legacyCategory
+                : $this->getFieldValue($message, 7);
+
+            $exerciseName = ($legacyName !== null && $legacyName !== 255 && $legacyName !== 65535)
+                ? $legacyName
+                : $this->getFieldValue($message, 8);
+
             $sets[] = new ParsedSet(
                 index: $index,
                 setType: $this->getFieldValue($message, 5) ?? 0,
                 duration: $duration !== null ? (int) round($duration / 1000) : null,
                 repetitions: $this->getFieldValue($message, 3),
                 weight: $weight !== null ? round($weight / 16, 2) : null,
-                exerciseCategory: $this->getFieldValue($message, 1),
-                exerciseName: $this->getFieldValue($message, 2),
+                exerciseCategory: $exerciseCategory,
+                exerciseName: $exerciseName,
             );
 
             $index++;
@@ -212,7 +226,14 @@ class FitActivityParser
     {
         foreach ($message->fields as $field) {
             if ($field->fieldNumber === $fieldNumber) {
-                return is_string($field->value) ? $field->value : null;
+                if (! is_string($field->value)) {
+                    return null;
+                }
+
+                // FIT strings are null-terminated; strip trailing garbage bytes
+                $nullPos = strpos($field->value, "\x00");
+
+                return $nullPos !== false ? substr($field->value, 0, $nullPos) : $field->value;
             }
         }
 

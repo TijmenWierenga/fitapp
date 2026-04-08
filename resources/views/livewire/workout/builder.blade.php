@@ -1,5 +1,5 @@
 <div class="p-6">
-    @if($importContextKey)
+    @if($importId)
         <flux:callout variant="info" class="mb-6">
             <flux:callout.heading>Importing from Garmin FIT</flux:callout.heading>
             <flux:callout.text>Review the workout structure and save to complete the import.</flux:callout.text>
@@ -13,7 +13,7 @@
         </flux:callout>
     @endif
 
-    @error('importContextKey')
+    @error('importId')
         <flux:callout variant="danger" class="mb-6">
             <flux:callout.heading>Import expired</flux:callout.heading>
             <flux:callout.text>{{ $message }}</flux:callout.text>
@@ -22,7 +22,7 @@
 
     <div class="flex justify-between items-center mb-6">
         <flux:heading size="xl">
-            @if($importContextKey)
+            @if($importId)
                 Import Workout
             @elseif($workout && $workout->exists)
                 Edit Workout
@@ -33,7 +33,7 @@
         <div class="flex gap-2">
             <flux:button href="{{ route('dashboard') }}" variant="ghost">Cancel</flux:button>
             <flux:button variant="primary" wire:click="saveWorkout">
-                {{ $importContextKey ? 'Save & Complete' : 'Save Workout' }}
+                {{ $importId ? 'Save & Complete' : 'Save Workout' }}
             </flux:button>
         </div>
     </div>
@@ -70,7 +70,7 @@
         </flux:card>
 
         {{-- RPE / Feeling (import mode only) --}}
-        @if($importContextKey)
+        @if($importId)
             <flux:card class="p-4">
                 <flux:heading size="sm" class="mb-3">How did it go?</flux:heading>
 

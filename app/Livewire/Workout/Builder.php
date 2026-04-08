@@ -13,13 +13,15 @@ use App\DataTransferObjects\Workout\CardioExerciseData;
 use App\DataTransferObjects\Workout\DurationExerciseData;
 use App\DataTransferObjects\Workout\SectionData;
 use App\DataTransferObjects\Workout\StrengthExerciseData;
+use App\Enums\FitImportStatus;
 use App\Enums\Workout\Activity;
 use App\Enums\Workout\BlockType;
+use App\Models\FitImport;
 use App\Models\Workout;
+use App\Support\Fit\Decode\FitActivityParser;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
@@ -43,7 +45,7 @@ class Builder extends Component
     public array $sections = [];
 
     #[Url(as: 'import')]
-    public ?string $importContextKey = null;
+    public ?string $importId = null;
 
     public ?int $rpe = null;
 
@@ -59,7 +61,7 @@ class Builder extends Component
             $this->scheduled_date = $workout->scheduled_at->format('Y-m-d');
             $this->scheduled_time = $workout->scheduled_at->format('H:i');
             $this->sections = $this->hydrateFromWorkout($workout);
-        } elseif ($this->importContextKey !== null) {
+        } elseif ($this->importId !== null) {
             $this->hydrateFromImportContext();
         } else {
             $this->scheduled_date = now()->format('Y-m-d');
@@ -244,18 +246,21 @@ class Builder extends Component
         $scheduledAt = CarbonImmutable::parse("{$this->scheduled_date} {$this->scheduled_time}");
         $sectionDtos = $this->buildSectionDtos();
 
-        if ($this->importContextKey !== null) {
-            $context = Cache::get("fit_import:{$this->importContextKey}");
+        if ($this->importId !== null) {
+            $fitImport = FitImport::where('id', $this->importId)
+                ->where('user_id', auth()->id())
+                ->where('status', FitImportStatus::Pending)
+                ->first();
 
-            if ($context === null) {
-                $this->addError('importContextKey', 'Import session expired. Please re-upload your file.');
+            if ($fitImport === null) {
+                $this->addError('importId', 'Import session expired. Please re-upload your file.');
 
                 return;
             }
 
             $this->workout = app(FinalizeGarminImport::class)->execute(
                 user: auth()->user(),
-                context: $context,
+                fitImport: $fitImport,
                 sections: $sectionDtos,
                 name: $this->name,
                 activity: $this->activity,
@@ -264,8 +269,6 @@ class Builder extends Component
                 rpe: $this->rpe,
                 feeling: $this->feeling,
             );
-
-            Cache::forget("fit_import:{$this->importContextKey}");
         } elseif ($this->workout && $this->workout->exists) {
             $this->workout->update([
                 'name' => $this->name,
@@ -296,11 +299,14 @@ class Builder extends Component
 
     private function hydrateFromImportContext(): void
     {
-        $context = Cache::get("fit_import:{$this->importContextKey}");
+        $fitImport = FitImport::where('id', $this->importId)
+            ->where('user_id', auth()->id())
+            ->where('status', FitImportStatus::Pending)
+            ->first();
 
-        if ($context === null) {
+        if ($fitImport === null) {
             session()->flash('error', 'Import session expired. Please re-upload your file.');
-            $this->importContextKey = null;
+            $this->importId = null;
             $this->scheduled_date = now()->format('Y-m-d');
             $this->scheduled_time = now()->format('H:i');
             $this->sections = [
@@ -312,10 +318,10 @@ class Builder extends Component
             return;
         }
 
-        $parsed = $context->parsedActivity;
+        $parsed = app(FitActivityParser::class)->parse(base64_decode($fitImport->raw_data));
         $this->activity = SportMapper::toActivity($parsed->session->sport, $parsed->session->subSport);
 
-        $result = app(BuildWorkoutFromActivity::class)->execute($parsed, [], false);
+        $result = app(BuildWorkoutFromActivity::class)->execute($parsed);
         $this->sections = $this->hydrateFromSectionDtos($result['sections']);
 
         $this->scheduled_date = $parsed->session->startTime->format('Y-m-d');

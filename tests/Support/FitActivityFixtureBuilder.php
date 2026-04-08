@@ -6,13 +6,19 @@ namespace Tests\Support;
 
 use App\Support\Fit\FitBaseType;
 use App\Support\Fit\FitEncoder;
+use App\Support\Fit\FitExerciseTitleField;
 use App\Support\Fit\FitField;
+use App\Support\Fit\FitFileIdField;
+use App\Support\Fit\FitFileType;
+use App\Support\Fit\FitLapField;
 use App\Support\Fit\FitMessage;
+use App\Support\Fit\FitMessageType;
+use App\Support\Fit\FitScaleFactor;
+use App\Support\Fit\FitSessionField;
+use App\Support\Fit\FitSetField;
 
 class FitActivityFixtureBuilder
 {
-    private const int FIT_EPOCH_OFFSET = 631065600;
-
     private int $sport = 1;
 
     private int $subSport = 0;
@@ -105,7 +111,7 @@ class FitActivityFixtureBuilder
     }
 
     /**
-     * @param  int  $weight  Weight in grams (Garmin uses weight_scale=16, so this is the raw value * 16)
+     * @param  float|null  $weight  Weight in kilograms (encoded as raw * FitScaleFactor::WEIGHT internally)
      */
     public function addSet(
         int $setType = 0,
@@ -167,13 +173,13 @@ class FitActivityFixtureBuilder
     {
         return new FitMessage(
             localMessageType: 0,
-            globalMessageNumber: 0,
+            globalMessageNumber: FitMessageType::FileId->value,
             fields: [
-                new FitField(0, FitBaseType::Enum, 4), // type = activity
+                new FitField(FitFileIdField::Type->value, FitBaseType::Enum, FitFileType::Activity->value),
                 new FitField(1, FitBaseType::UInt16, 1), // manufacturer = Garmin
                 new FitField(2, FitBaseType::UInt16, 0), // product
                 new FitField(3, FitBaseType::UInt32, null), // serial_number
-                new FitField(4, FitBaseType::UInt32, $this->startTimestamp - self::FIT_EPOCH_OFFSET), // time_created
+                new FitField(4, FitBaseType::UInt32, $this->startTimestamp - FitScaleFactor::FIT_EPOCH_OFFSET), // time_created
             ],
         );
     }
@@ -181,24 +187,24 @@ class FitActivityFixtureBuilder
     private function buildSession(): FitMessage
     {
         $fields = [
-            new FitField(253, FitBaseType::UInt32, $this->startTimestamp - self::FIT_EPOCH_OFFSET), // timestamp
-            new FitField(5, FitBaseType::Enum, $this->sport),
-            new FitField(6, FitBaseType::Enum, $this->subSport),
-            new FitField(7, FitBaseType::UInt32, $this->totalElapsedTime !== null ? $this->totalElapsedTime * 1000 : null), // ms
-            new FitField(9, FitBaseType::UInt32, $this->totalDistance !== null ? (int) ($this->totalDistance * 100) : null), // cm
-            new FitField(11, FitBaseType::UInt16, $this->totalCalories),
-            new FitField(16, FitBaseType::UInt8, $this->avgHeartRate),
-            new FitField(17, FitBaseType::UInt8, $this->maxHeartRate),
-            new FitField(20, FitBaseType::UInt16, $this->avgPower),
+            new FitField(FitSessionField::Timestamp->value, FitBaseType::UInt32, $this->startTimestamp - FitScaleFactor::FIT_EPOCH_OFFSET),
+            new FitField(FitSessionField::Sport->value, FitBaseType::Enum, $this->sport),
+            new FitField(FitSessionField::SubSport->value, FitBaseType::Enum, $this->subSport),
+            new FitField(FitSessionField::TotalElapsedTime->value, FitBaseType::UInt32, $this->totalElapsedTime !== null ? $this->totalElapsedTime * FitScaleFactor::MILLISECONDS : null),
+            new FitField(FitSessionField::TotalDistance->value, FitBaseType::UInt32, $this->totalDistance !== null ? (int) ($this->totalDistance * FitScaleFactor::CENTIMETERS) : null),
+            new FitField(FitSessionField::TotalCalories->value, FitBaseType::UInt16, $this->totalCalories),
+            new FitField(FitSessionField::AvgHeartRate->value, FitBaseType::UInt8, $this->avgHeartRate),
+            new FitField(FitSessionField::MaxHeartRate->value, FitBaseType::UInt8, $this->maxHeartRate),
+            new FitField(FitSessionField::AvgPower->value, FitBaseType::UInt16, $this->avgPower),
         ];
 
         if ($this->workoutName !== null) {
-            $fields[] = new FitField(29, FitBaseType::String, $this->workoutName);
+            $fields[] = new FitField(FitSessionField::WorkoutName->value, FitBaseType::String, $this->workoutName);
         }
 
         return new FitMessage(
             localMessageType: 1,
-            globalMessageNumber: 18,
+            globalMessageNumber: FitMessageType::Session->value,
             fields: $fields,
         );
     }
@@ -210,18 +216,18 @@ class FitActivityFixtureBuilder
     {
         return new FitMessage(
             localMessageType: 2,
-            globalMessageNumber: 19,
+            globalMessageNumber: FitMessageType::Lap->value,
             fields: [
-                new FitField(253, FitBaseType::UInt32, $this->startTimestamp - self::FIT_EPOCH_OFFSET), // timestamp
-                new FitField(7, FitBaseType::UInt32, $lap['totalElapsedTime'] !== null ? $lap['totalElapsedTime'] * 1000 : null),
-                new FitField(9, FitBaseType::UInt32, $lap['totalDistance'] !== null ? (int) ($lap['totalDistance'] * 100) : null),
-                new FitField(13, FitBaseType::UInt16, $lap['avgSpeed']),
-                new FitField(15, FitBaseType::UInt8, $lap['avgHeartRate']),
-                new FitField(16, FitBaseType::UInt8, $lap['maxHeartRate']),
-                new FitField(17, FitBaseType::UInt8, $lap['avgCadence']),
-                new FitField(19, FitBaseType::UInt16, $lap['avgPower']),
-                new FitField(20, FitBaseType::UInt16, $lap['maxPower']),
-                new FitField(21, FitBaseType::UInt16, $lap['totalAscent']),
+                new FitField(FitLapField::Timestamp->value, FitBaseType::UInt32, $this->startTimestamp - FitScaleFactor::FIT_EPOCH_OFFSET),
+                new FitField(FitLapField::TotalElapsedTime->value, FitBaseType::UInt32, $lap['totalElapsedTime'] !== null ? $lap['totalElapsedTime'] * FitScaleFactor::MILLISECONDS : null),
+                new FitField(FitLapField::TotalDistance->value, FitBaseType::UInt32, $lap['totalDistance'] !== null ? (int) ($lap['totalDistance'] * FitScaleFactor::CENTIMETERS) : null),
+                new FitField(FitLapField::AvgSpeed->value, FitBaseType::UInt16, $lap['avgSpeed']),
+                new FitField(FitLapField::AvgHeartRate->value, FitBaseType::UInt8, $lap['avgHeartRate']),
+                new FitField(FitLapField::MaxHeartRate->value, FitBaseType::UInt8, $lap['maxHeartRate']),
+                new FitField(FitLapField::AvgCadence->value, FitBaseType::UInt8, $lap['avgCadence']),
+                new FitField(FitLapField::AvgPower->value, FitBaseType::UInt16, $lap['avgPower']),
+                new FitField(FitLapField::MaxPower->value, FitBaseType::UInt16, $lap['maxPower']),
+                new FitField(FitLapField::TotalAscent->value, FitBaseType::UInt16, $lap['totalAscent']),
             ],
         );
     }
@@ -233,14 +239,14 @@ class FitActivityFixtureBuilder
     {
         return new FitMessage(
             localMessageType: 3,
-            globalMessageNumber: 225,
+            globalMessageNumber: FitMessageType::Set->value,
             fields: [
-                new FitField(0, FitBaseType::UInt32, $set['duration'] !== null ? $set['duration'] * 1000 : null), // ms
-                new FitField(1, FitBaseType::UInt16, $set['exerciseCategory']),
-                new FitField(2, FitBaseType::UInt16, $set['exerciseName']),
-                new FitField(3, FitBaseType::UInt16, $set['repetitions']),
-                new FitField(4, FitBaseType::UInt16, $set['weight'] !== null ? (int) ($set['weight'] * 16) : null), // weight_scale = 16
-                new FitField(5, FitBaseType::UInt8, $set['setType']),
+                new FitField(FitSetField::Duration->value, FitBaseType::UInt32, $set['duration'] !== null ? $set['duration'] * FitScaleFactor::MILLISECONDS : null),
+                new FitField(FitSetField::LegacyCategory->value, FitBaseType::UInt16, $set['exerciseCategory']),
+                new FitField(FitSetField::LegacyName->value, FitBaseType::UInt16, $set['exerciseName']),
+                new FitField(FitSetField::Repetitions->value, FitBaseType::UInt16, $set['repetitions']),
+                new FitField(FitSetField::Weight->value, FitBaseType::UInt16, $set['weight'] !== null ? (int) ($set['weight'] * FitScaleFactor::WEIGHT) : null),
+                new FitField(FitSetField::SetType->value, FitBaseType::UInt8, $set['setType']),
             ],
         );
     }
@@ -252,12 +258,12 @@ class FitActivityFixtureBuilder
     {
         return new FitMessage(
             localMessageType: 4,
-            globalMessageNumber: 264,
+            globalMessageNumber: FitMessageType::ExerciseTitle->value,
             fields: [
                 new FitField(254, FitBaseType::UInt16, $index),
-                new FitField(0, FitBaseType::UInt16, $title['exerciseCategory']),
-                new FitField(1, FitBaseType::UInt16, $title['exerciseName']),
-                new FitField(2, FitBaseType::String, $title['displayName']),
+                new FitField(FitExerciseTitleField::Category->value, FitBaseType::UInt16, $title['exerciseCategory']),
+                new FitField(FitExerciseTitleField::Name->value, FitBaseType::UInt16, $title['exerciseName']),
+                new FitField(FitExerciseTitleField::DisplayName->value, FitBaseType::String, $title['displayName']),
             ],
         );
     }

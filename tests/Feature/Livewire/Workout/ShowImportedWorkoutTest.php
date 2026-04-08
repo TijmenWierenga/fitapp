@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Workout\WorkoutSource;
 use App\Livewire\Workout\Show;
 use App\Models\Block;
 use App\Models\BlockExercise;
@@ -15,7 +16,7 @@ it('shows session summary banner for imported workouts', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->create([
         'user_id' => $user->id,
-        'source' => 'garmin_fit',
+        'source' => WorkoutSource::GarminFit,
         'total_duration' => 3720,
         'total_distance' => 8500,
         'total_calories' => 523,
@@ -57,7 +58,7 @@ it('shows imported badge for garmin fit imports', function () {
     $user = User::factory()->create();
     $workout = Workout::factory()->create([
         'user_id' => $user->id,
-        'source' => 'garmin_fit',
+        'source' => WorkoutSource::GarminFit,
     ]);
 
     Livewire::actingAs($user)
@@ -79,7 +80,7 @@ it('does not show imported badge for non-imported workouts', function () {
 
 it('renders strength exercise sets table when exercise sets exist', function () {
     $user = User::factory()->create();
-    $workout = Workout::factory()->create(['user_id' => $user->id, 'source' => 'garmin_fit']);
+    $workout = Workout::factory()->create(['user_id' => $user->id, 'source' => WorkoutSource::GarminFit]);
     $section = Section::factory()->create(['workout_id' => $workout->id]);
     $block = Block::factory()->create(['section_id' => $section->id]);
     $strengthExercise = StrengthExercise::factory()->create(['target_sets' => 3, 'target_reps_max' => 10, 'target_weight' => 80.00]);
@@ -104,7 +105,7 @@ it('renders strength exercise sets table when exercise sets exist', function () 
 
 it('renders cardio lap table when exercise sets exist', function () {
     $user = User::factory()->create();
-    $workout = Workout::factory()->create(['user_id' => $user->id, 'source' => 'garmin_fit']);
+    $workout = Workout::factory()->create(['user_id' => $user->id, 'source' => WorkoutSource::GarminFit]);
     $section = Section::factory()->create(['workout_id' => $workout->id]);
     $block = Block::factory()->distanceDuration()->create(['section_id' => $section->id]);
     $cardioExercise = CardioExercise::factory()->create(['target_duration' => 1800, 'target_distance' => 5000]);

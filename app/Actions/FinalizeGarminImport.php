@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Actions\Garmin\ParsedActivityHelper;
-use App\DataTransferObjects\Fit\FitImportContext;
 use App\DataTransferObjects\Workout\SectionData;
+use App\Enums\FitImportStatus;
 use App\Enums\Workout\Activity;
-use App\Models\ExerciseSet;
 use App\Models\FitImport;
 use App\Models\User;
 use App\Models\Workout;
-use App\Support\Workout\PaceConverter;
+use App\Support\Fit\Decode\FitActivityParser;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +19,9 @@ class FinalizeGarminImport
 {
     public function __construct(
         private CreateStructuredWorkout $createWorkout,
+        private PopulateFitExerciseSets $populateSets,
+        private SetWorkoutSessionSummary $setSessionSummary,
+        private FitActivityParser $parser,
     ) {}
 
     /**
@@ -28,7 +29,7 @@ class FinalizeGarminImport
      */
     public function execute(
         User $user,
-        FitImportContext $context,
+        FitImport $fitImport,
         Collection $sections,
         string $name,
         Activity $activity,
@@ -37,7 +38,9 @@ class FinalizeGarminImport
         ?int $rpe,
         ?int $feeling,
     ): Workout {
-        return DB::transaction(function () use ($user, $context, $sections, $name, $activity, $scheduledAt, $notes, $rpe, $feeling): Workout {
+        $parsed = $this->parser->parse(base64_decode($fitImport->raw_data));
+
+        return DB::transaction(function () use ($user, $fitImport, $parsed, $sections, $name, $activity, $scheduledAt, $notes, $rpe, $feeling): Workout {
             $workout = $this->createWorkout->execute(
                 user: $user,
                 name: $name,
@@ -47,119 +50,18 @@ class FinalizeGarminImport
                 sections: $sections,
             );
 
-            $this->populateExerciseSets($workout, $context);
-            $this->setSessionSummary($workout, $context);
+            $this->populateSets->execute($workout, $parsed);
+            $this->setSessionSummary->execute($workout, $parsed);
             $this->markCompleted($workout, $scheduledAt, $rpe, $feeling);
-            $this->storeFitImport($user, $workout, $context);
+
+            $fitImport->update([
+                'workout_id' => $workout->id,
+                'status' => FitImportStatus::Completed,
+                'imported_at' => now(),
+            ]);
 
             return $workout->fresh(['sections.blocks.exercises.exerciseable']);
         });
-    }
-
-    private function populateExerciseSets(Workout $workout, FitImportContext $context): void
-    {
-        $parsed = $context->parsedActivity;
-        $workout->loadMissing('sections.blocks.exercises');
-
-        $hasSets = count($parsed->sets) > 0;
-        $hasCardioLaps = collect($parsed->laps)->contains(fn ($lap) => ($lap->totalDistance ?? 0) > 0);
-
-        if ($hasSets) {
-            $strengthExercises = $workout->sections
-                ->flatMap(fn ($s) => $s->blocks)
-                ->filter(fn ($b) => $b->block_type !== \App\Enums\Workout\BlockType::DistanceDuration)
-                ->flatMap(fn ($b) => $b->exercises);
-
-            $this->populateStrengthSets($strengthExercises, $parsed);
-        }
-
-        if ($hasCardioLaps || ! $hasSets) {
-            $cardioExercises = $workout->sections
-                ->flatMap(fn ($s) => $s->blocks)
-                ->filter(fn ($b) => $b->block_type === \App\Enums\Workout\BlockType::DistanceDuration)
-                ->flatMap(fn ($b) => $b->exercises);
-
-            $this->populateCardioSets($cardioExercises, $parsed);
-        }
-    }
-
-    /**
-     * @param  \Illuminate\Support\Collection<int, \App\Models\BlockExercise>  $blockExercises
-     */
-    private function populateStrengthSets(
-        \Illuminate\Support\Collection $blockExercises,
-        \App\DataTransferObjects\Fit\ParsedActivity $parsed,
-    ): void {
-        $activeSets = collect($parsed->sets)->filter->isActive();
-        $groups = ParsedActivityHelper::groupSetsByExercise($activeSets);
-
-        $exerciseIndex = 0;
-
-        foreach ($groups as $group) {
-            if (! isset($blockExercises[$exerciseIndex])) {
-                $exerciseIndex++;
-
-                continue;
-            }
-
-            $blockExercise = $blockExercises[$exerciseIndex];
-
-            foreach ($group['sets'] as $setIndex => $set) {
-                ExerciseSet::create([
-                    'block_exercise_id' => $blockExercise->id,
-                    'set_number' => $setIndex + 1,
-                    'reps' => $set->repetitions,
-                    'weight' => $set->weight,
-                    'set_duration' => $set->duration,
-                ]);
-            }
-
-            $exerciseIndex++;
-        }
-    }
-
-    /**
-     * @param  \Illuminate\Support\Collection<int, \App\Models\BlockExercise>  $blockExercises
-     */
-    private function populateCardioSets(
-        \Illuminate\Support\Collection $blockExercises,
-        \App\DataTransferObjects\Fit\ParsedActivity $parsed,
-    ): void {
-        if ($blockExercises->isEmpty()) {
-            return;
-        }
-
-        $primaryExercise = $blockExercises->first();
-
-        foreach ($parsed->laps as $index => $lap) {
-            ExerciseSet::create([
-                'block_exercise_id' => $primaryExercise->id,
-                'set_number' => $index + 1,
-                'distance' => $lap->totalDistance,
-                'duration' => $lap->totalElapsedTime,
-                'avg_heart_rate' => $lap->avgHeartRate,
-                'max_heart_rate' => $lap->maxHeartRate,
-                'avg_pace' => PaceConverter::fromFitSpeed($lap->avgSpeed),
-                'avg_power' => $lap->avgPower,
-                'max_power' => $lap->maxPower,
-                'avg_cadence' => $lap->avgCadence,
-                'total_ascent' => $lap->totalAscent,
-            ]);
-        }
-    }
-
-    private function setSessionSummary(Workout $workout, FitImportContext $context): void
-    {
-        $parsed = $context->parsedActivity;
-
-        $workout->update([
-            'total_duration' => $parsed->session->totalElapsedTime,
-            'total_distance' => $parsed->session->totalDistance,
-            'total_calories' => $parsed->session->totalCalories,
-            'avg_heart_rate' => $parsed->session->avgHeartRate,
-            'max_heart_rate' => $parsed->session->maxHeartRate,
-            'source' => 'garmin_fit',
-        ]);
     }
 
     private function markCompleted(Workout $workout, CarbonImmutable $scheduledAt, ?int $rpe, ?int $feeling): void
@@ -168,16 +70,6 @@ class FinalizeGarminImport
             'completed_at' => $scheduledAt,
             'rpe' => $rpe,
             'feeling' => $feeling,
-        ]);
-    }
-
-    private function storeFitImport(User $user, Workout $workout, FitImportContext $context): void
-    {
-        FitImport::create([
-            'user_id' => $user->id,
-            'workout_id' => $workout->id,
-            'raw_data' => base64_encode($context->rawBytes),
-            'imported_at' => now(),
         ]);
     }
 }

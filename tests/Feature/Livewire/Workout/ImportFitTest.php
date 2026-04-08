@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Fit\GarminExerciseCategory;
 use App\Enums\Workout\Activity;
+use App\Enums\Workout\WorkoutSource;
 use App\Livewire\Workout\ImportFit;
 use App\Models\User;
 use App\Models\Workout;
@@ -113,7 +114,7 @@ it('imports FIT data into the workout and marks it completed', function () {
         ->and($workout->total_calories)->toBe(400)
         ->and($workout->avg_heart_rate)->toBe(130)
         ->and($workout->max_heart_rate)->toBe(165)
-        ->and($workout->source)->toBe('garmin_fit')
+        ->and($workout->source)->toBe(WorkoutSource::GarminFit)
         ->and($workout->rpe)->toBe(7)
         ->and($workout->feeling)->toBe(4);
 });
@@ -151,7 +152,7 @@ it('shows duplicate warning when a matching imported workout exists', function (
     // Existing imported workout
     Workout::factory()->for($user)->create([
         'activity' => Activity::Strength,
-        'source' => 'garmin_fit',
+        'source' => WorkoutSource::GarminFit,
         'scheduled_at' => now(),
     ]);
 

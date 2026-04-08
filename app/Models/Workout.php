@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Workout\Activity;
+use App\Enums\Workout\WorkoutSource;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -62,6 +63,7 @@ class Workout extends Model
         'total_calories' => 'integer',
         'avg_heart_rate' => 'integer',
         'max_heart_rate' => 'integer',
+        'source' => WorkoutSource::class,
     ];
 
     /**

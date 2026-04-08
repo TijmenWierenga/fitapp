@@ -91,7 +91,7 @@
         @endif
 
         {{-- Imported badge --}}
-        @if($workout->source === 'garmin_fit')
+        @if($workout->source === \App\Enums\Workout\WorkoutSource::GarminFit)
             <div class="rounded-xl bg-zinc-200 dark:bg-zinc-700 px-3 py-1.5 flex items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400">
                 <flux:icon.arrow-up-tray class="size-3.5 text-zinc-400 dark:text-zinc-500" />
                 <span>Imported</span>

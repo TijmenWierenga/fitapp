@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Workout;
 
-use App\Actions\Garmin\ParsedActivityHelper;
-use App\Actions\Garmin\SportMapper;
+use App\Actions\CheckForDuplicateFitImport;
+use App\Actions\DetectFitExerciseMismatch;
 use App\Actions\ImportFitToWorkout;
 use App\DataTransferObjects\Fit\ParsedActivity;
-use App\Enums\Workout\BlockType;
 use App\Exceptions\FitParseException;
 use App\Models\Workout;
 use App\Support\Fit\Decode\FitActivityParser;
@@ -76,8 +75,13 @@ class ImportFit extends Component
             $parsed = $parser->parse($fitData);
 
             $this->preview = $this->buildPreview($parsed);
-            $this->duplicateWarning = $this->checkDuplicate($parsed);
-            $this->mismatchWarning = $this->detectMismatch($parsed);
+
+            $duplicate = app(CheckForDuplicateFitImport::class)->execute(auth()->user(), $parsed);
+            $this->duplicateWarning = $duplicate !== null
+                ? "Possible duplicate: workout '{$duplicate->name}' on {$duplicate->scheduled_at->format('M j, Y')} was already imported from Garmin."
+                : null;
+
+            $this->mismatchWarning = app(DetectFitExerciseMismatch::class)->execute($this->workout, $parsed);
             $this->step = 'preview';
         } catch (FitParseException $e) {
             $this->parseError = $e->getMessage();
@@ -95,13 +99,22 @@ class ImportFit extends Component
 
         $fitData = file_get_contents($this->fitFile->getRealPath());
 
-        $action->execute(
-            user: auth()->user(),
-            workout: $this->workout,
-            fitData: $fitData,
-            rpe: $this->rpe,
-            feeling: $this->feeling,
-        );
+        try {
+            $action->execute(
+                user: auth()->user(),
+                workout: $this->workout,
+                fitData: $fitData,
+                rpe: $this->rpe,
+                feeling: $this->feeling,
+            );
+        } catch (\Throwable $e) {
+            report($e);
+            $this->parseError = 'Import failed. Please try again or use a different file.';
+            $this->step = 'upload';
+            $this->reset(['fitFile', 'preview', 'duplicateWarning', 'mismatchWarning', 'rpe', 'feeling']);
+
+            return;
+        }
 
         $this->dispatch('fit-imported');
 
@@ -113,7 +126,7 @@ class ImportFit extends Component
      */
     private function buildPreview(ParsedActivity $parsed): array
     {
-        $activity = SportMapper::toActivity($parsed->session->sport, $parsed->session->subSport);
+        $activity = \App\Actions\Garmin\SportMapper::toActivity($parsed->session->sport, $parsed->session->subSport);
 
         return [
             'activity' => $activity->label(),
@@ -127,49 +140,6 @@ class ImportFit extends Component
             'avgHeartRate' => $parsed->session->avgHeartRate,
             'maxHeartRate' => $parsed->session->maxHeartRate,
         ];
-    }
-
-    private function checkDuplicate(ParsedActivity $parsed): ?string
-    {
-        $activity = SportMapper::toActivity($parsed->session->sport, $parsed->session->subSport);
-
-        $duplicate = Workout::query()
-            ->where('user_id', auth()->id())
-            ->where('activity', $activity)
-            ->where('source', 'garmin_fit')
-            ->whereDate('scheduled_at', $parsed->session->startTime->toDateString())
-            ->first();
-
-        if ($duplicate === null) {
-            return null;
-        }
-
-        return "Possible duplicate: workout '{$duplicate->name}' on {$duplicate->scheduled_at->format('M j, Y')} was already imported from Garmin.";
-    }
-
-    private function detectMismatch(ParsedActivity $parsed): ?string
-    {
-        $activeSets = collect($parsed->sets)->filter->isActive();
-
-        if ($activeSets->isEmpty()) {
-            return null;
-        }
-
-        $groups = ParsedActivityHelper::groupSetsByExercise($activeSets);
-        $fitExerciseCount = count($groups);
-
-        $this->workout->loadMissing('sections.blocks.exercises');
-        $plannedCount = $this->workout->sections
-            ->flatMap(fn ($s) => $s->blocks)
-            ->filter(fn ($b) => $b->block_type !== BlockType::DistanceDuration)
-            ->flatMap(fn ($b) => $b->exercises)
-            ->count();
-
-        if ($fitExerciseCount !== $plannedCount) {
-            return "FIT file has {$fitExerciseCount} exercises, planned workout has {$plannedCount}.";
-        }
-
-        return null;
     }
 
     public function render(): \Illuminate\View\View

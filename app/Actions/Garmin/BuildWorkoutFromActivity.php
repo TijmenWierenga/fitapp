@@ -24,7 +24,7 @@ class BuildWorkoutFromActivity
      * @param  array<int, int>  $exerciseMappings  Map of exercise group index → Exercise model ID
      * @return array{sections: Collection<int, SectionData>, matched: list<string>, unmatched: list<string>, warnings: list<string>}
      */
-    public function execute(ParsedActivity $activity, array $exerciseMappings = [], bool $detectSupersets = true): array
+    public function execute(ParsedActivity $activity, array $exerciseMappings = [], bool $detectSupersets = false): array
     {
         $matched = [];
         $unmatched = [];

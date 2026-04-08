@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-use App\DataTransferObjects\Fit\FitImportContext;
+use App\Enums\FitImportStatus;
 use App\Enums\Workout\Activity;
+use App\Enums\Workout\WorkoutSource;
 use App\Livewire\Workouts\ImportGarmin;
+use App\Models\FitImport;
 use App\Models\User;
 use App\Models\Workout;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Cache;
 use Livewire\Livewire;
 use Tests\Support\FitActivityFixtureBuilder;
 
@@ -49,17 +50,17 @@ it('redirects to builder after uploading a valid FIT file without duplicates', f
         ->set('fitFile', $uploadedFile)
         ->assertRedirect();
 
-    // Verify that a FitImportContext was stored in cache
+    // Verify that a pending FitImport was created
     $redirectUrl = $component->effects['redirect'];
-    preg_match('/import=([a-f0-9-]+)/', $redirectUrl, $matches);
+    preg_match('/import=(\d+)/', $redirectUrl, $matches);
 
     expect($matches)->toHaveCount(2);
 
-    $uuid = $matches[1];
-    $context = Cache::get("fit_import:{$uuid}");
+    $fitImport = FitImport::find($matches[1]);
 
-    expect($context)->toBeInstanceOf(FitImportContext::class)
-        ->and($context->parsedActivity->session->sport)->toBe(1);
+    expect($fitImport)->not->toBeNull()
+        ->and($fitImport->status)->toBe(FitImportStatus::Pending)
+        ->and($fitImport->user_id)->toBe($user->id);
 });
 
 it('shows duplicate warning step when a matching imported workout exists', function () {
@@ -67,7 +68,7 @@ it('shows duplicate warning step when a matching imported workout exists', funct
 
     Workout::factory()->for($user)->create([
         'activity' => Activity::Run,
-        'source' => 'garmin_fit',
+        'source' => WorkoutSource::GarminFit,
         'scheduled_at' => now(),
     ]);
 
@@ -91,7 +92,7 @@ it('redirects to builder when user confirms import despite duplicate', function 
 
     Workout::factory()->for($user)->create([
         'activity' => Activity::Run,
-        'source' => 'garmin_fit',
+        'source' => WorkoutSource::GarminFit,
         'scheduled_at' => now(),
     ]);
 
@@ -110,22 +111,21 @@ it('redirects to builder when user confirms import despite duplicate', function 
         ->assertRedirect();
 
     $redirectUrl = $component->effects['redirect'];
-    preg_match('/import=([a-f0-9-]+)/', $redirectUrl, $matches);
+    preg_match('/import=(\d+)/', $redirectUrl, $matches);
 
     expect($matches)->toHaveCount(2);
 
-    $uuid = $matches[1];
-    $context = Cache::get("fit_import:{$uuid}");
-
-    expect($context)->toBeInstanceOf(FitImportContext::class);
+    $fitImport = FitImport::find($matches[1]);
+    expect($fitImport)->not->toBeNull()
+        ->and($fitImport->status)->toBe(FitImportStatus::Pending);
 });
 
-it('resets to upload step when user cancels duplicate warning', function () {
+it('resets to upload step and deletes pending import when user cancels duplicate warning', function () {
     $user = User::factory()->withTimezone('UTC')->create();
 
     Workout::factory()->for($user)->create([
         'activity' => Activity::Run,
-        'source' => 'garmin_fit',
+        'source' => WorkoutSource::GarminFit,
         'scheduled_at' => now(),
     ]);
 
@@ -143,6 +143,9 @@ it('resets to upload step when user cancels duplicate warning', function () {
         ->call('resetImport')
         ->assertSet('step', 'upload')
         ->assertSet('duplicateWarning', null);
+
+    // Pending import should be deleted
+    expect(FitImport::where('user_id', $user->id)->where('status', FitImportStatus::Pending)->count())->toBe(0);
 });
 
 it('shows parse error for invalid FIT file', function () {

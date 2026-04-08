@@ -10,13 +10,20 @@ use App\DataTransferObjects\Fit\ParsedLap;
 use App\DataTransferObjects\Fit\ParsedSession;
 use App\DataTransferObjects\Fit\ParsedSet;
 use App\Exceptions\FitParseException;
+use App\Support\Fit\FitExerciseTitleField;
+use App\Support\Fit\FitFileIdField;
+use App\Support\Fit\FitFileType;
+use App\Support\Fit\FitInvalidValue;
+use App\Support\Fit\FitLapField;
 use App\Support\Fit\FitMessage;
+use App\Support\Fit\FitMessageType;
+use App\Support\Fit\FitScaleFactor;
+use App\Support\Fit\FitSessionField;
+use App\Support\Fit\FitSetField;
 use Carbon\CarbonImmutable;
 
 class FitActivityParser
 {
-    private const int FIT_EPOCH_OFFSET = 631065600;
-
     public function __construct(private FitDecoder $decoder) {}
 
     public function parse(string $fitData): ParsedActivity
@@ -39,10 +46,10 @@ class FitActivityParser
     private function validateActivityFile(array $messages): void
     {
         foreach ($messages as $message) {
-            if ($message->globalMessageNumber === 0) {
-                $type = $this->getFieldValue($message, 0);
+            if ($message->globalMessageNumber === FitMessageType::FileId->value) {
+                $type = $this->getFieldValue($message, FitFileIdField::Type->value);
 
-                if ($type !== 4) {
+                if ($type !== FitFileType::Activity->value) {
                     throw FitParseException::notAnActivity();
                 }
 
@@ -59,29 +66,29 @@ class FitActivityParser
     private function parseSession(array $messages): ParsedSession
     {
         foreach ($messages as $message) {
-            if ($message->globalMessageNumber !== 18) {
+            if ($message->globalMessageNumber !== FitMessageType::Session->value) {
                 continue;
             }
 
-            $startTimestamp = $this->getFieldValue($message, 253);
+            $startTimestamp = $this->getFieldValue($message, FitSessionField::Timestamp->value);
             $startTime = $startTimestamp !== null
-                ? CarbonImmutable::createFromTimestamp($startTimestamp + self::FIT_EPOCH_OFFSET)
+                ? CarbonImmutable::createFromTimestamp($startTimestamp + FitScaleFactor::FIT_EPOCH_OFFSET)
                 : CarbonImmutable::now();
 
-            $totalElapsedTime = $this->getFieldValue($message, 7);
-            $totalDistance = $this->getFieldValue($message, 9);
+            $totalElapsedTime = $this->getFieldValue($message, FitSessionField::TotalElapsedTime->value);
+            $totalDistance = $this->getFieldValue($message, FitSessionField::TotalDistance->value);
 
             return new ParsedSession(
-                sport: $this->getFieldValue($message, 5) ?? 0,
-                subSport: $this->getFieldValue($message, 6) ?? 0,
+                sport: $this->getFieldValue($message, FitSessionField::Sport->value) ?? 0,
+                subSport: $this->getFieldValue($message, FitSessionField::SubSport->value) ?? 0,
                 startTime: $startTime,
-                totalElapsedTime: $totalElapsedTime !== null ? (int) round($totalElapsedTime / 1000) : null,
-                totalDistance: $totalDistance !== null ? round($totalDistance / 100, 2) : null,
-                totalCalories: $this->getFieldValue($message, 11),
-                avgHeartRate: $this->getFieldValue($message, 16),
-                maxHeartRate: $this->getFieldValue($message, 17),
-                avgPower: $this->getFieldValue($message, 20),
-                workoutName: $this->getStringFieldValue($message, 29),
+                totalElapsedTime: $totalElapsedTime !== null ? (int) round($totalElapsedTime / FitScaleFactor::MILLISECONDS) : null,
+                totalDistance: $totalDistance !== null ? round($totalDistance / FitScaleFactor::CENTIMETERS, 2) : null,
+                totalCalories: $this->getFieldValue($message, FitSessionField::TotalCalories->value),
+                avgHeartRate: $this->getFieldValue($message, FitSessionField::AvgHeartRate->value),
+                maxHeartRate: $this->getFieldValue($message, FitSessionField::MaxHeartRate->value),
+                avgPower: $this->getFieldValue($message, FitSessionField::AvgPower->value),
+                workoutName: $this->getStringFieldValue($message, FitSessionField::WorkoutName->value),
             );
         }
 
@@ -98,31 +105,31 @@ class FitActivityParser
         $index = 0;
 
         foreach ($messages as $message) {
-            if ($message->globalMessageNumber !== 19) {
+            if ($message->globalMessageNumber !== FitMessageType::Lap->value) {
                 continue;
             }
 
-            $startTimestamp = $this->getFieldValue($message, 253);
+            $startTimestamp = $this->getFieldValue($message, FitLapField::Timestamp->value);
             $startTime = $startTimestamp !== null
-                ? CarbonImmutable::createFromTimestamp($startTimestamp + self::FIT_EPOCH_OFFSET)
+                ? CarbonImmutable::createFromTimestamp($startTimestamp + FitScaleFactor::FIT_EPOCH_OFFSET)
                 : CarbonImmutable::now();
 
-            $totalElapsedTime = $this->getFieldValue($message, 7);
-            $totalDistance = $this->getFieldValue($message, 9);
-            $avgSpeed = $this->getFieldValue($message, 13);
+            $totalElapsedTime = $this->getFieldValue($message, FitLapField::TotalElapsedTime->value);
+            $totalDistance = $this->getFieldValue($message, FitLapField::TotalDistance->value);
+            $avgSpeed = $this->getFieldValue($message, FitLapField::AvgSpeed->value);
 
             $laps[] = new ParsedLap(
                 index: $index,
                 startTime: $startTime,
-                totalElapsedTime: $totalElapsedTime !== null ? (int) round($totalElapsedTime / 1000) : 0,
-                totalDistance: $totalDistance !== null ? round($totalDistance / 100, 2) : null,
-                avgHeartRate: $this->getFieldValue($message, 15),
-                maxHeartRate: $this->getFieldValue($message, 16),
+                totalElapsedTime: $totalElapsedTime !== null ? (int) round($totalElapsedTime / FitScaleFactor::MILLISECONDS) : 0,
+                totalDistance: $totalDistance !== null ? round($totalDistance / FitScaleFactor::CENTIMETERS, 2) : null,
+                avgHeartRate: $this->getFieldValue($message, FitLapField::AvgHeartRate->value),
+                maxHeartRate: $this->getFieldValue($message, FitLapField::MaxHeartRate->value),
                 avgSpeed: $avgSpeed,
-                avgPower: $this->getFieldValue($message, 19),
-                maxPower: $this->getFieldValue($message, 20),
-                avgCadence: $this->getFieldValue($message, 17),
-                totalAscent: $this->getFieldValue($message, 21),
+                avgPower: $this->getFieldValue($message, FitLapField::AvgPower->value),
+                maxPower: $this->getFieldValue($message, FitLapField::MaxPower->value),
+                avgCadence: $this->getFieldValue($message, FitLapField::AvgCadence->value),
+                totalAscent: $this->getFieldValue($message, FitLapField::TotalAscent->value),
             );
 
             $index++;
@@ -141,33 +148,32 @@ class FitActivityParser
         $index = 0;
 
         foreach ($messages as $message) {
-            if ($message->globalMessageNumber !== 225) {
+            if ($message->globalMessageNumber !== FitMessageType::Set->value) {
                 continue;
             }
 
-            $duration = $this->getFieldValue($message, 0);
-            $weight = $this->getFieldValue($message, 4);
+            $duration = $this->getFieldValue($message, FitSetField::Duration->value);
+            $weight = $this->getFieldValue($message, FitSetField::Weight->value);
 
             // Field 1/2 = legacy exercise_category/exercise_name
             // Field 7/8 = newer category/category_subtype (used by recent Garmin devices)
-            // 0xFFFF (65535) and 0xFF (255) are FIT "invalid" markers
-            $legacyCategory = $this->getFieldValue($message, 1);
-            $legacyName = $this->getFieldValue($message, 2);
+            $legacyCategory = $this->getFieldValue($message, FitSetField::LegacyCategory->value);
+            $legacyName = $this->getFieldValue($message, FitSetField::LegacyName->value);
 
-            $exerciseCategory = ($legacyCategory !== null && $legacyCategory !== 65535)
+            $exerciseCategory = ($legacyCategory !== null && $legacyCategory !== FitInvalidValue::UINT16)
                 ? $legacyCategory
-                : $this->getFieldValue($message, 7);
+                : $this->getFieldValue($message, FitSetField::Category->value);
 
-            $exerciseName = ($legacyName !== null && $legacyName !== 255 && $legacyName !== 65535)
+            $exerciseName = ($legacyName !== null && $legacyName !== FitInvalidValue::UINT8 && $legacyName !== FitInvalidValue::UINT16)
                 ? $legacyName
-                : $this->getFieldValue($message, 8);
+                : $this->getFieldValue($message, FitSetField::Name->value);
 
             $sets[] = new ParsedSet(
                 index: $index,
-                setType: $this->getFieldValue($message, 5) ?? 0,
-                duration: $duration !== null ? (int) round($duration / 1000) : null,
-                repetitions: $this->getFieldValue($message, 3),
-                weight: $weight !== null ? round($weight / 16, 2) : null,
+                setType: $this->getFieldValue($message, FitSetField::SetType->value) ?? 0,
+                duration: $duration !== null ? (int) round($duration / FitScaleFactor::MILLISECONDS) : null,
+                repetitions: $this->getFieldValue($message, FitSetField::Repetitions->value),
+                weight: $weight !== null ? round($weight / FitScaleFactor::WEIGHT, 2) : null,
                 exerciseCategory: $exerciseCategory,
                 exerciseName: $exerciseName,
             );
@@ -187,13 +193,13 @@ class FitActivityParser
         $titles = [];
 
         foreach ($messages as $message) {
-            if ($message->globalMessageNumber !== 264) {
+            if ($message->globalMessageNumber !== FitMessageType::ExerciseTitle->value) {
                 continue;
             }
 
-            $exerciseCategory = $this->getFieldValue($message, 0);
-            $exerciseName = $this->getFieldValue($message, 1);
-            $displayName = $this->getStringFieldValue($message, 2);
+            $exerciseCategory = $this->getFieldValue($message, FitExerciseTitleField::Category->value);
+            $exerciseName = $this->getFieldValue($message, FitExerciseTitleField::Name->value);
+            $displayName = $this->getStringFieldValue($message, FitExerciseTitleField::DisplayName->value);
 
             if ($exerciseCategory === null || $exerciseName === null || $displayName === null) {
                 continue;

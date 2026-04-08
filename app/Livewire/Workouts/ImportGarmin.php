@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Workouts;
 
-use App\Actions\Garmin\SportMapper;
-use App\DataTransferObjects\Fit\FitImportContext;
-use App\DataTransferObjects\Fit\ParsedActivity;
+use App\Actions\CheckForDuplicateFitImport;
+use App\Enums\FitImportStatus;
 use App\Exceptions\FitParseException;
-use App\Models\Workout;
+use App\Models\FitImport;
 use App\Support\Fit\Decode\FitActivityParser;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -27,7 +24,7 @@ class ImportGarmin extends Component
 
     public ?string $duplicateWarning = null;
 
-    public ?string $pendingImportKey = null;
+    public ?int $pendingImportId = null;
 
     public function updatedFitFile(): void
     {
@@ -42,19 +39,23 @@ class ImportGarmin extends Component
             $parser = app(FitActivityParser::class);
             $parsed = $parser->parse($fitData);
 
-            $uuid = (string) Str::uuid();
-            $this->storeImportContext($uuid, $parsed, $fitData);
+            $fitImport = FitImport::create([
+                'user_id' => auth()->id(),
+                'status' => FitImportStatus::Pending,
+                'raw_data' => base64_encode($fitData),
+            ]);
 
-            $this->duplicateWarning = $this->checkDuplicate($parsed);
+            $duplicate = app(CheckForDuplicateFitImport::class)->execute(auth()->user(), $parsed);
 
-            if ($this->duplicateWarning !== null) {
-                $this->pendingImportKey = $uuid;
+            if ($duplicate !== null) {
+                $this->duplicateWarning = "Possible duplicate: workout '{$duplicate->name}' on {$duplicate->scheduled_at->format('M j, Y')} was already imported from Garmin.";
+                $this->pendingImportId = $fitImport->id;
                 $this->step = 'duplicate_warning';
 
                 return;
             }
 
-            $this->redirect(route('workouts.create', ['import' => $uuid]));
+            $this->redirect(route('workouts.create', ['import' => $fitImport->id]));
         } catch (FitParseException $e) {
             $this->parseError = $e->getMessage();
         }
@@ -62,54 +63,30 @@ class ImportGarmin extends Component
 
     public function confirmImportAnyway(): void
     {
-        if ($this->pendingImportKey === null) {
+        if ($this->pendingImportId === null) {
             $this->resetImport();
 
             return;
         }
 
-        $this->redirect(route('workouts.create', ['import' => $this->pendingImportKey]));
+        $this->redirect(route('workouts.create', ['import' => $this->pendingImportId]));
     }
 
     public function resetImport(): void
     {
-        if ($this->pendingImportKey !== null) {
-            Cache::forget("fit_import:{$this->pendingImportKey}");
+        if ($this->pendingImportId !== null) {
+            FitImport::where('id', $this->pendingImportId)
+                ->where('user_id', auth()->id())
+                ->where('status', FitImportStatus::Pending)
+                ->delete();
         }
 
-        $this->reset(['fitFile', 'step', 'parseError', 'duplicateWarning', 'pendingImportKey']);
+        $this->reset(['fitFile', 'step', 'parseError', 'duplicateWarning', 'pendingImportId']);
         $this->step = 'upload';
     }
 
     public function render(): \Illuminate\View\View
     {
         return view('livewire.workouts.import-garmin');
-    }
-
-    private function storeImportContext(string $uuid, ParsedActivity $parsed, string $fitData): void
-    {
-        Cache::put(
-            "fit_import:{$uuid}",
-            new FitImportContext($parsed, $fitData),
-            now()->addMinutes(30),
-        );
-    }
-
-    private function checkDuplicate(ParsedActivity $parsed): ?string
-    {
-        $activity = SportMapper::toActivity($parsed->session->sport, $parsed->session->subSport);
-
-        $duplicate = Workout::query()
-            ->where('user_id', auth()->id())
-            ->where('activity', $activity)
-            ->where('source', 'garmin_fit')
-            ->whereDate('scheduled_at', $parsed->session->startTime->toDateString())
-            ->first();
-
-        if ($duplicate === null) {
-            return null;
-        }
-
-        return "Possible duplicate: workout '{$duplicate->name}' on {$duplicate->scheduled_at->format('M j, Y')} was already imported from Garmin.";
     }
 }

@@ -2,25 +2,23 @@
 
 declare(strict_types=1);
 
-use App\DataTransferObjects\Fit\FitImportContext;
 use App\Enums\Fit\GarminExerciseCategory;
+use App\Enums\FitImportStatus;
 use App\Enums\Workout\Activity;
+use App\Enums\Workout\WorkoutSource;
 use App\Livewire\Workout\Builder;
+use App\Models\FitImport;
 use App\Models\User;
-use App\Support\Fit\Decode\FitActivityParser;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Tests\Support\FitActivityFixtureBuilder;
 
-function createImportContext(string $fitData): string
+function createPendingImport(User $user, string $fitData): FitImport
 {
-    $parsed = app(FitActivityParser::class)->parse($fitData);
-    $uuid = (string) Str::uuid();
-
-    Cache::put("fit_import:{$uuid}", new FitImportContext($parsed, $fitData), now()->addMinutes(30));
-
-    return $uuid;
+    return FitImport::create([
+        'user_id' => $user->id,
+        'status' => FitImportStatus::Pending,
+        'raw_data' => base64_encode($fitData),
+    ]);
 }
 
 it('hydrates builder from import context for a running activity', function () {
@@ -31,12 +29,12 @@ it('hydrates builder from import context for a running activity', function () {
         ->addLap(totalElapsedTime: 1800, totalDistance: 5000)
         ->build();
 
-    $uuid = createImportContext($fitData);
+    $fitImport = createPendingImport($user, $fitData);
 
-    Livewire::withQueryParams(['import' => $uuid])
+    Livewire::withQueryParams(['import' => $fitImport->id])
         ->actingAs($user)
         ->test(Builder::class)
-        ->assertSet('importContextKey', $uuid)
+        ->assertSet('importId', (string) $fitImport->id)
         ->assertSet('activity', Activity::Run)
         ->assertNotSet('name', '')
         ->assertCount('sections', 1)
@@ -54,9 +52,9 @@ it('hydrates builder from import context for a strength activity with sets', fun
         ->addSet(setType: 1, repetitions: 8, weight: 85.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
         ->build();
 
-    $uuid = createImportContext($fitData);
+    $fitImport = createPendingImport($user, $fitData);
 
-    Livewire::withQueryParams(['import' => $uuid])
+    Livewire::withQueryParams(['import' => $fitImport->id])
         ->actingAs($user)
         ->test(Builder::class)
         ->assertSet('activity', Activity::Strength)
@@ -73,9 +71,9 @@ it('uses workout name from FIT file when available', function () {
         ->addSet(setType: 1, repetitions: 10, weight: 50.0, exerciseCategory: GarminExerciseCategory::BenchPress->value, exerciseName: 0)
         ->build();
 
-    $uuid = createImportContext($fitData);
+    $fitImport = createPendingImport($user, $fitData);
 
-    Livewire::withQueryParams(['import' => $uuid])
+    Livewire::withQueryParams(['import' => $fitImport->id])
         ->actingAs($user)
         ->test(Builder::class)
         ->assertSet('name', 'Push Day');
@@ -89,22 +87,22 @@ it('generates workout name when FIT file has no workout name', function () {
         ->addLap(totalElapsedTime: 1800, totalDistance: 5000)
         ->build();
 
-    $uuid = createImportContext($fitData);
+    $fitImport = createPendingImport($user, $fitData);
 
-    $component = Livewire::withQueryParams(['import' => $uuid])
+    $component = Livewire::withQueryParams(['import' => $fitImport->id])
         ->actingAs($user)
         ->test(Builder::class);
 
     expect($component->get('name'))->toStartWith('Run - ');
 });
 
-it('shows expired error when import context has expired', function () {
+it('shows expired error when import does not exist', function () {
     $user = User::factory()->withTimezone('UTC')->create();
 
-    Livewire::withQueryParams(['import' => 'expired-uuid-that-does-not-exist'])
+    Livewire::withQueryParams(['import' => '999999'])
         ->actingAs($user)
         ->test(Builder::class)
-        ->assertSet('importContextKey', null)
+        ->assertSet('importId', null)
         ->assertCount('sections', 3);
 });
 
@@ -116,9 +114,9 @@ it('shows RPE and feeling fields in import mode', function () {
         ->addLap(totalElapsedTime: 1800, totalDistance: 5000)
         ->build();
 
-    $uuid = createImportContext($fitData);
+    $fitImport = createPendingImport($user, $fitData);
 
-    Livewire::withQueryParams(['import' => $uuid])
+    Livewire::withQueryParams(['import' => $fitImport->id])
         ->actingAs($user)
         ->test(Builder::class)
         ->assertSee('Rate of Perceived Exertion')
@@ -142,9 +140,9 @@ it('saves imported workout via FinalizeGarminImport and redirects', function () 
         ->addLap(totalElapsedTime: 1800, totalDistance: 5000, avgHeartRate: 150, maxHeartRate: 175)
         ->build();
 
-    $uuid = createImportContext($fitData);
+    $fitImport = createPendingImport($user, $fitData);
 
-    Livewire::withQueryParams(['import' => $uuid])
+    Livewire::withQueryParams(['import' => $fitImport->id])
         ->actingAs($user)
         ->test(Builder::class)
         ->set('rpe', 7)
@@ -155,20 +153,18 @@ it('saves imported workout via FinalizeGarminImport and redirects', function () 
     $this->assertDatabaseHas('workouts', [
         'user_id' => $user->id,
         'activity' => Activity::Run->value,
-        'source' => 'garmin_fit',
+        'source' => WorkoutSource::GarminFit,
         'rpe' => 7,
         'feeling' => 4,
     ]);
 
-    $this->assertDatabaseHas('fit_imports', [
-        'user_id' => $user->id,
-    ]);
-
-    // Verify cache was cleared
-    expect(Cache::get("fit_import:{$uuid}"))->toBeNull();
+    $fitImport->refresh();
+    expect($fitImport->status)->toBe(FitImportStatus::Completed)
+        ->and($fitImport->workout_id)->not->toBeNull()
+        ->and($fitImport->imported_at)->not->toBeNull();
 });
 
-it('shows error when import context expires during save', function () {
+it('shows error when import record is missing during save', function () {
     $user = User::factory()->withTimezone('UTC')->create();
 
     $fitData = (new FitActivityFixtureBuilder)
@@ -176,18 +172,18 @@ it('shows error when import context expires during save', function () {
         ->addLap(totalElapsedTime: 1800, totalDistance: 5000)
         ->build();
 
-    $uuid = createImportContext($fitData);
+    $fitImport = createPendingImport($user, $fitData);
 
-    $component = Livewire::withQueryParams(['import' => $uuid])
+    $component = Livewire::withQueryParams(['import' => $fitImport->id])
         ->actingAs($user)
         ->test(Builder::class);
 
-    // Expire the cache before saving
-    Cache::forget("fit_import:{$uuid}");
+    // Delete the import before saving
+    $fitImport->delete();
 
     $component
         ->call('saveWorkout')
-        ->assertHasErrors('importContextKey');
+        ->assertHasErrors('importId');
 });
 
 it('displays Import Workout heading in import mode', function () {
@@ -198,9 +194,9 @@ it('displays Import Workout heading in import mode', function () {
         ->addLap(totalElapsedTime: 1800, totalDistance: 5000)
         ->build();
 
-    $uuid = createImportContext($fitData);
+    $fitImport = createPendingImport($user, $fitData);
 
-    Livewire::withQueryParams(['import' => $uuid])
+    Livewire::withQueryParams(['import' => $fitImport->id])
         ->actingAs($user)
         ->test(Builder::class)
         ->assertSee('Import Workout')

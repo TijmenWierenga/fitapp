@@ -7,6 +7,7 @@ namespace App\Livewire\Workout;
 use App\Actions\CheckForDuplicateFitImport;
 use App\Actions\DetectFitExerciseMismatch;
 use App\Actions\ImportFitToWorkout;
+use App\DataTransferObjects\Fit\FitActivityPreview;
 use App\DataTransferObjects\Fit\ParsedActivity;
 use App\Exceptions\FitParseException;
 use App\Models\Workout;
@@ -29,8 +30,7 @@ class ImportFit extends Component
 
     public string $step = 'upload';
 
-    /** @var array<string, mixed>|null */
-    public ?array $preview = null;
+    public ?FitActivityPreview $preview = null;
 
     public ?string $duplicateWarning = null;
 
@@ -121,25 +121,22 @@ class ImportFit extends Component
         $this->redirect(route('workouts.show', $this->workout));
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function buildPreview(ParsedActivity $parsed): array
+    private function buildPreview(ParsedActivity $parsed): FitActivityPreview
     {
         $activity = \App\Actions\Garmin\SportMapper::toActivity($parsed->session->sport, $parsed->session->subSport);
 
-        return [
-            'activity' => $activity->label(),
-            'duration' => $parsed->session->totalElapsedTime !== null
+        return new FitActivityPreview(
+            activity: $activity->label(),
+            duration: $parsed->session->totalElapsedTime !== null
                 ? TimeConverter::format($parsed->session->totalElapsedTime)
                 : null,
-            'distance' => $parsed->session->totalDistance !== null
+            distance: $parsed->session->totalDistance !== null
                 ? DistanceConverter::format((int) $parsed->session->totalDistance)
                 : null,
-            'calories' => $parsed->session->totalCalories,
-            'avgHeartRate' => $parsed->session->avgHeartRate,
-            'maxHeartRate' => $parsed->session->maxHeartRate,
-        ];
+            calories: $parsed->session->totalCalories,
+            avgHeartRate: $parsed->session->avgHeartRate,
+            maxHeartRate: $parsed->session->maxHeartRate,
+        );
     }
 
     public function render(): \Illuminate\View\View

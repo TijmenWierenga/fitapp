@@ -322,7 +322,7 @@ class Builder extends Component
         $this->activity = SportMapper::toActivity($parsed->session->sport, $parsed->session->subSport);
 
         $result = app(BuildWorkoutFromActivity::class)->execute($parsed);
-        $this->sections = $this->hydrateFromSectionDtos($result['sections']);
+        $this->sections = $this->hydrateFromSectionDtos($result->sections);
 
         $this->scheduled_date = $parsed->session->startTime->format('Y-m-d');
         $this->scheduled_time = $parsed->session->startTime->format('H:i');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\DataTransferObjects\Fit\ImportFitResult;
 use App\Models\FitImport;
 use App\Models\User;
 use App\Models\Workout;
@@ -20,16 +21,13 @@ class ImportFitToWorkout
         private DetectFitExerciseMismatch $detectMismatch,
     ) {}
 
-    /**
-     * @return array{warnings: list<string>}
-     */
     public function execute(
         User $user,
         Workout $workout,
         string $fitData,
         ?int $rpe = null,
         ?int $feeling = null,
-    ): array {
+    ): ImportFitResult {
         $parsed = $this->parser->parse($fitData);
         $warnings = [];
 
@@ -52,7 +50,7 @@ class ImportFitToWorkout
             $this->storeFitImport($user, $workout, $fitData);
         });
 
-        return ['warnings' => $warnings];
+        return new ImportFitResult($warnings);
     }
 
     private function markCompleted(Workout $workout, ?int $rpe, ?int $feeling): void

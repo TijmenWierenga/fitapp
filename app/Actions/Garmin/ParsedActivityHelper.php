@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Garmin;
 
+use App\DataTransferObjects\Fit\DetectedBlock;
+use App\DataTransferObjects\Fit\ExerciseGroup;
 use App\DataTransferObjects\Fit\ParsedActivity;
 use App\DataTransferObjects\Fit\ParsedSet;
+use App\Enums\Fit\DetectedBlockType;
 use Illuminate\Support\Collection;
 
 class ParsedActivityHelper
@@ -14,12 +17,15 @@ class ParsedActivityHelper
      * Group consecutive active sets by exercise_category+exercise_name.
      *
      * @param  Collection<int, ParsedSet>  $sets
-     * @return list<array{key: string, category: int, name: int, sets: list<ParsedSet>}>
+     * @return list<ExerciseGroup>
      */
     public static function groupSetsByExercise(Collection $sets): array
     {
         $groups = [];
-        $currentGroup = null;
+        $currentKey = null;
+        $currentCategory = 0;
+        $currentName = 0;
+        $currentSets = [];
 
         foreach ($sets as $set) {
             $hasIdentification = $set->exerciseCategory !== null && $set->exerciseName !== null;
@@ -30,23 +36,19 @@ class ParsedActivityHelper
                 ? "{$category}:{$name}"
                 : 'weight:'.($set->weight ?? 0);
 
-            if ($currentGroup === null || $currentGroup['key'] !== $key) {
-                if ($currentGroup !== null) {
-                    $groups[] = $currentGroup;
-                }
-                $currentGroup = [
-                    'key' => $key,
-                    'category' => $category,
-                    'name' => $name,
-                    'sets' => [],
-                ];
+            if ($currentKey !== null && $currentKey !== $key) {
+                $groups[] = new ExerciseGroup($currentKey, $currentCategory, $currentName, $currentSets);
+                $currentSets = [];
             }
 
-            $currentGroup['sets'][] = $set;
+            $currentKey = $key;
+            $currentCategory = $category;
+            $currentName = $name;
+            $currentSets[] = $set;
         }
 
-        if ($currentGroup !== null) {
-            $groups[] = $currentGroup;
+        if ($currentKey !== null) {
+            $groups[] = new ExerciseGroup($currentKey, $currentCategory, $currentName, $currentSets);
         }
 
         return $groups;
@@ -74,12 +76,8 @@ class ParsedActivityHelper
      * Takes the output of groupSetsByExercise and identifies repeating exercise cycles
      * (A-B-A-B becomes a superset of A+B). Non-repeating groups stay as straight sets.
      *
-     * Returns a list of "detected blocks", each with:
-     * - type: 'superset' or 'straight'
-     * - exercises: array keyed by exercise key, each containing merged sets and metadata
-     *
-     * @param  list<array{key: string, category: int, name: int, sets: list<ParsedSet>}>  $groups
-     * @return list<array{type: 'superset'|'straight', exercises: array<string, array{category: int, name: int, sets: list<ParsedSet>}>}>
+     * @param  list<ExerciseGroup>  $groups
+     * @return list<DetectedBlock>
      */
     public static function detectBlocks(array $groups): array
     {
@@ -92,19 +90,19 @@ class ParsedActivityHelper
             $cycle = [];
             $j = $i;
 
-            while ($j < $groupCount && ! in_array($groups[$j]['key'], $seenKeys, true)) {
-                $seenKeys[] = $groups[$j]['key'];
-                $cycle[] = $groups[$j]['key'];
+            while ($j < $groupCount && ! in_array($groups[$j]->key, $seenKeys, true)) {
+                $seenKeys[] = $groups[$j]->key;
+                $cycle[] = $groups[$j]->key;
                 $j++;
             }
 
             $cycleLength = count($cycle);
 
-            if ($cycleLength > 1 && $j < $groupCount && $groups[$j]['key'] === $cycle[0]) {
+            if ($cycleLength > 1 && $j < $groupCount && $groups[$j]->key === $cycle[0]) {
                 // Found a superset cycle — collect all rounds that match the pattern
                 $end = $i;
 
-                while ($end < $groupCount && $groups[$end]['key'] === $cycle[($end - $i) % $cycleLength]) {
+                while ($end < $groupCount && $groups[$end]->key === $cycle[($end - $i) % $cycleLength]) {
                     $end++;
                 }
 
@@ -112,35 +110,29 @@ class ParsedActivityHelper
 
                 for ($k = $i; $k < $end; $k++) {
                     $group = $groups[$k];
-                    $key = $group['key'];
 
-                    if (! isset($exercises[$key])) {
-                        $exercises[$key] = [
-                            'category' => $group['category'],
-                            'name' => $group['name'],
-                            'sets' => [],
-                        ];
+                    if (! isset($exercises[$group->key])) {
+                        $exercises[$group->key] = new ExerciseGroup($group->key, $group->category, $group->name, []);
                     }
 
-                    $exercises[$key]['sets'] = [...$exercises[$key]['sets'], ...$group['sets']];
+                    $exercises[$group->key] = new ExerciseGroup(
+                        $group->key,
+                        $group->category,
+                        $group->name,
+                        [...$exercises[$group->key]->sets, ...$group->sets],
+                    );
                 }
 
-                $blocks[] = ['type' => 'superset', 'exercises' => $exercises];
+                $blocks[] = new DetectedBlock(DetectedBlockType::Superset, $exercises);
                 $i = $end;
             } else {
                 // No repeat — each group is a straight set
                 for ($k = $i; $k < $j; $k++) {
                     $group = $groups[$k];
-                    $blocks[] = [
-                        'type' => 'straight',
-                        'exercises' => [
-                            $group['key'] => [
-                                'category' => $group['category'],
-                                'name' => $group['name'],
-                                'sets' => $group['sets'],
-                            ],
-                        ],
-                    ];
+                    $blocks[] = new DetectedBlock(
+                        DetectedBlockType::Straight,
+                        [$group->key => $group],
+                    );
                 }
 
                 $i = $j;

@@ -14,10 +14,10 @@ it('groups consecutive sets by exercise category and name', function () {
     $groups = ParsedActivityHelper::groupSetsByExercise($sets);
 
     expect($groups)->toHaveCount(2);
-    expect($groups[0]['key'])->toBe('0:0');
-    expect($groups[0]['sets'])->toHaveCount(2);
-    expect($groups[1]['key'])->toBe('28:0');
-    expect($groups[1]['sets'])->toHaveCount(2);
+    expect($groups[0]->key)->toBe('0:0');
+    expect($groups[0]->sets)->toHaveCount(2);
+    expect($groups[1]->key)->toBe('28:0');
+    expect($groups[1]->sets)->toHaveCount(2);
 });
 
 it('groups unidentified sets by weight', function () {
@@ -31,10 +31,10 @@ it('groups unidentified sets by weight', function () {
     $groups = ParsedActivityHelper::groupSetsByExercise($sets);
 
     expect($groups)->toHaveCount(2);
-    expect($groups[0]['key'])->toBe('weight:6');
-    expect($groups[0]['sets'])->toHaveCount(2);
-    expect($groups[1]['key'])->toBe('weight:14');
-    expect($groups[1]['sets'])->toHaveCount(2);
+    expect($groups[0]->key)->toBe('weight:6');
+    expect($groups[0]->sets)->toHaveCount(2);
+    expect($groups[1]->key)->toBe('weight:14');
+    expect($groups[1]->sets)->toHaveCount(2);
 });
 
 it('splits unidentified sets when weight changes then returns', function () {

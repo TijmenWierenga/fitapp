@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace App\Actions\Garmin;
 
+use App\DataTransferObjects\Fit\BuildWorkoutResult;
+use App\DataTransferObjects\Fit\DetectedBlock;
+use App\DataTransferObjects\Fit\ExerciseGroup;
 use App\DataTransferObjects\Fit\ParsedActivity;
 use App\DataTransferObjects\Workout\BlockData;
 use App\DataTransferObjects\Workout\CardioExerciseData;
 use App\DataTransferObjects\Workout\ExerciseData;
 use App\DataTransferObjects\Workout\SectionData;
 use App\DataTransferObjects\Workout\StrengthExerciseData;
+use App\Enums\Fit\DetectedBlockType;
 use App\Enums\Fit\GarminExerciseCategory;
 use App\Enums\Workout\BlockType;
 use App\Enums\Workout\ExerciseType;
@@ -22,9 +26,8 @@ class BuildWorkoutFromActivity
 
     /**
      * @param  array<int, int>  $exerciseMappings  Map of exercise group index → Exercise model ID
-     * @return array{sections: Collection<int, SectionData>, matched: list<string>, unmatched: list<string>, warnings: list<string>}
      */
-    public function execute(ParsedActivity $activity, array $exerciseMappings = [], bool $detectSupersets = false): array
+    public function execute(ParsedActivity $activity, array $exerciseMappings = [], bool $detectSupersets = false): BuildWorkoutResult
     {
         $matched = [];
         $unmatched = [];
@@ -57,21 +60,18 @@ class BuildWorkoutFromActivity
             ),
         ]);
 
-        return [
-            'sections' => $sections,
-            'matched' => $matched,
-            'unmatched' => $unmatched,
-            'warnings' => $warnings,
-        ];
+        return new BuildWorkoutResult(
+            sections: $sections,
+            matched: $matched,
+            unmatched: $unmatched,
+            warnings: $warnings,
+        );
     }
 
     /**
      * @param  list<string>  $matched
      * @param  list<string>  $unmatched
      * @param  list<string>  $warnings
-     * @return Collection<int, BlockData>
-     */
-    /**
      * @param  array<int, int>  $exerciseMappings
      * @return Collection<int, BlockData>
      */
@@ -91,16 +91,13 @@ class BuildWorkoutFromActivity
         if ($detectSupersets) {
             $detectedBlocks = ParsedActivityHelper::detectBlocks($groups);
         } else {
-            $detectedBlocks = array_map(fn (array $group) => [
-                'type' => 'straight',
-                'exercises' => [
-                    $group['key'] => [
-                        'category' => $group['category'],
-                        'name' => $group['name'],
-                        'sets' => $group['sets'],
-                    ],
-                ],
-            ], $groups);
+            $detectedBlocks = array_map(
+                fn (ExerciseGroup $group) => new DetectedBlock(
+                    DetectedBlockType::Straight,
+                    [$group->key => $group],
+                ),
+                $groups,
+            );
         }
 
         $blocks = collect();
@@ -111,7 +108,7 @@ class BuildWorkoutFromActivity
             $exercises = collect();
             $exerciseOrder = 0;
 
-            foreach ($detected['exercises'] as $key => $exerciseInfo) {
+            foreach ($detected->exercises as $key => $exerciseInfo) {
                 // Check for user-provided exercise mapping first
                 $mappedExercise = isset($exerciseMappings[$globalExerciseIndex])
                     ? Exercise::find($exerciseMappings[$globalExerciseIndex])
@@ -125,25 +122,24 @@ class BuildWorkoutFromActivity
                     $displayName = 'Exercise '.($globalExerciseIndex + 1);
                     $exercise = null;
                 } else {
-                    $category = GarminExerciseCategory::tryFrom($exerciseInfo['category']);
+                    $category = GarminExerciseCategory::tryFrom($exerciseInfo->category);
                     $categoryLabel = $category?->label();
-                    $displayName = $titleMap[$key] ?? $categoryLabel ?? "Exercise {$exerciseInfo['category']}/{$exerciseInfo['name']}";
+                    $displayName = $titleMap[$key] ?? $categoryLabel ?? "Exercise {$exerciseInfo->category}/{$exerciseInfo->name}";
 
                     $exercise = ($category === GarminExerciseCategory::Unknown)
                         ? null
-                        : $this->matchExercise($exerciseInfo['category'], $exerciseInfo['name'], $displayName, $matched, $unmatched, $warnings);
+                        : $this->matchExercise($exerciseInfo->category, $exerciseInfo->name, $displayName, $matched, $unmatched, $warnings);
                 }
 
-                $sets = $exerciseInfo['sets'];
-                $reps = collect($sets)->pluck('repetitions')->filter()->values();
-                $weights = collect($sets)->pluck('weight')->filter()->values();
+                $reps = collect($exerciseInfo->sets)->pluck('repetitions')->filter()->values();
+                $weights = collect($exerciseInfo->sets)->pluck('weight')->filter()->values();
 
                 $exercises->push(new ExerciseData(
                     name: $exercise?->name ?? $displayName,
                     order: $exerciseOrder,
                     type: ExerciseType::Strength,
                     exerciseable: new StrengthExerciseData(
-                        targetSets: count($sets),
+                        targetSets: count($exerciseInfo->sets),
                         targetRepsMin: $reps->isNotEmpty() ? (int) $reps->min() : null,
                         targetRepsMax: $reps->isNotEmpty() ? (int) $reps->max() : null,
                         targetWeight: $weights->isNotEmpty() ? (float) $weights->max() : null,
@@ -155,7 +151,7 @@ class BuildWorkoutFromActivity
                 $globalExerciseIndex++;
             }
 
-            $blockType = $detected['type'] === 'superset' ? BlockType::Superset : BlockType::StraightSets;
+            $blockType = $detected->type === DetectedBlockType::Superset ? BlockType::Superset : BlockType::StraightSets;
 
             $blocks->push(new BlockData(
                 blockType: $blockType,

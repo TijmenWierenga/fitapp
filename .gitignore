@@ -26,3 +26,4 @@ yarn-error.log
 /.worktrees
 *.fit
 !tests/fixtures/fit/*.fit
+!tests/fixtures/fit/public/**/*.fit

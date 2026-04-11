@@ -46,38 +46,38 @@
 
                     {{-- Activity summary grid --}}
                     <div class="grid grid-cols-2 gap-3">
-                        @if($preview['duration'])
+                        @if($preview->duration)
                             <div class="rounded-lg bg-zinc-100 dark:bg-zinc-800 px-3 py-2">
                                 <div class="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase">Duration</div>
-                                <div class="text-sm font-medium text-zinc-900 dark:text-white">{{ $preview['duration'] }}</div>
+                                <div class="text-sm font-medium text-zinc-900 dark:text-white">{{ $preview->duration }}</div>
                             </div>
                         @endif
 
-                        @if($preview['calories'])
+                        @if($preview->calories)
                             <div class="rounded-lg bg-zinc-100 dark:bg-zinc-800 px-3 py-2">
                                 <div class="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase">Calories</div>
-                                <div class="text-sm font-medium text-zinc-900 dark:text-white">{{ $preview['calories'] }} kcal</div>
+                                <div class="text-sm font-medium text-zinc-900 dark:text-white">{{ $preview->calories }} kcal</div>
                             </div>
                         @endif
 
-                        @if($preview['distance'])
+                        @if($preview->distance)
                             <div class="rounded-lg bg-zinc-100 dark:bg-zinc-800 px-3 py-2">
                                 <div class="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase">Distance</div>
-                                <div class="text-sm font-medium text-zinc-900 dark:text-white">{{ $preview['distance'] }}</div>
+                                <div class="text-sm font-medium text-zinc-900 dark:text-white">{{ $preview->distance }}</div>
                             </div>
                         @endif
 
-                        @if($preview['avgHeartRate'])
+                        @if($preview->avgHeartRate)
                             <div class="rounded-lg bg-zinc-100 dark:bg-zinc-800 px-3 py-2">
                                 <div class="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase">Avg HR</div>
-                                <div class="text-sm font-medium text-zinc-900 dark:text-white">{{ $preview['avgHeartRate'] }} bpm</div>
+                                <div class="text-sm font-medium text-zinc-900 dark:text-white">{{ $preview->avgHeartRate }} bpm</div>
                             </div>
                         @endif
 
-                        @if($preview['maxHeartRate'])
+                        @if($preview->maxHeartRate)
                             <div class="rounded-lg bg-zinc-100 dark:bg-zinc-800 px-3 py-2">
                                 <div class="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase">Max HR</div>
-                                <div class="text-sm font-medium text-zinc-900 dark:text-white">{{ $preview['maxHeartRate'] }} bpm</div>
+                                <div class="text-sm font-medium text-zinc-900 dark:text-white">{{ $preview->maxHeartRate }} bpm</div>
                             </div>
                         @endif
                     </div>

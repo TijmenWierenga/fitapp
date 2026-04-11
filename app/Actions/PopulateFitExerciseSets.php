@@ -59,7 +59,7 @@ class PopulateFitExerciseSets
 
             $blockExercise = $blockExercises[$exerciseIndex];
 
-            foreach ($group['sets'] as $setIndex => $set) {
+            foreach ($group->sets as $setIndex => $set) {
                 ExerciseSet::create([
                     'block_exercise_id' => $blockExercise->id,
                     'set_number' => $setIndex + 1,

@@ -5,5 +5,7 @@
 
     <livewire:workout.duplicate />
 
+    <livewire:workout.import-fit />
+
     <livewire:exercise.detail />
 </div>

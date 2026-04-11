@@ -54,14 +54,23 @@
             @endforeach
         </div>
 
-        <flux:button
-            href="{{ route('workouts.create') }}"
-            variant="primary"
-            class="w-full"
-            icon="plus"
-        >
-            Create Workout
-        </flux:button>
+        <div class="flex gap-2">
+            <flux:button
+                href="{{ route('workouts.create') }}"
+                variant="primary"
+                class="flex-1"
+                icon="plus"
+            >
+                Create Workout
+            </flux:button>
+            <flux:button
+                href="{{ route('workouts.import') }}"
+                variant="ghost"
+                icon="arrow-up-tray"
+            >
+                Import
+            </flux:button>
+        </div>
     @else
         <div class="text-center py-8">
             <div class="flex justify-center mb-3">
@@ -70,13 +79,22 @@
             <flux:text class="text-zinc-500 dark:text-zinc-400 mb-4">
                 No upcoming workouts scheduled
             </flux:text>
-            <flux:button
-                href="{{ route('workouts.create') }}"
-                variant="primary"
-                icon="plus"
-            >
-                Create Workout
-            </flux:button>
+            <div class="flex justify-center gap-2">
+                <flux:button
+                    href="{{ route('workouts.create') }}"
+                    variant="primary"
+                    icon="plus"
+                >
+                    Create Workout
+                </flux:button>
+                <flux:button
+                    href="{{ route('workouts.import') }}"
+                    variant="ghost"
+                    icon="arrow-up-tray"
+                >
+                    Import
+                </flux:button>
+            </div>
         </div>
     @endif
 </div>

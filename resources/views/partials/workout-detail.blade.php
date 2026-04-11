@@ -1,11 +1,14 @@
 @use('App\Domain\Workload\Calculators\DurationEstimator')
 @use('App\Domain\Workload\PlannedBlockMapper')
+@use('App\Support\Workout\TimeConverter')
 
 @props(['showBackButton' => true, 'showViewFullPage' => false, 'inModal' => false])
 
 @php
+    $hasActualDuration = $workout->total_duration !== null;
     $estimatedSeconds = (new DurationEstimator)->estimate(PlannedBlockMapper::fromWorkout($workout));
     $estimatedMinutes = $estimatedSeconds ? (int) round($estimatedSeconds / 60) : null;
+    $hasSessionData = $workout->total_duration || $workout->total_distance || $workout->total_calories || $workout->avg_heart_rate;
 @endphp
 
 <div>
@@ -27,6 +30,9 @@
                     @endif
                     <flux:menu.item icon="pencil" :href="route('workouts.edit', $workout)">Edit Workout</flux:menu.item>
                     <flux:menu.item icon="arrow-down-tray" :href="route('workouts.export-fit', $workout)">Export to Garmin</flux:menu.item>
+                    @if(!$workout->isCompleted())
+                        <flux:menu.item icon="arrow-up-tray" wire:click="$dispatch('import-fit', { workoutId: {{ $workout->id }} })">Import Garmin Data</flux:menu.item>
+                    @endif
                     <flux:menu.item icon="document-duplicate" wire:click="$dispatch('duplicate-workout', { workoutId: {{ $workout->id }} })">Duplicate</flux:menu.item>
                     @if($workout->canBeDeleted())
                         <flux:menu.separator />
@@ -49,7 +55,12 @@
         </div>
 
         {{-- Duration pill --}}
-        @if($estimatedMinutes)
+        @if($hasActualDuration)
+            <div class="rounded-xl bg-zinc-200 dark:bg-zinc-700 px-3 py-1.5 flex items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400">
+                <flux:icon.clock class="size-3.5 text-zinc-400 dark:text-zinc-500" />
+                <span>{{ TimeConverter::format($workout->total_duration) }}</span>
+            </div>
+        @elseif($estimatedMinutes)
             <div class="rounded-xl bg-zinc-200 dark:bg-zinc-700 px-3 py-1.5 flex items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400">
                 <flux:icon.clock class="size-3.5 text-zinc-400 dark:text-zinc-500" />
                 <span>~{{ $estimatedMinutes }} min</span>
@@ -78,7 +89,20 @@
                 <span>Tomorrow</span>
             </div>
         @endif
+
+        {{-- Imported badge --}}
+        @if($workout->source === \App\Enums\Workout\WorkoutSource::GarminFit)
+            <div class="rounded-xl bg-zinc-200 dark:bg-zinc-700 px-3 py-1.5 flex items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400">
+                <flux:icon.arrow-up-tray class="size-3.5 text-zinc-400 dark:text-zinc-500" />
+                <span>Imported</span>
+            </div>
+        @endif
     </div>
+
+    {{-- Session summary banner --}}
+    @if($hasSessionData)
+        <x-workout.session-summary :workout="$workout" />
+    @endif
 
     {{-- Evaluation data for completed workouts --}}
     @if($workout->isCompleted() && ($workout->rpe || $workout->feeling))

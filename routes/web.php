@@ -12,6 +12,7 @@ use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\TwoFactor;
 use App\Livewire\Workout\Builder as WorkoutBuilder;
 use App\Livewire\Workout\Show as WorkoutShow;
+use App\Livewire\Workouts\ImportGarmin;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -28,6 +29,10 @@ Route::get('/get-started', GetStarted::class)->name('get-started');
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+Route::get('workouts/import', ImportGarmin::class)
+    ->middleware(['auth', 'verified'])
+    ->name('workouts.import');
 
 Route::get('workouts/create', WorkoutBuilder::class)
     ->middleware(['auth', 'verified'])

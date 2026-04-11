@@ -4,6 +4,18 @@ namespace App\Support\Workout;
 
 class PaceConverter
 {
+    /**
+     * Convert FIT enhanced speed (mm/s) to seconds per km.
+     */
+    public static function fromFitSpeed(int|float|null $fitSpeed): ?int
+    {
+        if ($fitSpeed === null || $fitSpeed <= 0) {
+            return null;
+        }
+
+        return (int) round(1_000_000 / $fitSpeed);
+    }
+
     public static function toSecondsPerKm(int $minutes, int $seconds): int
     {
         return ($minutes * 60) + $seconds;

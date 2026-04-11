@@ -51,6 +51,10 @@ Use the converter classes in `App\Support\Workout` when converting between stora
 
 Prefer rich domain objects and value objects over primitive types (arrays, floats, strings) for domain concepts. Value objects make intent explicit, centralize behavior, and are easier to test.
 
+### DTOs Over Associative Arrays
+
+Never use associative arrays as pseudo-structs for method parameters or return types. When a method accepts or returns structured data with known keys, create a readonly DTO or value object class instead. This provides type safety, IDE autocompletion, and self-documenting code. Place domain DTOs in `App\DataTransferObjects\{Domain}` and infrastructure-level VOs alongside their related support classes.
+
 ### Enums Over String Constants
 
 When a domain concept has a fixed set of values with associated behavior (labels, colors, formatting), use a backed enum instead of string constants. Derive related attributes as methods on the enum.

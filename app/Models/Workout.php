@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Workout\Activity;
+use App\Enums\Workout\WorkoutSource;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -43,6 +44,12 @@ class Workout extends Model
         'completed_at',
         'rpe',
         'feeling',
+        'total_duration',
+        'total_distance',
+        'total_calories',
+        'avg_heart_rate',
+        'max_heart_rate',
+        'source',
     ];
 
     protected $casts = [
@@ -51,6 +58,12 @@ class Workout extends Model
         'completed_at' => 'datetime',
         'rpe' => 'integer',
         'feeling' => 'integer',
+        'total_duration' => 'integer',
+        'total_distance' => 'decimal:2',
+        'total_calories' => 'integer',
+        'avg_heart_rate' => 'integer',
+        'max_heart_rate' => 'integer',
+        'source' => WorkoutSource::class,
     ];
 
     /**
@@ -77,6 +90,14 @@ class Workout extends Model
     public function sections(): HasMany
     {
         return $this->hasMany(Section::class)->orderBy('order');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<FitImport, $this>
+     */
+    public function fitImport(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(FitImport::class);
     }
 
     /**

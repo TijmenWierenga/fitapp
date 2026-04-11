@@ -2,9 +2,9 @@
 
 namespace App\Actions;
 
+use App\Actions\Garmin\WorkoutFitMapper;
 use App\Models\Workout;
 use App\Support\Fit\FitEncoder;
-use App\Support\Fit\WorkoutFitMapper;
 
 class ExportWorkoutFit
 {

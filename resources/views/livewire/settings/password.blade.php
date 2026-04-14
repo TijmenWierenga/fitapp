@@ -1,15 +1,20 @@
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout :heading="__('Update password')" :subheading="__('Ensure your account is using a long, random password to stay secure')">
+    <x-settings.layout
+        :heading="$hasExistingPassword ? __('Update password') : __('Set password')"
+        :subheading="$hasExistingPassword ? __('Ensure your account is using a long, random password to stay secure') : __('Set a password so you can also log in with your email address')"
+    >
         <form method="POST" wire:submit="updatePassword" class="mt-6 space-y-6">
-            <flux:input
-                wire:model="current_password"
-                :label="__('Current password')"
-                type="password"
-                required
-                autocomplete="current-password"
-            />
+            @if ($hasExistingPassword)
+                <flux:input
+                    wire:model="current_password"
+                    :label="__('Current password')"
+                    type="password"
+                    required
+                    autocomplete="current-password"
+                />
+            @endif
             <flux:input
                 wire:model="password"
                 :label="__('New password')"

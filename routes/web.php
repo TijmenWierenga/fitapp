@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Controllers\StravaAuthController;
+use App\Livewire\Auth\ConfirmStravaLink;
 use App\Livewire\Chat\Coach;
 use App\Livewire\Exercise\Show as ExerciseShow;
 use App\Livewire\GetStarted;
 use App\Livewire\Injury\Reports as InjuryReports;
 use App\Livewire\Onboarding\FitnessProfileWizard;
 use App\Livewire\Settings\Appearance;
+use App\Livewire\Settings\ConnectedAccounts;
 use App\Livewire\Settings\FitnessProfile;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -14,6 +17,16 @@ use App\Livewire\Workout\Builder as WorkoutBuilder;
 use App\Livewire\Workout\Show as WorkoutShow;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
+
+// Strava OAuth
+Route::middleware('throttle:5,1')->group(function () {
+    Route::get('auth/strava/redirect', [StravaAuthController::class, 'redirect'])
+        ->name('auth.strava.redirect');
+    Route::get('auth/strava/callback', [StravaAuthController::class, 'callback'])
+        ->name('auth.strava.callback');
+    Route::get('auth/strava/confirm-link', ConfirmStravaLink::class)
+        ->name('auth.strava.confirm-link');
+});
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -79,6 +92,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('two-factor.show');
 
     Route::get('settings/fitness-profile', FitnessProfile::class)->name('fitness-profile.edit');
+    Route::get('settings/connected-accounts', ConnectedAccounts::class)->name('connected-accounts.edit');
 
     Route::get('injuries/{injury}/reports', InjuryReports::class)->name('injuries.reports');
 });

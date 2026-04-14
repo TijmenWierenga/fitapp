@@ -1,4 +1,4 @@
-<x-layouts.auth>
+<x-layouts.auth.split>
     <div class="flex flex-col gap-6">
         <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
 
@@ -60,9 +60,21 @@
             </div>
         </form>
 
+        <!-- Social login divider -->
+        <div class="relative flex items-center justify-center">
+            <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-zinc-200 dark:border-zinc-700"></div>
+            </div>
+            <span class="relative bg-white px-3 text-sm text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
+                {{ __('or continue with') }}
+            </span>
+        </div>
+
+        <x-strava-button intent="login" />
+
         <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
             <span>{{ __('Already have an account?') }}</span>
             <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
         </div>
     </div>
-</x-layouts.auth>
+</x-layouts.auth.split>

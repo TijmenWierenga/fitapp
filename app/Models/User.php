@@ -79,6 +79,22 @@ class User extends Authenticatable implements OAuthenticatable
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<Workout, $this>
      */
+    public function hasPassword(): bool
+    {
+        return $this->password !== null;
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<ConnectedAccount, $this>
+     */
+    public function connectedAccounts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ConnectedAccount::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Workout, $this>
+     */
     public function workouts(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Workout::class);

@@ -69,6 +69,16 @@ class UserFactory extends Factory
     }
 
     /**
+     * Indicate that the user has no password (OAuth-only account).
+     */
+    public function withoutPassword(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'password' => null,
+        ]);
+    }
+
+    /**
      * Indicate that the user is an admin.
      */
     public function admin(): static

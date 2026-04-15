@@ -8,8 +8,11 @@ use App\Models\StrengthExercise;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
+use SocialiteProviders\Manager\SocialiteWasCalled;
+use SocialiteProviders\Strava\StravaExtendSocialite;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(SocialiteWasCalled::class, StravaExtendSocialite::class);
+
         Passport::authorizationView(fn ($parameters) => view('mcp.authorize', $parameters)); // @phpstan-ignore-line
         Date::use(CarbonImmutable::class);
 

@@ -1,6 +1,6 @@
-<x-layouts.auth>
+<x-layouts.auth.split>
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+        <x-auth-header :title="__('Log in to your account')" :description="__('Enter your credentials to continue')" />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
@@ -49,6 +49,18 @@
             </div>
         </form>
 
+        <!-- Social login divider -->
+        <div class="relative flex items-center justify-center">
+            <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-zinc-200 dark:border-zinc-700"></div>
+            </div>
+            <span class="relative bg-white px-3 text-sm text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
+                {{ __('or continue with') }}
+            </span>
+        </div>
+
+        <x-strava-button intent="login" />
+
         @if (Route::has('register'))
             <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-600 dark:text-zinc-400">
                 <span>{{ __('Don\'t have an account?') }}</span>
@@ -56,4 +68,4 @@
             </div>
         @endif
     </div>
-</x-layouts.auth>
+</x-layouts.auth.split>

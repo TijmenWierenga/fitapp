@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "files=$({ git diff --name-only --diff-filter=ACMR HEAD -- '*.php' 2>/dev/null; git ls-files --others --exclude-standard -- '*.php' 2>/dev/null; } | sort -u) && if [ -n \"$files\" ]; then echo \"$files\" | xargs vendor/bin/phpstan analyse --no-progress --error-format=raw; fi",
+            "command": "files=$({ git diff --name-only --diff-filter=ACMR HEAD -- '*.php' 2>/dev/null; git ls-files --others --exclude-standard -- '*.php' 2>/dev/null; } | sort -u) && if [ -n \"$files\" ]; then output=$(echo \"$files\" | xargs vendor/bin/phpstan analyse --no-progress --error-format=raw 2>&1); rc=$?; if [ $rc -ne 0 ]; then echo \"$output\"; exit 2; fi; fi",
             "timeout": 120,
             "statusMessage": "Running PHPStan..."
           }

@@ -12,25 +12,35 @@ use Laravel\Socialite\Contracts\User as SocialiteUserContract;
  */
 class PendingSocialiteUser implements SocialiteUserContract
 {
-    public string $token;
-
-    public ?string $refreshToken;
-
-    public ?int $expiresIn;
+    private function __construct(
+        public readonly string $providerUserId,
+        public string $token,
+        public ?string $refreshToken,
+        public ?int $expiresIn,
+        public readonly ?string $name,
+        public readonly ?string $email,
+        public readonly ?string $avatar,
+    ) {}
 
     /**
      * @param  array{provider_user_id: string, token: string, refresh_token: ?string, expires_in: ?int, name: ?string, email: ?string, avatar: ?string}  $data
      */
-    public function __construct(private readonly array $data)
+    public static function fromArray(array $data): self
     {
-        $this->token = $data['token'];
-        $this->refreshToken = $data['refresh_token'] ?? null;
-        $this->expiresIn = $data['expires_in'] ?? null;
+        return new self(
+            providerUserId: $data['provider_user_id'],
+            token: $data['token'],
+            refreshToken: $data['refresh_token'] ?? null,
+            expiresIn: $data['expires_in'] ?? null,
+            name: $data['name'] ?? null,
+            email: $data['email'] ?? null,
+            avatar: $data['avatar'] ?? null,
+        );
     }
 
     public function getId(): string
     {
-        return $this->data['provider_user_id'];
+        return $this->providerUserId;
     }
 
     public function getNickname(): ?string
@@ -40,16 +50,16 @@ class PendingSocialiteUser implements SocialiteUserContract
 
     public function getName(): ?string
     {
-        return $this->data['name'] ?? null;
+        return $this->name;
     }
 
     public function getEmail(): ?string
     {
-        return $this->data['email'] ?? null;
+        return $this->email;
     }
 
     public function getAvatar(): ?string
     {
-        return $this->data['avatar'] ?? null;
+        return $this->avatar;
     }
 }

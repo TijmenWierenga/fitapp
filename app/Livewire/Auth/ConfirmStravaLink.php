@@ -54,7 +54,7 @@ class ConfirmStravaLink extends Component
 
         RateLimiter::clear($throttleKey);
 
-        $socialiteUser = new PendingSocialiteUser($pending);
+        $socialiteUser = PendingSocialiteUser::fromArray($pending);
 
         $linkAccount->execute($user, OAuthProvider::Strava, $socialiteUser);
 

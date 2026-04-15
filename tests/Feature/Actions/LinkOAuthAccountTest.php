@@ -9,7 +9,7 @@ use App\Support\OAuth\PendingSocialiteUser;
 it('creates a new connected account for the user', function () {
     $user = User::factory()->create();
 
-    $socialiteUser = new PendingSocialiteUser([
+    $socialiteUser = PendingSocialiteUser::fromArray([
         'provider_user_id' => '12345',
         'token' => 'access-token-123',
         'refresh_token' => 'refresh-token-123',
@@ -42,7 +42,7 @@ it('updates an existing connected account with new tokens', function () {
         'refresh_token' => 'old-refresh-token',
     ]);
 
-    $socialiteUser = new PendingSocialiteUser([
+    $socialiteUser = PendingSocialiteUser::fromArray([
         'provider_user_id' => '12345',
         'token' => 'new-access-token',
         'refresh_token' => 'new-refresh-token',
@@ -63,7 +63,7 @@ it('updates an existing connected account with new tokens', function () {
 it('stores the correct scopes', function () {
     $user = User::factory()->create();
 
-    $socialiteUser = new PendingSocialiteUser([
+    $socialiteUser = PendingSocialiteUser::fromArray([
         'provider_user_id' => '12345',
         'token' => 'access-token-123',
         'refresh_token' => 'refresh-token-123',

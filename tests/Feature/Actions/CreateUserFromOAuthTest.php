@@ -8,7 +8,7 @@ use App\Support\OAuth\PendingSocialiteUser;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 
 it('creates a user and connected account from OAuth data', function () {
-    $socialiteUser = new PendingSocialiteUser([
+    $socialiteUser = PendingSocialiteUser::fromArray([
         'provider_user_id' => '12345',
         'token' => 'access-token-123',
         'refresh_token' => 'refresh-token-123',
@@ -40,7 +40,7 @@ it('creates a user and connected account from OAuth data', function () {
 });
 
 it('sets password to null for OAuth-created users', function () {
-    $socialiteUser = new PendingSocialiteUser([
+    $socialiteUser = PendingSocialiteUser::fromArray([
         'provider_user_id' => '12345',
         'token' => 'access-token-123',
         'refresh_token' => 'refresh-token-123',
